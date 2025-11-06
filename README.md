@@ -48,12 +48,36 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 
 #### 方式一：使用 Docker
 
+**window**
+
+- 在n8n內連結本機電腦的網路使用`localhost`
+
 ```bash
-docker run -it --rm \
-  --name n8n \
-  -p 5678:5678 \
-  n8nio/n8n
+docker volume create n8n_data
+
+docker run -d \
+ --name n8n \
+ --network host \
+ -p 5678:5678 \
+ -v n8n_data:/home/node/.n8n \
+ docker.n8n.io/n8nio/n8n
 ```
+
+**Mac電腦**
+
+- 在n8n內連結本機電腦的網路使用`host.docker.internal`
+
+```bash
+docker volume create n8n_data
+
+docker run -d \
+ --name n8n \
+ -p 5678:5678 \
+ -v n8n_data:/home/node/.n8n \
+ docker.n8n.io/n8nio/n8n
+```
+
+
 
 #### 方式二：使用 npm
 
