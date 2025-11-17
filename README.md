@@ -57,9 +57,9 @@ docker volume create n8n_data
 
 docker run -d \
  --name n8n \
- --network host \
  -p 5678:5678 \
  -v n8n_data:/home/node/.n8n \
+ -e GENERIC_TIMEZONE="Asia/Taipei" \
  docker.n8n.io/n8nio/n8n
 ```
 
@@ -74,6 +74,7 @@ docker run -d \
  --name n8n \
  -p 5678:5678 \
  -v n8n_data:/home/node/.n8n \
+ -e GENERIC_TIMEZONE="Asia/Taipei" \
  docker.n8n.io/n8nio/n8n
 ```
 
