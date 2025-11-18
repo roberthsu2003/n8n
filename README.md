@@ -17,7 +17,9 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 
 ## [n8n 簡介與安裝](./n8n簡介與安裝/README.md)
 
-## [關於OAuth(開放授權)的關念]
+## [關於OAuth(開放授權)的關念](./OAuth/README.md)
+
+## [Google Cloud的API服務設定重點](./Google_Cloud_api服務/README.md)
 
 ## 初階範例
 
