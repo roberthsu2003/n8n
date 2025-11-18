@@ -28,7 +28,7 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 
 ### [google app script整合](./GAS整合/README.md)
 
-## n8n的部署
+## [n8n的部署](./n8n的部署/README.md)
 
 
 
