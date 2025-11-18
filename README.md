@@ -21,7 +21,14 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 
 - [透過網站取得引言](./初階範例/範例1_透過網站取得引言.md)
 
-## [FastAPI說明](https://github.com/roberthsu2003/FastApi)
 
-## 使用自訂API或Webhook
+## 進階使用
+
+### [supabase整合](./supabase整合/README.md)
+
+### [google app script整合](./GAS整合/README.md)
+
+## n8n的部署
+
+
 
