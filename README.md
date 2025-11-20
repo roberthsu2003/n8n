@@ -53,16 +53,11 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 [便利貼說明] → [排程觸發] → [HTTP 引言] → [HTTP 程式笑話] → [整理欄位] → [寄送 Gmail]
 ```
 
+## [supabase整合](./supabase整合/README.md)
 
+## [google app script整合](./GAS整合/README.md)
 
-
-## 進階使用
-
-- [**supabase整合**](./supabase整合/README.md)
-
-- [**google app script整合**](./GAS整合/README.md)
-
-- [**FaseAPI的整合**](./FastAPI整合/)
+## [FaseAPI的整合](./FastAPI整合/)
 
 ## [n8n的免費部署方案](./n8n的部署/README.md)
 
