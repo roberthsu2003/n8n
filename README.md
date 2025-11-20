@@ -37,21 +37,39 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 
 - [**透過網站取得引言**](./初階範例/範例_透過網站取得引言.md)
 
+	- http請求
+
 ```
 [便利貼說明] → [手動觸發] → [HTTP 請求取得引言] → [整理並重新命名欄位]
 ```
 
-- [**寄送Gmail**](./初階範例/範例_寄送gmail.md)
+## 整合Google服務
+
+- [**寄送Gmail**](./Google_Cloud_api服務/範例_寄送gmail.md)
+
+	- http請求
+	- gmail
 
 ```
 [便利貼說明] → [排程觸發] → [HTTP 請求取得引言] → [整理並重新命名欄位] → [寄送 Gmail]
 ```
 
-- [**寄送一則笑話**](./初階範例/範例_寄送一個笑話.md)
+- [**寄送一則笑話**](./Google_Cloud_api服務/範例_寄送一個笑話.md)
+
+	- http請求
+	- gmail
 
 ```
 [便利貼說明] → [排程觸發] → [HTTP 引言] → [HTTP 程式笑話] → [整理欄位] → [寄送 Gmail]
 ```
+
+- [**學生體驗回饋問卷範本**](./Google_Cloud_api服務/學生體驗回饋問卷範.md)
+
+	- 手動建立Google Form
+	- Google Sheet
+
+## 整合LLM模型
+
 
 ## [supabase整合](./supabase整合/README.md)
 
