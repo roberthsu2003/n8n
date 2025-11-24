@@ -65,7 +65,7 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 [便利貼說明] → [排程觸發] → [HTTP 引言] → [HTTP 程式笑話] → [整理欄位] → [寄送 Gmail]
 ```
 
-- [**學生體驗回饋問卷範本**](./Google_Cloud_api服務/學生體驗回饋問卷範.md)
+- [**學生體驗回饋問卷範本**](./Google_Cloud_api服務/學生體驗回饋問卷範本.md)
 
 	- 手動建立Google Form
 	- Google Sheet
