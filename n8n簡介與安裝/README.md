@@ -116,3 +116,27 @@ docker ps | grep n8n
 - **工作流程畫布**：中間區域用於設計和編輯工作流程
 - **執行歷史**：查看工作流程的執行記錄和結果
 
+## n8n(Name Volume)備份的方式
+- 備份完後,手動儲存到雲端資料夾(n8n)
+### Mac的備份方式
+
+```bash
+# 1. 確認您的 n8n Volume 名稱為 n8n_data
+# 2. 確定您在 Mac 終端機內位於想要儲存備份檔的位置（例如：~/Desktop/backup）
+
+docker run --rm \
+    -v n8n_data:/data \
+    -v $(pwd):/backup \
+    alpine sh -c "cd /data && tar -czvf /backup/n8n_backup_$(date +%Y%m%d).tar.gz ."
+```
+
+- docker run --rm: 運行一個執行完畢就會自動刪除的臨時容器。
+
+- -v n8n_data:/data: 將您的 n8n Volume 掛載到臨時容器的 /data 資料夾。
+
+- -v $(pwd):/backup: 將您當前所在的 Mac 資料夾 ($(pwd)) 掛載到臨時容器的 /backup 資料夾。
+
+- alpine sh -c "...": 在容器內執行壓縮指令，將 /data（n8n 資料）打包成 .tar.gz 檔，並輸出到 /backup（您的 Mac 本機）。
+
+執行完畢後，您就會在終端機當前所在的目錄找到名為 n8n_backup_YYYYMMDD.tar.gz 的完整備份檔，接著您就可以將它上傳到雲端了。
+
