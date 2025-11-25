@@ -31,11 +31,15 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 [執行工作流] → [Customer Datastore] → [Edit Fields] → [Customer Messenger]
 ```
 
+---
+
 - [**透過互動式逐步教程學習JSON基礎(適合初學者)**](./初階範例/範例_透過互動式逐步教程學習JSON基礎(適合初學者).md)
 
 ```
 [Execute to Start] → [Key & Value] → [String] → [Number] → [Boolean] → [Null] → [Array] → [Object] → [Using JSON] → [Final Exam]
 ```
+
+---
 
 - [**透過網站取得引言**](./初階範例/範例_透過網站取得引言.md)
 
@@ -44,6 +48,8 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 ```
 [便利貼說明] → [手動觸發] → [HTTP 請求取得引言] → [整理並重新命名欄位]
 ```
+
+---
 
 ## 整合Google服務
 
@@ -55,6 +61,7 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 ```
 [便利貼說明] → [排程觸發] → [HTTP 請求取得引言] → [整理並重新命名欄位] → [寄送 Gmail]
 ```
+---
 
 - [**寄送一則笑話**](./Google_Cloud_api服務/範例_寄送一個笑話.md)
 
@@ -65,10 +72,14 @@ n8n 起初的名稱 nodemation 意指節點自動化，後簡化為 n8n 這種�
 [便利貼說明] → [排程觸發] → [HTTP 引言] → [HTTP 程式笑話] → [整理欄位] → [寄送 Gmail]
 ```
 
+---
+
 - [**學生體驗回饋問卷範本**](./Google_Cloud_api服務/學生體驗回饋問卷範本.md)
 
 	- 手動建立Google Form
-	- Google Sheet
+	- 自動產生Google Sheet
+	- google Sheet有新增資料時
+	- 檢查新增資料內容,符合條件自動發送Gmail通知
 
 ## 整合LLM模型
 
