@@ -112,9 +112,25 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 ---
 
-### 建立固定網址
+### 建立固定網址和docker的設定方式
 
 [**Raspberry Pi + n8n + ngrok,建立固定網址**](./Raspberry_Pi+n8n+ngrok.md)
+
+
+```bash
+docker run -d \
+  --name n8n \
+  --restart always \
+  -p 5678:5678 \
+  -v n8n_data:/home/node/.n8n \
+  -e GENERIC_TIMEZONE="Asia/Taipei" \
+  -e N8N_SECURE_COOKIE=false \
+  -e WEBHOOK_URL="https://superinnocent-hillary-unwholesome.ngrok-free.dev" \
+  docker.n8n.io/n8nio/n8n
+```
+
+
+---
 
 #### 重要說明
 
