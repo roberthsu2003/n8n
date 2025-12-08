@@ -85,7 +85,7 @@ docker run -d \
 ```
 
 --- 
-1. **啟動 n8n 容器,使用Raspberry**
+1. **啟動n8n容器,使用Raspberry**
 
 ```bash
 docker run -d \
