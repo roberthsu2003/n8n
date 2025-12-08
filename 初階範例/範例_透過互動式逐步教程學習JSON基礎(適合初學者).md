@@ -4,6 +4,11 @@
 ### 📚 工作流程說明
 
 這個 n8n 工作流程是一個互動式的教學指南，專門為了幫助初學者理解 JSON (JavaScript Object Notation) 的基礎概念而設計。透過視覺化的節點操作，你將一步步學習 JSON 的核心結構（鍵與值）、各種資料型態（字串、數字、布林值、陣列、物件、Null），以及如何在 n8n 中透過表達式（Expressions）來靈活運用這些資料。這不需要任何程式設計背景，只需跟隨流程中的便利貼（Sticky Notes）指引即可輕鬆上手。
+### 參考影片和template
+
+[youtube](https://youtu.be/PAmgrwYnzWs?si=DiMnHOn_XJBPEFb1)
+
+[樣版](https://n8n.io/workflows/5170-learn-json-basics-with-an-interactive-step-by-step-tutorial-for-beginners/)
 
 ### 預覽圖
 

@@ -5,6 +5,11 @@
 
 這個 n8n 工作流程示範如何自動從網際網路上的 API 取得隨機引言（Quote），並透過 Gmail 自動寄送給指定的收件人。工作流程會在每天指定的時間自動執行，讓您每天都能收到勵志引言。
 
+### 影片和template
+
+[youtube](https://www.youtube.com/watch?v=5CBUXMO_L2Y&t=5s)
+
+[樣版](https://n8n.io/workflows/8527-learn-n8n-basics-in-3-easy-steps/)
 ### 預覽圖
 
 ![](./images/pic2.png)
