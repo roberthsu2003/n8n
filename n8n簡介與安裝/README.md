@@ -71,7 +71,7 @@ Docker 是最簡單且推薦的安裝方式，適用於 Windows、macOS 和 Linu
 docker volume create n8n_data
 ```
 
-2. **啟動 n8n 容器**
+2. **啟動 n8n 容器,使用本機**
 
 適用於 Windows 和 macOS（透過 Docker Desktop）：
 
@@ -83,6 +83,38 @@ docker run -d \
   -e GENERIC_TIMEZONE="Asia/Taipei" \
   docker.n8n.io/n8nio/n8n
 ```
+
+--- 
+1. **啟動 n8n 容器,使用Raspberry**
+
+```bash
+docker run -d \
+  --name n8n \
+  -p 5678:5678 \
+  -v n8n_data:/home/node/.n8n \
+  -e GENERIC_TIMEZONE="Asia/Taipei" \
+  -e N8N_SECURE_COOKIE=false \
+  docker.n8n.io/n8nio/n8n
+```
+
+> **mac或window 連線至raspberry的方法*‌*
+> 
+> 原因是Google API 通常不允許 http:// 開頭的網址作為「已授權的重新導向 URI (Authorized redirect URIs)」，除非它是 localhost。當你使用 http://192.168.x.x:5678 或類似的內部 IP 時，Google 會拒絕連線。
+
+**所以必需使用SSH Tunnel**
+
+這是最簡單的方法，不需要公開你的 n8n 到網際網路，也不用買網域。我們透過 SSH 將你 Mac 的 localhost:5678 映射到 Raspberry Pi 的 5678 port。
+
+```bash
+# 語法：ssh -L <本地Port>:localhost:<遠端Port> <使用者>@<Pi的IP>
+ssh -L 5678:localhost:5678 pi@192.168.1.100
+```
+
+---
+
+### 建立固定網址
+
+[**Raspberry Pi + n8n + ngrok,建立固定網址**](./Raspberry_Pi+n8n+ngrok.md)
 
 #### 重要說明
 
