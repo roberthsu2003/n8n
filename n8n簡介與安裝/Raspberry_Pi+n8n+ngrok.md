@@ -49,6 +49,8 @@ ngrok config add-authtoken <你的_TOKEN>
 
 ### 步驟 3：啟動固定網址隧道
 
+- 注意如果重啟,這一個步驟要重新設定
+
 這會讓 ngrok 在背景執行，並將流量導向 Port 5678。 *(請將 `<你的網址>` 換成筆記區的網址，**不需要**加 http://)*
 
 > 範例：`ngrok http 5678 --domain=poodle-calm.ngrok-free.app > /dev/null &`
