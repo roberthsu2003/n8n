@@ -112,22 +112,13 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 ---
 
-### 建立固定網址和docker的設定方式
+### 建立固定網址和 Docker 的設定方式
 
-[**Raspberry Pi + n8n + ngrok,建立固定網址**](./Raspberry_Pi+n8n+ngrok.md)
+為了讓 n8n 能夠接收外部服務（如 LINE Bot, Google）的 Webhook 回調，我們強烈建議使用 ngrok 建立固定的對外網址。請依照您的作業系統選擇對應的教學：
 
-
-```bash
-docker run -d \
-  --name n8n \
-  --restart always \
-  -p 5678:5678 \
-  -v n8n_data:/home/node/.n8n \
-  -e GENERIC_TIMEZONE="Asia/Taipei" \
-  -e N8N_SECURE_COOKIE=false \
-  -e WEBHOOK_URL="https://<你的固定網址>" \
-  docker.n8n.io/n8nio/n8n
-```
+- [**🍓 Raspberry Pi (樹莓派) + ngrok 設定教學**](./Raspberry_Pi+n8n+ngrok.md)
+- [**🪟 Windows Desktop + ngrok 設定教學**](./Windows+n8n+ngrok.md)
+- [**🍎 Mac Desktop + ngrok 設定教學**](./Mac+n8n+ngrok.md)
 
 
 ---
