@@ -125,7 +125,7 @@ docker run -d \
   -v n8n_data:/home/node/.n8n \
   -e GENERIC_TIMEZONE="Asia/Taipei" \
   -e N8N_SECURE_COOKIE=false \
-  -e WEBHOOK_URL="https://superinnocent-hillary-unwholesome.ngrok-free.dev" \
+  -e WEBHOOK_URL="https://<你的固定網址>" \
   docker.n8n.io/n8nio/n8n
 ```
 
