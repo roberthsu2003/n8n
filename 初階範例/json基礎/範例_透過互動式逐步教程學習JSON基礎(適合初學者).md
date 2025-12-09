@@ -14,11 +14,6 @@
 
 ![](./images/pic5.png)
 
-#### 🔄 工作流程圖
-
-```
-[Execute to Start] → [Key & Value] → [String] → [Number] → [Boolean] → [Null] → [Array] → [Object] → [Using JSON] → [Final Exam]
-```
 
 #### 📋 節點詳細說明
 
