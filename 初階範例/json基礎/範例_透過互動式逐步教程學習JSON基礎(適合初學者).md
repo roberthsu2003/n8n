@@ -8,11 +8,11 @@
 
 [youtube](https://youtu.be/PAmgrwYnzWs?si=DiMnHOn_XJBPEFb1)
 
-[樣版](https://n8n.io/workflows/5170-learn-json-basics-with-an-interactive-step-by-step-tutorial-for-beginners/)
+[樣版下載](./透過互動式逐步教程學習JSON 基礎.json)
 
 ### 預覽圖
 
-![](./images/json_basics_tutorial.png)
+![](./images/pic5.png)
 
 #### 🔄 工作流程圖
 
