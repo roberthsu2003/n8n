@@ -1,0 +1,123 @@
+{
+  "name": "範例_透過網站取得引言",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🚀🚀 從這裏開始 🚀🚀\n\n1. 按\"執行這裏\",開始執行\n\n2. 這會透過Internet取得隨機引言\n\n3. 按最後一個節點,取很我自得到什麼?\n",
+        "height": 272,
+        "width": 1104,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -176,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "3d4d2718-000c-42d6-b37b-7dc084e6c053",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -96
+      ],
+      "id": "d39449a9-e4e1-4f03-8c36-005babfe1c32",
+      "name": "當按下這裏時執行"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        368,
+        -96
+      ],
+      "id": "357f5bff-d61b-45c6-96e3-861c80f08caa",
+      "name": "透過internet取得隨機引言"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3f1921cd-1034-47d4-b8c2-579574d9c1d3",
+              "name": "問題",
+              "value": "={{ $json.q }}",
+              "type": "string"
+            },
+            {
+              "id": "2ce4abe8-4a80-440e-ab04-e044c225c331",
+              "name": "作者",
+              "value": "={{ $json.a }}",
+              "type": "string"
+            },
+            {
+              "id": "313c626a-9391-420f-9595-eaea39fa8c3f",
+              "name": "回覆",
+              "value": "={{ $json.h }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        -96
+      ],
+      "id": "6ab95fc2-21a4-4f38-9352-bf99402b73bf",
+      "name": "檢示取得的引言"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "當按下這裏時執行": {
+      "main": [
+        [
+          {
+            "node": "透過internet取得隨機引言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "透過internet取得隨機引言": {
+      "main": [
+        [
+          {
+            "node": "檢示取得的引言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c1f59605-eb38-4deb-ab6a-3eb2e3067864",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "ltbeR32xwoXvm5Ws",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
