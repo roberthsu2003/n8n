@@ -8,7 +8,7 @@
 
 [youtube](https://youtu.be/PAmgrwYnzWs?si=DiMnHOn_XJBPEFb1)
 
-[樣版下載](./透過互動式逐步教程學習JSON 基礎.json)
+[樣版下載](./透過互動式逐步教程學習JSON基礎.json)
 
 ### 預覽圖
 
