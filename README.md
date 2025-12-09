@@ -63,7 +63,7 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 
 ## 🔗 整合 Google 服務
 
-### 1. [**自動寄送 Gmail**](./Google_Cloud_api服務/範例_寄送gmail.md)
+### 1. [**自動寄送 Gmail**](./Google_Cloud_api服務/自動寄送gmail/範例_寄送gmail.md)
 結合定時觸發 (Schedule Trigger) 與 Gmail 節點，自動發送每日引言信件。
 
 **技術重點**：HTTP 請求、Gmail API

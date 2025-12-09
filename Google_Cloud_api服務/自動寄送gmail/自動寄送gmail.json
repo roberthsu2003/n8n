@@ -1,0 +1,166 @@
+{
+  "name": "自動寄送gmail",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 現在開始安排時間 ⏰\n\n1. 雙擊“時間計劃”以設定運行時間\n\n2. 連接您的 Gmail 並設定收件人\n\n3. 若要進行測試，請點選「計畫」節點上的「執行工作流程」。",
+        "height": 272,
+        "width": 1232
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "56427147-bf89-4a40-a054-d97966010190",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -80
+      ],
+      "id": "aefa24bf-29fa-45ec-888e-fd1794f4bf79",
+      "name": "安排時間點"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        272,
+        -80
+      ],
+      "id": "0e53638f-a2e6-4c23-a6fd-8f5921826494",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1bec931c-8bcf-46dc-9eae-df2a5f3d1818",
+              "name": "問題",
+              "value": "={{ $json.q }}",
+              "type": "string"
+            },
+            {
+              "id": "86cc85e9-2c5c-4cd0-a17e-4f8213ab5f3d",
+              "name": "作者",
+              "value": "={{ $json.a }}",
+              "type": "string"
+            },
+            {
+              "id": "b4d73c76-72c2-4317-a42f-ac11f5a0d5c7",
+              "name": "結果",
+              "value": "={{ $json.h }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -80
+      ],
+      "id": "42413544-05b2-433d-9083-0e27c6750e1f",
+      "name": "結果"
+    },
+    {
+      "parameters": {
+        "sendTo": "roberthsu2003@gmail.com",
+        "subject": "從n8n發送過來的",
+        "emailType": "text",
+        "message": "=這個是從n8n寄來的引言\n引言是:{{ $json.問題 }}\n作者是:{{ $json.作者 }}\n回覆是:{{ $json.結果 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        -80
+      ],
+      "id": "32a2467f-811a-4ced-97e5-b8ef13da7ef3",
+      "name": "Send a message",
+      "webhookId": "e5289eea-1948-48c1-af5f-73bd26f45bfa",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x0PFl2hklrzd3Zor",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "安排時間點": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "結果": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "67ec070b-9a2d-489a-bb6c-efb1957de155",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "SwU0cxyInMWhIe5J",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}

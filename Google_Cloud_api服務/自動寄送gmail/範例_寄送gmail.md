@@ -9,16 +9,15 @@
 
 [youtube](https://www.youtube.com/watch?v=5CBUXMO_L2Y&t=5s)
 
-[樣版](https://n8n.io/workflows/8527-learn-n8n-basics-in-3-easy-steps/)
+[自動寄送gmail-樣版json檔](./自動寄送gmail.json)
+
 ### 預覽圖
 
 ![](./images/pic2.png)
 
-#### 🔄 工作流程圖
 
-```
-[便利貼說明] → [排程觸發] → [HTTP 請求取得引言] → [整理並重新命名欄位] → [寄送 Gmail]
-```
+
+
 
 #### 📋 節點詳細說明
 
