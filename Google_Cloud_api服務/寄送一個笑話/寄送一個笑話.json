@@ -1,0 +1,188 @@
+{
+  "name": "寄送一個笑話",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 寄送1個笑話...\n",
+        "height": 224,
+        "width": 1104
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "03a1c979-e891-4dfb-a0a7-39d9a33b0187",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        16,
+        -96
+      ],
+      "id": "3a0dcb70-db58-4f62-9ad7-b164ba10f914",
+      "name": "取得一個引言"
+    },
+    {
+      "parameters": {
+        "url": "=https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        -96
+      ],
+      "id": "6833de04-5673-4787-8749-e07b180679d3",
+      "name": "取得一個程式碼的笑話"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -192,
+        -96
+      ],
+      "id": "6156db94-8a99-4642-a69f-ed96ecfa6a72",
+      "name": "安排時間點1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6d00045b-18c8-409b-a660-82a65f4e671c",
+              "name": "作者",
+              "value": "={{ $('取得一個引言').item.json.a }}",
+              "type": "string"
+            },
+            {
+              "id": "8794fc82-17df-4d59-8bc3-90a49912212b",
+              "name": "笑話",
+              "value": "={{ $json.joke }}",
+              "type": "string"
+            },
+            {
+              "id": "83dced00-3edc-41a7-abd1-706409d8e6cc",
+              "name": "類別",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "da96c71e-9feb-47f5-b234-4be98c1ee48c",
+      "name": "取出前2個網站的資料"
+    },
+    {
+      "parameters": {
+        "sendTo": "roberthsu2003@gmail.com",
+        "subject": "這是一個笑話",
+        "emailType": "text",
+        "message": "=請看這裏的笑話\n作者:{{ $json.作者 }}\n類別:{{ $json.類別 }}\n笑話:{{ $json.笑話 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        -96
+      ],
+      "id": "7d52e404-c6ba-4aa5-97df-db452d8bf0a3",
+      "name": "發送一個笑話",
+      "webhookId": "191e32f2-155f-4566-8c05-798d322f6672",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x0PFl2hklrzd3Zor",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "取得一個引言": {
+      "main": [
+        [
+          {
+            "node": "取得一個程式碼的笑話",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "取得一個程式碼的笑話": {
+      "main": [
+        [
+          {
+            "node": "取出前2個網站的資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "安排時間點1": {
+      "main": [
+        [
+          {
+            "node": "取得一個引言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "取出前2個網站的資料": {
+      "main": [
+        [
+          {
+            "node": "發送一個笑話",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ac3d585f-e8bf-491c-bfef-e77b44262533",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "1TXwwJIy0yBjxkhm",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
