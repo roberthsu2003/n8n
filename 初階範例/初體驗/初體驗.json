@@ -1,0 +1,186 @@
+{
+  "name": "初體驗",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 初體驗\n適合初學者的第一個範例\n",
+        "height": 112,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "e0781cd8-84bf-4a3f-ad83-8e888a77858c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        16
+      ],
+      "id": "1f407dc2-cbda-4f16-a451-6f426e23df3b",
+      "name": "執行工作流(Execute workflow)"
+    },
+    {
+      "parameters": {
+        "content": "**取得虛假樣本數據**",
+        "height": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "f1dd993b-b4d9-47f6-aff0-0d0026cbe134",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "getAllPeople"
+      },
+      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        16
+      ],
+      "id": "cb3fc7c9-e5bd-4a50-8036-98136cffc4cf",
+      "name": "Customer Datastore (n8n training)"
+    },
+    {
+      "parameters": {
+        "content": "**提取資料並準備好供下一節點使用。**",
+        "height": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "050b5a7f-f024-47f1-9502-5dc1ee4edb9d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a42a0c76-bce6-4ed3-ad89-c704393587c6",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "79235962-d0b2-43ce-9060-2474aa0037ff",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "363f2e5f-4613-4f5d-8491-12789313363b",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "d61a05b4-64d0-4ec5-9951-2a4ae7468ef9",
+              "name": "notes",
+              "value": "={{ $json.notes }}",
+              "type": "string"
+            },
+            {
+              "id": "90b3fd4f-4e1f-4d30-9fe1-308e42c90eb3",
+              "name": "country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        16
+      ],
+      "id": "3e32fe80-9a2c-4c4d-a840-615a6942fd6c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "customerId": "客戶資訊",
+        "message": "=Customer Information:\nID: {{ $json.id }}\nName: {{ $json.name }}\nEmail: {{ $json.email }}\nNotes: {{ $json.notes }}\nCountry: {{ $json.country }}\nCreated: {{ $json.created }}\n"
+      },
+      "type": "n8n-nodes-base.n8nTrainingCustomerMessenger",
+      "typeVersion": 1,
+      "position": [
+        432,
+        16
+      ],
+      "id": "4c03b8d7-9b2f-4d75-8f86-bcff30b4e042",
+      "name": "Customer Messenger (n8n training)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流(Execute workflow)": {
+      "main": [
+        [
+          {
+            "node": "Customer Datastore (n8n training)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Datastore (n8n training)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Customer Messenger (n8n training)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94e28032-68ac-44f4-b14c-f9fb2ff83cab",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "fgKi6w6mfr8Uzm6V",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
