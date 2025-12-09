@@ -101,6 +101,10 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 
 ---
 
+## 整合Webhook的實作
+
+### 1. [**自動化問候系統**](./Webhook的實作/README.md)
+
 ## 🗄️ [Supabase 整合](./supabase整合/README.md)
 使用開源的 Firebase 替代方案 Supabase，學習即時資料庫、檔案儲存和身份驗證的整合。
 

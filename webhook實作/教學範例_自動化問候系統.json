@@ -1,0 +1,243 @@
+{
+  "name": "教學範例:自動化問候系統",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "greeting",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bdfbc8a6-a604-4b85-a633-4c12ab9ede88",
+      "name": "Webhook 觸發器",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        16
+      ],
+      "webhookId": "greeting-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.name }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "18c37f5e-5a1e-4de5-a037-e19ee4e3e820",
+      "name": "檢查姓名",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        192,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "greeting",
+              "value": "={{ '你好,' + $json.body.name + '!你今年' + $json.body.age + '歲,歡迎來到自動化世界!' }}"
+            },
+            {
+              "name": "time",
+              "value": "={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "285ad415-6700-426a-b799-c86bd7f9e8fa",
+      "name": "設定問候訊息",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "error",
+              "value": "請提供您的姓名"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb3b888a-0740-4f4a-84ae-f36493e1b0ee",
+      "name": "設定錯誤訊息",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        544,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "5b9256fd-32d2-42ad-83d2-86a269b30076",
+      "name": "回應成功",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "180f40cb-1f56-4f88-92cd-e640f4d8e914",
+      "name": "回應錯誤",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        704,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📍 步驟一:接收請求\n使用 POST 方法發送 JSON 資料\n記得資料在 $json.body 裡面",
+        "height": 384,
+        "color": 4
+      },
+      "id": "4d8b04b0-71ce-4fd9-9b38-4e8ea1728d9a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ✅ 步驟二:驗證資料\n檢查 name 是否為空\ntrue → 成功 / false → 錯誤",
+        "height": 384,
+        "color": 5
+      },
+      "id": "11fe7d5b-53fa-4b29-ad7a-40bf79649c8e",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🎉 成功路徑\n建立問候訊息並回應",
+        "height": 284,
+        "width": 400,
+        "color": 2
+      },
+      "id": "f86fd40b-f0e0-4651-8ed9-e7168007e720",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ 錯誤路徑\n回傳錯誤訊息",
+        "height": 236,
+        "width": 400
+      },
+      "id": "486d012e-5b04-4d98-bc93-c9523914183f",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        512,
+        32
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook 觸發器": {
+      "main": [
+        [
+          {
+            "node": "檢查姓名",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "檢查姓名": {
+      "main": [
+        [
+          {
+            "node": "設定問候訊息",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "設定錯誤訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "設定問候訊息": {
+      "main": [
+        [
+          {
+            "node": "回應成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "設定錯誤訊息": {
+      "main": [
+        [
+          {
+            "node": "回應錯誤",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "772d630f-38c8-4c29-8aca-83b83fe2e850",
+  "meta": {
+    "instanceId": "7760517cfb99a9708da4a95c1beadf896e07d75295475b5b8128f732afd4828d"
+  },
+  "id": "pNnsQ78UuzFTyigP",
+  "tags": []
+}
