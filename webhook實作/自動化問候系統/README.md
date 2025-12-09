@@ -49,6 +49,13 @@ curl -X POST https://你的n8n網址/webhook/greeting \
   -d '{"name": "小明", "age": 25}'
 ```
 
+例如:
+```bash
+curl -X POST https://localhost:5678/webhook/greeting \
+  -H "Content-Type: application/json" \
+  -d '{"name": "小明", "age": 25}'
+```
+
 **預期回應:**
 ```json
 {
