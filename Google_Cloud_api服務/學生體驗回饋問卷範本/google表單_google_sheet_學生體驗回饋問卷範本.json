@@ -1,0 +1,240 @@
+{
+  "name": "google表單_google_sheet_學生體驗回饋問卷範本",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1xh5Qz-tWV-I1_PTfxvcvIKZJbf9T07CyPDVnL_442fU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 875294182,
+          "mode": "list",
+          "cachedResultName": "表單回應 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xh5Qz-tWV-I1_PTfxvcvIKZJbf9T07CyPDVnL_442fU/edit#gid=875294182"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -288
+      ],
+      "id": "f0ee2bce-a93c-42e7-8746-e01ac56c5c22",
+      "name": "Google Sheets Trigger1",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "52S4GN8IzhLrElLX",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "eff9197e-0cb3-4a07-89fb-4c6d712709ae",
+              "leftValue": "={{ Number($json[\"課程目標：\\n本課程的學習目標清晰明確。\"]) < 3 ||\n  Number($json[\"內容實用性：\\n課程內容與實際應用相關且實用\"]) < 3 ||\n  Number($json[\"內容深度：\\n課程內容的深度適中，具備挑戰性但不至於無法理解。\"]) < 3 ||\n  Number($json[\"課時安排:\\n每次上課的時間長度安排合理。\"]) < 3 ||\n  Number($json[\"學習材料\\n提供的教材、講義或參考資料對學習有幫助\"]) < 3\n\n}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        -32
+      ],
+      "id": "651e3928-a7cd-4fe7-b875-0512962fea75",
+      "name": "評分欄位內,有3分以下的"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f3c7fe05-bd91-495f-8fbb-edc3c91a3dd6",
+              "leftValue": "={{ $json['建議(對課程建議):']}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -288
+      ],
+      "id": "b64bb73b-11b5-4a27-80de-58513972a592",
+      "name": "建議欄位有值的"
+    },
+    {
+      "parameters": {
+        "sendTo": "roberthsu2004@gmail.com",
+        "subject": "評分有3分以下的",
+        "emailType": "text",
+        "message": "=時間: {{ $json['時間戳記'] }} +\n電子郵件地址: {{ $json['電子郵件地址'] }} \n姓名或學號: {{ $json['1.您的姓名或學號'] }} \n課程名稱:{{ $json['2. 您參加的課程名稱：'] }}\n\n內容實用性:課程內容與實際應用相關且實用\n{{ $json['內容實用性：\\n課程內容與實際應用相關且實用'] }}\n\n內容深度:課程內容的深度適中，具備挑戰性但不至於無法理解。\n{{ $json['內容深度:\\n課程內容的深度適中，具備挑戰性但不至於無法理解。'] }}\n\n課時安排:\n每次上課的時間長度安排合理。\n{{ $json['課時安排:\\n每次上課的時間長度安排合理。'] }}\n\n學習材料\n提供的教材、講義或參考資料對學習有幫助\n{{ $json['學習材料\\n提供的教材、講義或參考資料對學習有幫助'] }}\n\n建議(對課程建議)\n{{ $json['建議(對課程建議):'] }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        592,
+        -48
+      ],
+      "id": "a7d54d53-2eb1-4404-a76b-6136bf1a4867",
+      "name": "評分有3分以下的",
+      "webhookId": "f8a332b8-fdf0-439f-9c24-67cc8848d3c2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x0PFl2hklrzd3Zor",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "roberthsu2004@gmail.com",
+        "subject": "有建議的學員",
+        "emailType": "text",
+        "message": "=時間: {{ $json['時間戳記'] }} +\n電子郵件地址: {{ $json['電子郵件地址'] }} \n姓名或學號: {{ $json['1.您的姓名或學號'] }} \n課程名稱:{{ $json['2. 您參加的課程名稱：'] }}\n\n內容實用性:課程內容與實際應用相關且實用\n{{ $json['內容實用性：\\n課程內容與實際應用相關且實用'] }}\n\n內容深度:課程內容的深度適中，具備挑戰性但不至於無法理解。\n{{ $json['內容深度:\\n課程內容的深度適中，具備挑戰性但不至於無法理解。'] }}\n\n課時安排:\n每次上課的時間長度安排合理。\n{{ $json['課時安排:\\n每次上課的時間長度安排合理。'] }}\n\n學習材料\n提供的教材、講義或參考資料對學習有幫助\n{{ $json['學習材料\\n提供的教材、講義或參考資料對學習有幫助'] }}\n\n建議(對課程建議)\n{{ $json['建議(對課程建議):'] }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -304
+      ],
+      "id": "d69f67df-e433-4dde-b75a-2f32cb9b08f5",
+      "name": "有建議的",
+      "webhookId": "f8a332b8-fdf0-439f-9c24-67cc8848d3c2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "x0PFl2hklrzd3Zor",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Google Sheets Trigger1": [
+      {
+        "json": {
+          "時間戳記": "2025/11/25 下午 1:10:53",
+          "電子郵件地址": "roberthsu2004@gmai.com",
+          "1.您的姓名或學號": "A1213",
+          "2. 您參加的課程名稱：": "java",
+          "課程目標：\n本課程的學習目標清晰明確。": 4,
+          "內容實用性：\n課程內容與實際應用相關且實用": 3,
+          "內容深度：\n課程內容的深度適中，具備挑戰性但不至於無法理解。": 4,
+          "課時安排:\n每次上課的時間長度安排合理。": 3,
+          "學習材料\n提供的教材、講義或參考資料對學習有幫助": "",
+          "建議(對課程建議):": "我有4個小建議",
+          "第 9 欄": ""
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Sheets Trigger1": {
+      "main": [
+        [
+          {
+            "node": "建議欄位有值的",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "評分欄位內,有3分以下的": {
+      "main": [
+        [
+          {
+            "node": "評分有3分以下的",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建議欄位有值的": {
+      "main": [
+        [
+          {
+            "node": "有建議的",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "評分欄位內,有3分以下的",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "27589e19-8804-45cd-baf6-b2a97cdac20c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "QCxjCFpNonJYrATy",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
