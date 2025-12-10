@@ -102,7 +102,9 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 
 ---
 
-## Code Node (JavaScript) 整合
+## 💻 [Code Node (JavaScript) 進階應用](./code_node(javascript)節點/README.md)
+
+掌握 Node.js Code 節點，突破 Low Code 的限制。學習如何處理複雜的資料轉換、多重條件判斷與陣列重組，讓您的工作流程更靈活高效。
 
 ---
 
