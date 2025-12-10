@@ -163,6 +163,7 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 #### 🎯 適用情境
 - 需要接收外部服務的 Webhook（例如：LINE Bot、GitHub Webhook）
 - 需要使用 OAuth 2.0 整合第三方服務（例如：Google、Notion）
+- 想要使用 **n8n MCP** 的功能 (讓 AI 能夠搜尋、執行、檢查您的工作流程)
 - 需要在任何地方訪問你的 n8n
 - n8n 可安裝在本機或遠端電腦（Raspberry Pi）
 
