@@ -71,12 +71,23 @@ curl -X POST https://你的n8n網址/webhook/greeting \
   -d '{}'
 ```
 
-**預期回應:**
-```json
-{
-  "error": "請提供您的姓名"
-}
-```
+#### 步驟四:使用網頁介面測試 (推薦) 🌟
+ 
+ 我們準備了一個精美的網頁介面，讓您不用輸入指令也能測試！
+ 
+ 1. 進入 `website` 資料夾
+ 2. 使用文字編輯器打開 `script.js`
+ 3. 找到第 10 行的 `const WEBHOOK_URL`，將其修改為您的 n8n Webhook URL
+    ```javascript
+    // 例如:
+    const WEBHOOK_URL = 'https://您的網址/webhook/greeting';
+    ```
+ 4. 用瀏覽器打開 `index.html`
+ 5. 輸入姓名與年齡，點擊 **發送 Webhook**
+ 6. 畫面將會顯示 n8n 回傳的問候語與時間
+ 
+ > **提示**: 若網頁出現 CORS 錯誤，請確保您使用 `webhook-test` 結尾的 URL 進行測試，或者在啟動 n8n 時設定允許跨域環境變數 (通常測試環境較寬鬆)。
+
 
 ### 📚 教學重點
 
