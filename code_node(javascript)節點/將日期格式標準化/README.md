@@ -4,6 +4,10 @@
 
 這個範例展示如何使用 Code Node 將不同格式的日期轉換為標準格式，這是資料處理中非常常見的需求。
 
+## 工作流程樣版下載
+
+[example1_date_format](example1_date_format.json)
+
 ## 🎯 使用場景
 
 當您從不同來源接收資料時，日期格式可能不一致：
@@ -26,9 +30,7 @@
 
 ## 📦 工作流程結構
 
-```
-When clicking 'Execute workflow' → 模擬訂單資料 → 日期格式轉換 (Code)
-```
+![日期格式標準化](./images/日期格式標準化.png)
 
 ### 節點說明
 
