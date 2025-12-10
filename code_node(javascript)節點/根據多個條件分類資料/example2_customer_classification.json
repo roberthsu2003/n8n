@@ -1,0 +1,68 @@
+{
+  "name": "範例二:客戶分級與標籤",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-node",
+      "name": "開始",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "customer_id",
+              "value": "C001"
+            },
+            {
+              "name": "customer_name",
+              "value": "陳大華"
+            }
+          ],
+          "number": [
+            {
+              "name": "total_orders",
+              "value": 25
+            },
+            {
+              "name": "total_amount",
+              "value": 150000
+            },
+            {
+              "name": "days_since_last_order",
+              "value": 10
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-node-1",
+      "name": "客戶資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 在 n8n Code node 中常用的變數:\n// $input.all() - 取得所有輸入項目\n// $input.first() - 取得第一個項目\n// $input.last() - 取得最後一個項目\n// $input.item - 取得當前處理的項目\n// item.json - 該項目的 JSON 資料\n// item.binary - 該項目的二進位資料\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // 複雜的分級邏輯\n  let customerLevel = '';\n  let tags = [];\n  let discount = 0;\n  \n  // 根據訂單數量和金額判斷等級\n  if (data.total_amount >= 100000 && data.total_orders >= 20) {\n    customerLevel = 'VIP';\n    discount = 15;\n    tags.push('高價值客戶');\n  } else if (data.total_amount >= 50000 || data.total_orders >= 10) {\n    customerLevel = '黃金會員';\n    discount = 10;\n    tags.push('重要客戶');\n  } else if (data.total_orders >= 5) {\n    customerLevel = '銀牌會員';\n    discount = 5;\n    tags.push('活躍客戶');\n  } else {\n    customerLevel = '一般會員';\n    discount = 0;\n  }\n  \n  // 根據最後訂單時間判斷活躍度\n  if (data.days_since_last_order <= 7) {\n    tags.push('高度活躍');\n  } else if (data.days_since_last_order <= 30) {\n    tags.push('活躍');\n  } else if (data.days_since_last_order <= 90) {\n    tags.push('需關注');\n  } else {\n    tags.push('流失風險');\n  }\n  \n  // 計算平均訂單金額\n  const avgOrderAmount = data.total_orders > 0 \n    ? Math.round(data.total_amount / data.total_orders) \n    : 0;\n  \n  // 如果平均訂單金額高,加上標籤\n  if (avgOrderAmount >= 5000) {\n    tags.push('高單價客戶');\n  }\n  \n  // 組合輸出資料\n  results.push({\n    json: {\n      customer_id: data.customer_id,\n      customer_name: data.customer_name,\n      level: customerLevel,\n      discount_rate: discount,\n      tags: tags.join(', '),\n      avg_order_amount: avgOrderAmount,\n      analysis_date: new Date().toISOString(),\n      // 保留原始數據\n      original_data: {\n        total_orders: data.total_orders,\n        total_amount: data.total_amount,\n        days_since_last_order: data.days_since_last_order\n      }\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "code-node-1",
+      "name": "客戶分級邏輯 (Code)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "開始": {
+      "main": [[{ "node": "客戶資料", "type": "main", "index": 0 }]]
+    },
+    "客戶資料": {
+      "main": [[{ "node": "客戶分級邏輯 (Code)", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {}
+}

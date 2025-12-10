@@ -1,0 +1,58 @@
+{
+  "name": "範例一:日期格式標準化",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-node",
+      "name": "開始",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "order_date",
+              "value": "2024/03/15"
+            },
+            {
+              "name": "customer_name",
+              "value": "王小明"
+            },
+            {
+              "name": "amount",
+              "value": "1500"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-node-1",
+      "name": "模擬訂單資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取得輸入資料\n// $input.all() 可以取得所有輸入項目的陣列\n// $input.first() 取得第一個項目\n// $input.item.json 取得當前項目的 JSON 資料\n\nconst items = $input.all();\nconst outputItems = [];\n\nfor (const item of items) {\n  // 取得原始日期字串\n  const orderDate = item.json.order_date;\n  \n  // 將 2024/03/15 轉換為 2024-03-15 (ISO 格式)\n  const isoDate = orderDate.replace(/\\//g, '-');\n  \n  // 建立輸出資料\n  outputItems.push({\n    json: {\n      customer_name: item.json.customer_name,\n      amount: item.json.amount,\n      order_date_original: orderDate,\n      order_date_iso: isoDate,\n      formatted_date: new Date(isoDate).toLocaleDateString('zh-TW', {\n        year: 'numeric',\n        month: '2-digit',\n        day: '2-digit'\n      })\n    }\n  });\n}\n\nreturn outputItems;"
+      },
+      "id": "code-node-1",
+      "name": "日期格式轉換 (Code)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "開始": {
+      "main": [[{ "node": "模擬訂單資料", "type": "main", "index": 0 }]]
+    },
+    "模擬訂單資料": {
+      "main": [[{ "node": "日期格式轉換 (Code)", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {}
+}

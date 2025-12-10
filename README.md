@@ -100,6 +100,12 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 ## 🔌 [n8n MCP Server 整合](./mcp/README.md)
 透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具，讓 AI 能夠搜尋、檢查並直接執行自動化任務。
 
+---
+
+## Code Node (JavaScript) 整合
+
+---
+
 ## 🗄️ [Supabase 整合](./supabase整合/README.md)
 使用開源的 Firebase 替代方案 Supabase，學習即時資料庫、檔案儲存和身份驗證的整合。
 
