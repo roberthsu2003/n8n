@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>n8n 自動化問候系統</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-glob"></div>
+    <div class="background-glob glob-2"></div>
+    
+    <div class="container">
+        <header>
+            <h1>自動化問候系統</h1>
+            <p>透過 n8n Webhook 觸發您的專屬問候</p>
+        </header>
+
+        <main class="card glass">
+            <form id="greetingForm">
+                <div class="input-group">
+                    <label for="name">您的姓名</label>
+                    <input type="text" id="name" name="name" placeholder="請輸入姓名" required autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label for="age">您的年齡</label>
+                    <input type="number" id="age" name="age" placeholder="例如: 25" required min="1" max="120">
+                </div>
+
+                <button type="submit" id="submitBtn">
+                    <span class="btn-text">發送 Webhook</span>
+                    <div class="btn-loader"></div>
+                </button>
+            </form>
+
+            <div id="resultArea" class="result-container hidden">
+                <h3>來自 n8n 的回應</h3>
+                <div class="response-box">
+                    <p id="greetingText" class="typing-effect"></p>
+                    <div class="meta-info">
+                        <span class="timestamp-label">處理時間:</span>
+                        <span id="timestampText">--</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
