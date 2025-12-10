@@ -4,6 +4,10 @@
 
 這個範例展示如何使用 Code Node 實現複雜的客戶分級邏輯，根據多個條件自動為客戶分配等級、折扣率和標籤。
 
+## 工作流程樣版下載
+
+[example2_customer_classification](example2_customer_classification.json)
+
 ## 🎯 使用場景
 
 在 CRM 或電商系統中，您需要根據客戶的消費行為進行分級管理：
@@ -30,9 +34,7 @@
 
 ## 📦 工作流程結構
 
-```
-When clicking 'Execute workflow' → 客戶資料 → 客戶分級邏輯 (Code)
-```
+![客戶分級與標籤](./images/客戶分級與標籤.png)
 
 ### 節點說明
 
