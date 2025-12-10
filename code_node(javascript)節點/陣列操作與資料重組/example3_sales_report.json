@@ -1,50 +1,79 @@
 {
-  "name": "範例三:銷售報表資料重組",
   "nodes": [
     {
       "parameters": {},
-      "id": "start-node",
-      "name": "開始",
-      "type": "n8n-nodes-base.start",
+      "id": "9dfa2789-8995-4af6-a738-3a7a24accf55",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [250, 300]
+      "position": [
+        -32,
+        -112
+      ]
     },
     {
       "parameters": {
-        "values": {
-          "string": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "transactions_field",
               "name": "transactions",
-              "value": "=[{\"product\":\"筆記型電腦\",\"category\":\"3C產品\",\"amount\":35000,\"date\":\"2024-03-01\",\"region\":\"北區\"},{\"product\":\"滑鼠\",\"category\":\"3C產品\",\"amount\":500,\"date\":\"2024-03-01\",\"region\":\"北區\"},{\"product\":\"鍵盤\",\"category\":\"3C產品\",\"amount\":1200,\"date\":\"2024-03-02\",\"region\":\"南區\"},{\"product\":\"顯示器\",\"category\":\"3C產品\",\"amount\":8000,\"date\":\"2024-03-02\",\"region\":\"北區\"},{\"product\":\"辦公椅\",\"category\":\"傢俱\",\"amount\":4500,\"date\":\"2024-03-01\",\"region\":\"中區\"}]"
+              "value": "=[{\"product\":\"筆記型電腦\",\"category\":\"3C產品\",\"amount\":35000,\"date\":\"2024-03-01\",\"region\":\"北區\"},{\"product\":\"滑鼠\",\"category\":\"3C產品\",\"amount\":500,\"date\":\"2024-03-01\",\"region\":\"北區\"},{\"product\":\"鍵盤\",\"category\":\"3C產品\",\"amount\":1200,\"date\":\"2024-03-02\",\"region\":\"南區\"},{\"product\":\"顯示器\",\"category\":\"3C產品\",\"amount\":8000,\"date\":\"2024-03-02\",\"region\":\"北區\"},{\"product\":\"辦公椅\",\"category\":\"傢俱\",\"amount\":4500,\"date\":\"2024-03-01\",\"region\":\"中區\"}]",
+              "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "set-node-1",
+      "id": "786dd6d7-24ca-43d9-a7f2-170935d18760",
       "name": "交易資料",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.2,
-      "position": [450, 300]
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        -112
+      ]
     },
     {
       "parameters": {
         "jsCode": "// n8n Code Node 重要變數說明:\n// \n// 輸入資料:\n// - $input.all() : 取得所有輸入項目的陣列\n// - $input.first() : 取得第一個項目\n// - $input.last() : 取得最後一個項目\n// - $input.item : 目前正在處理的項目\n// - item.json : 項目的 JSON 資料\n// - item.binary : 項目的二進位資料 (檔案)\n//\n// 其他有用的變數:\n// - $json : 快捷方式,等同於 $input.item.json\n// - $binary : 快捷方式,等同於 $input.item.binary\n// - $node : 當前節點的資訊\n// - $workflow : workflow 的資訊\n// - $execution : 執行的資訊\n//\n// 輸出格式:\n// return [{json: {...}}, {json: {...}}] 或 return {json: {...}}\n\nconst item = $input.first();\nconst transactions = JSON.parse(item.json.transactions);\n\n// === 資料處理:群組統計 ===\n\n// 1. 按區域統計\nconst regionStats = {};\ntransactions.forEach(t => {\n  if (!regionStats[t.region]) {\n    regionStats[t.region] = {\n      region: t.region,\n      total_amount: 0,\n      transaction_count: 0,\n      products: []\n    };\n  }\n  regionStats[t.region].total_amount += t.amount;\n  regionStats[t.region].transaction_count += 1;\n  regionStats[t.region].products.push(t.product);\n});\n\n// 2. 按類別統計\nconst categoryStats = {};\ntransactions.forEach(t => {\n  if (!categoryStats[t.category]) {\n    categoryStats[t.category] = {\n      category: t.category,\n      total_amount: 0,\n      avg_amount: 0,\n      items: []\n    };\n  }\n  categoryStats[t.category].total_amount += t.amount;\n  categoryStats[t.category].items.push({\n    product: t.product,\n    amount: t.amount\n  });\n});\n\n// 計算平均值\nObject.values(categoryStats).forEach(cat => {\n  cat.avg_amount = Math.round(cat.total_amount / cat.items.length);\n});\n\n// 3. 找出最高和最低金額的交易\nconst sortedTransactions = [...transactions].sort((a, b) => b.amount - a.amount);\nconst topTransaction = sortedTransactions[0];\nconst lowestTransaction = sortedTransactions[sortedTransactions.length - 1];\n\n// 4. 按日期分組並計算每日總額\nconst dailyStats = {};\ntransactions.forEach(t => {\n  if (!dailyStats[t.date]) {\n    dailyStats[t.date] = {\n      date: t.date,\n      daily_total: 0,\n      transaction_count: 0\n    };\n  }\n  dailyStats[t.date].daily_total += t.amount;\n  dailyStats[t.date].transaction_count += 1;\n});\n\n// 5. 計算整體統計\nconst totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);\nconst avgTransaction = Math.round(totalAmount / transactions.length);\n\n// === 組合最終報表 ===\nconst report = {\n  json: {\n    report_date: new Date().toISOString(),\n    summary: {\n      total_transactions: transactions.length,\n      total_amount: totalAmount,\n      avg_transaction: avgTransaction\n    },\n    by_region: Object.values(regionStats).map(r => ({\n      region: r.region,\n      total: r.total_amount,\n      count: r.transaction_count,\n      avg: Math.round(r.total_amount / r.transaction_count),\n      products: r.products.join(', ')\n    })),\n    by_category: Object.values(categoryStats),\n    daily_breakdown: Object.values(dailyStats),\n    highlights: {\n      highest_transaction: {\n        product: topTransaction.product,\n        amount: topTransaction.amount,\n        region: topTransaction.region\n      },\n      lowest_transaction: {\n        product: lowestTransaction.product,\n        amount: lowestTransaction.amount,\n        region: lowestTransaction.region\n      }\n    },\n    // 加入原始資料供參考\n    raw_transactions: transactions\n  }\n};\n\nreturn report;"
       },
-      "id": "code-node-1",
+      "id": "e03376cf-352d-4abd-b531-61885e83a59e",
       "name": "銷售報表分析 (Code)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [
+        368,
+        -112
+      ]
     }
   ],
   "connections": {
-    "開始": {
-      "main": [[{ "node": "交易資料", "type": "main", "index": 0 }]]
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "交易資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "交易資料": {
-      "main": [[{ "node": "銷售報表分析 (Code)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "銷售報表分析 (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "pinData": {}
+  "pinData": {},
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
 }

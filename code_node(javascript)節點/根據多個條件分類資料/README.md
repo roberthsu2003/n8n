@@ -31,13 +31,13 @@
 ## 📦 工作流程結構
 
 ```
-開始 → 客戶資料 → 客戶分級邏輯 (Code)
+When clicking 'Execute workflow' → 客戶資料 → 客戶分級邏輯 (Code)
 ```
 
 ### 節點說明
 
-1. **開始**：觸發工作流程
-2. **客戶資料** (Set Node)：建立測試客戶資料
+1. **When clicking 'Execute workflow'** (Manual Trigger)：手動觸發工作流程
+2. **客戶資料** (Set Node v3.4)：建立測試客戶資料
    - `customer_id`: "C001"
    - `customer_name`: "陳大華"
    - `total_orders`: 25（訂單總數）
@@ -180,7 +180,7 @@ return results;
 
 ### 步驟二：執行測試
 
-1. 點擊「執行工作流程」
+1. 點擊畫面上方的「執行工作流程」按鈕
 2. 查看「客戶分級邏輯 (Code)」節點的輸出
 
 ### 步驟三：測試不同場景

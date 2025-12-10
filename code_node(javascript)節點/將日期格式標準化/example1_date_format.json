@@ -1,58 +1,91 @@
 {
-  "name": "範例一:日期格式標準化",
   "nodes": [
     {
-      "parameters": {},
-      "id": "start-node",
-      "name": "開始",
-      "type": "n8n-nodes-base.start",
-      "typeVersion": 1,
-      "position": [250, 300]
-    },
-    {
       "parameters": {
-        "values": {
-          "string": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "order_date_field",
               "name": "order_date",
-              "value": "2024/03/15"
+              "value": "2024/03/15",
+              "type": "string"
             },
             {
+              "id": "customer_name_field",
               "name": "customer_name",
-              "value": "王小明"
+              "value": "王小明",
+              "type": "string"
             },
             {
+              "id": "amount_field",
               "name": "amount",
-              "value": "1500"
+              "value": "1500",
+              "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "set-node-1",
+      "id": "289d2d6b-5184-4d28-980d-9080c84306cd",
       "name": "模擬訂單資料",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.2,
-      "position": [450, 300]
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        128
+      ]
     },
     {
       "parameters": {
         "jsCode": "// 取得輸入資料\n// $input.all() 可以取得所有輸入項目的陣列\n// $input.first() 取得第一個項目\n// $input.item.json 取得當前項目的 JSON 資料\n\nconst items = $input.all();\nconst outputItems = [];\n\nfor (const item of items) {\n  // 取得原始日期字串\n  const orderDate = item.json.order_date;\n  \n  // 將 2024/03/15 轉換為 2024-03-15 (ISO 格式)\n  const isoDate = orderDate.replace(/\\//g, '-');\n  \n  // 建立輸出資料\n  outputItems.push({\n    json: {\n      customer_name: item.json.customer_name,\n      amount: item.json.amount,\n      order_date_original: orderDate,\n      order_date_iso: isoDate,\n      formatted_date: new Date(isoDate).toLocaleDateString('zh-TW', {\n        year: 'numeric',\n        month: '2-digit',\n        day: '2-digit'\n      })\n    }\n  });\n}\n\nreturn outputItems;"
       },
-      "id": "code-node-1",
+      "id": "a84ec36d-976f-4877-b75a-4a3ddf72c226",
       "name": "日期格式轉換 (Code)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [
+        752,
+        128
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        368,
+        128
+      ],
+      "id": "4a8c7a4b-18b0-4013-8338-aaa242c2258f",
+      "name": "When clicking ‘Execute workflow’"
     }
   ],
   "connections": {
-    "開始": {
-      "main": [[{ "node": "模擬訂單資料", "type": "main", "index": 0 }]]
-    },
     "模擬訂單資料": {
-      "main": [[{ "node": "日期格式轉換 (Code)", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "日期格式轉換 (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "模擬訂單資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "pinData": {}
+  "pinData": {},
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
 }

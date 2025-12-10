@@ -31,13 +31,13 @@
 ## 📦 工作流程結構
 
 ```
-開始 → 交易資料 → 銷售報表分析 (Code)
+When clicking 'Execute workflow' → 交易資料 → 銷售報表分析 (Code)
 ```
 
 ### 節點說明
 
-1. **開始**：觸發工作流程
-2. **交易資料** (Set Node)：建立測試交易記錄
+1. **When clicking 'Execute workflow'** (Manual Trigger)：手動觸發工作流程
+2. **交易資料** (Set Node v3.4)：建立測試交易記錄
    ```json
    [
      {"product":"筆記型電腦","category":"3C產品","amount":35000,"date":"2024-03-01","region":"北區"},
@@ -265,7 +265,7 @@ const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
 
 ### 步驟二：執行測試
 
-1. 點擊「執行工作流程」
+1. 點擊畫面上方的「執行工作流程」按鈕
 2. 查看「銷售報表分析 (Code)」節點的輸出
 3. 展開各個統計維度查看結果
 
