@@ -13,6 +13,51 @@
 
 ## 🔑 n8n Code Node 重要變數
 
+> [適合程式設計師角度的說明](n8n執行機制與全域變數詳解.md)
+
+
+### 上一個節點傳入的資料結構
+
+n8n 節點之間傳遞的資料是**項目陣列**，每個項目都包含 `json` 和 `binary` 兩個屬性：
+
+```javascript
+// 上一個節點傳入的完整資料結構
+[
+  {
+    json: {
+      customer_name: "王小明",
+      order_date: "2024/03/15",
+      amount: 1500
+    },
+    binary: {}  // 若有檔案資料，會存放在這裡
+  },
+  {
+    json: {
+      customer_name: "李大華",
+      order_date: "2024/03/16",
+      amount: 2300
+    },
+    binary: {}
+  },
+  {
+    json: {
+      customer_name: "張美玲",
+      order_date: "2024/03/17",
+      amount: 1800
+    },
+    binary: {}
+  }
+]
+```
+
+**資料結構說明**：
+- 📦 **外層是陣列**：包含多個項目（items）
+- 📋 **每個項目是物件**：具有 `json` 和 `binary` 兩個屬性
+- 💾 **json 屬性**：存放實際的業務資料（如客戶資訊、訂單資料等）
+- 📎 **binary 屬性**：存放二進位資料（如圖片、PDF 等檔案）
+
+---
+
 ### 輸入資料變數
 ```javascript
 $input.all()      // 取得所有輸入項目的陣列
