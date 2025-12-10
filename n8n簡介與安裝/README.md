@@ -54,26 +54,40 @@ n8n 可以應用在各種自動化場景，以下是一些常見用途：
 
 ## 1.3 安裝方式
 
-### 使用 Docker（推薦方式）
+根據您的使用需求，我們提供三種不同的安裝方式。請先參考下方的**使用情境選擇指南**，選擇最適合您的安裝方式。
 
-Docker 是最簡單且推薦的安裝方式，適用於 Windows、macOS 和 Linux 系統。使用 Docker 可以確保環境一致性，並簡化後續的維護工作。
+### 📋 使用情境選擇指南
+
+選擇適合您的安裝方式：
+
+| 情境 | 適用安裝方式 | 說明 |
+|------|------------|------|
+| **只在本機使用**<br>不需要外部服務連接 | [方式一](#方式一本機安裝-localhost) | 最簡單的安裝方式，適合測試和學習 |
+| **跨電腦訪問**<br>例如：Mac 訪問 Raspberry Pi 上的 n8n | [方式二](#方式二ssh-tunnel-安裝) | 透過 SSH Tunnel 安全連接，不需公開網址 |
+| **需要外部服務整合**<br>例如：LINE Bot、Google OAuth、Webhook | [方式三](#方式三ngrok-公開網址安裝) | 使用 ngrok 建立公開網址，支援完整功能 |
+
+---
+
+### 方式一：本機安裝 (localhost)
+
+#### 🎯 適用情境
+- 只在同一台電腦上使用 n8n
+- 不需要接收外部 Webhook
+- 適合學習和測試
 
 #### 前置需求
-
 - 已安裝 Docker Desktop 或 Docker Engine
 - 確保 Docker 服務正在運行
 
 #### 安裝步驟
 
-1. **建立資料卷**（用於持久化儲存 n8n 的設定和資料）
+**步驟 1：建立資料卷**（用於持久化儲存 n8n 的設定和資料）
 
 ```bash
 docker volume create n8n_data
 ```
 
-2. **啟動 n8n 容器,使用本機**
-
-適用於 Windows 和 macOS（透過 Docker Desktop）：
+**步驟 2：啟動 n8n 容器**
 
 ```bash
 docker run -d \
@@ -84,8 +98,34 @@ docker run -d \
   docker.n8n.io/n8nio/n8n
 ```
 
---- 
-1. **啟動n8n容器,使用Raspberry**
+**步驟 3：訪問 n8n**
+
+在瀏覽器中開啟：`http://localhost:5678`
+
+---
+
+### 方式二：SSH Tunnel 安裝
+
+#### 🎯 適用情境
+- n8n 安裝在另一台電腦上（例如：Raspberry Pi）
+- 需要從本機電腦（Mac/Windows）訪問遠端的 n8n
+- 不需要公開網址，只需內網訪問
+- 需要使用 Google OAuth 等服務（因為這些服務要求 localhost 或 HTTPS）
+
+#### 前置需求
+- 遠端電腦已安裝 Docker
+- 本機電腦可透過 SSH 連接遠端電腦
+- 知道遠端電腦的 IP 位址
+
+#### 安裝步驟
+
+**步驟 1：在遠端電腦上建立資料卷**
+
+```bash
+docker volume create n8n_data
+```
+
+**步驟 2：在遠端電腦上啟動 n8n 容器**
 
 ```bash
 docker run -d \
@@ -97,28 +137,100 @@ docker run -d \
   docker.n8n.io/n8nio/n8n
 ```
 
-> **mac或window 連線至raspberry的方法*‌*
+**步驟 3：在本機電腦建立 SSH Tunnel**
+
+> ⚠️ **為什麼需要 SSH Tunnel？**
 > 
-> 原因是Google API 通常不允許 http:// 開頭的網址作為「已授權的重新導向 URI (Authorized redirect URIs)」，除非它是 localhost。當你使用 http://192.168.x.x:5678 或類似的內部 IP 時，Google 會拒絕連線。
+> Google API 等服務通常不允許 `http://` 開頭的內部 IP 位址（如 `http://192.168.x.x:5678`）作為「已授權的重新導向 URI」，除非是 `localhost`。
+> 
+> 透過 SSH Tunnel，我們可以將本機的 `localhost:5678` 映射到遠端電腦的 n8n 服務，這樣就能以 `http://localhost:5678` 的形式訪問，滿足 OAuth 的要求。
 
-**所以必需使用SSH Tunnel**
-
-這是最簡單的方法，不需要公開你的 n8n 到網際網路，也不用買網域。我們透過 SSH 將你 Mac 的 localhost:5678 映射到 Raspberry Pi 的 5678 port。
+在本機電腦執行以下指令：
 
 ```bash
-# 語法：ssh -L <本地Port>:localhost:<遠端Port> <使用者>@<Pi的IP>
+# 語法：ssh -L <本地Port>:localhost:<遠端Port> <使用者>@<遠端IP>
 ssh -L 5678:localhost:5678 pi@192.168.1.100
 ```
 
+**步驟 4：訪問 n8n**
+
+保持 SSH 連線不中斷，在本機瀏覽器中開啟：`http://localhost:5678`
+
 ---
 
-### 建立固定網址和 Docker 的設定方式
+### 方式三：ngrok 公開網址安裝
 
-為了讓 n8n 能夠接收外部服務（如 LINE Bot, Google）的 Webhook 回調，我們強烈建議使用 ngrok 建立固定的對外網址。請依照您的作業系統選擇對應的教學：
+#### 🎯 適用情境
+- 需要接收外部服務的 Webhook（例如：LINE Bot、GitHub Webhook）
+- 需要使用 OAuth 2.0 整合第三方服務（例如：Google、Notion）
+- 需要在任何地方訪問你的 n8n
+- n8n 可安裝在本機或遠端電腦（Raspberry Pi）
 
-- [**🍓 Raspberry Pi (樹莓派) + ngrok 設定教學**](./Raspberry_Pi+n8n+ngrok.md)
-- [**🪟 Windows Desktop + ngrok 設定教學**](./Windows+n8n+ngrok.md)
-- [**🍎 Mac Desktop + ngrok 設定教學**](./Mac+n8n+ngrok.md)
+#### 前置需求
+- 已安裝 Docker Desktop 或 Docker Engine
+- 需要註冊 ngrok 帳號（免費版即可）
+
+---
+
+#### 第一階段：申請 ngrok 固定網址
+
+##### 📝 準備工作（筆記區）
+
+請在操作過程中將您的專屬資訊填寫在此處：
+
+- **我的 ngrok 帳號 (Email):** `__________________________`
+- **我的 ngrok Authtoken:** `__________________________`
+- **我的固定網址 (Static Domain):** `__________________________` *(例如: poodle-calm-roughly.ngrok-free.app)*
+
+##### 操作步驟
+
+**步驟 1：註冊/登入 ngrok**
+- 前往 [dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup)
+- 建議使用 **Google 帳號登入**
+
+**步驟 2：領取免費固定網址** ⭐️
+- 登入後，點選左側選單的 **Universal Gateway** > **Domains**
+- 點擊 **「+ Create Domain」** 按鈕
+- 系統會自動配發一個網址
+- **請將這個網址抄寫到上方的筆記區**
+
+**步驟 3：取得身分驗證碼 (Authtoken)**
+- 點選左側選單的 **Getting Started** > **Your Authtoken**
+- 複製那串以 `2...` 開頭的長代碼
+- **請將 Token 抄寫或暫存起來**
+
+---
+
+#### 第二階段：安裝 n8n 並設定
+
+**步驟 1：建立資料卷**
+
+```bash
+docker volume create n8n_data
+```
+
+**步驟 2：啟動 n8n 容器**
+
+⚠️ **請務必將 `<你的網址>` 替換為您在 ngrok 申請的固定網址**
+
+```bash
+docker run -d \
+  --name n8n \
+  --restart always \
+  -p 5678:5678 \
+  -e WEBHOOK_URL="https://<你的網址>" \
+  -e GENERIC_TIMEZONE="Asia/Taipei" \
+  -v n8n_data:/home/node/.n8n \
+  docker.n8n.io/n8nio/n8n
+```
+
+**步驟 3：設定 ngrok tunnel**
+
+根據您的作業系統，請參考對應的詳細教學：
+
+- [🍓 **Raspberry Pi + ngrok 設定教學**](./Raspberry_Pi+n8n+ngrok.md)
+- [🪟 **Windows + ngrok 設定教學**](./Windows+n8n+ngrok.md)
+- [🍎 **Mac + ngrok 設定教學**](./Mac+n8n+ngrok.md)
 
 
 ---

@@ -1,98 +1,349 @@
-# Mac Desktop + n8n + ngrok 固定網址架設指南
+# 🍎 Mac + ngrok 固定網址設定教學
 
-這份指南將協助你在 macOS 上架設 n8n 自動化伺服器，並透過 ngrok 取得一個「永久固定」的對外網址。這對於連接 LINE Bot 或 Google OAuth 是必要的步驟。
+本教學將協助您在 macOS 上設定 ngrok tunnel，讓您的 n8n 伺服器可以透過固定的公開網址訪問。這是使用 LINE Bot、Google OAuth 等外部服務整合的必要步驟。
 
-## 📝 準備工作 (筆記區)
+---
 
-在開始之前，請確保你已經準備好以下資訊。
+## 📋 前置準備
 
-- **我的 ngrok 帳號 (Email):** `__________________________`
-- **我的 ngrok Authtoken:** `__________________________`
-- **我的固定網址 (Static Domain):** `__________________________` *(例如: poodle-calm-roughly.ngrok-free.app)*
+在開始之前，請確認：
 
-## 第一階段：申請固定網址
+- ✅ macOS 已安裝並運行 Docker Desktop
+- ✅ n8n 容器已經啟動（參考主文件的安裝步驟）
+- ✅ 已完成 ngrok 帳號註冊並取得：
+  - Authtoken（以 `2...` 開頭的長代碼）
+  - 固定網址（例如：`poodle-calm-roughly.ngrok-free.app`）
 
-1. **註冊/登入 ngrok**
-    - 前往 [dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup)
-    - 建議直接使用 **Google 帳號登入**。
-2. **領取免費固定網址** ⭐️ (重要步驟)
-    - 登入後，點選左側選單的 **Universal Gateway** (通用網關) > **Domains**。
-    - 點擊畫面中間的 **「+ Create Domain」** 按鈕。
-    - 系統會自動配發一個網址給你。
-    - **請將這個網址抄寫到上方的筆記區。**
-3. **取得身分驗證碼 (Authtoken)**
-    - 點選左側選單的 **Getting Started** > **Your Authtoken**。
-    - 複製那串以 `2...` 開頭的長代碼。
-    - **請將 Token 抄寫或暫存起來。**
+---
 
-## 第二階段：安裝與設定 (Mac 操作)
+## 🚀 設定步驟
 
-請使用 **Terminal (終端機)** 進行操作。
+### 步驟 1：開啟終端機
 
-### 步驟 1：安裝 ngrok
+使用以下任一方式開啟終端機：
 
-推薦使用 **Homebrew** 安裝，這是 Mac 最方便的套件管理工具。
+- **方法 1**：按 `Cmd + Space` 開啟 Spotlight，輸入 `Terminal`，按 Enter
+- **方法 2**：前往「應用程式」>「工具程式」>「終端機」
 
-**方法 A：使用 Homebrew (推薦)**
+---
+
+### 步驟 2：安裝 ngrok
+
+有兩種安裝方式，推薦使用 Homebrew：
+
+#### 方法 A：使用 Homebrew（強烈推薦）
+
+Homebrew 是 macOS 最流行的套件管理工具，可以簡化軟體安裝和更新。
+
+**如果尚未安裝 Homebrew**，先執行：
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**安裝 ngrok**：
+
 ```bash
 brew install ngrok/ngrok/ngrok
 ```
 
-**方法 B：手動下載**
-1. 前往 [ngrok 下載頁面](https://ngrok.com/download) 下載 Mac 版本 (Apple Silicon 選 ARM64)。
-2. 解壓縮後將執行檔移入系統路徑 (或是直接在該目錄執行)。
+#### 方法 B：手動下載安裝
 
-### 步驟 2：綁定帳號
+1. 前往 [ngrok 下載頁面](https://ngrok.com/download)
+2. 選擇對應版本：
+   - **Apple Silicon (M1/M2/M3)**：下載 ARM64 版本
+   - **Intel Mac**：下載 AMD64 版本
+3. 解壓縮 ZIP 檔案
+4. 將 `ngrok` 執行檔移動到系統路徑：
+   ```bash
+   sudo mv ngrok /usr/local/bin/
+   ```
 
-將你的 Authtoken 告訴 ngrok： *(請將 `<你的_TOKEN>` 換成筆記區那一長串代碼)*
+**驗證安裝**：
+
+```bash
+ngrok version
+```
+
+應該會顯示版本號，例如：`ngrok version 3.x.x`
+
+---
+
+### 步驟 3：綁定 ngrok 帳號
+
+將您在 ngrok 網站取得的 Authtoken 綁定到本機：
 
 ```bash
 ngrok config add-authtoken <你的_TOKEN>
 ```
 
-### 步驟 3：啟動固定網址隧道
+⚠️ **請將 `<你的_TOKEN>` 替換為您的實際 Authtoken**
 
-這會讓 ngrok 在背景執行，並將流量導向 Port 5678。 *(請將 `<你的網址>` 換成筆記區的網址，**不需要**加 http://)*
+範例：
+```bash
+ngrok config add-authtoken 2abcDEF123xyz...
+```
+
+---
+
+### 步驟 4：啟動 ngrok Tunnel
+
+執行以下指令啟動 ngrok，將本地的 5678 port 對應到您的固定網址：
 
 ```bash
 ngrok http 5678 --domain=<你的網址>
 ```
 
-> **注意：** 執行此指令後，終端機視窗會變成 ngrok 的監控畫面。**請不要關閉這個視窗**，並保持它開啟，否則連線會中斷。
+⚠️ **請將 `<你的網址>` 替換為您的固定網址（不需要加 `https://`）**
 
-**如何檢查是否成功？** 在瀏覽器輸入 `https://<你的網址>`。如果出現 "502 Bad Gateway" 或 n8n 畫面，代表隧道已經打通了！(502 是正常的，因為我們還沒開 n8n)。
-
-## 第三階段：啟動 n8n Docker
-
-請依照你習慣的方式開啟 n8n，建議開啟**另一個** Terminal 視窗來執行 Docker 指令。
-
-### 步驟 1：移除舊容器 (如果有)
-
+範例：
 ```bash
-docker rm -f n8n
+ngrok http 5678 --domain=poodle-calm-roughly.ngrok-free.app
 ```
 
-### 步驟 2：啟動新容器
+執行後，您會看到類似以下的畫面：
 
-請務必修改下方指令中的 `<你的網址>`。
+```
+ngrok
 
+Session Status                online
+Account                       your-email@example.com
+Version                       3.x.x
+Region                        Asia Pacific (ap)
+Latency                       12ms
+Web Interface                 http://127.0.0.1:4040
+Forwarding                    https://poodle-calm-roughly.ngrok-free.app -> http://localhost:5678
+
+Connections                   ttl     opn     rt1     rt5     p50     p90
+                              0       0       0.00    0.00    0.00    0.00
+```
+
+> ⚠️ **重要提醒**：
+> - 此終端機視窗會變成 ngrok 的監控畫面
+> - **請勿關閉此視窗**，否則連線會中斷
+> - 如果需要執行其他指令，請按 `Cmd + T` 開啟新的終端機分頁
+
+---
+
+### 步驟 5：驗證 Tunnel 是否成功
+
+保持 ngrok 終端機視窗開啟，在瀏覽器中開啟：
+
+```
+https://<你的網址>
+```
+
+**可能出現的狀況**：
+
+1. ✅ **看到 n8n 登入畫面**：完美！設定成功。
+2. ✅ **看到 "502 Bad Gateway"**：正常！表示 ngrok tunnel 已建立，只是 n8n 還沒啟動或正在啟動中。
+3. ❌ **無法連線或錯誤訊息**：請參考下方的故障排除章節。
+
+---
+
+## ✅ 完整驗收測試
+
+完成上述設定後，請依照以下步驟驗證：
+
+### 1. 確認網站可以訪問
+
+在瀏覽器中開啟您的固定網址：`https://<你的網址>`
+
+應該看到 n8n 的登入或設定畫面。
+
+### 2. 檢查 Webhook URL
+
+驗證 Webhook 是否使用公開網址：
+
+1. 登入 n8n
+2. 建立一個新的 Workflow
+3. 新增一個 **Webhook** 節點
+4. 查看節點設定中的 **Webhook URL**
+
+✅ **正確**：`https://<你的網址>/webhook/...`  
+❌ **錯誤**：`http://localhost:5678/webhook/...`
+
+如果顯示 localhost，請檢查您 Docker 啟動時的 `WEBHOOK_URL` 環境變數設定。
+
+---
+
+## 🔧 故障排除
+
+### 問題 1：找不到 ngrok 指令
+
+**錯誤訊息**：`command not found: ngrok`
+
+**原因**：ngrok 未安裝或未加入系統 PATH。
+
+**解決方法**：
+
+1. 檢查是否已安裝：
+   ```bash
+   which ngrok
+   ```
+
+2. 如果沒有輸出，請重新安裝（使用步驟 2 的方法）
+
+3. 如果手動下載安裝，確認檔案權限：
+   ```bash
+   chmod +x /usr/local/bin/ngrok
+   ```
+
+---
+
+### 問題 2：`The tunnel ... is already bound to another session`
+
+**原因**：ngrok 已經在另一個終端機視窗運行中。
+
+**解決方法**：
+
+```bash
+# 關閉所有 ngrok 程序
+pkill ngrok
+
+# 稍等 2-3 秒後，重新執行步驟 4
+ngrok http 5678 --domain=<你的網址>
+```
+
+---
+
+### 問題 3：n8n Webhook 仍顯示 localhost
+
+**原因**：Docker 容器啟動時未正確設定 `WEBHOOK_URL` 環境變數。
+
+**解決方法**：
+
+1. 停止並移除現有容器：
+```bash
+docker stop n8n
+docker rm n8n
+```
+
+2. 使用正確的環境變數重新啟動（請替換 `<你的網址>`）：
 ```bash
 docker run -d \
   --name n8n \
   --restart always \
   -p 5678:5678 \
   -e WEBHOOK_URL="https://<你的網址>" \
+  -e GENERIC_TIMEZONE="Asia/Taipei" \
   -v n8n_data:/home/node/.n8n \
   docker.n8n.io/n8nio/n8n
 ```
 
-## ✅ 驗收與測試
+---
 
-1. **打開瀏覽器**：輸入 `https://<你的網址>`。
-2. **確認畫面**：你應該會看到 n8n 的設定畫面或登入畫面。
-3. **檢查 Webhook**：
-    - 進入 n8n 建立一個 Workflow。
-    - 新增一個 **Webhook 節點**。
-    - 打開節點設定，檢查 **Webhook URL** 是否顯示為 `https://<你的網址>/...` 而不是 `localhost`。
+### 問題 4：無法透過網址訪問 n8n
 
-**恭喜！你的 Mac n8n 伺服器已經準備好接收 LINE Bot 與 Google OAuth 的連線了。**
+**檢查清單**：
+
+1. ✅ ngrok 終端機視窗是否仍在運行？
+   - 檢查視窗是否顯示 "Session Status: online"
+
+2. ✅ Docker Desktop 是否正在運行？
+   - 檢查選單列是否有 Docker 鯨魚圖示
+
+3. ✅ n8n 容器是否正在運行？
+   ```bash
+   docker ps | grep n8n
+   ```
+   應該看到 n8n 容器的狀態為 `Up`。
+
+4. ✅ 本地 5678 port 是否可以訪問？
+   ```bash
+   curl http://localhost:5678
+   ```
+   應該會回傳 HTML 內容。
+
+---
+
+## 💡 實用技巧
+
+### 讓 ngrok 在背景執行
+
+如果不想讓 ngrok 佔用一個終端機視窗，可以在背景執行：
+
+```bash
+ngrok http 5678 --domain=<你的網址> > /dev/null &
+```
+
+**說明**：
+- `> /dev/null`：將輸出導向空，不顯示訊息
+- `&`：在背景執行
+
+**停止背景執行的 ngrok**：
+
+```bash
+pkill ngrok
+```
+
+---
+
+### 開機自動啟動 ngrok（進階）
+
+使用 macOS 的 LaunchAgent 讓 ngrok 開機自動執行：
+
+1. 建立 plist 檔案：
+```bash
+nano ~/Library/LaunchAgents/com.ngrok.tunnel.plist
+```
+
+2. 貼上以下內容（請替換 `<你的網址>`）：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ngrok.tunnel</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/ngrok</string>
+        <string>http</string>
+        <string>5678</string>
+        <string>--domain=<你的網址></string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+```
+
+3. 載入服務：
+```bash
+launchctl load ~/Library/LaunchAgents/com.ngrok.tunnel.plist
+```
+
+4. 啟動服務：
+```bash
+launchctl start com.ngrok.tunnel
+```
+
+**取消自動啟動**：
+```bash
+launchctl unload ~/Library/LaunchAgents/com.ngrok.tunnel.plist
+```
+
+---
+
+### 監控 ngrok 連線狀況
+
+ngrok 提供了一個本地 Web 介面，可以查看即時的請求資訊：
+
+```
+http://127.0.0.1:4040
+```
+
+在瀏覽器開啟此網址，可以看到：
+- 所有通過 ngrok 的 HTTP 請求記錄
+- 請求和回應的詳細內容
+- 連線統計資訊
+
+這對於除錯 Webhook 和 OAuth 整合非常有幫助！
+
+---
+
+**🎉 恭喜！您的 Mac n8n 伺服器已成功設定 ngrok，可以接收外部 Webhook 和使用 OAuth 整合了！**
+

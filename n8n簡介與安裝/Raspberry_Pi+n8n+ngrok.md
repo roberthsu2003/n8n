@@ -1,116 +1,250 @@
-# Raspberry Pi + n8n + ngrok 固定網址架設指南
+# 🍓 Raspberry Pi + ngrok 固定網址設定教學
 
-這份指南將協助你在 Raspberry Pi 上架設 n8n 自動化伺服器，並透過 ngrok 取得一個「永久固定」的對外網址。這對於連接 LINE Bot 或 Google OAuth 是必要的步驟。
+本教學將協助您在 Raspberry Pi 上設定 ngrok tunnel，讓您的 n8n 伺服器可以透過固定的公開網址訪問。這是使用 LINE Bot、Google OAuth 等外部服務整合的必要步驟。
 
-## 📝 準備工作 (筆記區)
+---
 
-在開始之前，請確保你已經準備好以下資訊。請在操作過程中將你的專屬資訊填寫在此處：
+## 📋 前置準備
 
-- **我的 ngrok 帳號 (Email):** `__________________________`
-- **我的 ngrok Authtoken:** `__________________________`
-- **我的固定網址 (Static Domain):** `__________________________` *(例如: poodle-calm-roughly.ngrok-free.app)*
+在開始之前，請確認：
 
-## 第一階段：申請固定網址 (電腦操作)
+- ✅ Raspberry Pi 已安裝並運行 Docker
+- ✅ n8n 容器已經啟動（參考主文件的安裝步驟）
+- ✅ 已完成 ngrok 帳號註冊並取得：
+  - Authtoken（以 `2...` 開頭的長代碼）
+  - 固定網址（例如：`poodle-calm-roughly.ngrok-free.app`）
 
-請在你的 Mac 或 Windows 電腦瀏覽器上操作。
+---
 
-1. **註冊/登入 ngrok**
-    - 前往 [dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup)
-    - 建議直接使用 **Google 帳號登入**。
-1. **領取免費固定網址** ⭐️ (重要步驟)
-    - 登入後，點選左側選單的 **Universal Gateway** (通用網關) > **Domains**。
-    - 點擊畫面中間的 **「+ Create Domain」** 按鈕。
-    - 系統會自動配發一個網址給你。
-    - **請將這個網址抄寫到上方的筆記區。**
-1. **取得身分驗證碼 (Authtoken)**
-    - 點選左側選單的 **Getting Started** > **Your Authtoken**。
-    - 複製那串以 `2...` 開頭的長代碼。
-    - **請將 Token 抄寫或暫存起來。**
+## 🚀 設定步驟
 
-## 第二階段：安裝與設定 (Raspberry Pi 操作)
+### 步驟 1：連線至 Raspberry Pi
 
-請開啟終端機 (Terminal)，透過 SSH 連線進入你的 Raspberry Pi。
+在您的電腦上開啟終端機，透過 SSH 連線至 Raspberry Pi：
 
-### 步驟 1：安裝 ngrok
-
-複製並執行以下指令 (這會自動下載並安裝 ngrok)：
-
-```other
-curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrok
+```bash
+# 語法：ssh <使用者名稱>@<Pi的IP位址>
+ssh pi@192.168.1.100
 ```
 
-### 步驟 2：綁定帳號
+> 💡 **提示**：如果不確定 Pi 的 IP 位址，可以在 Pi 上執行 `hostname -I` 查詢。
 
-將你的 Authtoken 告訴 Raspberry Pi： *(請將 `<你的_TOKEN>` 換成筆記區那一長串代碼)*
+---
 
-```other
+### 步驟 2：安裝 ngrok
+
+在 Raspberry Pi 的終端機中，複製並執行以下指令：
+
+```bash
+curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
+  sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && \
+  echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | \
+  sudo tee /etc/apt/sources.list.d/ngrok.list && \
+  sudo apt update && \
+  sudo apt install ngrok
+```
+
+這個指令會：
+1. 下載 ngrok 的 GPG 金鑰
+2. 加入 ngrok 的軟體源
+3. 更新套件列表
+4. 安裝 ngrok
+
+**驗證安裝**：執行 `ngrok version` 應該會顯示版本號。
+
+---
+
+### 步驟 3：綁定 ngrok 帳號
+
+將您在 ngrok 網站取得的 Authtoken 綁定到 Raspberry Pi：
+
+```bash
 ngrok config add-authtoken <你的_TOKEN>
 ```
 
-### 步驟 3：啟動固定網址隧道
+⚠️ **請將 `<你的_TOKEN>` 替換為您的實際 Authtoken**
 
-- 注意如果重啟,這一個步驟要重新設定
+範例：
+```bash
+ngrok config add-authtoken 2abcDEF123xyz...
+```
 
-這會讓 ngrok 在背景執行，並將流量導向 Port 5678。 *(請將 `<你的網址>` 換成筆記區的網址，**不需要**加 http://)*
+---
 
-> 範例：`ngrok http 5678 --domain=poodle-calm.ngrok-free.app > /dev/null &`
+### 步驟 4：啟動 ngrok Tunnel
 
-```other
+執行以下指令啟動 ngrok，將本地的 5678 port 對應到您的固定網址：
+
+```bash
 ngrok http 5678 --domain=<你的網址> > /dev/null &
 ```
 
-**如何檢查是否成功？** 在你的電腦瀏覽器輸入 `https://<你的網址>`。如果出現 "502 Bad Gateway" 或 n8n 畫面，代表隧道已經打通了！(502 是正常的，因為我們還沒開 n8n)。
+⚠️ **請將 `<你的網址>` 替換為您的固定網址（不需要加 `https://`）**
 
-## 第三階段：啟動 n8n Docker (最後一步)
-
-現在我們要啟動 n8n，並明確告訴它我們的對外網址是剛剛申請的那個。
-
-### 步驟 1：移除舊容器 (如果有)
-
-```other
-docker rm -f n8n
+範例：
+```bash
+ngrok http 5678 --domain=poodle-calm-roughly.ngrok-free.app > /dev/null &
 ```
 
-### 步驟 2：啟動新容器
+**指令說明**：
+- `ngrok http 5678`：將本地 5678 port 透過 ngrok 公開
+- `--domain=<你的網址>`：使用您申請的固定網址
+- `> /dev/null`：將輸出導向空，避免佔用終端機
+- `&`：在背景執行
 
-請務必修改下方指令中的 `<你的網址>`。
+> ⚠️ **重要提醒**：Raspberry Pi 重新啟動後，ngrok tunnel 會中斷，需要重新執行此步驟。
 
-```other
+---
+
+### 步驟 5：驗證 Tunnel 是否成功
+
+在您的電腦瀏覽器中，開啟：
+
+```
+https://<你的網址>
+```
+
+**可能出現的狀況**：
+
+1. ✅ **看到 n8n 登入畫面**：完美！設定成功。
+2. ✅ **看到 "502 Bad Gateway"**：正常！表示 ngrok tunnel 已建立，只是 n8n 還沒啟動或正在啟動中。
+3. ❌ **無法連線或錯誤訊息**：請參考下方的故障排除章節。
+
+
+---
+
+## ✅ 完整驗收測試
+
+完成上述設定後，請依照以下步驟驗證：
+
+### 1. 確認網站可以訪問
+
+在瀏覽器中開啟您的固定網址：`https://<你的網址>`
+
+應該看到 n8n 的登入或設定畫面。
+
+### 2. 檢查 Webhook URL
+
+驗證 Webhook 是否使用公開網址：
+
+1. 登入 n8n
+2. 建立一個新的 Workflow
+3. 新增一個 **Webhook** 節點
+4. 查看節點設定中的 **Webhook URL**
+
+✅ **正確**：`https://<你的網址>/webhook/...`  
+❌ **錯誤**：`http://localhost:5678/webhook/...`
+
+如果顯示 localhost，請檢查您 Docker 啟動時的 `WEBHOOK_URL` 環境變數設定。
+
+---
+
+## 🔧 故障排除
+
+### 問題 1：`The tunnel ... is already bound to another session`
+
+**原因**：ngrok 已經在運行中，或者您重複執行了啟動指令。
+
+**解決方法**：
+
+```bash
+# 關閉所有 ngrok 程序
+pkill ngrok
+
+# 稍等 2-3 秒後，重新執行步驟 4
+ngrok http 5678 --domain=<你的網址> > /dev/null &
+```
+
+---
+
+### 問題 2：n8n Webhook 仍顯示 localhost
+
+**原因**：Docker 容器啟動時未正確設定 `WEBHOOK_URL` 環境變數。
+
+**解決方法**：
+
+1. 停止並移除現有容器：
+```bash
+docker stop n8n
+docker rm n8n
+```
+
+2. 使用正確的環境變數重新啟動（請替換 `<你的網址>`）：
+```bash
 docker run -d \
   --name n8n \
   --restart always \
   -p 5678:5678 \
   -e WEBHOOK_URL="https://<你的網址>" \
+  -e GENERIC_TIMEZONE="Asia/Taipei" \
   -v n8n_data:/home/node/.n8n \
-  n8nio/n8n
+  docker.n8n.io/n8nio/n8n
 ```
 
-## ✅ 驗收與測試
+---
 
-1. **打開瀏覽器**：輸入 `https://<你的網址>`。
-2. **確認畫面**：你應該會看到 n8n 的設定畫面或登入畫面。
-3. **檢查 Webhook**：
-    - 進入 n8n 建立一個 Workflow。
-    - 新增一個 **Webhook 節點**。
-    - 打開節點設定，檢查 **Webhook URL** 是否顯示為 `https://<你的網址>/...` 而不是 `localhost`。
+### 問題 3：無法透過網址訪問 n8n
 
-**恭喜！你的 n8n 伺服器已經準備好接收 LINE Bot 與 Google OAuth 的連線了。**
+**檢查清單**：
 
-## 💡 常見問題排除 (Troubleshooting)
+1. ✅ ngrok 是否正在運行？
+   ```bash
+   ps aux | grep ngrok
+   ```
+   應該看到 ngrok 程序在運行中。
 
-- **錯誤：`The tunnel ... is already bound to another session`**
-    - **原因**：你可能重複執行了 ngrok 指令。
-    - **解法**：執行 `pkill ngrok` 關閉所有程序，然後再執行一次步驟 3。
-- **錯誤：n8n 裡的網址還是 localhost**
-    - **原因**：Docker 啟動指令中的 `WEBHOOK_URL` 沒設定好。
-    - **解法**：請檢查 Docker 指令網址是否有加 `https://`，並重新執行第三階段。
+2. ✅ n8n 容器是否正在運行？
+   ```bash
+   docker ps | grep n8n
+   ```
+   應該看到 n8n 容器的狀態為 `Up`。
 
-## 📘 附錄：Markdown 筆記語法速查
+3. ✅ 本地 5678 port 是否可以訪問？
+   ```bash
+   curl http://localhost:5678
+   ```
+   應該會回傳 HTML 內容。
 
-如果您要在筆記軟體中編輯此文件，這些是常用的語法：
+---
 
-- **標題**：使用 `#` (大標題), `##` (次標題)
-- **粗體**：使用 `**文字**`
-- **程式碼區塊**：使用三個反引號 ````` 包裹程式碼
-- **清單**：使用 `*` 或 `1.` 開頭
-- **引用/備註**：使用 `>` 開頭
+## 💡 實用技巧
+
+### 讓 ngrok 開機自動啟動
+
+如果希望 Raspberry Pi 重新啟動後自動啟動 ngrok，可以設定 systemd 服務：
+
+1. 建立服務檔案：
+```bash
+sudo nano /etc/systemd/system/ngrok.service
+```
+
+2. 貼上以下內容（請替換 `<你的網址>`）：
+```ini
+[Unit]
+Description=ngrok tunnel
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/usr/local/bin/ngrok http 5678 --domain=<你的網址>
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. 啟用並啟動服務：
+```bash
+sudo systemctl enable ngrok
+sudo systemctl start ngrok
+```
+
+4. 檢查狀態：
+```bash
+sudo systemctl status ngrok
+```
+
+---
+
+**🎉 恭喜！您的 Raspberry Pi n8n 伺服器已成功設定 ngrok，可以接收外部 Webhook 和使用 OAuth 整合了！**
