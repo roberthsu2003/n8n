@@ -1,0 +1,183 @@
+{
+  "name": "CSV轉換為Excel",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "96d8fa73-2805-4316-8b22-973e93e84192",
+      "name": "手動觸發",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        768,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://data.taipei/api/dataset/9cb8ebf1-8d21-4523-908c-af853867eea1/resource/cec51213-9585-4b4a-ae18-5c9309ddf453/download",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "8fb180d6-1045-47b9-8f23-6e558c1aa939",
+      "name": "下載CSV檔案",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        992,
+        624
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "options": {
+          "delimiter": ",",
+          "enableBOM": false,
+          "headerRow": true
+        }
+      },
+      "id": "95637e7f-463d-4c3b-9920-ef690d7a570e",
+      "name": "解析CSV資料",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        1296,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "toXlsx"
+      },
+      "id": "3e488e2a-226d-4499-a8e3-92e598cf4285",
+      "name": "轉換為Excel",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        1600,
+        624
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## 📊 CSV 轉換為 Excel 工作流程 (使用最新節點)\n\n### 🔄 工作流程說明：\n\n1️⃣ **手動觸發** - 點擊「執行工作流程」按鈕開始\n\n2️⃣ **下載CSV檔案** - 從台北市資料平台下載求職求才資料\n\n3️⃣ **解析CSV資料** - 使用 Extract from File 節點將 CSV 轉換為 JSON\n\n4️⃣ **轉換為Excel** - 使用 Convert to File 節點將資料輸出為 .xlsx 格式\n\n---\n\n### 📝 更新說明：\n- ✅ 使用最新的 **Extract from File** 節點取代舊的 Spreadsheet File (讀取)\n- ✅ 使用最新的 **Convert to File** 節點取代舊的 Spreadsheet File (寫入)\n- ✅ 設定適當的檔案名稱和工作表名稱\n- ✅ 保留原有的 UTF-8 編碼和標題列設定\n\n---\n\n### 📂 資料來源：\n台北市就業服務處求職求才缺資訊\nhttps://data.taipei/api/dataset/9cb8ebf1-8d21-4523-908c-af853867eea1",
+        "height": 680,
+        "width": 520,
+        "color": 4
+      },
+      "id": "08373a4a-dbf8-44db-963a-60277ff45c80",
+      "name": "工作流程說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🌐 HTTP Request 節點\n\n**功能：** 從網路下載 CSV 檔案\n\n**設定：**\n- URL: 台北市開放資料平台\n- 回應格式: File (二進位檔案)\n\n這會將檔案以二進位格式傳遞給下一個節點",
+        "height": 240,
+        "width": 280,
+        "color": 5
+      },
+      "id": "13a1cda9-2e0e-41d3-ab91-2ac252499754",
+      "name": "節點說明1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📥 Extract from File 節點\n\n**功能：** 解析 CSV 檔案內容\n\n**新版特點：**\n- 專門用於從檔案提取資料\n- 支援多種格式 (CSV, JSON, XML 等)\n- 自動處理編碼問題\n\n**設定：**\n- 操作: CSV\n- 分隔符號: 逗號\n- 標題列: 開啟",
+        "height": 280,
+        "width": 280,
+        "color": 6
+      },
+      "id": "7af57f51-e5f1-4d32-86a9-1147ce55c3b5",
+      "name": "節點說明2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1232,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📤 Convert to File 節點\n\n**功能：** 將 JSON 資料轉換為 Excel 檔案\n\n**新版特點：**\n- 專門用於將資料轉換成檔案\n- 支援多種輸出格式 (XLSX, CSV, PDF 等)\n- 可自訂檔案名稱和工作表名稱\n\n**設定：**\n- 操作: Convert to XLSX\n- 檔案名稱: 自訂\n- 工作表名稱: 自訂\n- 標題列: 開啟",
+        "height": 300,
+        "width": 280,
+        "color": 3
+      },
+      "id": "46732f5f-819c-4b02-b1f5-190893909ce3",
+      "name": "節點說明3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1568,
+        272
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "手動觸發": {
+      "main": [
+        [
+          {
+            "node": "下載CSV檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下載CSV檔案": {
+      "main": [
+        [
+          {
+            "node": "解析CSV資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析CSV資料": {
+      "main": [
+        [
+          {
+            "node": "轉換為Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2e009d1a-2577-44ab-8df7-83be9e4b0b73",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "J1S77u2xIrKPMDEA",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
