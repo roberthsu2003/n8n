@@ -61,6 +61,11 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 
 ## 🔗 整合 Google 服務
 
+### [**儲存檔案至Google Drive**](./Google_Cloud_api服務/儲存檔案至google_drive/README.md)
+學習如何使用 Google Drive 節點將檔案上傳至 Google Drive。  
+
+**技術重點**：Google Drive API
+
 ### [**自動寄送 Gmail**](./Google_Cloud_api服務/自動寄送gmail/範例_寄送gmail.md)
 結合定時觸發 (Schedule Trigger) 與 Gmail 節點，自動發送每日引言信件。
 
