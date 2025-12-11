@@ -12,7 +12,7 @@
 
 ### 預覽圖
 
-![CSV轉換為Excel](./images/CSV轉換為Excel.png)
+![CSV轉換為Excel](./images/csv轉換為Excel.png)
 
 ### 工作流程圖下載
 
