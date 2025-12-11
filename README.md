@@ -50,7 +50,7 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 
 ---
 
-### [**CSV轉換為Excel**](./初階範例/CSV轉換為Excel/README.md)
+### [**CSV轉換為Excel**](./初階範例/csv轉換為Excel/README.md)
 
 學習如何下載,並轉換CSV為Excel檔案
 

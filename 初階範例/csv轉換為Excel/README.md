@@ -189,38 +189,44 @@ return items.filter(item => {
 ## 📌 常見問題
 
 ### **Q1: 下載的 CSV 檔案是亂碼怎麼辦？**
-**A**: 檢查「Import CSV」節點的編碼設定，常見編碼包括：
-- UTF-8（最常用）
-- Big5（繁體中文）
-- GB2312（簡體中文）
+**A**: 這個問題通常是編碼問題。新的 Extract from File 節點會自動處理編碼，但如果仍然出現亂碼，可以：
+- 檢查 CSV 檔案的原始編碼
+- 嘗試在下載時在 HTTP Request 節點設定特定的編碼
+- 常見編碼：UTF-8（最常用）、Big5（繁體中文）、GB2312（簡體中文）
 
 ### **Q2: 轉換後的 Excel 檔案沒有表頭？**
-**A**: 確保「Import CSV」節點的「包含表頭」選項已勾選。
+**A**: 確保「解析CSV資料」（Extract from File）節點的「包含表頭」選項已勾選。
 
 ### **Q3: 如何修改 Excel 檔案名稱？**
-**A**: 在「Convert to Excel」節點的「Options」→「File Name」中設定，可以使用：
+**A**: 在「轉換為Excel」（Convert to File）節點中可以設定檔案名稱，例如：
 - 固定名稱：`職缺資料`
 - 動態名稱：`={{ "職缺資料_" + new Date().toISOString().split('T')[0] }}`
+- 加入時間戳記：`={{ "職缺資料_" + $now.toFormat('yyyy-MM-dd') }}`
 
 ### **Q4: 可以轉換為其他格式嗎？**
-**A**: 可以！Spreadsheet File 節點支援：
-- `xlsx`：Excel 2007+
-- `xls`：Excel 97-2003
-- `csv`：逗號分隔
-- `ods`：OpenDocument 試算表
+**A**: 可以！Convert to File 節點支援多種輸出格式：
+- `XLSX`：Excel 2007+（最常用）
+- `CSV`：逗號分隔值檔案
+- `PDF`：可移植文件格式（需額外設定）
+- `HTML`：網頁表格格式
+
+**注意**：新的 Convert to File 節點比舊的 Spreadsheet File 支援更多格式！
 
 ### **Q5: 如何處理大型 CSV 檔案？**
-**A**: 對於大型檔案（超過 10MB），建議：
+**A**: 新的 Extract from File 節點在處理大型檔案時效能更好。對於非常大的檔案（超過 50MB），建議：
 - 增加 n8n 的記憶體限制
-- 使用分批處理
+- 使用分批處理（在下載後分割檔案）
 - 考慮使用資料庫作為中介儲存
+- 使用串流處理方式（streaming）
 
 ---
 
 ## 🎓 相關資源
 
 - [n8n HTTP Request 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/)
-- [n8n Spreadsheet File 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.spreadsheetfile/)
+- [n8n Extract from File 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.extractfromfile/) ✨ 新
+- [n8n Convert to File 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.converttofile/) ✨ 新
+- [n8n Spreadsheet File 節點文件（舊版）](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.spreadsheetfile/)
 - [臺北市資料大平台](https://data.taipei/)
 - [CSV 檔案格式說明](https://zh.wikipedia.org/zh-tw/%E9%80%97%E5%8F%B7%E5%88%86%E9%9A%94%E5%80%BC)
 
