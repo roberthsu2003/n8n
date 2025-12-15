@@ -111,7 +111,7 @@
 
 ## 連線資訊
 
-> domain  
+> domain
 > `superinnocent-hillary-unwholesome.ngrok-free.dev`
 
 > 啟動ngrok  
