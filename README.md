@@ -54,7 +54,7 @@
 
 ---
 
-## 🤖 整合 LLM 模型的AI Agent
+## 🤖 [整合 LLM 模型的AI Agent](./AI_Agent)
 > **即將推出**：學習如何將 OpenAI、Claude、Gemini 等大型語言模型整合到 n8n 工作流中。
 
 ---
