@@ -154,5 +154,100 @@
 4.  **「不安全」警告是正常的**：個人專案在驗證時看到的「未經驗證的應用程式」警告是正常現象，請安心點選「進階」並繼續。
 5.  **Client Secret 勿外洩**：GCP 產生的「用戶端密碼 (Client Secret)」等同於密碼，不要洩露給任何人或貼在公開的論壇上。順帶一提，如果要取得所有應用程式的完整功能，請開啟 Gemini 系列應用程式活動記錄。
 
+---
 
+## 📚 實作範例導覽
 
+完成 Google Cloud API 設定後，您可以開始實作以下範例，學習如何整合各種 Google 服務：
+
+### [⭐ 範例一：儲存檔案至Google Drive](./儲存檔案至google_drive/README.md)
+**難度**: 中級 | **學習時間**: 30-45 分鐘
+
+學習如何使用 Google Drive 節點將檔案上傳至 Google Drive。
+
+**學習重點**：
+- Google Drive API 整合
+- OAuth 2.0 認證設定
+- 檔案上傳與資料夾管理
+- 二進位資料處理
+
+**技術重點**：Google Drive API、檔案處理、OAuth 認證
+
+---
+
+### [⭐⭐ 範例二：自動寄送 Gmail](./自動寄送gmail/README.md)
+**難度**: 中級 | **學習時間**: 30-45 分鐘
+
+結合定時觸發 (Schedule Trigger) 與 Gmail 節點，自動發送每日引言信件。
+
+**學習重點**：
+- Schedule Trigger 排程觸發
+- HTTP 請求取得外部資料
+- Gmail API 整合
+- 動態郵件內容生成
+
+**技術重點**：HTTP 請求、Gmail API、排程觸發
+
+---
+
+### [⭐⭐ 範例三：寄送一則笑話](./寄送一個笑話/README.md)
+**難度**: 中級 | **學習時間**: 40-60 分鐘
+
+串接多個 API 來源（引言 + 程式笑話），組合成更有趣的自動化內容。
+
+**學習重點**：
+- 多個 HTTP 請求串接
+- 資料合併與處理
+- Gmail 郵件模板設計
+- 錯誤處理觀念
+
+**技術重點**：多 HTTP 請求、資料合併、Gmail API
+
+---
+
+### [⭐⭐⭐ 範例四：學生體驗回饋問卷範本](./學生體驗回饋問卷範本/README.md)
+**難度**: 進階 | **學習時間**: 60-90 分鐘
+
+自動偵測 Google 表單回覆，並根據條件觸發通知郵件。
+
+**學習重點**：
+- Google Form 與 Google Sheets 整合
+- Google Sheets Trigger 觸發器
+- 條件判斷與資料過濾
+- 自動化通知系統
+
+**技術重點**：
+- 手動建立 Google Form
+- 自動產生 Google Sheet
+- Google Sheet 新增資料觸發
+- 條件判斷與 Gmail 通知
+
+---
+
+## 🎯 學習路徑建議
+
+建議按照以下順序學習這些範例：
+
+1. **儲存檔案至Google Drive** → 學習基本的 Google API 整合
+2. **自動寄送 Gmail** → 掌握排程觸發與郵件發送
+3. **寄送一則笑話** → 進階的多 API 串接技巧
+4. **學生體驗回饋問卷範本** → 完整的表單處理自動化流程
+
+## 💡 學習建議
+
+- **先完成設定**：在開始範例前，務必先完成 Google Cloud API 服務設定
+- **理解 OAuth**：建議先閱讀 [OAuth 概念說明](../OAuth/README.md)
+- **逐步實作**：每個範例都包含詳細的設定步驟，請按照指示操作
+- **測試與除錯**：執行範例時，注意查看執行記錄和錯誤訊息
+
+## 📚 相關資源
+
+- [OAuth (開放授權) 的概念](../OAuth/README.md)
+- [n8n 官方文件](https://docs.n8n.io/)
+- [Google Cloud Console](https://console.cloud.google.com/)
+- [Google Drive API 文件](https://developers.google.com/drive/api/v3/about-sdk)
+- [Gmail API 文件](https://developers.google.com/gmail/api)
+
+---
+
+**🎓 完成這些範例後，您將能夠熟練地整合各種 Google 服務到 n8n 工作流程中！**

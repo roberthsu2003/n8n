@@ -29,70 +29,28 @@
 
 ---
 
-## 🎯 初階範例
+## 🎯 [初階範例](./初階範例/README.md)
 
-### [**初體驗**](./初階範例/初體驗/README.md)
-第一個 n8n 工作流！學習基本的觸發與資料傳遞。
+適合初學者的完整教學範例，從基礎的資料處理到檔案格式轉換，幫助您建立 n8n 的核心操作能力。
 
----
-
-### [**透過互動式逐步教程學習 JSON 基礎（適合初學者）**](./初階範例/json基礎/README.md)
-
-JSON 是自動化流程的資料核心。透過這個實作範例，您將學會如何建立和操作 JSON 格式。
-
----
-
-### [**透過網站取得引言**](./初階範例/透過網站取得隨機引言/README.md)
-
-學習如何使用 **HTTP Request** 節點發送請求並抓取外部 API 資料。
-
-**技術重點**：HTTP 請求、欄位整理
-
----
-
-### [**CSV轉換為Excel**](./初階範例/csv轉換為Excel/README.md)
-
-學習如何下載,並轉換CSV為Excel檔案
-
-**技術重點**：HTTP 請求下載,CSV轉換為Excel
+**包含範例**：
+- 初體驗：學習基本的觸發與資料傳遞
+- JSON 基礎：掌握自動化流程的資料核心
+- 透過網站取得引言：學習 HTTP Request 與 API 整合
+- CSV轉換為Excel：進階檔案處理技巧
 
 ---
 
 
-## 🔗 整合 Google 服務
+## 🔗 [整合 Google 服務](./Google_Cloud_api服務/README.md)
 
-### [**儲存檔案至Google Drive**](./Google_Cloud_api服務/儲存檔案至google_drive/README.md)
-學習如何使用 Google Drive 節點將檔案上傳至 Google Drive。  
+學習如何整合 Google Cloud API 服務，包含完整的 OAuth 2.0 設定指南與實作範例。
 
-**技術重點**：Google Drive API
-
-### [**自動寄送 Gmail**](./Google_Cloud_api服務/自動寄送gmail/README.md)
-結合定時觸發 (Schedule Trigger) 與 Gmail 節點，自動發送每日引言信件。
-
-**技術重點**：HTTP 請求、Gmail API
-
-
----
-
-### [**寄送一則笑話**](./Google_Cloud_api服務/寄送一個笑話/README.md)
-
-串接多個 API 來源（引言 + 程式笑話），組合成更有趣的自動化內容。
-
-**技術重點**：多 HTTP 請求、資料合併、Gmail API
-
-
----
-
-### [**學生體驗回饋問卷範本**](./Google_Cloud_api服務/學生體驗回饋問卷範本/README.md)
-
-自動偵測 Google 表單回覆，並根據條件觸發通知郵件。
-
-**技術重點**：  
-
-- 手動建立 Google Form
-- 自動產生 Google Sheet
-- Google Sheet 新增資料觸發
-- 條件判斷與 Gmail 通知
+**包含範例**：
+- 儲存檔案至Google Drive：學習 Google Drive API 整合
+- 自動寄送 Gmail：掌握排程觸發與郵件發送
+- 寄送一則笑話：進階的多 API 串接技巧
+- 學生體驗回饋問卷範本：完整的表單處理自動化流程
 
 ---
 
@@ -101,12 +59,12 @@ JSON 是自動化流程的資料核心。透過這個實作範例，您將學會
 
 ---
 
-## 整合Webhook的實作
+## 🔗 [整合 Webhook 的實作](./webhook實作/README.md)
 
-### [**自動化問候系統**](./webhook實作/自動化問候系統/README.md)
-透過 Webhook 接收外部 POST 請求，驗證使用者資料並回傳個人化問候訊息。
+學習如何使用 Webhook 建立 API 端點，讓外部應用程式能夠透過 HTTP 請求觸發 n8n 工作流程。
 
-**技術重點**：Webhook 觸發器、條件判斷、動態內容生成、JSON 回應
+**包含範例**：
+- 自動化問候系統：學習 Webhook 觸發器、條件判斷與 JSON 回應
 
 ---
 
