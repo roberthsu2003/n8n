@@ -135,6 +135,47 @@ System Prompt 決定了 AI Agent 的角色和行為。範例：
 - 在 System Prompt 中加入：「請保持回應簡潔，不超過 100 字」
 - 使用 **Max Tokens** 參數限制輸出長度
 
+## 📥 如何導入此 Workflow
+
+### 方法一：從檔案導入
+1. 下載 `智能客服聊天機器人.json` 檔案
+2. 在 n8n 介面中，點擊右上角的「…」選單
+3. 選擇「Import from File」
+4. 選擇下載的 JSON 檔案
+5. Workflow 將自動載入
+
+### 方法二：從剪貼簿導入
+1. 複製 `智能客服聊天機器人.json` 的內容
+2. 在 n8n 介面中，點擊右上角的「…」選單
+3. 選擇「Import from Clipboard」
+4. 貼上複製的內容
+5. 點擊「Import」
+
+### 導入後的設定
+1. **設定 OpenAI API Key**
+   - 點擊「OpenAI Chat Model」節點
+   - 在「Credentials」區域點擊「Create New」
+   - 輸入您的 OpenAI API Key
+   - 儲存設定
+
+2. **（可選）切換為 Google Gemini**
+   - 刪除「OpenAI Chat Model」節點
+   - 加入「Google Gemini Chat Model」節點
+   - 連接到「AI 客服代理」節點
+   - 設定 Google API Key
+
+3. **測試 Workflow**
+   - 點擊右上角的「啟動」按鈕
+   - 點擊「客服聊天」節點
+   - 使用測試介面或複製 Production URL
+   - 開始對話測試
+
+## 🖼️ Workflow 視覺化
+
+![智能客服聊天機器人](./images/智能客服聊天機器人.png)
+
+*截圖展示了 workflow 的完整結構與節點連接*
+
 ## 📚 相關資源
 
 - [n8n AI Agent 文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.agent/)
@@ -143,5 +184,4 @@ System Prompt 決定了 AI Agent 的角色和行為。範例：
 
 ---
 
-**🎓 完成此範例後，您將理解 AI Agent 的基本架構，可以開始建立自己的聊天機器人！**
 

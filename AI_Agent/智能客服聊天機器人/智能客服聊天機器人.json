@@ -1,0 +1,210 @@
+{
+  "name": "智能客服聊天機器人",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 💡 啟動指南\n\n稍後可以啟動此工作流程，並分享公開聊天網址，讓其他人與你的 AI 客服對話！\n\n**步驟：**\n1. 點擊右上角「啟動」按鈕\n2. 點擊「客服聊天」節點\n3. 複製「Production URL」分享給他人\n\n**注意事項：**\n- 需要設定 OpenAI API Key\n- 或切換為 Google Gemini Chat Model",
+        "height": 340,
+        "width": 380,
+        "color": 7
+      },
+      "id": "16604de8-bb38-439e-b0f6-70a871dce677",
+      "name": "📋 啟動指南",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 AI 客服核心\n\n你的 AI 客服可以：\n1. **接收** 來自聊天的客戶訊息\n2. **理解** 客戶問題與需求\n3. **回應** 友善且專業的答案\n4. **記憶** 對話脈絡，提供連貫回覆\n\n**自訂客服行為：**\n- 開啟此節點\n- 編輯「System Message」\n- 調整客服的語氣和回覆風格\n\n",
+        "height": 324,
+        "width": 440,
+        "color": 7
+      },
+      "id": "66441b7d-de93-4549-8c5e-ef2db2f21d4f",
+      "name": "🤖 AI 客服說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 對話記憶系統\n\n此節點幫助你的客服記住最近的對話，保持話題連貫性。\n\n**設定：**\n- 目前設定：記住最近 20 則訊息\n- 可調整數量以控制記憶長度\n\n**運作方式：**\n- 自動儲存對話歷史\n- 讓 AI 理解上下文\n- 提供更自然的對話體驗\n\n**實際應用：**\n- 記住客戶姓名\n- 追蹤問題脈絡\n- 避免重複詢問",
+        "height": 320,
+        "width": 380,
+        "color": 7
+      },
+      "id": "a2583353-6aa7-4017-8178-be7b0dab5366",
+      "name": "🧠 記憶說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        848
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 💬 客服對話範例\n\n**客戶：** 你好，我想了解產品的規格\n**AI 客服：** 您好！很高興為您服務。請問您想了解哪一款產品的規格呢？\n\n**客戶：** A 型號的產品\n**AI 客服：** 好的，A 型號產品的主要規格包括...\n（AI 會記住是 A 型號，不會重複詢問）\n\n**提示：**\n您可以修改 System Message 來調整客服的回覆風格！",
+        "height": 300,
+        "width": 380,
+        "color": 5
+      },
+      "id": "08aa75f1-f10c-4352-8439-1e67ef0ad909",
+      "name": "💬 對話範例",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        496
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=<role>\n你是一個友善且專業的客服助理。你的任務是協助客戶解決問題、回答疑問，並提供優質的服務體驗。公司名稱為 TechNova Solutions。\n</role>\n\n<personality>\n- 友善、耐心、樂於助人\n- 回應清晰、簡潔、易懂\n- 保持專業但不失親切\n- 善於傾聽並理解客戶需求\n</personality>\n\n<instructions>\n### 你的職責\n1. **親切地回應客戶問題**\n   - 使用禮貌且友善的語氣\n   - 確保客戶感受到被重視\n\n2. **提供準確的產品資訊**\n   - 回答產品規格、功能、價格等問題\n   - 若不確定資訊，誠實告知並建議查詢方式\n\n3. **協助解決客戶問題**\n   - 仔細聆聽問題描述\n   - 提供清晰的解決步驟\n   - 確認問題是否已解決\n\n4. **在無法解決時，禮貌地引導**\n   - 若問題超出能力範圍，引導客戶聯繫人工客服\n   - 提供聯繫方式或相關資源\n   - 如果無法回答，請告知客戶聯絡 TechNova Solutions 的客服電話：02-1234-5678，並聯絡客服經理 李先生\n\n### 對話原則\n- 保持回應簡潔，不超過 150 字\n- 使用繁體中文溝通\n- 記住對話中的重要資訊（客戶姓名、訂單號碼等）\n- 主動提供相關建議\n- 若客戶情緒不佳，展現同理心\n\n### 當前時間\n{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }} (台北時間)\n</instructions>\n\n<examples>\n客戶：你好\n你：您好！很高興為您服務。請問有什麼可以幫助您的嗎？\n\n客戶：我想退貨\n你：了解，我很樂意協助您處理退貨。請問您的訂單號碼是多少呢？\n\n客戶：這個產品怎麼使用？\n你：我很樂意為您說明使用方式。請問您購買的是哪一款產品呢？\n\n客戶：我有個問題你回答不出來\n你：很抱歉，我無法回答這個問題。建議您聯絡 TechNova Solutions 的客服電話：02-1234-5678，並找客服經理 李先生，他將會為您提供進一步協助。😊\n</examples>\n\n<output_format>\n- 使用友善、對話式的語氣回應\n- 根據對話脈絡給予個人化回覆\n- 適時使用表情符號增加親切感（但不過度）\n- 保持專業且有幫助的態度\n</output_format>"
+        }
+      },
+      "id": "62488e04-5558-426e-a2ec-1272ff70a840",
+      "name": "AI 客服代理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        224,
+        480
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "您好！👋 歡迎使用智能客服系統。\n\n我是您的 AI 客服助理，很高興為您服務！\n\n**我可以協助您：**\n💬 回答產品相關問題\n📦 處理訂單查詢\n🔧 解決使用問題\n💡 提供建議與諮詢\n\n請告訴我，有什麼可以幫助您的嗎？",
+        "options": {
+          "inputPlaceholder": "請在此輸入您的問題...",
+          "showWelcomeScreen": false,
+          "subtitle": "24/7 智能客服為您服務",
+          "title": "智能客服聊天機器人 🤖",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "64320d71-fac9-4985-bfc7-a4614b503dc0",
+      "name": "客服聊天",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -128,
+        480
+      ],
+      "webhookId": "customer-service-chat-webhook",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "id": "03800316-fcd7-4d6c-9e6e-6203caa880d1",
+      "name": "對話記憶",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        192,
+        704
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        720
+      ],
+      "id": "c0eecfe9-672a-413f-9845-9d36fc4f3a4f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "a2DHnK6MGTaS59sC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.3-70b-instruct:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        704
+      ],
+      "id": "08bf6fe7-ec7a-42bd-9571-39c43ac8b417",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "erNnIlwa0VXzcaGi",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "客服聊天": {
+      "main": [
+        [
+          {
+            "node": "AI 客服代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "對話記憶": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI 客服代理",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 客服代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "eecbfbd2-c07c-4ed8-a027-a6ae0fd6afa6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "OGzNHE2uOobeaajg",
+  "tags": []
+}
