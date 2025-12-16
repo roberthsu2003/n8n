@@ -1,0 +1,298 @@
+{
+  "name": "天氣和新聞查詢_使用Ollama",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 💡 啟動指南\n\n稍後可以啟動此工作流程，並分享公開聊天網址，讓其他人與你的 AI 代理對話！\n\n**步驟：**\n1. 點擊右上角「啟動」按鈕\n2. 點擊「Example Chat」節點\n3. 複製「Production URL」分享給他人",
+        "height": 300,
+        "width": 380,
+        "color": 7
+      },
+      "id": "02e9046b-3cc5-4565-94e3-4ee749e940b3",
+      "name": "📋 啟動指南",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 AI 代理核心\n\n你的 AI 代理可以：\n1. **接收** 來自聊天的訊息\n2. **選擇** 正確的工具（天氣、新聞）\n3. **回應** 即時且有用的答案\n\n**自訂代理行為：**\n- 開啟此節點\n- 編輯「System Message」\n- 調整代理的思考方式和回覆風格\n\n**目前使用模型：**\n- Ollama: gpt-oss:20b\n- 可切換為其他 LLM 模型",
+        "height": 400,
+        "width": 420,
+        "color": 7
+      },
+      "id": "d4aee2ab-0142-429d-938c-5f2ff03b6278",
+      "name": "🤖 AI 代理說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        528,
+        -48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 記憶系統\n\n此節點幫助你的代理記住最近的對話，保持話題連貫性。\n\n**設定：**\n- 目前設定：記住最近 30 則訊息\n- 可調整數量以控制記憶長度\n\n**運作方式：**\n- 自動儲存對話歷史\n- 讓 AI 理解上下文\n- 提供更自然的對話體驗",
+        "height": 280,
+        "width": 380,
+        "color": 7
+      },
+      "id": "e25f0741-c9fd-4667-ab70-1f1c60424c58",
+      "name": "🧠 記憶說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🌤️ 天氣工具 \n\n**修正內容：**\n✅ 日期參數問題已解決\n✅ 提供合理預設值\n✅ 優化 AI 指示\n\n**支援查詢：**\n- 當前天氣\n- 每小時預報\n- 每日預報（最多 16 天）\n\n**資料來源：**\nOpen-Meteo API (免費)",
+        "height": 260,
+        "width": 300,
+        "color": 4
+      },
+      "id": "bc97654c-5ad8-4e92-9b3c-1f5caa138228",
+      "name": "🌤️ 天氣工具說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1152,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 📰 新聞工具\n\n**功能：**\n取得各類 RSS 新聞源的最新文章\n\n**支援來源：**\n- BBC World\n- Al Jazeera\n- CNN World\n- TechCrunch\n- Hacker News\n- n8n Blog\n- 更多...\n\n**AI 會自動選擇合適的新聞源**",
+        "height": 260,
+        "width": 300,
+        "color": 4
+      },
+      "id": "51f14bde-ddbc-436a-bb34-a7f17c00b08e",
+      "name": "📰 新聞工具說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1152,
+        400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Gets the latest blog posts and news from RSS feeds.\n\nIMPORTANT: Choose the most relevant feed based on user's query.\n\nAvailable feeds:\n- BBC World: https://feeds.bbci.co.uk/news/world/rss.xml (global headlines)\n- Al Jazeera: https://www.aljazeera.com/xml/rss/all.xml (in-depth global coverage)\n- CNN World: http://rss.cnn.com/rss/edition_world.rss (breaking news worldwide)\n- TechCrunch: https://techcrunch.com/feed/ (tech & startup news)\n- Hacker News: http://news.ycombinator.com/rss (tech community headlines)\n- n8n Blog: https://n8n.io/blog/rss (n8n updates & tutorials)\n- Bon Appétit: https://www.bonappetit.com/feed/recipes-rss-feed/rss (recipes)\n- ENDS Report: https://www.endsreport.com/rss/news-and-analysis (environmental news)\n- MedlinePlus: https://medlineplus.gov/groupfeeds/new.xml (health topics)\n- Liberty Times: https://news.ltn.com.tw/rss/all.xml (Taiwan headlines and breaking news)\n- Central News Agency (CNA): https://feeds.feedburner.com/rsscna/aall (comprehensive Taiwan and cross-strait news)\n- The News Lens: https://feeds.feedburner.com/TheNewsLens (independent in-depth reporting on Taiwan and global issues)\n- Taipei Times: https://www.taipeitimes.com/xml/index.rss (English-language Taiwan news from a local perspective)\n- Newtalk: https://newtalk.tw/rss/all/ (independent media focusing on Taiwan politics and society)\n- Up Media: https://www.upmedia.mg/createRSS.php?Type=all (political, economic, and cross-strait analysis)\n- Business Weekly: https://www.businessweekly.com.tw/rss (Taiwan business and finance news)\n- Focus Taiwan: https://feeds.feedburner.com/rsscna/engnews (English Taiwan news with focus on business and culture)",
+        "url": "={{ $fromAI('URL', 'Select the most appropriate RSS feed URL based on the user query. Available options are listed in the tool description.', 'string', 'https://feeds.bbci.co.uk/news/world/rss.xml') }}",
+        "options": {}
+      },
+      "id": "319973e4-3b14-4195-83d2-065b43df4b65",
+      "name": "Get News",
+      "type": "n8n-nodes-base.rssFeedReadTool",
+      "position": [
+        1024,
+        496
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=<role>\n你是 n8n Demo AI Agent，一個友善且樂於助人的助理，專門展示 n8n 自動化平台中 AI 代理的強大功能。你的個性是鼓勵的、略帶教育性的，並且對自動化充滿熱情。你的主要功能是通過使用可用的工具來回答用戶問題並滿足他們的需求，展示你的能力。你的對話風格自然流暢。\n</role>\n\n<instructions>\n<goal>\n你的主要目標是作為使用 n8n 構建的 AI 代理的實時演示。你將與用戶互動，通過智能地使用可用工具來回答他們的問題，並解釋 AI 代理背後的概念，幫助他們理解其潛力。\n</goal>\n\n<context>\n### 我的工作原理\n我是一個在簡單 n8n 工作流程中運行的 AI 模型。這個工作流程為我提供了兩個關鍵要素：\n1. **一組工具**：這些是我可以調用的函數，用於獲取資訊或執行操作。\n2. **簡單記憶**：我可以記住當前對話的近期內容，以理解上下文。\n\n### 我的目的\n我的主要目的是作為展示。我展示了如何通過簡單的對話為各種功能（我的工具）提供聊天界面，而無需複雜的 UI。這是一種讓強大的自動化通過簡單對話變得人人可用的絕佳方式。\n\n### 工具使用指南\n如果用戶的請求符合工具的功能，你必須選擇一個可用工具。你不能自己執行這些操作；必須調用工具。\n\n### 關於 n8n 中的 AI 代理\n- **可靠性**：雖然我可以一次有效地使用一個工具，但更高級的代理可以執行多步驟任務。然而，對於複雜的關鍵任務流程，通常更可靠的做法是在 n8n 中構建結構化的逐步工作流程，而不是僅依賴代理的推理。代理非常適合面向用戶的互動，但結構化工作流程是後端可靠性的關鍵。\n- **最佳實踐**：一個好的做法是保持代理的工具集專注，通常少於 10-15 個工具，以確保可靠性並防止混淆。\n\n### 當前日期與時間\n{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }} (台北時間)\n</context>\n\n<output_format>\n- 以友善、對話式和樂於助人的語氣回應。\n- 當用戶的請求需要工具時，首先選擇適當的工具。然後，以清晰易懂的方式向用戶呈現工具執行的結果。\n- 保持主動。如果用戶不確定該做什麼，根據你的可用工具建議一些他們可以詢問的範例（例如：談論你的工具和你對自己的了解）。\n- 使用繁體中文回應，保持專業且友善的態度。\n</output_format>\n</instructions>"
+        }
+      },
+      "id": "00fc3d2e-5c9e-484d-bf6e-0eca8c98be3d",
+      "name": "Your First AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        576,
+        384
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "嗨！👋 我是你的 AI 助理。\n\n我可以幫你：\n🌤️ 查詢天氣預報\n📰 取得最新新聞\n\n試著問我問題吧！",
+        "options": {
+          "inputPlaceholder": "在此輸入你的訊息...",
+          "showWelcomeScreen": false,
+          "subtitle": "這是一個展示用的 AI 代理，試試看吧！",
+          "title": "你的第一個 AI 代理 🚀",
+          "responseMode": "lastNode"
+        }
+      },
+      "id": "977a26f0-bda8-4899-af24-23ece849db71",
+      "name": "Example Chat",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        224,
+        384
+      ],
+      "webhookId": "515fb4cf-d29e-45a4-9a3e-4e382113e2ee",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 30
+      },
+      "id": "36223748-a79a-4a78-921e-d0378e757a15",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        544,
+        608
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        240,
+        624
+      ],
+      "id": "14a45e77-d7d7-4f00-94fa-6f13afcaef97",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "puHSzMoUUx9WwTbB",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "=Get weather forecast for any location and time period.\n\nIMPORTANT USAGE RULES:\n1. For CURRENT weather (\"now\", \"today\", \"current\"):\n   - Use ONLY 'current' parameter\n   - DO NOT provide start_date or end_date\n   - Example: current=temperature_2m,windspeed_10m,rain\n\n2. For HOURLY forecast (specific day details):\n   - Use 'hourly' parameter with start_date and end_date\n   - Best for single day forecasts\n   - Example: hourly=temperature_2m,precipitation\n\n3. For DAILY forecast (multi-day overview):\n   - Use 'daily' parameter with start_date and end_date\n   - Best for weekly forecasts\n   - Example: daily=temperature_2m_max,precipitation_sum\n\nLOCATION: Always infer latitude and longitude from city name automatically.\nDATES: Use YYYY-MM-DD format. If not specified, use today as start_date.\nTEMPERATURE: Default to celsius unless user specifies fahrenheit.",
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ $fromAI('latitude', 'Latitude of the location. Infer from city name automatically. Example: 25.03 for Taipei', 'number') }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ $fromAI('longitude', 'Longitude of the location. Infer from city name automatically. Example: 121.56 for Taipei', 'number') }}"
+            },
+            {
+              "name": "current",
+              "value": "={{ $fromAI('current', 'Current weather variables (comma-separated, no spaces). Use ONLY for current/now queries. Leave empty for forecast queries. Example: temperature_2m,windspeed_10m,rain. Options: temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weathercode,cloudcover_total,pressure_msl,surface_pressure,windspeed_10m,winddirection_10m,windgusts_10m', 'string') }}"
+            },
+            {
+              "name": "hourly",
+              "value": "={{ $fromAI('hourly', 'Hourly weather variables (comma-separated, no spaces). Use for single day detailed forecast. Leave empty for current weather or daily overview. Example: temperature_2m,precipitation. Options: temperature_2m,relative_humidity_2m,dewpoint_2m,apparent_temperature,precipitation,rain,showers,snowfall,snow_depth,pressure_msl,surface_pressure,cloudcover_total,cloudcover_low,cloudcover_mid,cloudcover_high,windspeed_10m,winddirection_10m,windgusts_10m,visibility,is_day,sunshine_duration,soil_temperature,soil_moisture,PM10,PM2_5,carbon_monoxide,ozone,us_aqi,UV_index', 'string') }}"
+            },
+            {
+              "name": "daily",
+              "value": "={{ $fromAI('daily', 'Daily weather variables (comma-separated, no spaces). Use for multi-day forecast overview. Leave empty for current weather or hourly details. Example: temperature_2m_max,precipitation_sum. Options: weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,sunrise,sunset,daylight_duration,sunshine_duration,pressure_msl_max,pressure_msl_min,surface_pressure_max,surface_pressure_min,windgusts_10m_max,windspeed_10m_max,winddirection_10m_dominant,shortwave_radiation_sum', 'string') }}"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ $fromAI('start_date', 'Start date in YYYY-MM-DD format. Required for hourly/daily forecast. Leave empty for current weather. Default to today if not specified.', 'string', $now.toFormat('yyyy-MM-dd')) }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $fromAI('end_date', 'End date in YYYY-MM-DD format. Must be after start_date. Required for hourly/daily forecast. Leave empty for current weather. Default to 7 days from now if not specified.', 'string', $now.plus({ days: 7 }).toFormat('yyyy-MM-dd')) }}"
+            },
+            {
+              "name": "temperature_unit",
+              "value": "={{ $fromAI('temperature_unit', 'Temperature unit: celsius or fahrenheit', 'string', 'celsius') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ee773c3-e025-436d-a526-65ddb1b9a015",
+      "name": "Get Weather",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "position": [
+        1024,
+        816
+      ],
+      "typeVersion": 4.2
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Example Chat": {
+      "main": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "41ea6e95-4575-4dcb-ac5d-da81b3a2570b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "YhdgHOA5rMkjtbfI",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
