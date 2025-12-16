@@ -28,21 +28,6 @@
 - **Simple Vector Store** - 向量資料庫
 - **Embeddings OpenAI** - 文字嵌入
 
-## 📌 Sticky 規劃
-
-```
-📌 Sticky 1: "資料準備 - 文件載入與向量化"
-📌 Sticky 2: "對話入口"
-📌 Sticky 3: "AI 檢索與回答"
-```
-
-### Sticky 使用原則：
-- 🟦 **藍色 Sticky**：輸入/觸發器
-- 🟩 **綠色 Sticky**：AI 處理核心
-- 🟨 **黃色 Sticky**：工具與外部服務
-- 🟧 **橘色 Sticky**：輸出/回應
-- 🟥 **紅色 Sticky**：錯誤處理
-
 ## 🎓 教學重點
 
 ### 1. 什麼是 Embeddings（嵌入）

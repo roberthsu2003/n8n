@@ -28,22 +28,6 @@
 - **Gmail** - 發送分類結果
 - **Google Sheets** - 記錄分類
 
-## 📌 Sticky 規劃
-
-```
-📌 Sticky 1: "郵件接收"
-📌 Sticky 2: "AI 分類器"
-📌 Sticky 3: "分類結果處理"
-📌 Sticky 4: "記錄與通知"
-```
-
-### Sticky 使用原則：
-- 🟦 **藍色 Sticky**：輸入/觸發器
-- 🟩 **綠色 Sticky**：AI 處理核心
-- 🟨 **黃色 Sticky**：工具與外部服務
-- 🟧 **橘色 Sticky**：輸出/回應
-- 🟥 **紅色 Sticky**：錯誤處理
-
 ## 🎓 教學重點
 
 ### 1. 自動化業務流程

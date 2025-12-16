@@ -27,22 +27,6 @@
 - **Call n8n Workflow Tool** - 呼叫其他 workflow
 - **HTTP Request Tool** - 自訂工具（API 呼叫）
 
-## 📌 Sticky 規劃
-
-```
-📌 Sticky 1: "對話入口"
-📌 Sticky 2: "AI Agent - 決策中心"
-📌 Sticky 3: "工具箱 - 計算器、API 呼叫"
-📌 Sticky 4: "外部服務整合"
-```
-
-### Sticky 使用原則：
-- 🟦 **藍色 Sticky**：輸入/觸發器
-- 🟩 **綠色 Sticky**：AI 處理核心
-- 🟨 **黃色 Sticky**：工具與外部服務
-- 🟧 **橘色 Sticky**：輸出/回應
-- 🟥 **紅色 Sticky**：錯誤處理
-
 ## 🎓 教學重點
 
 ### 1. Tools Agent 的運作方式

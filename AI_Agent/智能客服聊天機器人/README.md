@@ -25,21 +25,6 @@
 - **OpenAI Chat Model** 或 **Google Gemini Chat Model**（語言模型）- 生成回應
 - **Simple Memory**（記憶功能）- 保持對話脈絡
 
-## 📌 Sticky 規劃
-
-```
-📌 Sticky 1: "觸發區 - 接收用戶訊息"
-📌 Sticky 2: "AI 核心 - 處理與回應"
-📌 Sticky 3: "記憶系統 - 保持對話脈絡"
-```
-
-### Sticky 使用原則：
-- 🟦 **藍色 Sticky**：輸入/觸發器
-- 🟩 **綠色 Sticky**：AI 處理核心
-- 🟨 **黃色 Sticky**：工具與外部服務
-- 🟧 **橘色 Sticky**：輸出/回應
-- 🟥 **紅色 Sticky**：錯誤處理
-
 ## 🎓 教學重點
 
 ### 1. 如何設定 System Prompt（系統提示詞）
