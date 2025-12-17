@@ -1,0 +1,275 @@
+{
+  "name": "01_RAG文件索引_本機上傳",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "📤 上傳文件建立索引",
+        "formDescription": "請上傳您的文件檔案,系統將自動建立 AI 檢索索引\n\n✅ 支援格式: PDF、Word、TXT\n⏱️ 處理時間: 約 10-30 秒\n💾 索引將儲存至向量資料庫",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "📄 選擇檔案",
+              "fieldType": "file",
+              "requiredField": true,
+              "fieldOptions": {
+                "acceptFileTypes": ".pdf,.doc,.docx,.txt"
+              }
+            },
+            {
+              "fieldLabel": "📝 文件標題",
+              "fieldType": "text",
+              "requiredField": true,
+              "fieldOptions": {
+                "placeholder": "例如: 產品使用手冊 v2.0"
+              }
+            },
+            {
+              "fieldLabel": "🏷️ 文件分類",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {"option": "技術文件"},
+                  {"option": "使用手冊"},
+                  {"option": "政策規範"},
+                  {"option": "常見問題"},
+                  {"option": "培訓教材"},
+                  {"option": "其他"}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "📋 文件描述 (選填)",
+              "fieldType": "textarea",
+              "requiredField": false,
+              "fieldOptions": {
+                "placeholder": "簡單描述這份文件的內容..."
+              }
+            }
+          ]
+        },
+        "responseMode": "onReceived",
+        "respondWithOptions": {
+          "respondWith": "text",
+          "text": "✅ 文件已成功接收!\n\n系統正在處理:\n1️⃣ 提取文字內容\n2️⃣ 分割文字區塊\n3️⃣ 生成向量嵌入\n4️⃣ 儲存至資料庫\n\n請稍候片刻..."
+        },
+        "options": {}
+      },
+      "id": "form-trigger-001",
+      "name": "📤 表單觸發器",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [240, 400],
+      "webhookId": "rag-upload-form"
+    },
+    {
+      "parameters": {
+        "operation": "extractFromFile",
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "id": "extract-file-001",
+      "name": "📄 提取檔案內容",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [480, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-001",
+              "name": "content",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-002",
+              "name": "source",
+              "value": "local_upload",
+              "type": "string"
+            },
+            {
+              "id": "assign-003",
+              "name": "title",
+              "value": "={{ $('📤 表單觸發器').item.json['📝 文件標題'] }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-004",
+              "name": "category",
+              "value": "={{ $('📤 表單觸發器').item.json['🏷️ 文件分類'] }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-005",
+              "name": "description",
+              "value": "={{ $('📤 表單觸發器').item.json['📋 文件描述 (選填)'] || '無描述' }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-006",
+              "name": "upload_time",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-007",
+              "name": "file_size",
+              "value": "={{ $binary.data.fileSize }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-metadata-001",
+      "name": "🏷️ 設定文件資訊",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 400]
+    },
+    {
+      "parameters": {
+        "chunkSize": 800,
+        "chunkOverlap": 200
+      },
+      "id": "text-splitter-001",
+      "name": "✂️ 遞迴字元分割器",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [960, 400]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-004",
+        "options": {}
+      },
+      "id": "embeddings-001",
+      "name": "🧠 Google Gemini 嵌入",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [960, 600]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "source",
+                "value": "={{ $json.source }}"
+              },
+              {
+                "name": "title",
+                "value": "={{ $json.title }}"
+              },
+              {
+                "name": "category",
+                "value": "={{ $json.category }}"
+              },
+              {
+                "name": "description",
+                "value": "={{ $json.description }}"
+              },
+              {
+                "name": "upload_time",
+                "value": "={{ $json.upload_time }}"
+              },
+              {
+                "name": "file_size",
+                "value": "={{ $json.file_size }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "vector-store-001",
+      "name": "💾 Simple Vector Store (插入)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [1200, 400]
+    }
+  ],
+  "connections": {
+    "📤 表單觸發器": {
+      "main": [
+        [
+          {
+            "node": "📄 提取檔案內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 提取檔案內容": {
+      "main": [
+        [
+          {
+            "node": "🏷️ 設定文件資訊",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🏷️ 設定文件資訊": {
+      "main": [
+        [
+          {
+            "node": "✂️ 遞迴字元分割器",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✂️ 遞迴字元分割器": {
+      "main": [
+        [
+          {
+            "node": "💾 Simple Vector Store (插入)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Google Gemini 嵌入": {
+      "ai_embedding": [
+        [
+          {
+            "node": "💾 Simple Vector Store (插入)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-001",
+      "name": "RAG系統"
+    },
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-002",
+      "name": "文件索引"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-17T00:00:00.000Z",
+  "versionId": "workflow-01-v1"
+}

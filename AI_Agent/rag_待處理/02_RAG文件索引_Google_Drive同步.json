@@ -1,0 +1,365 @@
+{
+  "name": "02_RAG文件索引_Google_Drive同步",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-001",
+      "name": "⏰ 每日凌晨2點執行",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 400],
+      "notes": "📅 排程設定:\n- 每天凌晨 2:00 自動執行\n- 可改為手動觸發測試\n- Cron 表達式: 0 2 * * *"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "queryString": "(mimeType='application/pdf' or mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or mimeType='text/plain') and trashed=false",
+        "options": {
+          "fields": [
+            "id",
+            "name",
+            "mimeType",
+            "modifiedTime",
+            "createdTime",
+            "size",
+            "webViewLink"
+          ]
+        }
+      },
+      "id": "google-drive-list-001",
+      "name": "📂 列出 Google Drive 檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [480, 400],
+      "notes": "🔍 檔案過濾條件:\n✅ PDF 檔案\n✅ Word 檔案 (.docx)\n✅ 純文字檔 (.txt)\n❌ 排除已刪除檔案"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-batches-001",
+      "name": "🔄 逐一處理檔案",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [720, 400],
+      "notes": "⚙️ 批次處理設定:\n- 每次處理 1 個檔案\n- 避免記憶體溢出\n- 可追蹤處理進度"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "google-drive-download-001",
+      "name": "⬇️ 下載檔案內容",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 400],
+      "notes": "📥 下載設定:\n- 自動轉換 Google Docs 為純文字\n- 保留原始格式資訊\n- 下載至 binary 資料"
+    },
+    {
+      "parameters": {
+        "operation": "extractFromFile",
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "id": "extract-file-002",
+      "name": "📄 提取檔案內容",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-101",
+              "name": "content",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-102",
+              "name": "source",
+              "value": "google_drive",
+              "type": "string"
+            },
+            {
+              "id": "assign-103",
+              "name": "file_name",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-104",
+              "name": "file_id",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-105",
+              "name": "mime_type",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.mimeType }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-106",
+              "name": "modified_time",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.modifiedTime }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-107",
+              "name": "created_time",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.createdTime }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-108",
+              "name": "file_size",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.size }}",
+              "type": "number"
+            },
+            {
+              "id": "assign-109",
+              "name": "web_link",
+              "value": "={{ $('📂 列出 Google Drive 檔案').item.json.webViewLink }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-110",
+              "name": "sync_time",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-metadata-002",
+      "name": "🏷️ 設定檔案資訊",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1440, 400]
+    },
+    {
+      "parameters": {
+        "chunkSize": 800,
+        "chunkOverlap": 200
+      },
+      "id": "text-splitter-002",
+      "name": "✂️ 遞迴字元分割器",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [1680, 400]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-004",
+        "options": {}
+      },
+      "id": "embeddings-002",
+      "name": "🧠 Google Gemini 嵌入",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [1680, 600]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "source",
+                "value": "={{ $json.source }}"
+              },
+              {
+                "name": "file_name",
+                "value": "={{ $json.file_name }}"
+              },
+              {
+                "name": "file_id",
+                "value": "={{ $json.file_id }}"
+              },
+              {
+                "name": "mime_type",
+                "value": "={{ $json.mime_type }}"
+              },
+              {
+                "name": "modified_time",
+                "value": "={{ $json.modified_time }}"
+              },
+              {
+                "name": "created_time",
+                "value": "="{{ $json.created_time }}"
+              },
+              {
+                "name": "file_size",
+                "value": "={{ $json.file_size }}"
+              },
+              {
+                "name": "web_link",
+                "value": "={{ $json.web_link }}"
+              },
+              {
+                "name": "sync_time",
+                "value": "={{ $json.sync_time }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "vector-store-002",
+      "name": "💾 Simple Vector Store (插入)",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [1920, 400]
+    }
+  ],
+  "connections": {
+    "⏰ 每日凌晨2點執行": {
+      "main": [
+        [
+          {
+            "node": "📂 列出 Google Drive 檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📂 列出 Google Drive 檔案": {
+      "main": [
+        [
+          {
+            "node": "🔄 逐一處理檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 逐一處理檔案": {
+      "main": [
+        [
+          {
+            "node": "⬇️ 下載檔案內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⬇️ 下載檔案內容": {
+      "main": [
+        [
+          {
+            "node": "📄 提取檔案內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 提取檔案內容": {
+      "main": [
+        [
+          {
+            "node": "🏷️ 設定檔案資訊",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🏷️ 設定檔案資訊": {
+      "main": [
+        [
+          {
+            "node": "✂️ 遞迴字元分割器",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "✂️ 遞迴字元分割器": {
+      "main": [
+        [
+          {
+            "node": "💾 Simple Vector Store (插入)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Google Gemini 嵌入": {
+      "ai_embedding": [
+        [
+          {
+            "node": "💾 Simple Vector Store (插入)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-003",
+      "name": "RAG系統"
+    },
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-004",
+      "name": "自動同步"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-17T00:00:00.000Z",
+  "versionId": "workflow-02-v1"
+}

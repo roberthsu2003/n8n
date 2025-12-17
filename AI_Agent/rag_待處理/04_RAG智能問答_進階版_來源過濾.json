@@ -1,0 +1,393 @@
+{
+  "name": "04_RAG智能問答_進階版_來源過濾",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": false,
+          "subtitle": "💬 智能問答系統 (進階版)\n\n✨ 功能特色:\n🎯 可指定查詢來源\n📚 多輪對話記憶\n🔍 智能關鍵字識別\n\n💡 使用提示:\n• 直接提問 → 搜尋所有文件\n• \"從本機檔案查詢...\" → 只搜尋上傳的檔案\n• \"從 Google Drive 查詢...\" → 只搜尋雲端檔案"
+        }
+      },
+      "id": "chat-trigger-201",
+      "name": "💬 Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "rag-chat-advanced"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "parse-01",
+              "name": "user_question",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-02",
+              "name": "source_filter",
+              "value": "={{ $json.chatInput.toLowerCase().includes('本機') || $json.chatInput.toLowerCase().includes('本地') || $json.chatInput.toLowerCase().includes('上傳') || $json.chatInput.toLowerCase().includes('local') ? 'local_upload' : $json.chatInput.toLowerCase().includes('google') || $json.chatInput.toLowerCase().includes('drive') || $json.chatInput.toLowerCase().includes('雲端') || $json.chatInput.toLowerCase().includes('gdrive') ? 'google_drive' : 'all' }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-03",
+              "name": "clean_question",
+              "value": "={{ $json.chatInput.replace(/從本機檔案中|從本地檔案中|從上傳的檔案中|從本機檔案|從本地檔案|從本機|從本地|從Google Drive中|從Google Drive|從雲端中|從雲端|查詢|搜尋|找一下|找找看|幫我找/g, '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "parse-04",
+              "name": "has_source_filter",
+              "value": "={{ $json.chatInput.toLowerCase().includes('本機') || $json.chatInput.toLowerCase().includes('本地') || $json.chatInput.toLowerCase().includes('上傳') || $json.chatInput.toLowerCase().includes('google') || $json.chatInput.toLowerCase().includes('drive') || $json.chatInput.toLowerCase().includes('雲端') }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "parse-input-201",
+      "name": "🔍 解析使用者輸入",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 400],
+      "notes": "🤖 智能識別功能:\n\n關鍵字 → 來源\n━━━━━━━━━━━━\n本機/本地/上傳 → local_upload\nGoogle/Drive/雲端 → google_drive\n無關鍵字 → all (全部)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": ""
+          },
+          "conditions": [
+            {
+              "id": "condition-01",
+              "leftValue": "={{ $json.source_filter }}",
+              "rightValue": "all",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-filter-201",
+      "name": "❓ 是否需要過濾來源",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.1,
+      "position": [720, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "filter-01",
+              "name": "filter_config",
+              "value": "={{ { \"where\": { \"source\": { \"$eq\": $json.source_filter } } } }}",
+              "type": "object"
+            },
+            {
+              "id": "filter-02",
+              "name": "source_name",
+              "value": "={{ $json.source_filter === 'local_upload' ? '本機上傳檔案 📤' : 'Google Drive 檔案 ☁️' }}",
+              "type": "string"
+            },
+            {
+              "id": "filter-03",
+              "name": "source_icon",
+              "value": "={{ $json.source_filter === 'local_upload' ? '📤' : '☁️' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-filter-201",
+      "name": "🎯 設定來源過濾",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [960, 200],
+      "notes": "✅ 有指定來源\n\n過濾條件:\nwhere: {\n  source: {\n    $eq: \"local_upload\"\n    或 \"google_drive\"\n  }\n}"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "no-filter-01",
+              "name": "filter_config",
+              "value": "={}",
+              "type": "object"
+            },
+            {
+              "id": "no-filter-02",
+              "name": "source_name",
+              "value": "所有文件 📚",
+              "type": "string"
+            },
+            {
+              "id": "no-filter-03",
+              "name": "source_icon",
+              "value": "📚",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "no-filter-201",
+      "name": "🌐 查詢所有來源",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [960, 600],
+      "notes": "❌ 未指定來源\n\n查詢範圍:\n所有可用文件\n(本機上傳 + Google Drive)"
+    },
+    {
+      "parameters": {
+        "mode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-201",
+      "name": "🔗 合併分支",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1200, 400]
+    },
+    {
+      "parameters": {
+        "agent": "toolsAgent",
+        "promptType": "define",
+        "text": "=你是一個專業的文件助理 AI,名稱是「DocuBot Pro」。\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n【當前查詢設定】\n🎯 查詢範圍: {{ $json.source_name }}\n❓ 使用者問題: {{ $('🔍 解析使用者輸入').item.json.clean_question }}\n⏰ 查詢時間: {{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n【核心任務】\n使用 document_search 工具在指定範圍內搜尋答案,提供準確、專業的回答。\n\n【回答準則】\n\n1️⃣ **資訊來源透明度**\n   - 明確說明資訊來自哪個來源\n   - 如果有多個來源,分別說明\n   - 提供文件名稱或標題 (如果可用)\n\n2️⃣ **準確性第一**\n   - 嚴格根據檢索到的文件內容回答\n   - 不確定的資訊要明確標註\n   - 找不到答案時,誠實告知並建議替代方案\n\n3️⃣ **回答結構**\n   ✅ 使用繁體中文\n   ✅ 條理清晰,適當分點說明\n   ✅ 複雜內容使用列表或表格\n   ✅ 重要資訊可用 **粗體** 強調\n\n4️⃣ **專業互動**\n   - 保持友善、耐心的語氣\n   - 理解上下文和對話歷史\n   - 問題不清楚時,禮貌詢問\n   - 避免過度技術性用語\n\n5️⃣ **特別提醒**\n   {{ $json.source_filter !== 'all' ? '⚠️ 注意:目前只在「' + $json.source_name + '」中搜尋,如需搜尋其他來源,請明確告知。' : '💡 提示:目前搜尋所有可用文件。如需限制搜尋範圍,可以指定「從本機檔案」或「從 Google Drive」。' }}\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n【開始回答】",
+        "options": {
+          "systemMessage": "=📊 系統資訊\n━━━━━━━━━━━━━━━━━━━━━━━━\n🗄️ 向量資料庫: 已連接\n🔍 檢索範圍: {{ $json.source_name }}\n🌐 回應語言: 繁體中文\n🤖 模型: Google Gemini 1.5 Flash\n⚙️ Temperature: 0.3 (精確模式)\n━━━━━━━━━━━━━━━━━━━━━━━━"
+        }
+      },
+      "id": "ai-agent-201",
+      "name": "🤖 AI Agent (進階)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [1440, 400]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "options": {
+          "temperature": 0.3,
+          "maxOutputTokens": 2048,
+          "topP": 0.9,
+          "topK": 40
+        }
+      },
+      "id": "gemini-chat-201",
+      "name": "🧠 Google Gemini Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [1440, 600]
+    },
+    {
+      "parameters": {
+        "name": "document_search",
+        "description": "=【文件檢索工具】\n\n🎯 當前搜尋範圍: {{ $('🔗 合併分支').item.json.source_name }}\n\n【功能說明】\n在指定的文件來源中搜尋相關資訊。\n\n【使用時機】\n• 需要查找具體資訊\n• 驗證某個說法\n• 了解詳細內容\n\n【輸入格式】\n輸入問題的關鍵字或完整問題句子。\n\n【輸出內容】\nTop 5 最相關的文件段落\n\n{{ $('🔗 合併分支').item.json.source_filter !== 'all' ? '⚠️ 僅搜尋: ' + $('🔗 合併分支').item.json.source_name : '💡 搜尋: 所有可用文件' }}",
+        "topK": 5,
+        "options": {
+          "metadata": "={{ $('🔗 合併分支').item.json.filter_config }}"
+        }
+      },
+      "id": "vector-tool-201",
+      "name": "🔍 Vector Store Tool (動態過濾)",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [1680, 400],
+      "notes": "🎯 動態來源過濾\n\n根據使用者意圖,自動設定:\n• local_upload 過濾\n• google_drive 過濾\n• 或不過濾 (全部)"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve",
+        "options": {}
+      },
+      "id": "vector-store-201",
+      "name": "💾 Simple Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [1680, 600]
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-004"
+      },
+      "id": "embeddings-201",
+      "name": "🧠 Embeddings Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [1680, 800]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-201",
+      "name": "💬 Respond to Chat",
+      "type": "@n8n/n8n-nodes-langchain.respondToChat",
+      "typeVersion": 1.1,
+      "position": [1920, 400]
+    }
+  ],
+  "connections": {
+    "💬 Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "🔍 解析使用者輸入",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 解析使用者輸入": {
+      "main": [
+        [
+          {
+            "node": "❓ 是否需要過濾來源",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "❓ 是否需要過濾來源": {
+      "main": [
+        [
+          {
+            "node": "🎯 設定來源過濾",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🌐 查詢所有來源",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🎯 設定來源過濾": {
+      "main": [
+        [
+          {
+            "node": "🔗 合併分支",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🌐 查詢所有來源": {
+      "main": [
+        [
+          {
+            "node": "🔗 合併分支",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "🔗 合併分支": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Agent (進階)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Agent (進階)": {
+      "main": [
+        [
+          {
+            "node": "💬 Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Google Gemini Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🤖 AI Agent (進階)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Vector Store Tool (動態過濾)": {
+      "ai_tool": [
+        [
+          {
+            "node": "🤖 AI Agent (進階)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Simple Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "🔍 Vector Store Tool (動態過濾)",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "💾 Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-007",
+      "name": "RAG系統"
+    },
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-008",
+      "name": "進階功能"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-17T00:00:00.000Z",
+  "versionId": "workflow-04-v1"
+}
