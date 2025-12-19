@@ -1,4 +1,5 @@
 {
+  "name": "RAG入門_記憶體儲存",
   "nodes": [
     {
       "parameters": {
@@ -37,7 +38,7 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        184,
+        192,
         -64
       ],
       "id": "84a6f69a-7a49-4e6c-9d50-ce52d6f8b3ff",
@@ -51,8 +52,8 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        320,
-        160
+        448,
+        112
       ],
       "id": "0876668d-aabd-445d-a7f5-9a0d1955c0f9",
       "name": "Default Data Loader"
@@ -65,8 +66,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        576,
-        400
+        592,
+        432
       ],
       "id": "7bb46f29-8745-4fab-bae6-3f6c378a0080",
       "name": "Embeddings HuggingFace Inference",
@@ -84,7 +85,7 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.4,
       "position": [
-        656,
+        688,
         -80
       ],
       "id": "253a645a-de93-466f-a4f8-8a562af5ff73",
@@ -144,6 +145,7 @@
       "name": "Query Data Tool"
     }
   ],
+  "pinData": {},
   "connections": {
     "上傳檔案": {
       "main": [
@@ -194,11 +196,6 @@
         ]
       ]
     },
-    "AI Agent": {
-      "main": [
-        []
-      ]
-    },
     "OpenRouter Chat Model": {
       "ai_languageModel": [
         [
@@ -208,6 +205,11 @@
             "index": 0
           }
         ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
       ]
     },
     "Query Data Tool": {
@@ -222,9 +224,28 @@
       ]
     }
   },
-  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6d0adb17-7ba4-4fac-b07d-1691854255b3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
-  }
+  },
+  "id": "YLUSHUrnPmbc33DN",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    },
+    {
+      "updatedAt": "2025-12-17T04:56:29.060Z",
+      "createdAt": "2025-12-17T04:56:29.060Z",
+      "id": "bzzQgm0t95xMzxKe",
+      "name": "RAG系統"
+    }
+  ]
 }
