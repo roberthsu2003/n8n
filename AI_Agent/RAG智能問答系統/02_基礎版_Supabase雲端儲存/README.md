@@ -151,44 +151,7 @@ Supabase 提供完整的管理介面：
 3. 點擊 **Create new project**
 4. 等待 30 秒
 
-### **步驟 3：啟用 Vector 擴展**
-
-1. 點擊左側 **SQL Editor**
-2. 點擊 **New query**
-3. 貼上並執行：
-
-```sql
-CREATE EXTENSION IF NOT EXISTS vector;
-```
-
-### **步驟 4：取得連線資訊**
-
-1. 點擊 **Settings** → **Database**
-2. 複製 **Connection string** (URI 格式)
-3. 將 `[YOUR-PASSWORD]` 替換為您的密碼
-
-### **步驟 5：在 n8n 設定憑證**
-
-1. n8n → **Credentials** → **Add Credential**
-2. 選擇 **Postgres**
-3. 貼上連線字串
-4. 測試連線 ✅
-5. 儲存
-
-### **步驟 6：匯入工作流程並開始使用**
-
-1. 匯入 4 個 JSON 檔案
-2. 更新所有 Vector Store 節點的憑證
-3. 測試上傳功能
-4. 開始問答！
-
-**🎉 完成！設定很簡單！**
-
----
-
-## 📖 詳細設定指南
-
-**👉 請參考 [Supabase快速設定指南.md](./Supabase快速設定指南.md)**
+### 重要設定參考影片[youtube設定影片](https://youtu.be/JjBofKJnYIU?si=j-I9HAjcPOkt5vAc)
 
 這份指南包含：
 - ✅ 詳細的設定步驟
