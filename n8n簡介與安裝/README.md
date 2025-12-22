@@ -160,6 +160,9 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 ### 方式三：ngrok 公開網址安裝
 
+- 主要用途:開發,學習
+- 網址都一樣(固定網址),但不能保證網址永遠不變
+
 #### 🎯 適用情境
 - 需要接收外部服務的 Webhook（例如：LINE Bot、GitHub Webhook）
 - 需要使用 OAuth 2.0 整合第三方服務（例如：Google、Notion）
@@ -202,6 +205,8 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 ---
 
+
+
 #### 第二階段：安裝 n8n 並設定
 
 **步驟 1：建立資料卷**
@@ -235,6 +240,47 @@ docker run -d \
 
 
 ---
+
+### 方式四：Godaddy申請正式網址,使用cloudflare的tunnel-(暫停使用)
+
+**申請流程**
+1. 登入Godaddy申請正式網址(申請1年最便宜的,每年重新申請)
+2. 登入cloudflare內,註冊免費帳號,將申請的正式網址加入cloudflare的設定中
+3. 取得cloudflare的2組name server
+4. 登入Godaddy的帳戶內,進入網域的設定中,將name server設定為cloudflare的2組name server(原本的godaddy的name server會被cloudflare的name server取代)
+
+**驗証方式**
+1. 登入Godaddy的帳戶內,進入網域的設定中,查看name server是否已經被cloudflare的name server取代
+2. 登入cloudflare的帳戶內,查看是否已經有申請的正式網址
+
+**終端機指令驗證方式**
+- 查看dns server是否已經被cloudflare的name server取代
+```bash
+dig ns <你的網域> @8.8.8.8
+dig ns <你的網域> @1.1.1.1
+
+```
+
+**進入[https://one.dash.cloudflare.com/](https://one.dash.cloudflare.com/)設定cloudflare的tunnel**
+
+  1. 點選`網路`>`連接器`
+  2. 建立通道(Tunnel)
+
+**本機安裝tunnel的連接器**
+
+```bash
+brew install cloudflared
+```
+
+**啟動cloudflare的tunnel**
+```bash
+cloudflared tunnel run --token <你的token>
+```
+
+**驗證tunnel是否成功**
+```bash
+cloudflared tunnel list
+```
 
 #### 重要說明
 
