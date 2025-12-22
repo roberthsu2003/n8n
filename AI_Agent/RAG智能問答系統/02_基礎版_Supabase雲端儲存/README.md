@@ -151,7 +151,9 @@ Supabase 提供完整的管理介面：
 3. 點擊 **Create new project**
 4. 等待 30 秒
 
-### 重要設定參考影片[youtube設定影片](https://youtu.be/JjBofKJnYIU?si=j-I9HAjcPOkt5vAc)
+### 重要設定參考影片
+
+[**youtube設定影片**](https://youtu.be/JjBofKJnYIU?si=j-I9HAjcPOkt5vAc)
 
 這份指南包含：
 - ✅ 詳細的設定步驟
