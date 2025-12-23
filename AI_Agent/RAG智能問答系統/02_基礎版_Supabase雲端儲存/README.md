@@ -1,8 +1,83 @@
 # 📁 RAG 基礎版 - Supabase 雲端儲存
 
-## 📖 什麼是這個範例？
+## 📖 **學習重點**
 
-這是 **最快速部署的 RAG 實作**，使用 **Supabase** 雲端向量資料庫，**5 分鐘即可完成設定**，零技術門檻！
+- 學會如何用 **Supabase 向量資料庫** 快速部署 RAG（檢索增強生成）AI 系統，適合零技術門檻新手。
+- 瞭解 **n8n** 自動化平台與 Supabase、PostgreSQL 的整合方式，實現對話紀錄儲存與知識檢索的功能。
+- 學會設定與測試 n8n 節點與向量儲存服務，讓 AI 能高效從文件資料中搜尋與產生回應。
+- 完成帳號註冊、專案建立、資料管理與系統測試的全流程實作，建立穩定可擴充的 RAG 雲端架構。
+
+### **註冊和連線注意事項**
+- supabase的註冊方式(必需使用GitHub登入)一開始的建立專案，會自動建立一個postgresql資料庫，所以不需要再另外建立postgresql資料庫。
+- postgresql要自已設定密碼
+- postgresql的設定,例如:`密碼和連線池`,必需先進入`project settings`，然後再進入`database`，才可以重設密碼和連線池。`請看下方專有名詞解釋`
+- postgresql的連線字串必需先進入專案的`connect`
+   - type必需使用psql,而不是使用URI
+   - Source必需使用:`Primary Database`
+   - Method必需使用:`Transaction pooler`
+
+```psql
+psql -h db.bwfxafdmgjtmdmvjkpsj.supabase.co -p 5432 -d postgres -U postgres
+-h: 主機名稱
+-p: 埠號
+-d: 資料庫名稱
+-U: 使用者名稱
+```
+
+- 如何在n8n中加入`Postgres Chat Memory`節點(小心是當作Memory使用,所以不需先設定table)設定postgresql的憑證,並測試連線是否成功。
+
+
+### **有關於postgresql的專有名詞解釋**
+
+
+**什麼是連線池(Connection Pool)**
+「Connection pooling configuration」指的是資料庫「連線池」的設定，也就是你要怎麼管理一批可重用的資料庫連線，以便讓很多客戶端同時存取時維持效能與穩定。
+
+**連線池是什麼**
+
+- 連線池會預先建立一組到 Postgres 的連線，之後每個 API / 後端請求來時，就向池子借一條連線，用完再還回去，而不是每次新建與關閉連線。
+- 這樣可以減少建立連線的開銷，避免太多連線直接打爆資料庫，提升整體吞吐量與穩定性。
+
+**Supabase 這裡的配置在管什麼**
+
+- 「Pool Size」是每個 user+db 組合可以用的最大到 Postgres cluster 的連線數，例如預設 15 條，是依你的 compute 等級（Nano）決定的上限。
+- 「Max Client Connections」是允許同時接到連線池的客戶端連線數上限（這裡是 200），超過的客戶端可能會排隊或被拒絕，以保護後端資料庫不被壓垮。
+
+**什麼時候需要調整**
+
+- 當請求量變大、看到連線不夠用或有 timeout 時，才會考慮調整 Pool Size（但在你現在的 Nano 計畫中，上限是預設的）。
+- 一般情況下維持預設設定即可，如果要處理高併發，就需要升級 compute 等級，讓可用的 pool 與 client 連線上限變大。
+
+---
+
+**使麼是PostgreSQL URI連線字串**
+
+- `URI` 會以標準 Postgres URL 的形式給你連線字串，例如：
+
+    `postgresql://postgres:7G42K2Zx58@aws-1-ap-south-1.pooler.supabase.com:6543/postgres`
+
+> 這種格式通常給程式庫或 ORM 用，例如 Node、Python、SQLAlchemy 之類，直接塞一條 URL 就可以建立連線。
+
+**什麼是PostgreSQL psql連線字串**
+
+- `PSQL` 指的是給 `psql` CLI 工具使用的命令格式，通常長得像：
+
+   `psql -h aws-1-ap-south-1.pooler.supabase.com -p 6543 -d postgres -U postgres`
+
+- 這種格式適合你在終端機裡手動連線測試，或寫在 shell script 裡執行資料庫操作。
+
+**什麼是Postgres的連線方法(Method)**
+- Direct connection(直接連線)
+
+> - `Direct connection` 是直接連到你的 Postgres 資料庫，例如用 5432 port 的連線字串，應用程式和資料庫是一對一長連線關係。​
+
+>  - 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
+
+-Transaction pooler(交易池)
+
+> - `Direct connection` 是直接連到你的 Postgres 資料庫，例如用 5432 port 的連線字串，應用程式和資料庫是一對一長連線關係。​
+
+> - 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
 
 這個版本包含 **4 個獨立工作流程**：
 - 📤 **Workflow 1A**：本機檔案上傳索引
