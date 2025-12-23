@@ -70,8 +70,7 @@ psql -h db.bwfxafdmgjtmdmvjkpsj.supabase.co -p 5432 -d postgres -U postgres
 - Direct connection(直接連線)
 
 > - `Direct connection` 是直接連到你的 Postgres 資料庫，例如用 5432 port 的連線字串，應用程式和資料庫是一對一長連線關係。​
-
->  - 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
+- 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
 
 -Transaction pooler(交易池)
 
