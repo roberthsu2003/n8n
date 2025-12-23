@@ -8,23 +8,24 @@
 - 完成帳號註冊、專案建立、資料管理與系統測試的全流程實作，建立穩定可擴充的 RAG 雲端架構。
 
 ### **註冊和連線注意事項**
-- supabase的註冊方式(必需使用GitHub登入)一開始的建立專案，會自動建立一個postgresql資料庫，所以不需要再另外建立postgresql資料庫。
-- postgresql要自已設定密碼
-- postgresql的設定,例如:`密碼和連線池`,必需先進入`project settings`，然後再進入`database`，才可以重設密碼和連線池。`請看下方專有名詞解釋`
-- postgresql的連線字串必需先進入專案的`connect`
-   - type必需使用psql,而不是使用URI
-   - Source必需使用:`Primary Database`
-   - Method必需使用:`Transaction pooler`
+- 節點`Postgres Chat Memory`必需設定的方式
+   - supabase的註冊方式(必需使用GitHub登入)一開始的建立專案，會自動建立一個postgresql資料庫，所以不需要再另外建立postgresql資料庫。
+   - postgresql要自已設定密碼
+   - postgresql的設定,例如:`密碼和連線池`,必需先進入`project settings`，然後再進入`database`，才可以重設密碼和連線池。`請看下方專有名詞解釋`
+   - postgresql的連線字串必需先進入專案的`connect`
+      - type必需使用psql,而不是使用URI
+      - Source必需使用:`Primary Database`
+      - Method必需使用:`Transaction pooler`
 
-```psql
-psql -h db.bwfxafdmgjtmdmvjkpsj.supabase.co -p 5432 -d postgres -U postgres
--h: 主機名稱
--p: 埠號
--d: 資料庫名稱
--U: 使用者名稱
-```
+   ```psql
+   psql -h db.bwfxafdmgjtmdmvjkpsj.supabase.co -p 5432 -d postgres -U postgres
+   -h: 主機名稱
+   -p: 埠號
+   -d: 資料庫名稱
+   -U: 使用者名稱
+   ```
 
-- 如何在n8n中加入`Postgres Chat Memory`節點(小心是當作Memory使用,所以不需先設定table)設定postgresql的憑證,並測試連線是否成功。
+   - 如何在n8n中加入`Postgres Chat Memory`節點(小心是當作Memory使用,所以不需先設定table)設定postgresql的憑證,並測試連線是否成功。
 
 
 ### **有關於postgresql的專有名詞解釋**
@@ -69,14 +70,13 @@ psql -h db.bwfxafdmgjtmdmvjkpsj.supabase.co -p 5432 -d postgres -U postgres
 **什麼是Postgres的連線方法(Method)**
 - Direct connection(直接連線)
 
-> - `Direct connection` 是直接連到你的 Postgres 資料庫，例如用 5432 port 的連線字串，應用程式和資料庫是一對一長連線關係。​
-- 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
+> - `Direct connection` 是直接連到你的 Postgres 資料庫，例如用 5432 port 的連線字串，應用程式和資料庫是一對一長連線關係。​ 
+> - 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
 
 -Transaction pooler(交易池)
 
-> - `Direct connection` 是直接連到你的 Postgres 資料庫，例如用 5432 port 的連線字串，應用程式和資料庫是一對一長連線關係。​
-
-> - 很適合跑在 VM、長壽命 container 的後端服務，連線會長時間保持開啟，延遲最低，但需要資料庫支援較多同時連線數。
+> - `Transaction pooler` 是經過 Supabase 的連線池（例如 Supavisor / PgBouncer 類型）再轉接到資料庫，一條真正的 DB 連線會在「一個 transaction」期間借給某個 client，用完就立刻回到池子重用給其他 client。​
+> - 非常適合 serverless function、edge function 或大量短生命週期連線的情境，可以用較少的實際 DB 連線，承受更多併發請求，但某些功能（例如 prepared statements、依賴 session 狀態的操作）會受限制或需要額外設定。
 
 這個版本包含 **4 個獨立工作流程**：
 - 📤 **Workflow 1A**：本機檔案上傳索引
