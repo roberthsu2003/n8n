@@ -306,7 +306,18 @@ docker run -d \
 ```
 
 - **解釋**: `-e` 參數設定環境變數
-- **連線測試**: 使用 MySQL client 連線
+- **連線測試(進入容器)**: `docker exec -it <容器ID> mysql -u root -p `
+  > 「進去那個正在跑的容器裡面，開一個互動式的 MySQL 命令列，用 root 帳號登入。」  
+  > docker exec：對一個已經在跑的容器「下指令」。   
+  > -it：開一個可以打字互動的終端機 (像在容器裡面開視窗)。  
+  > <容器ID>：指定要進去哪一台「小機器」 (哪個容器)。    
+  > mysql -u root -p：在容器裡執行 MySQL 客戶端，用 root 帳號登入並輸入密碼。  
+  > 輸入密碼：mypassword
+  > 進去後，可以執行簡單的指令驗證：`SHOW DATABASES;`
+
+​
+
+
 
 #### 3. 與 n8n 的關聯
 
@@ -341,16 +352,41 @@ docker run -d \
   --name mydb \
   --network my-network \
   -e MYSQL_ROOT_PASSWORD=pass \
+  -e MYSQL_DATABASE=testdb \
   mysql:8.0
 
 # 啟動 Web App (可以透過 'mydb' 連線到資料庫)
 docker run -d \
   --name webapp \
   --network my-network \
-  -e DB_HOST=mydb \
-  mywebapp
+  -e DB_HOST=mydb \  
+  -p 8080:80 \
+  nginx:latest
 ```
 
+**1. 驗證「容器正在執行」**
+
+> `docker ps`
+
+**驗證「容器能被外部連接」（針對你教材的 Web+Database 情景)**
+- 方式 A：用 hostname 驗證（容器內）
+
+```bash
+docker exec -it webapp sh #使用sh
+apt-get update && apt-get install -y iputils-ping  # 安裝ping,如果是 Debian/Ubuntu
+ping mydb
+```
+
+- 方式 B：MySQL 容器
+
+```bash
+docker exec -it mydb mysql -u root -p
+mysql> SHOW DATABASES;
+mysql> USE testdb;
+mysql> SHOW TABLES;
+```
+
+如果能連進去，表示整個棧都成功了。
 ---
 
 ### 九、Docker Compose: 從指令到配置檔
@@ -421,10 +457,12 @@ docker-compose up -d
 
 #### 4. Compose 常用指令
 
-- **啟動**: `docker-compose up -d`
-- **停止**: `docker-compose down`
-- **查看 logs**: `docker-compose logs -f`
-- **重啟**: `docker-compose restart`
+- **啟動**: `docker-compose up -d`(建立+上線)
+- **下架**: `docker-compose down`(停止+刪除容器)
+- **停止**: `docker-compose stop`(停止)
+- **重新上線**: `docker-compose start`(啟動)
+- **查看 logs**: `docker-compose logs -f`(-f,不會中斷,一直停留在前景)
+- **重啟**: `docker-compose restart`(停止+重啟)
 - **查看狀態**: `docker-compose ps`
 
 ---
@@ -488,18 +526,20 @@ version: '3.8'
 
 services:
   n8n:
-    image: n8nio/n8n
+    image: docker.n8n.io/n8nio/n8n
     ports:
       - "5678:5678"
     environment:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=admin123
+      - GENERIC_TIMEZONE="Asia/Taipei"
     volumes:
       - n8n_data:/home/node/.n8n
 
 volumes:
   n8n_data:
+	  name: n8n_data  #強制名字要使用n8n_data
 ```
 
 #### 2. 關鍵欄位解析
