@@ -1,97 +1,381 @@
-# Docker容器化基礎與n8n部署準備
+# Docker 容器化基礎課程 (整合版)
 
-**Docker 不是目的，而是「工具」**。這 6 小時的目標不是讓他們成為 DevOps 工程師，而是讓他們具備「**有能力部署、除錯並維護 n8n 容器**」的技能。
-
-根據您 Python 講師的背景，我為您規劃了一份**由淺入深、強調實作**的 6 小時 Docker 課程大綱。這份大綱特別強調「資料持久化 (Volumes)」和「Docker Compose」，因為這兩者是長期運行 n8n 的關鍵。
+> **課程定位**: 此課程專為低程度學生設計,目標是讓學生能夠理解容器概念,具備部署、除錯並維護 n8n 容器的能力
 
 ---
 
-### 課程主題：Docker 容器化基礎與 n8n 部署準備
+## 📚 課程學習目標
 
-**總時數：6 小時**
-**教學目標：** 學生能夠理解容器概念，學會基本的 Docker 指令，並能使用 Docker Compose 撰寫 `docker-compose.yml` 來管理 n8n 服務。
+完成本課程後,學生能夠:
 
----
-
-### 第一階段：概念與基礎操作 (前 1.5 小時)
-
-**目標：打破對虛擬機的舊有觀念，建立「映象檔 (Image)」與「容器 (Container)」的物件導向概念。**
-
-1. **Docker 核心概念 (30 分鐘)**
-* **痛點分析**：為什麼以前部署很痛苦？（環境不一致、依賴衝突）。
-* **核心比喻**：
-* **虛擬機 (VM)** vs **容器 (Container)**：像是「整棟房子」vs「IKEA 樣品屋 (輕量、共用地基)」。
-* **Image (映象檔)** vs **Container (容器)**：
-* 對 Python 學生解釋：Image 是 `Class` (類別)，Container 是 `Instance` (實例)。
-* 對一般學生解釋：Image 是「食譜」，Container 是照著食譜做出來的「這盤菜」。
-
-
-
-
-
-
-2. **安裝與 Hello World (30 分鐘)**
-* Docker Desktop (Mac/Windows) 或 Docker Engine (Linux) 安裝簡介。
-* 執行第一個容器：`docker run hello-world`。
-* 解讀 Log：發生了什麼事？(Client -> Daemon -> Registry -> Image -> Container)。
-
-
-3. **基礎指令實戰 (30 分鐘)**
-* 尋找資源：Docker Hub 導覽。
-* 拉取：`docker pull nginx`。
-* 檢視：`docker images`, `docker ps` (正在執行), `docker ps -a` (包含已停止)。
-
-
-
-### 第二階段：網路與與資料持久化 (重點！1.5 小時)
-
-**目標：解決 n8n 架設最常遇到的兩個問題：「連不到網頁」與「重啟後 Workflow 不見了」。**
-
-1. **端口映射 (Port Mapping) (45 分鐘)**
-* **概念**：容器是封閉的監獄，`-p` 是開窗戶。
-* **實作**：
-* `docker run -d -p 8080:80 nginx`
-* 解釋 `Host Port : Container Port` 的對應關係。
-* 瀏覽器打開 `localhost:8080` 看到 Nginx 歡迎頁面。
-
-
-* **除錯**：為什麼 `localhost:80` 打不開？(因為沒對應)。
-
-
-2. **Volume 資料卷 (45 分鐘) —— *n8n 存活關鍵***
-* **慘痛教訓演示**：
-* 在 Nginx 容器內建立一個檔案。
-* 刪除容器 (`docker rm -f`) 再重開。
-* 檔案消失了！(說明容器的短暫性)。
-
-
-* **解決方案**：Bind Mounts 與 Volumes。
-* **實作**：
-* `docker run -v $(pwd)/html:/usr/share/nginx/html ...`
-* 在主機修改 `index.html`，容器內即時更新 (這對 n8n 備份至關重要)。
-
-
-
-
+- 理解 Docker 在 n8n 中扮演的角色
+- 建立「映象檔 (Image)」與「容器 (Container)」的基本概念
+- 看得懂並修改 `docker run` 和 `docker-compose.yml`
+- 知道 n8n 的資料為什麼會消失、怎麼保存
+- 使用 Docker Compose 管理多服務應用
 
 ---
 
-### 第三階段：進階管理與 Docker Compose (1.5 小時)
+## 📖 課程大綱 (由簡至難)
 
-**目標：從「手動下指令」進化到「基礎設施即代碼 (IaC)」，這是架設 n8n 的標準姿勢。**
+### 一、Docker 是什麼?為什麼要學?
 
-1. **環境變數 (Environment Variables) (30 分鐘)**
-* **概念**：不修改程式碼，透過 `-e` 改變軟體行為。
-* **實作**：使用一個簡單的 Python Web Server 或是 MySQL 容器，設定 `MYSQL_ROOT_PASSWORD`。
-* **關聯 n8n**：預告 n8n 需要設定 `WEBHOOK_URL` 或加密金鑰等變數。
+**教學目標**: 讓學生先理解問題,再接受 Docker 是解法
 
+#### 1. 為什麼需要 Docker?
 
-2. **Docker Compose 登場 (1 小時)**
-* **為什麼需要 Compose**：當你要同時啟動 n8n、PostgreSQL (資料庫) 和 Redis 時，一行一行打指令太累了。
-* **YAML 語法速成**：縮排的藝術。
-* **編寫第一個 `docker-compose.yml**`：
+- **痛點分析**: 傳統部署的困境
+  - 「在我電腦上可以跑啊!」的經典問題
+  - 環境不一致、依賴衝突
+  - 更新與維護的噩夢
+  
+- **n8n 的特殊需求**
+  - n8n 是什麼? (一句話: 工作流自動化伺服器)
+  - 為什麼不能「直接下載執行」?
+    - Node.js 版本需求
+    - 套件依賴複雜
+    - 需要長時間運作
+  
+- **Docker 解決了什麼?**
+  - 環境一次封裝完成
+  - 刪除後可以快速重建一個一模一樣的環境
+  - 「少出錯」比「更厲害」更重要
+
+#### 2. 虛擬機 (VM) vs 容器 (Container)
+
+- **視覺化比喻**
+  - **虛擬機**: 像是「整棟房子」(包含地基、水電、裝潢)
+  - **容器**: 像是「IKEA 樣品屋」(輕量、共用地基、快速組裝)
+  
+- **為什麼容器比較適合?**
+  - 啟動速度快 (秒級 vs 分鐘級)
+  - 資源佔用少
+  - 易於分享與複製
+
+---
+
+### 二、Docker 核心概念 (只學必要的 5 個名詞)
+
+**教學目標**: 學生能用白話解釋 Docker 在幹嘛
+
+#### 1. Image (映象檔) vs Container (容器)
+
+- **針對 Python 學生的比喻**
+  - **Image** = `Class` (類別/設計圖)
+  - **Container** = `Instance` (實例/實際物件)
+  
+- **針對一般學生的比喻**
+  - **Image** = 「食譜」
+  - **Container** = 照著食譜做出來的「這盤菜」
+  
+- **關鍵觀念**
+  - 一個 Image 可以建立多個 Container
+  - 刪除 Container 不會影響 Image
+  - n8n image ≠ n8n container
+
+#### 2. Volume (資料卷)
+
+- **比喻**: 外接硬碟
+- **為什麼重要?**: 
+  - 容器是「暫時性」的
+  - 刪除容器後,內部資料會消失
+  - Volume 讓資料可以「持久保存」
+  
+- **對 n8n 的意義**
+  - Workflow 的儲存位置
+  - 備份的關鍵
+
+#### 3. Port (端口)
+
+- **比喻**: 對外開的門
+- **為什麼需要?**
+  - 容器是封閉的環境
+  - Port Mapping 讓外部可以連進來
+  
+#### 4. Environment Variable (環境變數)
+
+- **比喻**: 設定選項
+- **用途**: 不修改程式碼,就能改變軟體行為
+
+#### 5. Docker Hub
+
+- **比喻**: App Store
+- **用途**: 下載別人打包好的 Image
+
+---
+
+### 三、環境準備與安裝
+
+**教學目標**: 確保每位學生都能成功安裝 Docker
+
+#### 1. 安裝 Docker Desktop
+
+- **Windows / Mac**: Docker Desktop
+- **Linux**: Docker Engine
+- **驗證安裝**: 執行 `docker --version`
+
+#### 2. 設定與檢查
+
+- Docker Desktop 介面導覽
+- 確認 Docker Daemon 正在運行
+- 系統資源配置建議
+
+---
+
+### 四、第一次執行容器 (Hello World)
+
+**教學目標**: 讓學生親手跑過第一個容器,建立信心
+
+#### 1. Hello World 實戰
+
+```bash
+docker run hello-world
+```
+
+- **解讀輸出訊息**: 發生了什麼事?
+  1. Docker Client 向 Docker Daemon 發送請求
+  2. Daemon 檢查本機是否有 image
+  3. 從 Docker Hub (Registry) 下載 image
+  4. 建立並執行 Container
+  5. Container 印出訊息後自動結束
+
+#### 2. 基礎指令練習
+
+- **查看 images**: `docker images`
+- **查看運行中的 containers**: `docker ps`
+- **查看所有 containers (包含已停止)**: `docker ps -a`
+
+#### 3. Docker Hub 導覽
+
+- 如何搜尋 Image
+- 理解 Image 的標籤 (Tags)
+- Official Images vs Community Images
+
+---
+
+### 五、實戰演練: 運行第一個網頁伺服器
+
+**教學目標**: 理解 Port Mapping,並成功在瀏覽器看到結果
+
+#### 1. 下載 Nginx Image
+
+```bash
+docker pull nginx
+```
+
+- 觀察下載過程
+- 理解 Layer 的概念 (簡單提及即可)
+
+#### 2. 啟動 Nginx 容器 (基礎版)
+
+```bash
+docker run nginx
+```
+
+- **問題**: 為什麼打不開網頁?
+- **答案**: 沒有設定 Port Mapping
+
+#### 3. 啟動 Nginx 容器 (完整版)
+
+```bash
+docker run -d -p 8080:80 nginx
+```
+
+- **參數解釋**
+  - `-d`: Detached mode (背景執行)
+  - `-p 8080:80`: Port Mapping (Host Port : Container Port)
+  
+- **測試**: 瀏覽器打開 `http://localhost:8080`
+
+#### 4. 容器管理基礎
+
+- **查看 logs**: `docker logs <container-id>`
+- **停止容器**: `docker stop <container-id>`
+- **啟動容器**: `docker start <container-id>`
+- **刪除容器**: `docker rm <container-id>`
+
+---
+
+### 六、資料持久化: Volume 的重要性
+
+**教學目標**: 理解容器的暫時性,學會使用 Volume 保存資料
+
+#### 1. 慘痛教訓演示
+
+**步驟**:
+1. 進入正在運行的 Nginx 容器
+   ```bash
+   docker exec -it <container-id> bash
+   ```
+2. 在容器內建立一個測試檔案
+   ```bash
+   echo "Hello" > /usr/share/nginx/html/test.txt
+   ```
+3. 確認檔案存在 (瀏覽器打開 `localhost:8080/test.txt`)
+4. 刪除容器並重新建立
+   ```bash
+   docker rm -f <container-id>
+   docker run -d -p 8080:80 nginx
+   ```
+5. **發現**: 檔案消失了!
+
+#### 2. Bind Mount 解決方案
+
+**步驟**:
+1. 在本機建立測試資料夾
+   ```bash
+   mkdir my-html
+   echo "<h1>Hello from Host!</h1>" > my-html/index.html
+   ```
+
+2. 使用 Bind Mount 啟動容器
+   ```bash
+   docker run -d -p 8080:80 -v $(pwd)/my-html:/usr/share/nginx/html nginx
+   ```
+
+3. **測試**:
+   - 瀏覽器查看結果
+   - 修改本機的 `index.html`
+   - 重新整理瀏覽器,立即看到變化
+
+4. **重點觀念**:
+   - 本機檔案 ↔ 容器內檔案 同步
+   - 刪除容器後,本機檔案仍然存在
+   - 這就是 n8n Workflow 不會消失的關鍵!
+
+#### 3. Named Volume (進階選項)
+
+- **差異**: Bind Mount vs Named Volume
+- **Named Volume 的優點**
+  - Docker 自動管理位置
+  - 更適合生產環境
+
+```bash
+docker volume create my-data
+docker run -d -p 8080:80 -v my-data:/usr/share/nginx/html nginx
+```
+
+---
+
+### 七、環境變數的應用
+
+**教學目標**: 學會透過環境變數控制容器行為
+
+#### 1. 為什麼需要環境變數?
+
+- 不修改程式碼就能改變設定
+- 適合不同環境 (開發/測試/正式)
+- 敏感資訊 (密碼) 不寫死在程式中
+
+#### 2. 實作範例: MySQL 容器
+
+```bash
+docker run -d \
+  -e MYSQL_ROOT_PASSWORD=mypassword \
+  -e MYSQL_DATABASE=testdb \
+  mysql:8.0
+```
+
+- **解釋**: `-e` 參數設定環境變數
+- **連線測試**: 使用 MySQL client 連線
+
+#### 3. 與 n8n 的關聯
+
+- n8n 常用環境變數預告
+  - `N8N_BASIC_AUTH_USER`: 登入帳號
+  - `N8N_BASIC_AUTH_PASSWORD`: 登入密碼
+  - `WEBHOOK_URL`: Webhook 網址
+  - `N8N_ENCRYPTION_KEY`: 加密金鑰
+
+---
+
+### 八、容器網路基礎 (選修)
+
+**教學目標**: 理解多個容器如何互相溝通
+
+#### 1. 容器之間如何連線?
+
+- 預設的 bridge 網路
+- 容器名稱作為 hostname
+
+#### 2. 建立自訂網路
+
+```bash
+docker network create my-network
+```
+
+#### 3. 實例: 連接 Web 與 Database
+
+```bash
+# 啟動 MySQL
+docker run -d \
+  --name mydb \
+  --network my-network \
+  -e MYSQL_ROOT_PASSWORD=pass \
+  mysql:8.0
+
+# 啟動 Web App (可以透過 'mydb' 連線到資料庫)
+docker run -d \
+  --name webapp \
+  --network my-network \
+  -e DB_HOST=mydb \
+  mywebapp
+```
+
+---
+
+### 九、Docker Compose: 從指令到配置檔
+
+**教學目標**: 理解為什麼需要 Compose,並能撰寫基本的 `docker-compose.yml`
+
+#### 1. 問題導向: 為什麼 `docker run` 不夠用?
+
+**痛點**:
+- 指令太長,容易打錯
+- 無法記住所有參數
+- 多個容器時,指令更複雜
+- 不好交給別人使用
+- 無法版本控制
+
+**解決方案**: Docker Compose
+- 「一份可重現的說明書」
+- Infrastructure as Code (基礎設施即代碼)
+- n8n 正式部署的標準做法
+
+#### 2. YAML 語法速成
+
+- **基本結構**: 縮排的藝術 (使用空格,不用 Tab)
+- **資料型態**:
+  - 字串
+  - 數字
+  - 列表 (使用 `-`)
+  - 物件 (使用縮排)
+
+**範例**:
+```yaml
+name: John
+age: 30
+hobbies:
+  - reading
+  - coding
+address:
+  city: Taipei
+  zipcode: 100
+```
+
+#### 3. 第一個 `docker-compose.yml`
+
+**目標**: 用 Compose 取代之前的 Nginx 指令
+
+**原始指令**:
+```bash
+docker run -d -p 8080:80 -v $(pwd)/html:/usr/share/nginx/html nginx
+```
+
+**Compose 版本**:
 ```yaml
 version: '3.8'
+
 services:
   web:
     image: nginx
@@ -99,258 +383,449 @@ services:
       - "8080:80"
     volumes:
       - ./html:/usr/share/nginx/html
-
 ```
 
-
-* **指令**：`docker-compose up -d` 與 `docker-compose down`。
-
-
-
----
-
-### 第四階段：專題實戰 - 模擬 n8n 部署環境 (1.5 小時)
-
-**目標：將前 4.5 小時的知識總結，實際演練 n8n 的部署流程 (先不進入 n8n 操作，專注於架設)。**
-
-1. **解讀 n8n 官方 Docker Compose (45 分鐘)**
-* 帶領學生看懂 n8n 的 `docker-compose.yml` 範本。
-* 解釋其中的關鍵欄位：
-* `restart: always` (當機自動重啟)。
-* `volumes` (n8n 的資料存在哪？`~/.n8n`)。
-* `ports` (5678 port)。
-
-
-
-
-2. **實戰演練 (45 分鐘)**
-* **任務**：使用 Docker Compose 啟動 n8n。
-* **步驟**：
-1. 建立資料夾。
-2. 撰寫 `docker-compose.yml` (包含 n8n 服務)。
-3. 建立 `.env` 檔案 (存放帳號密碼等敏感資訊)。
-4. 啟動並檢查 Logs (`docker-compose logs -f`)。
-5. 成功登入 n8n 歡迎畫面。
-
-
-* **Q&A 與常見雷區**：
-* 權限問題 (Linux/Mac 上的 Volume 讀寫權限)。
-* Port 衝突怎麼辦？
-
-
-
-
-
----
-
----
-可以，以下是一個**6 小時、以「為了順利理解與安裝 n8n 到 Docker」為目標**所設計的課程大綱。
-
-這份大綱是以**教學導向、非專職工程師也能跟上**為前提，並刻意避開過度艱深的 Docker 細節，讓學生「夠用、敢用、用得懂」。
-
----
-
-## **課程總目標（先讓學生知道為什麼要學）**
-
-> 這 6 小時學完後，學生能：
-
-- 理解 **Docker 在 n8n 中扮演的角色**
-- 看得懂並修改 **docker run / docker-compose**
-- 知道 **n8n 的資料為什麼會消失、怎麼保存**
-- 為下一堂「實際安裝 n8n 並建工作流」做好準備
-
----
-
-# **6 小時課程總覽**
-
-| **時間** | **主題**                | **教學重點**                   |
-| ------ | --------------------- | -------------------------- |
-| 第 1 小時 | 為什麼 n8n 一定要搭配 Docker  | 建立「容器化思維」                  |
-| 第 2 小時 | Docker 基本概念（夠用版）      | image / container / volume |
-| 第 3 小時 | Docker 實戰（CLI）        | docker run + port + volume |
-| 第 4 小時 | 容器資料保存與環境變數           | 為 n8n 鋪路                   |
-| 第 5 小時 | Docker Compose（為什麼需要） | 多服務、可重現                    |
-| 第 6 小時 | n8n 專用 Docker 架構預告    | 看懂官方範例                     |
-
----
-
-## **第 1 小時：為什麼 n8n 幾乎「一定要用 Docker」**
-
-### **教學目標**
-
-讓學生 **先理解問題，再接受 Docker 是解法**
-
-### **內容設計**
-
-- n8n 是什麼？（一句話）
-    - 不是寫程式
-    - 是「工作流伺服器」
-- 為什麼不能「直接下載執行」
-    - Node.js 版本
-    - 套件依賴
-    - 更新地獄
-- 實際案例說明
-    - 同一個 n8n，在不同電腦跑不起來
-- Docker 解決了什麼？
-    - 環境一次封裝
-    - 刪了再來一個一模一樣的
-
-📌 **關鍵觀念句**
-
-> Docker 不是讓你更厲害，是讓你「少出錯」
-
----
-
-## **第 2 小時：Docker 核心概念（n8n 專用版本）**
-
-### **教學目標**
-
-學生能「用白話解釋 Docker 在幹嘛」
-
-### **只教這 5 個名詞（其他全部不講）**
-
-| **名詞**               | **教法**  |
-| -------------------- | ------- |
-| Image                | 已經煮好的便當 |
-| Container            | 正在吃的便當  |
-| Volume               | 外接硬碟    |
-| Port                 | 對外開的門   |
-| Environment Variable | 設定選項    |
-
-### **視覺化說明**
-
-- n8n image ≠ n8n container
-- 刪 container ≠ 刪資料（如果有 volume）
-
----
-
-## **第 3 小時：Docker CLI 實戰（先不用 n8n）**
-
-### **教學目標**
-
-讓學生 **親手跑過一個容器，不再害怕指令**
-
-### **實作流程**
-
-1. docker pull hello-world
-2. docker run hello-world
-3. docker ps / docker ps -a
-4. 跑一個「會開網頁的容器」
-    - 例如 nginx
-
-```other
-docker run -d -p 8080:80 nginx
+**執行**:
+```bash
+docker-compose up -d
 ```
 
-### **重點不是記指令，而是理解**
+#### 4. Compose 常用指令
 
-- \-d 是什麼
-- \-p 8080:80 在做什麼
-- 為什麼瀏覽器能看到畫面
-
----
-
-## **第 4 小時：資料為什麼會不見？（Volume 與環境變數）**
-
-### **教學目標**
-
-為 n8n「工作流消失」問題提前打預防針
-
-### **教學情境**
-
-- 刪 container → 資料消失
-- 學生常見誤解：
-
-    >> 「我不是都有存嗎？」
-
-### **Volume 實作**
-
-```other
-docker run -d \
-  -p 8081:80 \
-  -v mydata:/usr/share/nginx/html \
-  nginx
-```
-
-### **環境變數概念**
-
-- 不改程式，就能改設定
-- 為什麼 n8n 大量用 env
+- **啟動**: `docker-compose up -d`
+- **停止**: `docker-compose down`
+- **查看 logs**: `docker-compose logs -f`
+- **重啟**: `docker-compose restart`
+- **查看狀態**: `docker-compose ps`
 
 ---
 
-## **第 5 小時：Docker Compose（為什麼一定要學）**
+### 十、進階實戰: 多服務應用
 
-### **教學目標**
+**教學目標**: 撰寫包含多個服務的 Compose 檔案
 
-學生能理解：
+#### 1. WordPress + MySQL 範例
 
-> 為什麼「docker run 很快就不夠用」
+```yaml
+version: '3.8'
 
-### **教學重點**
-
-- 問題導向
-    - 指令太長
-    - 不好記
-    - 不好交給別人
-- docker-compose.yml 是什麼
-    - **「一份可重現的說明書」**
-
-### **範例（先用 nginx）**
-
-```other
 services:
-  web:
-    image: nginx
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+    volumes:
+      - db_data:/var/lib/mysql
+    
+  wordpress:
+    image: wordpress:latest
     ports:
       - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass
+      WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      - db
+    volumes:
+      - wp_data:/var/www/html
+
+volumes:
+  db_data:
+  wp_data:
 ```
 
-### **關鍵觀念**
+#### 2. 重點解釋
 
-- 專案 ≠ 單一 container
-- n8n 幾乎一定是 compose
+- `depends_on`: 服務啟動順序
+- 服務名稱作為 hostname (wordpress 可以用 `db` 連到資料庫)
+- `volumes:` 區段: 宣告 Named Volume
+- 資料持久化: 兩個服務都使用 Volume
 
 ---
 
-## **第 6 小時：n8n 的 Docker 架構「預告課」**
+### 十一、n8n 專用 Docker 架構解析
 
-> 這一小時 **不安裝 n8n**
+**教學目標**: 看懂 n8n 官方的 `docker-compose.yml`
 
-> 目標是「看得懂官方文件」
+#### 1. 最簡單的 n8n Compose
 
-### **拆解 n8n 官方 docker-compose**
+```yaml
+version: '3.8'
 
-重點看這些：
+services:
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin123
+    volumes:
+      - n8n_data:/home/node/.n8n
 
-- image: n8nio/n8n
-- ports
-- volumes
-- environment
+volumes:
+  n8n_data:
+```
 
-### **建立正確心理模型**
+#### 2. 關鍵欄位解析
 
+- **image**: `n8nio/n8n`
+  - 使用官方 image
+  
+- **ports**: `5678:5678`
+  - n8n 預設使用 5678 port
+  
+- **volumes**: `n8n_data:/home/node/.n8n`
+  - **最重要!** 這是 Workflow 的儲存位置
+  - 刪除容器後,Workflow 不會消失的關鍵
+  
+- **environment**: 
+  - 帳號密碼設定
+  - 其他客製化選項
+
+#### 3. 實戰演練
+
+**步驟**:
+1. 建立專案資料夾
+   ```bash
+   mkdir n8n-demo
+   cd n8n-demo
+   ```
+
+2. 建立 `docker-compose.yml` (使用上面的範例)
+
+3. 啟動 n8n
+   ```bash
+   docker-compose up -d
+   ```
+
+4. 觀察 logs
+   ```bash
+   docker-compose logs -f
+   ```
+
+5. 開啟瀏覽器: `http://localhost:5678`
+
+6. **測試資料持久化**:
+   - 建立一個簡單的 Workflow
+   - 執行 `docker-compose down`
+   - 重新 `docker-compose up -d`
+   - 確認 Workflow 仍然存在!
+
+---
+
+### 十二、進階配置與最佳實踐
+
+**教學目標**: 學習生產環境的配置技巧
+
+#### 1. 使用 `.env` 檔案管理敏感資訊
+
+**為什麼需要?**
+- 密碼不應該寫在 `docker-compose.yml` 中
+- 方便不同環境切換
+- 不要上傳到 Git
+
+**範例**:
+
+`.env` 檔案:
+```
+N8N_USER=admin
+N8N_PASSWORD=super_secure_password
+```
+
+`docker-compose.yml`:
+```yaml
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:
+```
+
+#### 2. restart 策略
+
+```yaml
+services:
+  n8n:
+    image: n8nio/n8n
+    restart: always  # 容器異常退出時自動重啟
+```
+
+**選項**:
+- `no`: 不自動重啟 (預設)
+- `always`: 總是重啟
+- `on-failure`: 只在錯誤時重啟
+- `unless-stopped`: 除非手動停止,否則重啟
+
+#### 3. 資源限制
+
+```yaml
+services:
+  n8n:
+    image: n8nio/n8n
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          memory: 512M
+```
+
+---
+
+### 十三、常見問題與除錯
+
+**教學目標**: 學會自行排除常見錯誤
+
+#### 1. Port 已被佔用
+
+**錯誤訊息**:
+```
+Error: Bind for 0.0.0.0:5678 failed: port is already allocated
+```
+
+**解決方法**:
+1. 檢查哪個程式佔用 port
+   ```bash
+   # Mac/Linux
+   lsof -i :5678
+   
+   # Windows
+   netstat -ano | findstr :5678
+   ```
+
+2. 改用其他 port
+   ```yaml
+   ports:
+     - "5679:5678"  # 改用 5679
+   ```
+
+#### 2. Volume 權限問題 (Linux/Mac)
+
+**錯誤**: 容器無法寫入 Volume
+
+**解決方法**:
+```bash
+# 檢查 Volume 位置
+docker volume inspect n8n_data
+
+# 調整權限
+sudo chown -R 1000:1000 /path/to/volume
+```
+
+#### 3. Container 不斷重啟
+
+**診斷步驟**:
+1. 查看 logs
+   ```bash
+   docker-compose logs -f
+   ```
+
+2. 檢查環境變數是否正確
+
+3. 檢查 Volume 是否正常掛載
+
+#### 4. Image 下載失敗
+
+**可能原因**:
+- 網路問題
+- Docker Hub 連線問題
+
+**解決方法**:
+```bash
+# 使用鏡像站
+# 在 /etc/docker/daemon.json 加入:
+{
+  "registry-mirrors": ["https://mirror.gcr.io"]
+}
+```
+
+---
+
+### 十四、實用技巧與指令速查
+
+#### 1. 清理指令
+
+```bash
+# 清理未使用的 images
+docker image prune -a
+
+# 清理未使用的 volumes
+docker volume prune
+
+# 清理所有未使用的資源
+docker system prune -a --volumes
+```
+
+#### 2. 進入容器除錯
+
+```bash
+# 進入運行中的容器
+docker exec -it <container-id> sh
+
+# 或使用 bash (如果容器有安裝)
+docker exec -it <container-id> bash
+```
+
+#### 3. 複製檔案
+
+```bash
+# 從容器複製到主機
+docker cp <container-id>:/path/to/file ./local-path
+
+# 從主機複製到容器
+docker cp ./local-file <container-id>:/path/to/destination
+```
+
+#### 4. 查看容器資源使用
+
+```bash
+# 即時監控
+docker stats
+
+# 查看特定容器
+docker stats <container-id>
+```
+
+---
+
+### 十五、課程總結與下一步
+
+#### 1. 學生應該能回答的問題
+
+- [ ] 為什麼 n8n 用 Docker 比較安全?
+- [ ] Image 和 Container 有什麼差別?
+- [ ] 刪除 Container 為什麼資料會不見?
+- [ ] Volume 在 n8n 中扮演什麼角色?
+- [ ] `docker run` 和 `docker-compose` 差在哪?
+- [ ] 為什麼正式環境不用 `docker run`?
+- [ ] 如何查看容器的 logs?
+- [ ] Port Mapping 是什麼意思?
+
+#### 2. 關鍵心理模型建立
+
+- Docker 不是讓你更厲害,是讓你「少出錯」
 - n8n 是一個「長時間運作的服務」
-- 資料一定要放在 volume
-- 升級 = 換 image，不是重裝系統
+- 資料一定要放在 Volume
+- 升級 = 換 Image,不是重裝系統
+- Compose 是「一份可重現的說明書」
+
+#### 3. 實戰能力檢核
+
+學生應該能夠:
+- ✅ 獨立啟動一個 n8n 容器
+- ✅ 修改 `docker-compose.yml` 改變設定
+- ✅ 查看並理解 logs 訊息
+- ✅ 備份與還原 n8n 資料
+- ✅ 排除基本的 port 衝突問題
+- ✅ 使用 `.env` 檔案管理密碼
+
+#### 4. 下一步學習路徑
+
+**基礎已完成,可以進入:**
+- n8n Workflow 建立與執行
+- 連接外部服務 (Webhook, API)
+- 自動化實務案例
+- n8n 與 AI 整合應用
+
+**如果想深入 Docker:**
+- Docker 網路進階配置
+- 自訂 Dockerfile
+- Multi-stage builds
+- Docker Swarm / Kubernetes 入門
 
 ---
 
-## **課後學生應該能回答的問題**
+## 📝 教學建議與注意事項
 
-如果學生能回答這些，代表你教成功了：
+### 給講師的提醒
 
-- 為什麼 n8n 用 Docker 比較安全？
-- 刪 container 為什麼資料會不見？
-- volume 在 n8n 中扮演什麼角色？
-- docker run 和 docker compose 差在哪？
-- 為什麼正式環境不用 docker run？
+1. **不要急著教完所有指令**
+   - 重點是「理解概念」,不是「背指令」
+   - 學生能解決問題比記住指令重要
+
+2. **多用比喻與視覺化**
+   - 低程度學生需要具體的類比
+   - 可以準備圖解或動畫輔助
+
+3. **即時除錯示範**
+   - 刻意製造錯誤,示範如何排除
+   - 讓學生知道「出錯是正常的」
+
+4. **強調實作勝於理論**
+   - 每個概念都要配合實際操作
+   - 讓學生親手打指令,而非只是看
+
+5. **連結到 n8n 的實際應用**
+   - 每個章節都要說明「這對 n8n 有什麼幫助」
+   - 建立學習的動機與脈絡
+
+### 常見學生困難點
+
+1. **概念混淆**: Image vs Container
+   - **解法**: 反覆使用「Class vs Instance」比喻
+
+2. **指令恐懼症**
+   - **解法**: 準備指令小抄,強調「查資料」比「記憶」重要
+
+3. **YAML 縮排錯誤**
+   - **解法**: 使用線上 YAML validator,示範如何除錯
+
+4. **權限問題** (特別是 Linux/Mac 使用者)
+   - **解法**: 事先準備標準的權限設定指令
+
+5. **網路連線問題**
+   - **解法**: 準備離線的 Image 或使用鏡像站
 
 ---
 
-## **如果你願意，下一步我可以幫你**
+## 🎯 課程成功指標
 
-- 幫你把這 6 小時變成 **投影片大綱**
-- 幫你設計 **「學生常犯錯誤清單」**
-- 幫你規劃 **第 7～9 小時：正式安裝 n8n + 第一個工作流**
+如果學生在課程結束時能夠:
 
+1. ✅ 獨立從零開始啟動一個 n8n 服務
+2. ✅ 理解為什麼要使用 Volume
+3. ✅ 能夠修改 `docker-compose.yml` 改變 port 或環境變數
+4. ✅ 遇到錯誤時知道如何查看 logs
+5. ✅ 能夠向其他人解釋 Docker 的基本概念
+
+**那麼這個課程就是成功的!** 🎉
+
+---
+
+## 📚 補充學習資源
+
+### 官方文件
+- [Docker 官方文件](https://docs.docker.com/)
+- [Docker Compose 文件](https://docs.docker.com/compose/)
+- [n8n Docker 安裝指南](https://docs.n8n.io/hosting/installation/docker/)
+
+### 互動式學習
+- [Play with Docker](https://labs.play-with-docker.com/) - 線上練習環境
+- [Docker 101 Tutorial](https://www.docker.com/101-tutorial/)
+
+### 中文資源
+- Docker —— 從入門到實踐 (GitBook)
+- 各大技術部落格的 Docker 系列文章
+
+---
+
+**課程設計理念**: 這份課程以「能用」為目標,而非「精通」。讓學生在有限的時間內,掌握足夠部署與維護 n8n 的 Docker 技能,並建立繼續自學的基礎。
