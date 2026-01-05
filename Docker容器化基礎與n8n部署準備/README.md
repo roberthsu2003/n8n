@@ -133,7 +133,7 @@ docker run hello-world
 ```
 
 - **解讀輸出訊息**: 發生了什麼事?
-  1. Docker Client 向 Docker Daemon 發送請求
+  1. Docker Client 向 Docker Daemon 發送請求(Docker 用戶端把你的指令丟給 Docker 伺服程式去處理)
   2. Daemon 檢查本機是否有 image
   3. 從 Docker Hub (Registry) 下載 image
   4. 建立並執行 Container
@@ -144,6 +144,23 @@ docker run hello-world
 - **查看 images**: `docker images`
 - **查看運行中的 containers**: `docker ps`
 - **查看所有 containers (包含已停止)**: `docker ps -a`
+
+**更多**
+
+- **刪除容器**
+
+	- 刪除單一停止的容器：
+
+	`docker rm <容器ID或名稱>`
+
+- **如果容器還在跑，可用強制刪除：**
+
+  `docker rm -f <容器ID或名稱>。`
+  
+ - **清理指令**
+
+  - 刪未使用 images：`docker image prune -a`
+  - 刪未使用 volumes：`docker volume prune`
 
 #### 3. Docker Hub 導覽
 
@@ -255,6 +272,18 @@ docker volume create my-data
 docker run -d -p 8080:80 -v my-data:/usr/share/nginx/html nginx
 ```
 
+- **刪除 Volume：**
+​
+
+	- **先看有哪些 volumes：**
+
+	`docker volume ls`
+​
+
+	- **刪除指定的 volume：**
+
+	`docker volume rm <volume-name>`
+​
 ---
 
 ### 七、環境變數的應用
@@ -797,9 +826,7 @@ docker stats <container-id>
 
 ---
 
-## 🎯 課程成功指標
-
-如果學生在課程結束時能夠:
+## 🎯 成功指標
 
 1. ✅ 獨立從零開始啟動一個 n8n 服務
 2. ✅ 理解為什麼要使用 Volume
@@ -807,25 +834,8 @@ docker stats <container-id>
 4. ✅ 遇到錯誤時知道如何查看 logs
 5. ✅ 能夠向其他人解釋 Docker 的基本概念
 
-**那麼這個課程就是成功的!** 🎉
-
 ---
 
-## 📚 補充學習資源
 
-### 官方文件
-- [Docker 官方文件](https://docs.docker.com/)
-- [Docker Compose 文件](https://docs.docker.com/compose/)
-- [n8n Docker 安裝指南](https://docs.n8n.io/hosting/installation/docker/)
 
-### 互動式學習
-- [Play with Docker](https://labs.play-with-docker.com/) - 線上練習環境
-- [Docker 101 Tutorial](https://www.docker.com/101-tutorial/)
 
-### 中文資源
-- Docker —— 從入門到實踐 (GitBook)
-- 各大技術部落格的 Docker 系列文章
-
----
-
-**課程設計理念**: 這份課程以「能用」為目標,而非「精通」。讓學生在有限的時間內,掌握足夠部署與維護 n8n 的 Docker 技能,並建立繼續自學的基礎。
