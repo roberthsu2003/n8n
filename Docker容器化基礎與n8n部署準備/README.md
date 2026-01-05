@@ -148,17 +148,10 @@ docker run hello-world
 **更多**
 
 - **刪除容器**
+  - 刪除單一停止的容器：`docker rm <容器ID或名稱>`
+  - 如果容器還在跑，可用強制刪除：`docker rm -f <容器ID或名稱>`
 
-	- 刪除單一停止的容器：
-
-	`docker rm <容器ID或名稱>`
-
-- **如果容器還在跑，可用強制刪除：**
-
-  `docker rm -f <容器ID或名稱>。`
-  
- - **清理指令**
-
+- **清理指令**
   - 刪未使用 images：`docker image prune -a`
   - 刪未使用 volumes：`docker volume prune`
 
@@ -273,17 +266,8 @@ docker run -d -p 8080:80 -v my-data:/usr/share/nginx/html nginx
 ```
 
 - **刪除 Volume：**
-​
-
-	- **先看有哪些 volumes：**
-
-	`docker volume ls`
-​
-
-	- **刪除指定的 volume：**
-
-	`docker volume rm <volume-name>`
-​
+  - **先看有哪些 volumes：** `docker volume ls`
+  - **刪除指定的 volume：** `docker volume rm <volume-name>`
 ---
 
 ### 七、環境變數的應用
@@ -314,10 +298,6 @@ docker run -d \
   > mysql -u root -p：在容器裡執行 MySQL 客戶端，用 root 帳號登入並輸入密碼。  
   > 輸入密碼：mypassword
   > 進去後，可以執行簡單的指令驗證：`SHOW DATABASES;`
-
-​
-
-
 
 #### 3. 與 n8n 的關聯
 
@@ -359,7 +339,7 @@ docker run -d \
 docker run -d \
   --name webapp \
   --network my-network \
-  -e DB_HOST=mydb \  
+  -e DB_HOST=mydb \
   -p 8080:80 \
   nginx:latest
 ```
@@ -539,7 +519,7 @@ services:
 
 volumes:
   n8n_data:
-	  name: n8n_data  #強制名字要使用n8n_data
+    name: n8n_data  # 強制名字要使用 n8n_data
 ```
 
 #### 2. 關鍵欄位解析
@@ -549,12 +529,12 @@ volumes:
   
 - **ports**: `5678:5678`
   - n8n 預設使用 5678 port
-  
+
 - **volumes**: `n8n_data:/home/node/.n8n`
   - **最重要!** 這是 Workflow 的儲存位置
   - 刪除容器後,Workflow 不會消失的關鍵
-  
-- **environment**: 
+
+- **environment**:
   - 帳號密碼設定
   - 其他客製化選項
 
@@ -875,7 +855,3 @@ docker stats <container-id>
 5. ✅ 能夠向其他人解釋 Docker 的基本概念
 
 ---
-
-
-
-
