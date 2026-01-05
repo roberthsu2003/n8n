@@ -18,6 +18,9 @@
 
 ## 📚 課程章節
 
+### 🐳 [Docker容器化基礎與n8n部署準備](./Docker容器化基礎與n8n部署準備/README.md)
+學習 Docker 容器化基礎與 n8n 部署準備，包括 Docker 核心概念、安裝與 Hello World、基礎指令實戰、網路與與資料持久化、進階管理與 Docker Compose、專題實戰 - 模擬 n8n 部署環境。
+
 ### 🚀 [第一章：n8n 簡介與安裝](./n8n簡介與安裝/README.md)
 學習 n8n 的核心概念、支援的安裝方式（Docker、npm），以及如何建立固定網址（ngrok）以接收外部 Webhook。
 
