@@ -102,6 +102,8 @@ docker run -d \
 
 在瀏覽器中開啟：`http://localhost:5678`
 
+![](./images/本機安裝概念圖.png)
+
 ---
 
 ### 方式二：SSH Tunnel 安裝
