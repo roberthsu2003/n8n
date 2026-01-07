@@ -1,0 +1,352 @@
+{
+  "name": "DataTable簡單操作",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -176
+      ],
+      "id": "bbd756bf-c46b-421e-9c40-8a8131c9f687",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fiJfzQizxYrIeUpF",
+          "mode": "list",
+          "cachedResultName": "學生成績單",
+          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/fiJfzQizxYrIeUpF"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        -176
+      ],
+      "id": "ab432e40-3950-441f-9b0d-fd276f4d83eb",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "content": "## 顯示dataTable",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        -160
+      ],
+      "id": "b49783f2-8ffd-4b49-bc12-04a4dedd4618",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b3907822-8ff5-490a-96c2-9f9d3f9183d4",
+              "name": "姓名",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7e97ba47-4640-4b97-aef8-c9ee7614b833",
+              "name": "學號",
+              "value": "={{ $json.student_id }}",
+              "type": "number"
+            },
+            {
+              "id": "123e2eeb-7d94-42b8-8bd9-9d61ac4f01da",
+              "name": "國文",
+              "value": "={{ $json.chinese }}",
+              "type": "number"
+            },
+            {
+              "id": "a8c98c1a-c358-49fc-8a32-09bf5dd51969",
+              "name": "英文",
+              "value": "={{ $json.english }}",
+              "type": "number"
+            },
+            {
+              "id": "4cc07d47-6d03-41f5-8c8a-19b2d02be728",
+              "name": "數學",
+              "value": "={{ $json.math }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        -176
+      ],
+      "id": "21f21900-e8af-4b18-ad9e-b42ea62db6b2",
+      "name": "將英文欄位改為中文欄位"
+    },
+    {
+      "parameters": {
+        "content": "## 使用if過濾dataTable資料",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        64
+      ],
+      "id": "7d81bf8d-c721-4fcb-bdbc-0b8ff32f8d24",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "fiJfzQizxYrIeUpF",
+          "mode": "list",
+          "cachedResultName": "學生成績單",
+          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/fiJfzQizxYrIeUpF"
+        },
+        "matchType": "allConditions",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        48
+      ],
+      "id": "5f39d2ab-9530-4b21-af95-22fa384f647e",
+      "name": "Get row(s)1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b3907822-8ff5-490a-96c2-9f9d3f9183d4",
+              "name": "姓名",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7e97ba47-4640-4b97-aef8-c9ee7614b833",
+              "name": "學號",
+              "value": "={{ $json.student_id }}",
+              "type": "number"
+            },
+            {
+              "id": "123e2eeb-7d94-42b8-8bd9-9d61ac4f01da",
+              "name": "國文",
+              "value": "={{ $json.chinese }}",
+              "type": "number"
+            },
+            {
+              "id": "a8c98c1a-c358-49fc-8a32-09bf5dd51969",
+              "name": "英文",
+              "value": "={{ $json.english }}",
+              "type": "number"
+            },
+            {
+              "id": "4cc07d47-6d03-41f5-8c8a-19b2d02be728",
+              "name": "數學",
+              "value": "={{ $json.math }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -48
+      ],
+      "id": "178222e5-463f-4f66-8446-4b5073e8bb56",
+      "name": "將英文欄位改為中文欄位1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b3907822-8ff5-490a-96c2-9f9d3f9183d4",
+              "name": "姓名",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "7e97ba47-4640-4b97-aef8-c9ee7614b833",
+              "name": "學號",
+              "value": "={{ $json.student_id }}",
+              "type": "number"
+            },
+            {
+              "id": "123e2eeb-7d94-42b8-8bd9-9d61ac4f01da",
+              "name": "國文",
+              "value": "={{ $json.chinese }}",
+              "type": "number"
+            },
+            {
+              "id": "a8c98c1a-c358-49fc-8a32-09bf5dd51969",
+              "name": "英文",
+              "value": "={{ $json.english }}",
+              "type": "number"
+            },
+            {
+              "id": "4cc07d47-6d03-41f5-8c8a-19b2d02be728",
+              "name": "數學",
+              "value": "={{ $json.math }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        128
+      ],
+      "id": "9a71d9bd-3ca9-4811-9051-4833c9bf4706",
+      "name": "將英文欄位改為中文欄位2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "21b4b4d9-1356-48cb-a313-672d3755a87c",
+              "leftValue": "={{ $json.chinese }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "f0450b36-7dd9-4b8e-9d2a-a869f46960c0",
+              "leftValue": "={{ $json.english }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "506cae00-34f2-45a8-8e19-63b536eadc26",
+              "leftValue": "={{ $json.math }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        144,
+        48
+      ],
+      "id": "7bfc4107-0817-4ba8-9a0d-e562cb28129f",
+      "name": "每科有小於80分的"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "將英文欄位改為中文欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)1": {
+      "main": [
+        [
+          {
+            "node": "每科有小於80分的",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "每科有小於80分的": {
+      "main": [
+        [
+          {
+            "node": "將英文欄位改為中文欄位1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "將英文欄位改為中文欄位2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "eea27d26-289d-4e6b-a161-cc290f189c93",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "JDkReNcGwY7dbcYx",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
