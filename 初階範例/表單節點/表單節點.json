@@ -1,0 +1,194 @@
+{
+  "name": "表單節點",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "學生成績輸入",
+        "formDescription": "每個欄位必需填寫",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "學號",
+              "fieldLabel": "請輸入學號",
+              "fieldType": "number",
+              "placeholder": "20230517",
+              "requiredField": true
+            },
+            {
+              "fieldName": "姓名",
+              "fieldLabel": "請填入姓名",
+              "requiredField": true
+            },
+            {
+              "fieldName": "國文",
+              "fieldLabel": "國文分數",
+              "fieldType": "number",
+              "placeholder": "0~100分",
+              "defaultValue": "0",
+              "requiredField": true
+            },
+            {
+              "fieldName": "英文",
+              "fieldLabel": "你的英文分數",
+              "fieldType": "number",
+              "placeholder": "0~100分",
+              "defaultValue": "0",
+              "requiredField": true
+            },
+            {
+              "fieldName": "數學",
+              "fieldLabel": "你的數學分數",
+              "fieldType": "number",
+              "placeholder": "0~100",
+              "defaultValue": "0",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "buttonLabel": "送出"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -144,
+        -48
+      ],
+      "id": "a07dac5a-d49a-40d6-942a-99b3a11e2b09",
+      "name": "On form submission",
+      "webhookId": "fe0041e9-f67b-4eee-b1be-4cbf263d93d4"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "fiJfzQizxYrIeUpF",
+          "mode": "list",
+          "cachedResultName": "學生成績單",
+          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/fiJfzQizxYrIeUpF"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chinese": "={{ $json[\"國文\"] }}",
+            "english": "={{ $json[\"英文\"] }}",
+            "math": "={{ $json[\"數學\"] }}",
+            "name": "={{ $json[\"姓名\"] }}",
+            "student_id": "={{ $json[\"學號\"] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "student_id",
+              "displayName": "student_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chinese",
+              "displayName": "chinese",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "english",
+              "displayName": "english",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "math",
+              "displayName": "math",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "a5f9f02e-c80f-4558-83da-b4f75f4a3b24",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "content": "## 新增表單資料至DataTable"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -464,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "8efd7827-aebb-445f-ab30-358a46f24c89",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "97444d9a-d0df-48a9-9ea0-cf65295e927c",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "LRiKvjT3DQZ8p76g",
+  "tags": [
+    {
+      "updatedAt": "2025-11-20T02:34:19.787Z",
+      "createdAt": "2025-11-20T02:34:19.787Z",
+      "id": "0jpUyf1qykdlExqM",
+      "name": "上課用"
+    }
+  ]
+}
