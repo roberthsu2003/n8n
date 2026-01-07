@@ -240,7 +240,7 @@ docker run -d \
 - [🪟 **Windows + ngrok 設定教學**](./Windows+n8n+ngrok.md)
 - [🍎 **Mac + ngrok 設定教學**](./Mac+n8n+ngrok.md)
 
-
+![](./images/本機安裝概念圖_ngrok.png)
 ---
 
 ### 方式四：Godaddy申請正式網址,使用cloudflare的tunnel-(暫停使用)
@@ -348,4 +348,3 @@ docker run --rm \
 - alpine sh -c "...": 在容器內執行壓縮指令，將 /data（n8n 資料）打包成 .tar.gz 檔，並輸出到 /backup（您的 Mac 本機）。
 
 執行完畢後，您就會在終端機當前所在的目錄找到名為 n8n_backup_YYYYMMDD.tar.gz 的完整備份檔，接著您就可以將它上傳到雲端了。
-
