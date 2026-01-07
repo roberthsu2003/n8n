@@ -61,16 +61,14 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 **技術重點**：HTTP 請求下載、CSV轉換為Excel、檔案處理
 
 
-## n8n內建DataTable節點
-**難度**: 中級 
+## n8n內建的DataTable節點
+**難度**: 初級 
 
 學習如何使用 n8n 內建DataTable節點。
 
-### 範例:建立DataTable
+### [範例:DataTable](./DataTable/)
+
 **難度**: 初級 
-
-
-
 
 ### 範例：n8n內建表單節點
 **難度**: 中級 
