@@ -60,6 +60,26 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 
 **技術重點**：HTTP 請求下載、CSV轉換為Excel、檔案處理
 
+**練習**
+
+1. 下載政府開放平台的csv和json
+
+2. 下載pdf檔
+
+```
+n8n  Extract From File  測試
+財務報表 PDF
+https://www.sample-videos.com/pdf/Sample-pdf-5-mb.pdf
+
+發票報表範例
+https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dense/invoice.pdf
+
+商業報表
+https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-pdf-file.pdf
+
+
+```
+
 ---
 
 ## n8n內建的DataTable節點
