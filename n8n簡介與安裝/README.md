@@ -226,8 +226,12 @@ docker run -d \
   --name n8n \
   --restart always \
   -p 5678:5678 \
-  -e WEBHOOK_URL="https://<你的網址>" \
-  -e GENERIC_TIMEZONE="Asia/Taipei" \
+  -e N8N_HOST=abcd-1234.ngrok-free.app \
+  -e N8N_PROTOCOL=https \
+  -e N8N_PORT=5678 \
+  -e N8N_EDITOR_BASE_URL=https://abcd-1234.ngrok-free.app \
+  -e WEBHOOK_URL=https://abcd-1234.ngrok-free.app \
+  -e GENERIC_TIMEZONE=Asia/Taipei \
   -v n8n_data:/home/node/.n8n \
   docker.n8n.io/n8nio/n8n
 ```
