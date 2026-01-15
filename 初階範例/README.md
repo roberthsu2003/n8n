@@ -85,6 +85,8 @@ https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-pdf-file.pdf
 ## n8n內建的DataTable節點
 **難度**: 初級 
 
+### 工作流名稱: DataTable簡單操作
+
 學習如何使用 n8n 內建DataTable節點。
 
 ### [範例:DataTable](./DataTable/)
@@ -93,6 +95,8 @@ https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-pdf-file.pdf
 
 ### n8n內建表單節點
 **難度**: 中級 
+
+### 工作流名稱: 表單節點
 
 ### [範例:新增表單觸發節點](./表單節點/)
 
