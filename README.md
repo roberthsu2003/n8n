@@ -126,11 +126,4 @@
 
 [n8n 官方教學範例](https://blog.n8n.io/tag/tutorial/)
 
-## 連線資訊
-
-> domain
-> `superinnocent-hillary-unwholesome.ngrok-free.dev`
-
-> 啟動ngrok  
-> ngrok http 5678 --domain=<你的網址>
 
