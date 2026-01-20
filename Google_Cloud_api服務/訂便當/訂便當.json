@@ -1,0 +1,203 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "formTitle": "訂便當系統",
+          "formDescription": "中午的便當",
+          "formFields": {
+            "values": [
+              {
+                "fieldName": "姓名",
+                "fieldLabel": "請輸入姓名",
+                "requiredField": true
+              },
+              {
+                "fieldName": "選擇便當類型",
+                "fieldLabel": "請選擇",
+                "fieldType": "dropdown",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "火腿-120"
+                    },
+                    {
+                      "option": "雞腿-130"
+                    },
+                    {
+                      "option": "排骨-110"
+                    }
+                  ]
+                },
+                "requiredField": true
+              }
+            ]
+          },
+          "options": {
+            "appendAttribution": false,
+            "buttonLabel": "送出"
+          }
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.4,
+        "position": [
+          -272,
+          0
+        ],
+        "id": "d903ba82-6aa5-4f9e-ba2f-4dc3be1bb5f3",
+        "name": "On form submission",
+        "webhookId": "cf4e6909-4849-47d2-aaef-9f6dca9e1b49"
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "=https://docs.google.com/spreadsheets/d/12CksZzAiLBOLJjxyFofntketHl9sb1Iiad4qlLOeT2w/edit?gid=0#gid=0",
+            "mode": "url"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1333817722,
+            "mode": "list",
+            "cachedResultName": "工作表2",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12CksZzAiLBOLJjxyFofntketHl9sb1Iiad4qlLOeT2w/edit#gid=1333817722"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "客戶姓名": "={{ $json['姓名'] }}",
+              "便當名稱": "={{ $json['便當名稱'] }}",
+              "價格": "={{ $json['價格'] }}",
+              "訂購日期": "={{ $json['時間'] }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "客戶姓名",
+                "displayName": "客戶姓名",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "便當名稱",
+                "displayName": "便當名稱",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "價格",
+                "displayName": "價格",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "訂購日期",
+                "displayName": "訂購日期",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          176,
+          0
+        ],
+        "id": "4a44eae1-e179-4150-bd58-1f027742e672",
+        "name": "Append row in sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "P5aeSky9Aez0k63U",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "eb0fd415-2557-4a94-bcf3-369f9dccd96b",
+                "name": "姓名",
+                "value": "={{ $json['姓名'] }}",
+                "type": "string"
+              },
+              {
+                "id": "b0484469-c031-4700-a773-308e81f911fe",
+                "name": "便當名稱",
+                "value": "={{ $json['選擇便當類型'].split('-')[0] }}",
+                "type": "string"
+              },
+              {
+                "id": "280ba38c-2c33-4580-b34a-88691fe92d6f",
+                "name": "價格",
+                "value": "={{ Number($json['選擇便當類型'].split('-')[1]) }}",
+                "type": "number"
+              },
+              {
+                "id": "0c9b5f83-6802-4e82-a827-a254111a74de",
+                "name": "時間",
+                "value": "={{ $json.submittedAt.split('T')[0] }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -64,
+          0
+        ],
+        "id": "64926f1f-3210-46e6-a9f1-a6ff5f3a4a66",
+        "name": "Edit Fields"
+      }
+    ],
+    "connections": {
+      "On form submission": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Append row in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+    }
+  }
