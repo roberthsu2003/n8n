@@ -48,12 +48,12 @@ OAuth 的設計解決了「密碼共享」的巨大安全風險。它的主要�
     * 如果 App 需要長期存取，它會獲得一個「刷新權杖」(Refresh Token)，用來在過期時自動換取新的存取權杖，而不需要您再次登入。
     * 最重要的是，您可以隨時到您的 Google / Facebook 帳戶設定中，**主動「撤銷」** 對某個 App 的授權，該 App 的權杖會立刻失效。
 
-4.  ** separating 角色分離**
+4.  **separating roles 角色分離**
     * OAuth 明確定義了四個角色，讓授權流程標準化：
-        * **資源擁有者 (Resource Owner)：** 就是您，擁有資料的人。
-        * **客戶端 (Client)：** 就是第三方 App (例如 Spotify、Canva)。
-        * **授權伺服器 (Authorization Server)：** 負責驗證您的身份並取得您同意的服務 (例如 Google 登入頁面)。
-        * **資源伺服器 (Resource Server)：** 真正存放您資料的地方 (例如 Google Photos 的伺服器)。
+        * **Resource Owner (資源擁有者)：** 就是您，擁有資料的人。
+        * **Client (客戶端)：** 就是第三方 App (例如 Spotify、Canva)。
+        * **Authorization Server (授權伺服器)：** 負責驗證您的身份並取得您同意的服務 (例如 Google 登入頁面)。
+        * **Resource Server (資源伺服器)：** 真正存放您資料的地方 (例如 Google Photos 的伺服器)。
 
 ### 🌐 實際生活中的例子
 
