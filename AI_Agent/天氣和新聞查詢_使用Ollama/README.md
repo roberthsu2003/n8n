@@ -435,26 +435,19 @@ ollama pull codellama:7b
    - 學習更多進階工具整合技巧（使用雲端 API）
 
 <a name='fromAI說明'></a>
-## 💡 有關於$fromAI()的說明書
+## 💡 `$fromAI()` 函式說明
 
-下面是一份**專門給 n8n 使用者 / 教學用**的
-
-👉 **`$fromAI()` 語法說明書（白話＋技術版）**
+`$fromAI()` 語法說明書（技術文件）
 
 ---
 
-## 一、`$fromAI()` 是什麼？
+## 一、`$fromAI()` 概述
 
-`$fromAI()` 是 **n8n AI 節點（特別是 Tool / AI Agent）專用的表達式函式**，
-用途是：
+`$fromAI()` 是 n8n AI 節點（特別是 Tool / AI Agent）專用的表達式函式，用於將參數值的決定權交給 AI，而非在 workflow 中寫死固定值。
 
-> **把「某個參數的值」交給 AI 決定，而不是寫死在 workflow 裡**
+**核心功能**：讓 AI 根據上下文動態決定參數值。
 
-簡單一句話：
-
-> 🔮 **讓 AI 幫你填欄位值**
-
-在你的例子中，就是讓 AI **自動選擇最適合的 RSS Feed URL**。
+在本範例中，`$fromAI()` 用於讓 AI 自動選擇最適合的 RSS Feed URL。
 
 ---
 
@@ -470,35 +463,33 @@ $fromAI(name, description, type, defaultValue)
 'URL'
 ```
 
-* 這是 **AI 要產生的欄位名稱**
-* 會顯示在 AI 的「工具參數 schema」中
-* 建議用**有意義的名稱**
+**說明**：
+- 定義 AI 要產生的欄位名稱
+- 會顯示在 AI 的工具參數 schema 中
+- 應使用有意義且描述性的名稱
 
-👉 教學建議：
-
-* URL
-* city
-* keyword
-* rssFeed
+**常見範例**：
+- `URL`
+- `city`
+- `keyword`
+- `rssFeed`
 
 ---
 
-### 2️⃣ `description`（給 AI 看的說明）
+### 2️⃣ `description`（AI 決策指引）
 
 ```js
 'Select the most appropriate RSS feed URL based on the user query. Available options are listed in the tool description.'
 ```
 
-⚠️ **這一段非常重要**
+**重要說明**：
+- 此描述是給 AI 看的決策指引，不是給使用者看的
+- AI 會根據這段文字來判斷如何選擇參數值
+- 描述越清晰明確，AI 的決策品質越好
 
-* 這是 **給 AI 看、不是給使用者看**
-* AI 會依這段文字來「判斷要怎麼選值」
-* 寫得越清楚，AI 越聰明
-
-👉 教學重點：
-
-* 這裡其實就是 **prompt engineering**
-* 很適合拿來教學生「AI 怎麼被引導」
+**技術要點**：
+- 這是 prompt engineering 的實踐
+- 透過清晰的描述引導 AI 做出正確決策
 
 ---
 
@@ -508,17 +499,17 @@ $fromAI(name, description, type, defaultValue)
 'string'
 ```
 
-目前常見的型別：
+**支援的資料型別**：
 
-| 型別        | 說明           |
-| --------- | ------------ |
-| `string`  | 文字（最常用）      |
-| `number`  | 數字           |
-| `boolean` | true / false |
-| `array`   | 陣列（進階）       |
-| `object`  | 物件（進階）       |
+| 型別        | 說明                |
+| --------- | ----------------- |
+| `string`  | 文字字串（最常用）          |
+| `number`  | 數值                |
+| `boolean` | 布林值（true / false）   |
+| `array`   | 陣列                |
+| `object`  | 物件                |
 
-👉 RSS URL 一定是字串，所以用 `string`
+**範例說明**：RSS URL 為字串型別，因此使用 `string`。
 
 ---
 
@@ -528,19 +519,17 @@ $fromAI(name, description, type, defaultValue)
 'https://feeds.bbci.co.uk/news/world/rss.xml'
 ```
 
-用途有三個：
+**預設值的用途**：
 
-1. AI 不確定時的 **保底值**
-2. Workflow 第一次測試時不會壞
-3. 提供 AI 一個「參考答案」
+1. **Fallback 機制**：當 AI 無法確定參數值時使用
+2. **測試穩定性**：確保 workflow 在首次測試時能正常運作
+3. **參考範例**：為 AI 提供一個參考答案，幫助理解預期格式
 
-👉 很重要的教學觀念：
-
-> **default ≠ 固定值，而是 fallback**
+**重要概念**：預設值不等於固定值，而是作為 fallback 機制使用。
 
 ---
 
-## 三、把你的範例拆解成一句人話
+## 三、範例解析
 
 ```js
 {{ 
@@ -553,84 +542,75 @@ $fromAI(name, description, type, defaultValue)
 }}
 ```
 
-等同於對 AI 說：
+**功能說明**：
 
-> 「嘿 AI，
-> 現在我需要一個叫做 **URL** 的參數，
-> 它是 **字串**，
-> 請你根據使用者問的內容，
-> 從我前面列出的 RSS 清單中，
-> 選一個**最適合的 RSS Feed URL**。
-> 如果你真的不知道，就先用 BBC World。」
+此範例指示 AI：
+- 產生一個名為 `URL` 的字串參數
+- 根據使用者查詢內容，從工具描述中列出的 RSS 清單中選擇最適合的 RSS Feed URL
+- 若無法確定，則使用預設值（BBC World News）
 
 ---
 
-## 四、執行時實際發生什麼事（重要）
+## 四、執行流程
 
-### 🧠 AI 的流程是這樣：
+### AI 決策流程：
 
-1. 使用者輸入問題
-
+1. **使用者輸入查詢**
    > 「今天台灣有什麼新聞？」
 
-2. AI 看到 Tool description 裡的 RSS 清單
+2. **AI 讀取工具描述**
+   - 從 Tool description 中取得可用的 RSS 清單
+   - 包含：Liberty Times、CNA、BBC、TechCrunch 等選項
 
-   * Liberty Times
-   * CNA
-   * BBC
-   * TechCrunch …
+3. **AI 分析與判斷**
+   - 根據「台灣」關鍵字進行語義分析
+   - 選擇最符合查詢意圖的 RSS Feed
 
-3. AI 根據「台灣」這個關鍵字判斷
-
-4. 自動回傳：
-
+4. **回傳參數值**
 ```json
 {
   "URL": "https://news.ltn.com.tw/rss/all.xml"
 }
 ```
 
-5. n8n 把這個值塞進 RSS Read Tool
+5. **n8n 執行工具**
+   - 將 AI 決定的 URL 值傳遞給 RSS Read Tool
+   - 執行 RSS 讀取操作
 
-👉 **整個流程不用 if / switch / code**
-
----
-
-## 五、教學時一定要強調的 3 個重點
-
-### ⭐ 1. `$fromAI()` 是「AI 決策入口」
-
-不是 JavaScript 函式思維，而是：
-
-> **把控制權交給 LLM**
+**技術優勢**：整個流程無需使用條件判斷（if/switch）或程式碼邏輯，完全由 AI 自主決策。
 
 ---
 
-### ⭐ 2. description 就是 prompt
+## 五、核心概念
 
-學生常犯錯：
+### 1. `$fromAI()` 是 AI 決策入口
 
-❌ description 寫得很隨便
-✅ description 寫得像在「教 AI 做事」
-
----
-
-### ⭐ 3. Tool + $fromAI = Agent 行為
-
-當你搭配：
-
-* AI Agent
-* Tool
-* `$fromAI()`
-
-你教的已經不是 n8n，
-而是：
-
-> 🤖 **Agentic Workflow（代理式流程）**
+`$fromAI()` 並非傳統的 JavaScript 函式，而是將參數決策的控制權交給 LLM，讓 AI 根據上下文動態決定參數值。
 
 ---
 
-## 六、給你一個「教學用標準模板」
+### 2. description 等同於 prompt
+
+**最佳實踐**：
+- ✅ 撰寫清晰、具體的描述，明確指示 AI 如何決策
+- ❌ 避免模糊或過於簡略的描述
+
+description 參數本質上就是 prompt engineering，需要精心設計以引導 AI 做出正確決策。
+
+---
+
+### 3. Tool + $fromAI = Agentic Workflow
+
+當結合以下元件時：
+- AI Agent
+- Tool
+- `$fromAI()`
+
+即構成 **Agentic Workflow（代理式工作流程）**，實現 AI 自主決策和工具使用的智能自動化。
+
+---
+
+## 六、標準模板
 
 ```js
 {{ 
@@ -642,6 +622,12 @@ $fromAI(name, description, type, defaultValue)
   ) 
 }}
 ```
+
+**使用說明**：
+- `parameter_name`：替換為實際參數名稱
+- 第二個參數：清楚描述 AI 應如何決定此值，包含約束條件或可用選項
+- `string`：根據實際需求選擇適當的資料型別
+- `default_value`：設定合理的預設值作為 fallback
 
 
 ---
