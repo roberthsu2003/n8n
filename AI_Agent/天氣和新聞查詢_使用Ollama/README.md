@@ -434,7 +434,7 @@ ollama pull codellama:7b
 2. [範例四：具備工具使用能力的助理](../具備工具使用能力的助理/README.md)
    - 學習更多進階工具整合技巧（使用雲端 API）
 
-<a name=“fromAI說明”></a>
+<a name='fromAI說明'></a>
 ## 💡 有關於$fromAI()的說明書
 
 下面是一份**專門給 n8n 使用者 / 教學用**的
