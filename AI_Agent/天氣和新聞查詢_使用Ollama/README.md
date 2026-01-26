@@ -1,5 +1,9 @@
 # 天氣和新聞查詢（使用 Ollama）
 
+## 工作流名稱:天氣和新聞查詢_使用Ollama
+
+## 重要技巧:[**$fomeAI()**](#fromAI說明)
+
 ## 📚 學習目標
 
 在掌握基本對話功能後，學習如何讓 AI Agent 具備**工具使用能力**。透過 Ollama 本地模型，建立一個能夠查詢天氣和新聞的智能助理，無需雲端 API 金鑰即可實作。
@@ -430,25 +434,216 @@ ollama pull codellama:7b
 2. [範例四：具備工具使用能力的助理](../具備工具使用能力的助理/README.md)
    - 學習更多進階工具整合技巧（使用雲端 API）
 
-### 相關資源
+<a name=“fromAI說明”></a>
+## 💡 有關於$fromAI()的說明書
 
-- [Ollama 官方網站](https://ollama.ai)
-- [Ollama GitHub](https://github.com/ollama/ollama)
-- [n8n AI Agent 文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.agent/)
-- [n8n Ollama 整合文件](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.lmchatollamawithcustomparams/)
-- [Open-Meteo API 文件](https://open-meteo.com/en/docs)
+下面是一份**專門給 n8n 使用者 / 教學用**的
 
-## 💡 學習小技巧
-
-1. **先玩再改**：先測試預設工作流程，理解運作方式後再修改
-2. **一次改一個**：每次只修改一個設定，觀察影響
-3. **記錄問題**：記錄 AI 回答得好和不好的範例
-4. **查看日誌**：執行時開啟日誌，理解 AI 的決策過程
-5. **持續實驗**：嘗試不同的 Prompt、工具和模型組合
+👉 **`$fromAI()` 語法說明書（白話＋技術版）**
 
 ---
 
-**🎓 完成此範例後，你將掌握 AI Agent 的工具使用能力，能夠建立具備實用功能的智能助理！這是從基礎對話進階到實際應用的重要一步，接下來可以探索更多工具整合和進階功能。**
+## 一、`$fromAI()` 是什麼？
 
-**💬 有問題或建議？歡迎透過 [聯絡表單](https://api.ia2s.app/form/templates/academy) 與我們交流！**
+`$fromAI()` 是 **n8n AI 節點（特別是 Tool / AI Agent）專用的表達式函式**，
+用途是：
+
+> **把「某個參數的值」交給 AI 決定，而不是寫死在 workflow 裡**
+
+簡單一句話：
+
+> 🔮 **讓 AI 幫你填欄位值**
+
+在你的例子中，就是讓 AI **自動選擇最適合的 RSS Feed URL**。
+
+---
+
+## 二、基本語法結構
+
+```js
+$fromAI(name, description, type, defaultValue)
+```
+
+### 1️⃣ `name`（參數名稱）
+
+```js
+'URL'
+```
+
+* 這是 **AI 要產生的欄位名稱**
+* 會顯示在 AI 的「工具參數 schema」中
+* 建議用**有意義的名稱**
+
+👉 教學建議：
+
+* URL
+* city
+* keyword
+* rssFeed
+
+---
+
+### 2️⃣ `description`（給 AI 看的說明）
+
+```js
+'Select the most appropriate RSS feed URL based on the user query. Available options are listed in the tool description.'
+```
+
+⚠️ **這一段非常重要**
+
+* 這是 **給 AI 看、不是給使用者看**
+* AI 會依這段文字來「判斷要怎麼選值」
+* 寫得越清楚，AI 越聰明
+
+👉 教學重點：
+
+* 這裡其實就是 **prompt engineering**
+* 很適合拿來教學生「AI 怎麼被引導」
+
+---
+
+### 3️⃣ `type`（資料型別）
+
+```js
+'string'
+```
+
+目前常見的型別：
+
+| 型別        | 說明           |
+| --------- | ------------ |
+| `string`  | 文字（最常用）      |
+| `number`  | 數字           |
+| `boolean` | true / false |
+| `array`   | 陣列（進階）       |
+| `object`  | 物件（進階）       |
+
+👉 RSS URL 一定是字串，所以用 `string`
+
+---
+
+### 4️⃣ `defaultValue`（預設值）
+
+```js
+'https://feeds.bbci.co.uk/news/world/rss.xml'
+```
+
+用途有三個：
+
+1. AI 不確定時的 **保底值**
+2. Workflow 第一次測試時不會壞
+3. 提供 AI 一個「參考答案」
+
+👉 很重要的教學觀念：
+
+> **default ≠ 固定值，而是 fallback**
+
+---
+
+## 三、把你的範例拆解成一句人話
+
+```js
+{{ 
+  $fromAI(
+    'URL',
+    'Select the most appropriate RSS feed URL based on the user query. Available options are listed in the tool description.',
+    'string',
+    'https://feeds.bbci.co.uk/news/world/rss.xml'
+  ) 
+}}
+```
+
+等同於對 AI 說：
+
+> 「嘿 AI，
+> 現在我需要一個叫做 **URL** 的參數，
+> 它是 **字串**，
+> 請你根據使用者問的內容，
+> 從我前面列出的 RSS 清單中，
+> 選一個**最適合的 RSS Feed URL**。
+> 如果你真的不知道，就先用 BBC World。」
+
+---
+
+## 四、執行時實際發生什麼事（重要）
+
+### 🧠 AI 的流程是這樣：
+
+1. 使用者輸入問題
+
+   > 「今天台灣有什麼新聞？」
+
+2. AI 看到 Tool description 裡的 RSS 清單
+
+   * Liberty Times
+   * CNA
+   * BBC
+   * TechCrunch …
+
+3. AI 根據「台灣」這個關鍵字判斷
+
+4. 自動回傳：
+
+```json
+{
+  "URL": "https://news.ltn.com.tw/rss/all.xml"
+}
+```
+
+5. n8n 把這個值塞進 RSS Read Tool
+
+👉 **整個流程不用 if / switch / code**
+
+---
+
+## 五、教學時一定要強調的 3 個重點
+
+### ⭐ 1. `$fromAI()` 是「AI 決策入口」
+
+不是 JavaScript 函式思維，而是：
+
+> **把控制權交給 LLM**
+
+---
+
+### ⭐ 2. description 就是 prompt
+
+學生常犯錯：
+
+❌ description 寫得很隨便
+✅ description 寫得像在「教 AI 做事」
+
+---
+
+### ⭐ 3. Tool + $fromAI = Agent 行為
+
+當你搭配：
+
+* AI Agent
+* Tool
+* `$fromAI()`
+
+你教的已經不是 n8n，
+而是：
+
+> 🤖 **Agentic Workflow（代理式流程）**
+
+---
+
+## 六、給你一個「教學用標準模板」
+
+```js
+{{ 
+  $fromAI(
+    'parameter_name',
+    'Clearly describe how the AI should decide this value, including constraints or available options.',
+    'string',
+    'default_value'
+  ) 
+}}
+```
+
+
+---
+
 
