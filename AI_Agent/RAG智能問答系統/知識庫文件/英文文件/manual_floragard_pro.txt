@@ -1,0 +1,28 @@
+Product Name: FloraGard Pro
+Model: FG-PRO-V2
+Purpose: Soil moisture and sunlight monitor for indoor plants.
+
+1. Installation
+Insert the FloraGard Pro probe into the soil about 3 to 4 inches deep. Ensure the light sensor on the top is not covered by leaves.
+
+2. App Setup
+Download the "FloraLink" app from the App Store or Google Play. Turn on Bluetooth on your phone and tap "Add Device."
+
+3. Sensor Readings
+- Moisture Range: 0% (Dry) to 100% (Wet)
+- Sunlight Intensity: 0 to 50,000 Lux
+- Temperature Range: -10°C to 50°C
+- Battery: Uses one CR2032 coin battery (lasts approx. 1 year).
+
+4. Light Status Definitions
+- Green Flash: Soil moisture is optimal.
+- Yellow Flash: Soil is getting dry.
+- Red Flash: Critical moisture level! Water immediately.
+- Blue Flash: Firmware updating.
+
+5. Common Questions
+Q: Why is the device offline?
+A: The FloraGard Pro uses Bluetooth Low Energy (BLE). You must be within 10 meters of the device to sync data.
+
+Q: Can I use it outdoors?
+A: Yes, but it is not fully waterproof. Do not expose to heavy rain.

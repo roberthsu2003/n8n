@@ -1,0 +1,341 @@
+Air Conditioner Installation and Maintenance Manual (General)
+
+Product Specifications
+
+Model: AC-280INV
+Type: Inverter Split Air Conditioner
+Cooling Capacity: 2.8 kW (approximately 4-6 tsubo)
+Heating Capacity: 3.2 kW
+Energy Efficiency Rating: Class 1
+Annual Power Consumption: Approximately 280 kWh/year
+Refrigerant: R32 eco-friendly refrigerant
+Indoor Unit Dimensions: 900 x 300 x 220 mm
+Outdoor Unit Dimensions: 800 x 550 x 300 mm
+Indoor Unit Weight: 10 kg
+Outdoor Unit Weight: 32 kg
+Rated Voltage: 110V / 220V
+Rated Frequency: 60 Hz
+Maximum Input Power: 1050 W
+Operating Sound: Indoor 23 dB / Outdoor 48 dB
+Applicable Area: 4-6 tsubo
+
+Chapter 1: Installation
+
+1.1 Pre-installation Precautions
+- Please have installation performed by a professional technician
+- Self-installation may be dangerous and voids warranty
+- Confirm electrical supply specifications before installation
+- Verify the installation location complies with regulations
+
+1.2 Indoor Unit Installation Location Selection
+Suitable Installation Locations:
+- Wall must be sturdy and able to support indoor unit weight (over 15 kg)
+- Minimum distance from ceiling: 15 cm
+- Minimum distance from side wall: 10 cm
+- Adequate drainage
+- Good air circulation
+- Remote control signal reachable
+
+Locations to Avoid:
+- Direct sunlight
+- Near heat sources (kitchen, heater)
+- Areas with heavy oil fumes
+- Areas exposed to moisture (bathroom)
+- Locations that may disturb sleep (directly above the bed)
+- Curtains or furniture blocking the air outlet
+
+1.3 Outdoor Unit Installation Location Selection
+Suitable Installation Locations:
+- Well-ventilated area
+- Platform or wall capable of bearing >50 kg
+- Easy access for maintenance and inspection
+- Easy drainage
+
+Locations to Avoid:
+- Direct sunlight (consider installing a sunshade panel)
+- Water accumulation
+- Areas exposed to rain
+- Corrosive gas environments
+- Neighbors’ windows facing directly (noise considerations)
+
+Installation Space Requirements:
+- Front clearance: at least 50 cm
+- Rear clearance: at least 10 cm
+- Left/Right: at least 20 cm each
+- Top clearance: at least 50 cm
+
+1.4 Refrigerant Piping Arrangement
+Refrigerant Pipe Length:
+- Standard piping: 3 meters (included)
+- Maximum piping: 15 meters
+- Additional charges apply for lengths beyond the standard
+
+Piping Notes:
+- Avoid excessive bends
+- Secure every 3 meters
+- Protective sleeve for wall penetrations
+- Proper insulation and wrapping
+- Do not damage refrigerant pipes
+
+1.5 Drain Pipe Installation
+- Drain pipe must maintain a slope steeper than 1/100
+- Fixed every 50 cm
+- Outlet higher than ground or drainage channel
+- Do not connect directly to sewer
+- Winter precautions to prevent freezing
+
+1.6 Power Wiring
+Power Specifications:
+- 110V model: dedicated circuit > 15 A
+- 220V model: dedicated circuit > 10 A
+- Use a grounded outlet
+- Wiring gauge must comply with code
+
+Wiring Notes:
+- Use a dedicated circuit (do not share with other appliances)
+- Proper grounding
+- Do not use extension cords
+- Wiring complies with indoor electrical installations code
+
+1.7 Commissioning
+After installation, verify:
+1. Refrigerant pressure is normal (tested by a professional)
+2. Drainage test is normal
+3. All functions operate correctly
+4. No abnormal noises or vibrations
+5. Remote control functions normally
+6. Receive the complete warranty documents
+
+Chapter 2: Remote Control Operation
+
+2.1 Remote Control Basic Functions
+Buttons:
+- Power On/Off: start or stop operation
+- Mode: switch operating mode (Cool/Dehumidify/Fan/Heat)
+- Temp +/-: adjust set temperature (16-30°C)
+- Fan: switch fan speed (Auto/Quiet/Low/Med/High)
+- Swing: adjust vertical air outlet angle
+- Swing (Auto): automatic swing of outlet blades
+- Power Save: enable power-saving mode
+- Quiet: enable quiet operation
+- Timer: set on/off timer
+- Sleep: enable sleep mode
+
+Display Indicators:
+- Snowflake: cooling mode
+- Sun: heating mode
+- Water Droplet: dehumidification mode
+- Fan: fan mode
+- Temperature Digits: set temperature
+- Fan Speed Icon: current fan speed
+
+2.2 Operating Modes Description
+Cooling Mode:
+- Used for hot-season cooling
+- Settable temperature: 16-30°C
+- Suggestion: 26-28°C for best energy efficiency
+- Each 1°C increase saves about 6% energy
+
+Heating Mode:
+- Used for cold-season heating
+- Settable temperature: 16-30°C
+- Suggestion: 20-22°C for comfort
+- Outdoor temperature below 5°C reduces efficiency
+
+Dehumidification Mode:
+- Used in rainy season or humid conditions
+- Auto-sets to optimal temperature and fan speed
+- Do not manually adjust temperature
+- Continuous use recommended not exceeding 4 hours
+
+Fan Mode:
+- Circulates air without heating or cooling
+- Can be used as a fan
+- Most energy-efficient mode
+- Suitable for spring and autumn
+
+Auto Mode:
+- Automatically determines operation mode
+- Automatically switches between cooling/heating based on room temperature
+- Maintains set temperature within ±2°C
+- Most convenient option
+
+2.3 Advanced Features
+Eco Mode:
+- Slightly adjust set temperature up/down
+- Reduces compressor operation frequency
+- Can save about 20-30%
+- Comfort level slightly reduced
+
+Quiet Mode:
+- Lowers operating sound to minimum
+- Fan speed auto-adjusted to a gentle breeze
+- Suitable for sleeping or working
+- Cooling capacity reduced by about 30%
+
+Sleep Mode:
+- Automatically adjusts temperature (±1°C per hour)
+- Prevents overcooling or overheating
+- Reduces noise
+- Optional auto-off after 1-8 hours
+
+Timer Function:
+- Set 0.5-24 hours
+- Timer On (cooling before returning home)
+- Timer Off (during sleep)
+- On/Off can be set simultaneously
+
+Air Direction Control:
+- 5 levels of up/down angle adjustment
+- Auto outlet swing
+- For cooling: recommended horizontal airflow
+- For heating: recommended downward airflow
+
+Chapter 3: Cleaning and Maintenance
+
+3.1 Filter Cleaning (every 2 weeks)
+Cleaning Steps:
+1. Turn off power
+2. Open the indoor unit front panel
+3. Remove the filter (lift upwards)
+4. Vacuum to remove dust
+5. Rinse with water (water temperature < 40°C)
+6. Gently brush with a soft brush
+7. Dry completely before reinstall
+8. Close the front panel
+
+Notes:
+- Do not use hot water (>40°C)
+- Do not scrub with stiff brush
+- Do not machine wash
+- Do not dry or expose to sun
+- If damaged, replace with a new unit
+
+3.2 Exterior Cleaning (monthly)
+Indoor Unit Exterior:
+1. Turn off power
+2. Wipe with a dry or slightly damp cloth
+3. For stubborn stains, use neutral cleaner
+4. Do not rinse with water directly
+5. Wipe dry with a dry cloth
+
+Outdoor Unit Exterior:
+1. Turn off power
+2. Remove debris and leaves
+3. Rinse fins with water (top-down)
+4. Do not use high-pressure water
+5. Take care not to wet electrical components
+
+Chapter 4: Troubleshooting
+
+4.1 Common Problem Diagnostics
+
+Problem: Cannot start
+Possible Causes:
+1. Power not connected → check plug, switch, and circuit breaker
+2. Remote battery is dead → replace battery
+3. Protection device activated → wait 3-5 minutes then retry
+4. Power supply voltage abnormal → check power supply
+
+Problem: Not cooling or weak cooling
+Possible Causes:
+1. Filter dirty → clean filter
+2. Temperature setting too high → lower temperature setting
+3. Doors/windows not closed → close doors/windows
+4. Outdoor unit not dissipating heat well → clean outdoor unit
+5. Refrigerant insufficient → contact a professional for recharge
+6. Room too large for the unit → consider a larger model
+
+Problem: Noise during operation
+Possible Causes:
+1. Filter not properly installed → reinstall filter
+2. Outdoor unit not securely mounted → check mounting screws
+3. Blades damaged → replace blades
+4. Fan failure → contact service
+
+Problem: Water leakage
+Possible Causes:
+1. Drain pipe blocked → clear drain
+2. Drain pipe slope insufficient → adjust slope
+3. Drain pipe cracked → replace drain pipe
+4. Excess condensation → increase insulation
+
+4.2 Error Codes
+
+E1 - Indoor temperature sensor abnormal
+Resolution: Turn off power for 5 minutes, then retry; if persists, contact service
+
+E2 - Outdoor temperature sensor abnormal
+Resolution: Check the outdoor unit, contact service
+
+E3 - Compressor overload protection
+Resolution: Turn off for 30 minutes, then retry; check outdoor unit cooling
+
+E4 - System high pressure protection
+Resolution: Clean outdoor unit, ensure good cooling
+
+E5 - Indoor fan motor abnormal
+Resolution: Check filter installation, contact service
+
+Chapter 5: Warranty and Services
+
+5.1 Warranty Contents
+Warranty Period:
+- Main unit: 3 years
+- Compressor: 5 years
+- Other parts: 1 year
+- From purchase date
+
+Warranty Coverage:
+- Faults under normal use
+- Manufacturing defects
+- Free on-site service
+- Free replacement of parts
+
+Not Covered:
+- Damages caused by user
+- Failure to follow instructions
+- Self-disassembly or repair
+- Damages due to natural disasters
+
+5.2 Customer Service
+24-hour service hotline: 0800-XXX-XXX
+
+Services:
+- Fault repair
+- Usage consultation
+- Maintenance appointments
+- Relocation service
+- Parts ordering
+
+Service Hours:
+- Monday to Sunday: 8:00-21:00
+- National holidays subject to service
+
+Specification Overview
+Model: AC-280INV
+Cooling Capacity: 2.8 kW (2400 kcal/h)
+Heating Capacity: 3.2 kW (2750 kcal/h)
+Power Consumption (Cooling): 650 W
+Power Consumption (Heating): 750 W
+Energy Efficiency Ratio (EER): 4.31
+Applicable Area: 4-6 tsubo
+Power Supply: 110V single-phase 60 Hz
+Operating Current: 6.5 A
+Noise: Indoor 23 dB / Outdoor 48 dB
+Dehumidification: 1.5 L/hr
+Refrigerant: R32 (650 g)
+Piping Length: Standard 3 m (Max 15 m)
+
+Warranty:
+- Main unit warranty: 3 years
+- Compressor warranty: 5 years
+
+Manufactured in: Taiwan
+
+Customer Service: 0800-XXX-XXX
+Official Website: www.example.com
+
+Note: This manual is a generic version; actual specifications depend on the purchased model.
+
+Translated into English version; file saved as `冷氣機安裝維護手冊_en.txt`

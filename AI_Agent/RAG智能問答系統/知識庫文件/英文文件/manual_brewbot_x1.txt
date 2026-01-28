@@ -1,0 +1,28 @@
+Product Name: BrewBot X1 Smart Coffee Maker
+Model: BB-X1-2024
+Manufacturer: FutureBrew Inc.
+
+1. Product Overview
+The BrewBot X1 is a WiFi-enabled coffee maker designed for home use. It features a 1.5L water tank and supports voice control via Alexa and Google Assistant.
+
+2. Technical Specifications
+- Power: 1200W
+- Voltage: 110V-220V
+- Water Tank Capacity: 1.5 Liters
+- Brewing Temperature: 92°C to 96°C (Adjustable via App)
+- Connectivity: 2.4GHz WiFi only (5GHz not supported)
+
+3. Operation Instructions
+- Power On: Press the circular button on the front panel once.
+- Pairing Mode: Hold the power button for 5 seconds until the LED blinks blue.
+- Factory Reset: Hold the power button and the "Brew" button simultaneously for 10 seconds.
+
+4. Maintenance
+- Descaling: The "Clean" light will turn orange after 300 brew cycles. Please use the FutureBrew Descaling Solution.
+- Filter: Replace the charcoal water filter every 2 months.
+
+5. Troubleshooting (Error Codes)
+- Error E01: Water tank is empty. Please refill.
+- Error E02: Coffee grinder jammed. Please clean the bean hopper.
+- Error E03: Overheating protection triggered. Unplug for 30 minutes.
+- Error E04: WiFi connection lost. Check your router.

@@ -1,0 +1,31 @@
+Product Name: SonicCloud 9 Wireless Headphones
+Model: SC-900
+Type: Over-Ear Active Noise Cancelling (ANC)
+
+1. Key Features
+- Hybrid ANC technology reduces ambient noise by up to 35dB.
+- Transparency Mode allows you to hear surroundings without removing headphones.
+- Multi-point connection: Connect to two devices simultaneously.
+
+2. Battery & Charging
+- Battery Life (ANC On): 30 hours
+- Battery Life (ANC Off): 45 hours
+- Charging Time: 2 hours for a full charge via USB-C.
+- Quick Charge: 10 minutes of charging provides 3 hours of playback.
+
+3. Controls (Touch Pad on Right Ear Cup)
+- Play/Pause: Double tap.
+- Volume Up: Swipe up.
+- Volume Down: Swipe down.
+- Next Track: Swipe forward.
+- Toggle ANC/Transparency: Long press for 2 seconds.
+
+4. LED Indicator Status
+- Flashing Red/Blue: Pairing mode.
+- Solid Blue: Connected.
+- Flashing Red: Low battery (below 10%).
+- Solid Green: Fully charged.
+
+5. Warranty
+- Standard Warranty: 1 year from purchase date.
+- Water Resistance: IPX4 (Sweat resistant, do not submerge).

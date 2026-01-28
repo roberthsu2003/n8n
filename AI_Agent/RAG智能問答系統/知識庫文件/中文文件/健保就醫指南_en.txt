@@ -1,0 +1,506 @@
+National Health Insurance Medical Treatment Guide
+
+This guide helps you understand the coverage, medical treatment process, and related rights of the National Health Insurance.
+
+Chapter 1: Basic Understanding of NHI
+
+1.1 Use of the NHI Card
+Basic Information of the NHI Card:
+- IC chip card with a photo
+- Contains medical records
+- Universal in all medical institutions in Taiwan
+- Valid for 6 years
+
+Please bring when seeking medical treatment:
+- NHI Card
+- Identification document
+- Co-payment fee
+
+Lost NHI Card:
+1. Report the loss immediately (call 0800-030-598)
+2. Apply for a replacement (bring ID card, photo, and a 200 NTD processing fee)
+3. For temporary medical treatment, you can pay out-of-pocket and apply for a refund with the receipt.
+
+1.2 Insured Status
+Persons who should be insured:
+- Citizens with household registration in Taiwan
+- Foreigners who have resided in Taiwan for six months
+- Foreigners working in Taiwan
+
+Insurance Categories:
+Category 1: Employees (company, firm employees)
+Category 2: Members of professional unions
+Category 3: Farmers and fishermen
+Category 4: Military personnel, civil servants, teachers, and their dependents
+Category 5: Low-income households
+Category 6: Others (unemployed, retired, etc.)
+
+Premium Calculation:
+Premium = Insured Amount × Insurance Rate × Co-payment Ratio
+
+Chapter 2: Outpatient Medical Treatment
+
+2.1 Outpatient Medical Treatment Process
+1. Choose a medical institution
+   - Clinics, district hospitals, regional hospitals, medical centers
+   - You can call first to inquire about outpatient hours
+   - Some hospitals allow online registration
+
+2. Registration
+   - On-site registration
+   - Telephone registration
+   - Online registration
+   - Mobile app registration
+
+3. Pay registration fee and co-payment
+   - Basic clinics: 50 NTD
+   - District hospitals: 80 NTD
+   - Regional hospitals: 240 NTD
+   - Medical centers: 420 NTD
+
+4. Waiting
+   - Pay attention to the number display
+   - Wait for your number to be called
+
+5. Consultation
+   - Present NHI card
+   - Explain your condition
+   - The doctor will diagnose and issue a prescription
+
+6. Dispensing Medication
+   - Get medication from the outpatient pharmacy
+   - Or take the prescription to a contracted NHI pharmacy to get medication
+
+2.2 Co-payment Explanation
+Outpatient co-payment:
+Clinics: 50 NTD
+District hospitals: 80 NTD (360 NTD without a referral)
+Regional hospitals: 240 NTD (420 NTD without a referral)
+Medical centers: 420 NTD (550 NTD without a referral)
+
+Medication co-payment:
+100 NTD or less: 0 NTD
+101-200 NTD: 20 NTD
+201-300 NTD: 40 NTD
+301-400 NTD: 60 NTD
+401-500 NTD: 80 NTD
+501-600 NTD: 100 NTD
+
+Individuals exempt from co-payment:
+- Patients with major illnesses/injuries (with a major illness/injury card)
+- Childbirth
+- Medical treatment in mountain and remote island areas
+- Children under 3 years old
+- Low-income households
+- Veterans
+- Receiving preventive healthcare services
+
+2.3 Referral System
+Purpose of referral:
+- Save medical resources
+- Reduce co-payment
+- Establish a hierarchical medical system
+
+Referral process:
+1. Go to a basic clinic for medical treatment
+2. The doctor assesses the need for a referral
+3. Issue a referral slip
+4. Take the referral slip to a large hospital for consultation
+5. Reduce the co-payment difference
+
+Referral benefits:
+- With a referral to a medical center: co-payment 420 NTD (originally 550 NTD)
+- With a referral to a regional hospital: co-payment 240 NTD (originally 420 NTD)
+
+2.4 Continuous Prescription for Chronic Diseases
+Applicable to:
+Chronic disease patients with stable conditions (hypertension, diabetes, etc.)
+
+How to use:
+1. The doctor issues a 3-month continuous prescription
+2. You can get a 1-month supply of medication each time
+3. Get medication for 3 consecutive times
+4. Need a follow-up visit before the 3rd refill
+
+Advantages:
+- Reduce the number of consultations
+- Save on registration fees and co-payments
+- Convenient to get medication
+
+Notes:
+- Seek immediate follow-up if your condition changes
+- Cannot get medication in advance
+- If lost, you need to see a doctor again to get a new prescription
+
+Chapter 3: Emergency Medical Treatment
+
+3.1 When to go to the emergency room
+Emergency medical conditions:
+- Difficulty breathing
+- Unconsciousness
+- Chest pain
+- Massive bleeding
+- Severe trauma
+- Severe burns
+- Acute abdominal pain
+- Poisoning
+- Acute allergic reaction
+- High fever that does not subside (>39°C)
+
+Situations not suitable for emergency room:
+- Common cold
+- Getting medication for chronic diseases
+- Minor skin wounds
+- Mild headache
+- Insomnia
+It is recommended to go to a general outpatient clinic
+
+3.2 Emergency Triage Classification
+Triage system (five levels):
+Level 1 (Resuscitation): Immediate treatment
+- Cardiopulmonary arrest before arrival at the hospital
+- Unstable vital signs
+
+Level 2 (Critical): Treatment within 10 minutes
+- Unconsciousness
+- Chest pain, difficulty breathing
+- Severe trauma
+
+Level 3 (Urgent): Treatment within 30 minutes
+- High fever
+- Severe vomiting and diarrhea
+- Moderate trauma
+
+Level 4 (Semi-urgent): Treatment within 60 minutes
+- General trauma
+- Mild abdominal pain
+
+Level 5 (Non-urgent): Treatment within 120 minutes
+- Mild symptoms
+- Getting medication for chronic diseases
+- Recommended to switch to an outpatient clinic
+
+3.3 Emergency Co-payment
+Triage Level 1-2: No co-payment
+Triage Level 3-5:
+- District hospitals: 300 NTD
+- Regional hospitals: 450 NTD
+- Medical centers: 650 NTD
+
+Hospitalization required after examination: Co-payment will be refunded
+
+3.4 Ambulance Use
+119 Ambulance:
+- Free of charge
+- For emergency medical conditions
+- Prioritizes sending to the nearest appropriate hospital
+
+Private ambulance:
+- Charges apply (approx. 600-1500 NTD)
+- Can specify a hospital
+- Reservation required
+
+Note: Do not occupy 119 ambulance resources for non-emergency situations
+
+Chapter 4: Hospitalization Related
+
+4.1 Hospitalization Process
+1. Complete hospitalization procedures
+   - Fill out hospitalization consent form
+   - Pay hospitalization deposit
+   - Choose ward class
+
+2. During hospitalization
+   - Cooperate with medical treatment
+   - Regular visiting hours
+   - Ward management rules
+
+3. Discharge and payment
+   - Complete discharge procedures
+   - Settle the bill
+   - Receive discharge summary
+
+4.2 Hospitalization Co-payment
+Hospitalization co-payment:
+- Acute ward: 5%-10% (depending on the length of stay)
+- Chronic ward: 5%-20%
+- No charge for readmission for the same disease within 30 days
+
+Co-payment ceiling:
+- Per hospitalization: 39,000 NTD
+- Annual cumulative: 69,000 NTD
+
+4.3 Ward Difference
+Ward class:
+NHI ward: Free (3-6 person room)
+Two-person room difference: Approx. 500-2000 NTD/day
+Single-person room difference: Approx. 1000-5000 NTD/day
+ICU room difference: Approx. 3000-8000 NTD/day
+
+Note:
+- Ward difference fees are not covered by NHI
+- Must be paid out-of-pocket
+- You can choose an NHI ward without paying the difference
+
+Chapter 5: NHI Coverage
+
+5.1 Outpatient Coverage Items
+Covered items:
+- Consultation fee
+- Laboratory test fee
+- General examination
+- Treatment fee
+- Surgery fee
+- Medication fee (NHI drugs)
+- Injection fee
+- Therapy fee
+
+5.2 Inpatient Coverage Items
+Covered items:
+- Ward fee (NHI ward)
+- Meal fee
+- Nursing fee
+- Laboratory test fee
+- Surgery fee
+- Anesthesia fee
+- Medication fee (NHI drugs)
+- Radiology fee
+- Rehabilitation therapy fee
+
+5.3 Non-Covered Items
+Not covered by NHI:
+- Cosmetic surgery
+- Non-essential corrective surgery
+- Preventive injections (with some exceptions)
+- Health check-ups
+- Ward difference
+- Designated physician fee
+- Registration fee
+- Special material difference
+- Non-NHI drugs
+- Medical treatment abroad (except in special cases)
+
+5.4 Special Material Difference
+NHI only covers basic items for some special materials, and you need to pay the difference for better materials:
+- Intraocular lens
+- Heart stent
+- Artificial joint
+- Pacemaker
+- Drug-eluting stent
+
+Suggestion: Choose suitable materials based on the doctor's explanation and your own financial ability
+
+Chapter 6: Major Illness/Injury
+
+6.1 Scope of Major Illness/Injury
+30 categories of major illnesses/injuries:
+1. Cancer
+2. Dialysis
+3. Hemophilia
+4. Myasthenia gravis
+5. Organ transplant
+6. Rare diseases
+7. Congenital coagulation factor abnormalities
+8. Severe burns
+9. Ventilator dependence
+10. Others announced by the central competent authority
+
+6.2 Application for Major Illness/Injury Card
+Application requirements:
+- Diagnosed by a physician as having a major illness/injury
+- Requires continuous treatment
+
+Application process:
+1. Ask the physician to issue a diagnostic certificate
+2. Fill out the major illness/injury application form
+3. Attach relevant examination reports
+4. Submit to the NHIA for review
+5. A major illness/injury certificate will be issued upon approval
+
+6.3 Major Illness/Injury Benefits
+Benefits for holding a major illness/injury card:
+- Exempt from co-payment for medical treatment
+- Not limited to specific medical institutions
+- No referral required
+- Free continuous prescription for chronic diseases
+
+Note: Only for medical treatment related to the major illness/injury
+
+Chapter 7: Special Medical Treatment
+
+7.1 Preventive Healthcare Services
+Adult preventive healthcare:
+- 40-64 years old: Once every 3 years
+- 65 years and older: Once a year
+- Polio patients over 35 years old: Once a year
+
+Examination items:
+- Physical examination
+- Blood tests (blood sugar, lipids, liver and kidney function)
+- Urine test
+- Hepatitis B screening (once in a lifetime for ages 45-79)
+- Hepatitis C screening (once in a lifetime for ages 45-79)
+
+Cervical smear test for women:
+- Women over 30 years old
+- Once a year
+
+Mammography:
+- Women aged 45-69
+- Once every 2 years
+
+Colorectal cancer screening:
+- People aged 50-74
+- Fecal occult blood test once every 2 years
+
+Oral cancer screening:
+- Betel nut chewers or smokers over 30 years old
+- Once every 2 years
+
+Child preventive healthcare:
+- Children under 7 years old
+- A total of 9 free health checks
+
+Prenatal examination for pregnant women:
+- A total of 10 times during pregnancy
+- 2 ultrasound examinations
+
+7.2 Dental Treatment
+NHI covered items:
+- Teeth cleaning (once every six months)
+- Tooth extraction
+- Root canal treatment
+- General filling
+- Simple dentures
+
+Partially covered items:
+- Fixed dentures (co-payment required)
+- Removable dentures (partially covered, e.g., for fully edentulous)
+
+Non-covered items:
+- Dental implants
+- Orthodontics
+- Whitening
+- Veneers
+- Periodontal laser treatment
+
+7.3 Traditional Chinese Medicine Treatment
+NHI covered items:
+- Chinese medicine outpatient consultation
+- Chinese medicine traumatology
+- Acupuncture
+- Chinese medicine
+
+Notes:
+- Outpatient co-payment is 50 NTD per visit
+- A 28-day supply of medication can be prescribed for chronic diseases
+- Can see both Chinese and Western medicine doctors simultaneously
+- Some concentrated Chinese medicines require out-of-pocket payment
+
+Chapter 8: Overseas Medical Treatment
+
+8.1 Reimbursement for Out-of-Pocket Medical Expenses Abroad
+Applicable situations:
+- Sudden illness requiring medical treatment abroad
+- Does not include traveling abroad for the purpose of medical treatment
+- Does not include cosmetic surgery, health check-ups, etc.
+
+Application deadline:
+- Apply within 6 months after returning to Taiwan
+
+Required documents:
+1. Reimbursement application form
+2. Original medical expense receipts
+3. Diagnosis certificate or proof document
+4. Entry and exit records for that trip
+5. Chinese translation of the expense receipts
+
+Reimbursement standard:
+- Reimbursed according to the payment standard of domestic medical institutions of the same level
+- Usually lower than the actual amount paid
+
+8.2 Medical Treatment in Mainland China
+Emergency medical treatment can be reimbursed:
+- Limited to sudden illnesses
+- Notarized documents are required
+- According to the payment standards of domestic medical institutions
+
+Long-term residence in mainland China:
+- Can apply to suspend insurance
+- Need to resume insurance coverage to seek medical treatment in Taiwan
+
+Chapter 9: Complaints and Rights
+
+9.1 Medical Dispute Resolution
+Medical dispute resolution channels:
+1. Communicate and coordinate with the medical institution
+2. File a complaint with the hospital's complaint department
+3. File a complaint with the health bureau
+4. Apply for mediation
+5. Legal channels
+
+9.2 NHI Business Complaints
+Complaint channels:
+- NHIA service hotline: 0800-030-598
+- Regional divisions of the NHIA
+- Online application on the NHIA website
+- Written complaint
+
+Common complaint cases:
+- Disputes over medical institution fees
+- Problems with using the NHI card
+- Disputes over coverage determination
+- Damage to medical rights
+
+9.3 Handling of Premium Arrears
+Impact of arrears:
+- Within 3 months: Suspension of insurance benefits
+- Can seek medical treatment at own expense and apply for reimbursement after paying the arrears
+- Accumulated arrears: Will be subject to collection
+
+Repayment methods:
+- Convenience store payment
+- Financial institution payment
+- NHIA counter payment
+- ATM transfer
+- Credit card payment
+
+Installment payment:
+- Can apply for installment payments if the arrears reach a certain amount
+- Up to 24 installments
+
+Chapter 10: Frequently Asked Questions
+
+Q1: What if I forget to bring my NHI card?
+A: You can pay for the medical treatment out-of-pocket first, and within 6 months from the date of treatment, apply for reimbursement from the NHIA with your NHI card, receipt, and diagnosis certificate.
+
+Q2: Can I see doctors at multiple hospitals at the same time?
+A: Yes, but it is better to stick to one hospital for the same disease.
+
+Q3: Can I get my chronic disease prescription refilled in advance?
+A: No, you must wait until the date of the last refill plus the number of days of medication before you can get another refill.
+
+Q4: Can I choose my doctor during hospitalization?
+A: Yes, but the designated physician fee must be paid out-of-pocket.
+
+Q5: What if I have doubts about the diagnosis after a consultation?
+A: You can seek a second medical opinion by visiting another hospital.
+
+Q6: Can the medical records in my NHI card be deleted?
+A: No, the medical records are for medical reference.
+
+Q7: The doctor said this is an out-of-pocket item, is that reasonable?
+A: NHI has coverage limits, and special examinations or materials may require out-of-pocket payment. You can ask if there are NHI-covered alternatives.
+
+Q8: The wait at the emergency room is very long, can I complain?
+A: The emergency room operates on a triage system. If your condition is not urgent, you will have to wait. It is recommended to switch to an outpatient clinic.
+
+Important Phone Numbers
+NHIA Service Hotline: 0800-030-598
+NHI Card Loss Report Hotline: 0800-030-598
+NHI Express APP: You can check medical records and payment records
+
+NHIA Website: www.nhi.gov.tw
+Regional Divisions of the NHIA: Please check the NHIA website
+
+Note: This guide is a simplified version. For detailed regulations, please refer to the announcements of the NHIA. NHI-related regulations may be updated at any time. Please check the NHIA website regularly for the latest information.
