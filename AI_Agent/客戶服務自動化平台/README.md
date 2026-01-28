@@ -116,7 +116,7 @@
 4. 加入客戶歷史資料到 Context
 
 ### 步驟四：設定知識庫查詢
-1. 建立 **Vector Store**（參考 [RAG 智能問答系統](./RAG智能問答系統/README.md) 或 [整合 RAG 的實作](../RAG/README.md)）
+1. 建立 **Vector Store**（參考 [RAG 智能問答系統](./RAG智能問答系統/README.md)）
 2. 加入 **Vector Store Retriever** 節點
 3. 設定檢索參數
 4. 將檢索結果加入 AI Context
