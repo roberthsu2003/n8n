@@ -3,28 +3,31 @@
   "nodes": [
     {
       "parameters": {
-        "formTitle": "Upload your data to test RAG",
+        "formTitle": "上傳資料至記憶體",
+        "formDescription": "將csv,txt,pdf檔案上傳至記憶體資料庫",
         "formFields": {
           "values": [
             {
-              "fieldLabel": "Upload your file(s)",
+              "fieldLabel": "上傳檔案",
               "fieldType": "file",
-              "acceptFileTypes": ".pdf,.csv",
+              "acceptFileTypes": "txt,pdf,csv",
               "requiredField": true
             }
           ]
         },
-        "options": {}
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.3,
+      "typeVersion": 2.5,
       "position": [
-        0,
-        -64
+        1472,
+        960
       ],
-      "id": "97f32ae0-05ac-42f6-92aa-6a0aaa97ce76",
+      "id": "9cd5d871-084f-4a7d-9f7b-b89f9407b8b9",
       "name": "上傳檔案",
-      "webhookId": "6ae85daa-3723-4b6e-ac30-fab84ee8c222"
+      "webhookId": "0efb0cb3-1bfd-4a4d-a743-e91e50b1f8be"
     },
     {
       "parameters": {
@@ -33,15 +36,16 @@
           "__rl": true,
           "mode": "list",
           "value": "vector_store_key"
-        }
+        },
+        "embeddingBatchSize": 20
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        192,
-        -64
+        1680,
+        960
       ],
-      "id": "84a6f69a-7a49-4e6c-9d50-ce52d6f8b3ff",
+      "id": "5089e2ae-348f-46c9-9cff-af6f1bdf4bda",
       "name": "Simple Vector Store"
     },
     {
@@ -52,24 +56,124 @@
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1.1,
       "position": [
-        448,
-        112
+        1984,
+        1152
       ],
-      "id": "0876668d-aabd-445d-a7f5-9a0d1955c0f9",
+      "id": "45de1a15-4beb-41c9-8b7b-120b19783194",
       "name": "Default Data Loader"
     },
     {
       "parameters": {
-        "modelName": "BAAI/bge-m3",
+        "content": "## (步驟1)左側-上傳資料\n- 這個範例會以`信用卡權益說明_en.txt`為範例,請至知識庫文件下載這個檔案\n",
+        "height": 96,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1488,
+        816
+      ],
+      "typeVersion": 1,
+      "id": "0a8e21bf-92fe-4958-ab0c-32897fd79a5e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## (步驟2)右側-查詢資料\n- - 這個範例會以`信用卡權益說明_en.txt`文件內容制作`system prompt",
+        "height": 128,
+        "width": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2048,
+        800
+      ],
+      "typeVersion": 1,
+      "id": "d928b26a-0af9-452e-8df8-1b08432c1e78",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        2016,
+        960
+      ],
+      "id": "363164a1-e05a-4b85-881a-d7c9b45cfef5",
+      "name": "When chat message received",
+      "webhookId": "4346d05d-1bcb-4bf9-998f-452c2329411c"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.content }}",
+        "options": {
+          "systemMessage": "=你是一個信用卡權益說明文件的專業助理。\n你的所有回答「只能」根據已提供的文件內容，不得使用常識推測、外部知識或自行補充。\n如果文件中沒有明確資訊，請明確回答「文件中未提及」。\n如果問題是有需要計算,請依據文件提供的內容計算\n\n限制:\n所有回應必須使用「繁體中文」。\n\n注意事項:\n回答時請保持精確、條列清楚、用詞正式，不加入個人意見。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2464,
+        960
+      ],
+      "id": "5f6b088c-c5c2-43cf-8010-6b30b95ac5f4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "請使用這裏的資料知識回答使用者",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        2480,
+        1168
+      ],
+      "id": "a2eb612a-b12b-455b-bdd3-7913a748388a",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:20b-cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        2352,
+        1184
+      ],
+      "id": "39637258-e0b5-4e4d-ab92-0b2a4b49261d",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "puHSzMoUUx9WwTbB",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "sentence-transformers/all-MiniLM-L6-v2",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        592,
-        432
+        2032,
+        1408
       ],
-      "id": "7bb46f29-8745-4fab-bae6-3f6c378a0080",
+      "id": "ce4ab2aa-36bc-4735-a070-a8eefcef5d96",
       "name": "Embeddings HuggingFace Inference",
       "credentials": {
         "huggingFaceApi": {
@@ -80,69 +184,53 @@
     },
     {
       "parameters": {
-        "options": {}
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-oss:20b-cloud",
+          "mode": "list",
+          "cachedResultName": "gpt-oss:20b-cloud"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.chatInput }}"
+            }
+          ]
+        },
+        "options": {
+          "system": "=你的工作是把這些輸入的文字,完整的轉換為英文,不要加入任何其它的文字"
+        }
       },
-      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
-      "typeVersion": 1.4,
-      "position": [
-        688,
-        -80
-      ],
-      "id": "253a645a-de93-466f-a4f8-8a562af5ff73",
-      "name": "When chat message received",
-      "webhookId": "f40a9ba2-d20d-4608-a0bd-6caff3843555"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3,
-      "position": [
-        912,
-        -80
-      ],
-      "id": "036492db-afb6-4eb1-8755-423d8340944e",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "model": "nvidia/nemotron-nano-12b-v2-vl:free",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "type": "@n8n/n8n-nodes-langchain.ollama",
       "typeVersion": 1,
       "position": [
-        880,
-        144
+        2160,
+        960
       ],
-      "id": "d1222345-69b2-46cc-a738-c21fc8bec4e2",
-      "name": "OpenRouter Chat Model",
+      "id": "cd02ce4d-908c-4cdf-ba65-357b25b7c7d9",
+      "name": "將中文轉換為英文",
       "credentials": {
-        "openRouterApi": {
-          "id": "erNnIlwa0VXzcaGi",
-          "name": "OpenRouter account"
+        "ollamaApi": {
+          "id": "puHSzMoUUx9WwTbB",
+          "name": "Ollama account"
         }
       }
     },
     {
       "parameters": {
-        "mode": "retrieve-as-tool",
-        "toolDescription": "Use this knowledge base to answer questions form the user",
-        "memoryKey": {
-          "__rl": true,
-          "mode": "list",
-          "value": "vector_store_key"
-        }
+        "content": "## 注意事項 - 這是英轉英的範例\n\n1. **上傳檔案請使用英文檔案**\n2. **embedding model請使用`sentence-transformers/all-MiniLM-L6-v2`**",
+        "height": 176,
+        "width": 416,
+        "color": 3
       },
-      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
+      "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1008,
-        144
+        1504,
+        608
       ],
-      "id": "7322014c-b6ef-48cf-a361-4fe70e0f742c",
-      "name": "Query Data Tool"
+      "typeVersion": 1,
+      "id": "1b379289-9104-4649-832c-87e810998b75",
+      "name": "Sticky Note2"
     }
   ],
   "pinData": {},
@@ -169,34 +257,29 @@
         ]
       ]
     },
-    "Embeddings HuggingFace Inference": {
-      "ai_embedding": [
-        [
-          {
-            "node": "Simple Vector Store",
-            "type": "ai_embedding",
-            "index": 0
-          },
-          {
-            "node": "Query Data Tool",
-            "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "When chat message received": {
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "將中文轉換為英文",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "OpenRouter Chat Model": {
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
       "ai_languageModel": [
         [
           {
@@ -207,17 +290,28 @@
         ]
       ]
     },
-    "AI Agent": {
-      "main": [
-        []
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Query Data Tool": {
-      "ai_tool": [
+    "將中文轉換為英文": {
+      "main": [
         [
           {
             "node": "AI Agent",
-            "type": "ai_tool",
+            "type": "main",
             "index": 0
           }
         ]
@@ -228,7 +322,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "6d0adb17-7ba4-4fac-b07d-1691854255b3",
+  "versionId": "dedc8d82-446c-41f8-9003-20da6a96a320",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"

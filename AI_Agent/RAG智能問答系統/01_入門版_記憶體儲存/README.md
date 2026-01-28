@@ -7,11 +7,26 @@
 整個系統只需要**一個工作流程**，就能實現：
 - 📤 上傳文件（PDF,CSV,TXT）
 - 🔍 自動建立向量索引
-- 💬 智能問答對話
+- 💬 智能問答對話（支援中文提問，英文檢索，中文回答）
+
+### 🌍 範例特色：英轉英架構
+
+此範例採用「**英轉英**」架構：
+- 📄 **上傳英文檔案**：使用英文 Embedding 模型（`sentence-transformers/all-MiniLM-L6-v2`）獲得最佳檢索效果
+- 💬 **中文提問**：使用者可以用繁體中文提問
+- 🔄 **自動翻譯**：系統自動將中文問題轉換為英文進行向量檢索
+- ✅ **中文回答**：AI 根據檢索到的英文資料生成繁體中文回答
+
+**為什麼這樣設計？**
+- 英文 Embedding 模型對英文文件的檢索效果最佳
+- 使用者可以用熟悉的語言（中文）提問
+- 系統自動處理語言轉換，無需手動翻譯
 
 ### 範例知識庫文件下載
 
 [範例知識庫文件下載](../知識庫文件)
+
+**建議使用**：`信用卡權益說明_en.txt`（英文檔案）
 
 ## ✨ 核心特色
 
@@ -21,9 +36,10 @@
 |------|------|
 | 🚀 **超級簡單** | 只需一個工作流程，5分鐘快速體驗 |
 | 💾 **記憶體儲存** | 使用 In-Memory Vector Store，無需外部資料庫 |
-| 🆓 **零成本** | 可使用 HuggingFace 免費嵌入模型 |
+| 🆓 **零成本** | 使用 HuggingFace 免費嵌入模型 + Ollama 本地模型 |
 | ⚡ **即時體驗** | 上傳檔案後立即可以開始問答 |
 | 📚 **學習友善** | 專注於 RAG 核心概念，無額外複雜度 |
+| 🌍 **多語言支援** | 支援中文提問，英文檢索，中文回答 |
 
 ### **適用場景**
 
@@ -37,7 +53,9 @@
 ⚠️ **資料不持久**：工作流程重啟或執行結束後，向量資料會消失  
 ⚠️ **不適合大量文件**：記憶體有限，建議小於 50 份文件  
 ⚠️ **無法跨流程共用**：每次執行都是獨立的索引  
-⚠️ **適合測試**：生產環境建議使用基礎版或進階版
+⚠️ **適合測試**：生產環境建議使用基礎版或進階版  
+⚠️ **英轉英範例**：此範例針對英文檔案優化，請上傳英文檔案以獲得最佳效果  
+⚠️ **需要 Ollama**：需要本地安裝並運行 Ollama 服務
 
 ---
 
@@ -95,9 +113,11 @@
 │                                                          │
 │  [When chat message received] (Chat Trigger)             │
 │      ↓                                                   │
-│  [AI Agent] ←─ [OpenRouter Chat Model]                  │
+│  [將中文轉換為英文] (Ollama)                              │
 │      ↓                                                   │
-│  [Query Data Tool] ←─ [Embeddings]                       │
+│  [AI Agent] ←─ [Ollama Chat Model]                      │
+│      ↓                                                   │
+│  [Simple Vector Store1] (Retrieve) ←─ [Embeddings]      │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -120,17 +140,19 @@
 
 ##### **1️⃣ 上傳檔案（Form Trigger）**
 
-- **節點類型**：`n8n-nodes-base.formTrigger` v2.3
+- **節點類型**：`n8n-nodes-base.formTrigger` v2.5
 - **主要功能**：
   - 產生一個網頁表單，讓使用者可以上傳檔案
-  - 接受 `.pdf` 和 `.csv` 格式的檔案
-  - 表單標題：「Upload your data to test RAG」
+  - 接受 `.txt`、`.pdf` 和 `.csv` 格式的檔案
+  - 表單標題：「上傳資料至記憶體」
+  - 表單描述：「將csv,txt,pdf檔案上傳至記憶體資料庫」
   - 這是整個流程的**起始點**
 
 **💡 學習重點**：
 - 這就像是一個「入口大門」，使用者在這裡上傳他們的資料
 - n8n 會自動產生一個網址，可以分享給其他人使用
 - 支援多檔案上傳，一次可以處理多個文件
+- **注意**：此範例為「英轉英」範例，建議上傳英文檔案
 
 ---
 
@@ -153,7 +175,7 @@
 ##### **3️⃣ Embeddings HuggingFace Inference**
 
 - **節點類型**：`embeddingsHuggingFaceInference` v1
-- **使用模型**：`BAAI/bge-m3`
+- **使用模型**：`sentence-transformers/all-MiniLM-L6-v2`
 - **主要功能**：
   - 將文字轉換成向量（Embedding）
   - 連接到 HuggingFace API
@@ -163,7 +185,8 @@
 - 這是整個系統的**核心技術**
 - Embedding 就像是把文字轉換成「座標」，讓電腦能計算文字之間的相似度
 - 同一個 Embedding 模型連接到兩個地方，確保「存入」和「查詢」使用相同的向量化方式
-- BAAI/bge-m3 是一個多語言模型，支援中文、英文等多種語言
+- `sentence-transformers/all-MiniLM-L6-v2` 是一個輕量級的英文嵌入模型，速度快且效果好
+- **注意**：此模型主要針對英文優化，適合此「英轉英」範例
 
 ---
 
@@ -172,6 +195,7 @@
 - **節點類型**：`vectorStoreInMemory` v1.3
 - **運作模式**：`insert`（插入模式）
 - **Memory Key**：`vector_store_key`
+- **Embedding Batch Size**：20
 - **主要功能**：
   - 接收來自表單的檔案
   - 將檔案內容轉換成**向量**並儲存在記憶體中
@@ -182,6 +206,7 @@
 - 它不是單純儲存文字，而是將內容轉換成數學向量
 - 這樣 AI 才能「理解」文件的意義並進行語義搜尋
 - **Memory Key** 是關鍵：讓兩個 Vector Store 節點共享同一個資料庫
+- **Embedding Batch Size** 控制一次處理的文件片段數量，影響處理速度
 
 ---
 
@@ -194,65 +219,87 @@
 - **節點類型**：`chatTrigger` v1.4
 - **主要功能**：
   - 提供一個聊天介面
-  - 接收使用者的問題
+  - 接收使用者的問題（可以是中文）
   - 啟動 AI 代理處理流程
 
 **💡 學習重點**：
 - 這是另一個「入口」，但這次是用來問問題的
 - n8n 會產生一個聊天室網址，使用者可以在那裡和 AI 對話
 - 與表單觸發器分開，形成兩個獨立的觸發點
+- 使用者可以用中文提問，系統會自動轉換為英文進行檢索
 
 ---
 
-##### **6️⃣ AI Agent**
+##### **6️⃣ 將中文轉換為英文**
 
-- **節點類型**：`agent` v3
+- **節點類型**：`ollama` v1
+- **使用模型**：`gpt-oss:20b-cloud`
 - **主要功能**：
-  - 接收使用者的問題
+  - 接收使用者的中文問題
+  - 將中文問題轉換為英文
+  - System Prompt：「你的工作是把這些輸入的文字,完整的轉換為英文,不要加入任何其它的文字」
+
+**💡 學習重點**：
+- 這是「英轉英」範例的關鍵節點
+- 因為 Embedding 模型主要針對英文優化，所以需要先將中文問題轉換為英文
+- 轉換後的英文問題會用於向量檢索
+- 使用 Ollama 本地模型進行翻譯，無需額外 API 費用
+
+---
+
+##### **7️⃣ AI Agent**
+
+- **節點類型**：`agent` v3.1
+- **System Message**：繁體中文，定義為「信用卡權益說明文件的專業助理」
+- **主要功能**：
+  - 接收轉換後的英文問題
   - 決定要使用哪些工具來回答
-  - 整合所有資訊後產生回答
+  - 整合所有資訊後產生繁體中文回答
 
 **💡 學習重點**：
 - 這是整個 AI 系統的**「大腦」**
 - 它會判斷：「我需要去資料庫找資料嗎？」「找到的資料要怎麼整合？」
 - 它可以多次呼叫工具，直到找到最佳答案
 - AI Agent 會自己判斷要不要使用工具，工具的描述很重要
+- System Message 明確要求只能根據文件內容回答，使用繁體中文回應
 
 ---
 
-##### **7️⃣ OpenRouter Chat Model**
+##### **8️⃣ Ollama Chat Model**
 
-- **節點類型**：`lmChatOpenRouter` v1
-- **使用模型**：`nvidia/nemotron-nano-12b-v2-vl:free`
+- **節點類型**：`lmChatOllama` v1
+- **使用模型**：`gpt-oss:20b-cloud`
 - **主要功能**：
   - 提供語言理解和生成能力
-  - 免費模型，適合教學使用
-  - 產生自然語言回答
+  - 使用本地 Ollama 模型，無需 API 費用
+  - 產生自然語言回答（繁體中文）
 
 **💡 學習重點**：
 - 這是 AI 的**「語言能力」**
 - 就像給 AI 一個「會說話的嘴巴」
-- 不同的模型有不同的能力和特色
-- 使用免費模型，零成本學習
+- 使用本地 Ollama 模型，完全免費且隱私性高
+- 需要在本地安裝並啟動 Ollama 服務
+- 模型會根據檢索到的英文資料生成繁體中文回答
 
 ---
 
-##### **8️⃣ Query Data Tool（Vector Store - Retrieve 模式）**
+##### **9️⃣ Simple Vector Store1（Retrieve 模式）**
 
 - **節點類型**：`vectorStoreInMemory` v1.3
 - **運作模式**：`retrieve-as-tool`（作為工具檢索）
 - **Memory Key**：`vector_store_key`（與插入節點共享）
-- **工具描述**：「Use this knowledge base to answer questions form the user」
+- **工具描述**：「請使用這裏的資料知識回答使用者」（繁體中文）
 - **主要功能**：
   - 從向量資料庫中搜尋相關文件
-  - 根據使用者問題找出最相關的內容
-  - 將找到的資料提供給 AI Agent
+  - 根據轉換後的英文問題找出最相關的內容
+  - 將找到的英文資料提供給 AI Agent
 
 **💡 學習重點**：
 - 這是 AI 的**「參考資料工具」**
 - AI Agent 可以主動決定要不要使用這個工具
 - 它會找出和問題最相關的片段，而不是整份文件
 - 使用相同的 Memory Key，存取之前儲存的向量資料
+- 工具描述使用繁體中文，幫助 AI Agent 理解何時使用此工具
 
 ---
 
@@ -285,31 +332,34 @@ Simple Vector Store 儲存向量
 ### **🟢 階段二：AI 智能問答**
 
 ```
-使用者提問 (Chat Trigger)
+使用者提問（中文）(Chat Trigger)
     ↓
-AI Agent 接收問題並分析
+將中文轉換為英文 (Ollama)
+    ↓ (翻譯問題)
+AI Agent 接收英文問題並分析
     ↓ (決策：需要查資料嗎？)
-AI Agent 呼叫 Query Data Tool
+AI Agent 呼叫 Simple Vector Store1
     ↓ (搜尋相關片段)
-Query Data Tool 從 Vector Store 檢索資料
-    ↓ (返回最相關的內容)
+Simple Vector Store1 從 Vector Store 檢索資料
+    ↓ (返回最相關的英文內容)
 AI Agent 整合資料
     ↓ (組織答案)
-OpenRouter Chat Model 生成自然語言回答
+Ollama Chat Model 生成繁體中文回答
     ↓
 回答顯示在聊天介面
     ✅ (完成)
 ```
 
 **詳細步驟**：
-1. 使用者在聊天介面輸入問題
-2. AI Agent 接收問題並判斷：「這個問題需要查詢知識庫嗎？」
-3. 如果需要，AI Agent 呼叫 Query Data Tool
-4. Query Data Tool 將問題轉換為向量，並在 Vector Store 中搜尋最相似的文件片段
-5. 找到的相關片段回傳給 AI Agent
-6. AI Agent 將問題和找到的資料一起傳給 OpenRouter Chat Model
-7. Chat Model 根據資料生成準確的回答
-8. 回答顯示在聊天介面上
+1. 使用者在聊天介面輸入中文問題
+2. 「將中文轉換為英文」節點將問題翻譯為英文
+3. AI Agent 接收英文問題並判斷：「這個問題需要查詢知識庫嗎？」
+4. 如果需要，AI Agent 呼叫 Simple Vector Store1
+5. Simple Vector Store1 將英文問題轉換為向量，並在 Vector Store 中搜尋最相似的文件片段
+6. 找到的相關英文片段回傳給 AI Agent
+7. AI Agent 將問題和找到的資料一起傳給 Ollama Chat Model
+8. Chat Model 根據英文資料生成繁體中文回答
+9. 回答顯示在聊天介面上
 
 ---
 
@@ -343,7 +393,8 @@ OpenRouter Chat Model 生成自然語言回答
 
 - ✅ n8n 帳號（本地安裝或雲端版都可）
 - ✅ HuggingFace API Key（[免費申請](https://huggingface.co/settings/tokens)）
-- ✅ OpenRouter API Key（[免費額度](https://openrouter.ai/)）
+- ✅ Ollama 已安裝並啟動（[安裝指南](../../Ollama安裝與設定.md)）
+- ✅ 已下載 `gpt-oss:20b-cloud` 模型（執行 `ollama pull gpt-oss:20b-cloud`）
 
 ### **步驟 1：匯入工作流程**
 
@@ -360,12 +411,19 @@ OpenRouter Chat Model 生成自然語言回答
 3. 在 n8n 中新增 `HuggingFaceApi` 憑證
 4. 貼上您的 API Token
 
-#### **2.2 OpenRouter API**
+#### **2.2 Ollama 設定**
 
-1. 前往 [OpenRouter](https://openrouter.ai/)
-2. 註冊並取得 API Key（新用戶有免費額度）
-3. 在 n8n 中新增 `OpenRouter` 憑證
-4. 貼上您的 API Key
+1. 確認 Ollama 已安裝並正在運行（預設在 `http://localhost:11434`）
+2. 下載所需模型：
+   ```bash
+   ollama pull gpt-oss:20b-cloud
+   ```
+3. 驗證模型已安裝：
+   ```bash
+   ollama list
+   ```
+4. 在 n8n 中新增 `Ollama API` 憑證
+5. Base URL 設定為：`http://localhost:11434`（或您的 Ollama 服務地址）
 
 ### **步驟 3：取得上傳網址**
 
@@ -376,9 +434,14 @@ OpenRouter Chat Model 生成自然語言回答
 
 ### **步驟 4：上傳測試文件**
 
-1. 準備一個 PDF 或 CSV 檔案（建議小於 5MB）
+1. 準備一個英文的 TXT、PDF 或 CSV 檔案（建議小於 5MB）
+   - 範例檔案：`信用卡權益說明_en.txt`（可在知識庫文件資料夾中找到）
 2. 在表單中上傳檔案
 3. 等待處理完成（約 10-30 秒）
+
+**⚠️ 重要提醒**：
+- 此範例為「英轉英」範例，請上傳**英文檔案**
+- Embedding 模型 `sentence-transformers/all-MiniLM-L6-v2` 主要針對英文優化
 
 ### **步驟 5：開始問答**
 
@@ -394,14 +457,14 @@ OpenRouter Chat Model 生成自然語言回答
 
 ### **測試 1：簡單事實查詢**
 
-**上傳文件**：產品說明書 PDF
+**上傳文件**：`信用卡權益說明_en.txt`（英文檔案）
 
-**提問**：
+**提問**（可用中文）：
 ```
-這個產品的主要功能是什麼？
+這個信用卡的主要權益是什麼？
 ```
 
-**預期結果**：AI 會從文件中找到產品功能列表並回答
+**預期結果**：AI 會將問題轉換為英文，從文件中找到相關內容，並以繁體中文回答
 
 ---
 
@@ -635,14 +698,14 @@ RAG = R + A + G
 
 ### **練習 2：比較不同的 Embedding 模型**
 
-1. 使用預設的 `BAAI/bge-m3`，上傳文件並測試
-2. 更換為 `sentence-transformers/all-MiniLM-L6-v2`，重新上傳並測試
+1. 使用預設的 `sentence-transformers/all-MiniLM-L6-v2`，上傳英文文件並測試
+2. 更換為 `BAAI/bge-m3`（多語言模型），重新上傳並測試
 3. 比較兩者的回答準確度和速度
 
 **記錄觀察**：
 - 哪個模型回答更準確？
 - 哪個模型速度更快？
-- 對中文的支援如何？
+- 如果使用多語言模型，可以嘗試移除「將中文轉換為英文」節點，直接使用中文檢索
 
 ---
 
@@ -663,12 +726,26 @@ RAG = R + A + G
 ### **練習 4：理解 Memory Key 的作用**
 
 **實驗步驟**：
-1. 修改檢索節點的 Memory Key 為 `different_key`
+1. 修改檢索節點（Simple Vector Store1）的 Memory Key 為 `different_key`
 2. 上傳文件後嘗試問答
-3. 觀察會發生什麼（應該會失敗）
+3. 觀察會發生什麼（應該會失敗，因為找不到資料）
 4. 改回 `vector_store_key`，確認恢復正常
 
 **學習目標**：深刻理解 Memory Key 的共享機制
+
+---
+
+### **練習 5：測試「英轉英」流程**
+
+**實驗步驟**：
+1. 上傳英文檔案（如 `信用卡權益說明_en.txt`）
+2. 用中文提問：「這個信用卡有什麼優惠？」
+3. 觀察執行日誌，確認：
+   - 「將中文轉換為英文」節點是否正確翻譯
+   - Simple Vector Store1 是否找到相關英文內容
+   - AI Agent 是否生成繁體中文回答
+
+**學習目標**：理解多語言 RAG 系統的運作流程
 
 ---
 
@@ -676,34 +753,52 @@ RAG = R + A + G
 
 ### **調整 1：更換 Embedding 模型**
 
-**預設模型**：`BAAI/bge-m3`（多語言支援，效果好）
+**預設模型**：`sentence-transformers/all-MiniLM-L6-v2`（輕量級，速度快，主要針對英文）
 
 **其他選擇**：
-- `sentence-transformers/all-MiniLM-L6-v2`（輕量級，速度快）
+- `BAAI/bge-m3`（多語言支援，效果好，支援中文）
 - `intfloat/multilingual-e5-large`（大型模型，效果更好但較慢）
 
 **如何更換**：
 1. 點擊 `Embeddings HuggingFace Inference` 節點
 2. 修改 `Model Name` 參數
 3. **注意**：Insert 和 Retrieve 兩個地方都要改成同一個模型
+4. **注意**：如果更換為多語言模型，可以考慮移除「將中文轉換為英文」節點
 
 ### **調整 2：更換語言模型**
 
-**預設模型**：`nvidia/nemotron-nano-12b-v2-vl:free`（免費）
+**預設模型**：`gpt-oss:20b-cloud`（Ollama 本地模型）
 
 **其他選擇**：
 ```bash
-# OpenRouter 支援的免費模型
-- meta-llama/llama-3.2-3b-instruct:free
-- google/gemini-flash-1.5:free
-- qwen/qwen-2-7b-instruct:free
+# Ollama 支援的模型（需先下載）
+ollama pull llama3.2:3b
+ollama pull qwen2.5:7b
+ollama pull mistral:7b
 ```
+
+**如何更換**：
+1. 下載新模型：`ollama pull <模型名稱>`
+2. 點擊 `Ollama Chat Model` 節點
+3. 修改 `Model` 參數為新模型名稱
+4. 同樣更新「將中文轉換為英文」節點的模型（如果需要）
 
 ### **調整 3：限制檢索數量**
 
-在 `Query Data Tool` 節點中：
+在 `Simple Vector Store1` 節點中：
 - `Top K`：預設為 4，表示檢索 4 個最相關片段
-- 增加到 6-8 可以提高準確度，但會增加 Token 使用量
+- 增加到 6-8 可以提高準確度，但會增加處理時間和記憶體使用
+
+### **調整 4：移除中文轉英文步驟（進階）**
+
+如果您想直接使用中文進行檢索：
+
+1. **更換 Embedding 模型**為多語言模型（如 `BAAI/bge-m3`）
+2. **移除「將中文轉換為英文」節點**
+3. **直接連接** `When chat message received` → `AI Agent`
+4. **更新 System Message**，確保 AI Agent 理解要處理中文問題
+
+這樣可以簡化流程，但需要確保 Embedding 模型支援中文。
 
 ---
 
@@ -715,11 +810,15 @@ RAG = R + A + G
 1. Embedding 模型設定不一致
 2. Memory Key 設定錯誤
 3. 文件格式不支援
+4. Ollama 服務未啟動
+5. 上傳了中文檔案但使用英文 Embedding 模型
 
 **解決方法**：
 1. 檢查兩個 Vector Store 節點的 `Memory Key` 都設為 `vector_store_key`
-2. 確認兩個 Embeddings 節點使用相同模型
-3. 確認文件是 PDF 或 CSV 格式
+2. 確認 Embeddings 節點使用 `sentence-transformers/all-MiniLM-L6-v2`
+3. 確認文件是 TXT、PDF 或 CSV 格式
+4. 確認 Ollama 服務正在運行：`curl http://localhost:11434/api/tags`
+5. **確認上傳的是英文檔案**（此範例為「英轉英」）
 
 ### **Q2: 重新執行工作流程後，之前上傳的文件不見了？**
 
@@ -734,13 +833,18 @@ In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新
 ### **Q3: 支援哪些文件格式？**
 
 **目前支援**：
+- ✅ TXT（.txt）
 - ✅ PDF（.pdf）
 - ✅ CSV（.csv）
 
 **想支援更多格式？**
 1. 點擊 `上傳檔案` 節點
 2. 修改 `Accept File Types` 參數
-3. 加入：`.txt,.docx,.xlsx`
+3. 加入：`.docx,.xlsx`
+
+**⚠️ 重要提醒**：
+- 此範例為「英轉英」範例，請上傳**英文檔案**
+- 如果上傳中文檔案，檢索效果可能不佳
 
 ### **Q4: 可以一次上傳多個文件嗎？**
 
@@ -765,6 +869,39 @@ In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新
 - 模型：`text-embedding-004`
 - 成本：免費（有配額限制）
 
+**選項 3**：使用本地 Embedding 模型（Ollama）
+- 節點類型：`Embeddings Ollama`
+- 需要先下載支援 Embedding 的模型
+- 完全免費且隱私性高
+
+### **Q6: Ollama 連接失敗怎麼辦？**
+
+**可能原因**：
+1. Ollama 服務未啟動
+2. Base URL 設定錯誤
+3. 防火牆阻擋連接
+
+**解決方法**：
+1. 確認 Ollama 正在運行：
+   ```bash
+   curl http://localhost:11434/api/tags
+   ```
+2. 檢查 n8n 中的 Ollama API 憑證設定
+3. Base URL 應為：`http://localhost:11434`（本地）或您的 Ollama 服務地址
+4. 確認防火牆允許本地連接
+
+### **Q7: 為什麼要將中文轉換為英文？**
+
+**原因**：
+- 此範例使用的 Embedding 模型 `sentence-transformers/all-MiniLM-L6-v2` 主要針對英文優化
+- 英文 Embedding 模型對英文文件的檢索效果更好
+- 上傳的檔案是英文，所以問題也需要轉換為英文才能正確檢索
+
+**如果想直接使用中文**：
+- 更換為多語言 Embedding 模型（如 `BAAI/bge-m3`）
+- 移除「將中文轉換為英文」節點
+- 直接連接 Chat Trigger → AI Agent
+
 ---
 
 ## 📚 學習路徑
@@ -775,7 +912,9 @@ In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新
 ✅ Embeddings（嵌入）的作用  
 ✅ Vector Store（向量資料庫）的運作原理  
 ✅ 語義搜尋 vs 關鍵字搜尋的差異  
-✅ AI Agent 如何使用工具檢索資訊
+✅ AI Agent 如何使用工具檢索資訊  
+✅ 多語言 RAG 系統的設計（中文提問、英文檢索、中文回答）  
+✅ Ollama 本地模型的整合與使用
 
 ### **下一步學習建議：**
 
@@ -803,16 +942,19 @@ In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新
 
 #### **Part 2：實作演示（20 分鐘）**
 1. 匯入工作流程
-2. 設定憑證（HuggingFace + OpenRouter）
-3. 上傳測試文件
-4. 執行問答測試
-5. 觀察執行日誌，理解每個節點的作用
+2. 確認 Ollama 服務運行中
+3. 設定憑證（HuggingFace + Ollama）
+4. 上傳英文測試文件（如 `信用卡權益說明_en.txt`）
+5. 執行問答測試（可用中文提問）
+6. 觀察執行日誌，理解每個節點的作用（特別注意「將中文轉換為英文」節點）
 
 #### **Part 3：互動實驗（10 分鐘）**
-1. 學生上傳自己的文件
-2. 測試不同類型的問題
-3. 討論 AI 回答的準確度
-4. 嘗試調整參數（Top K、Temperature）
+1. 學生上傳自己的英文文件
+2. 測試不同類型的中文問題
+3. 觀察「將中文轉換為英文」節點的翻譯結果
+4. 討論 AI 回答的準確度
+5. 嘗試調整參數（Top K、Temperature）
+6. 討論「英轉英」架構的優缺點
 
 ---
 
@@ -837,11 +979,14 @@ In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新
 ## 🎉 完成檢查清單
 
 - [ ] 成功匯入工作流程
-- [ ] 設定 HuggingFace 和 OpenRouter 憑證
-- [ ] 上傳一個測試文件
-- [ ] 成功進行問答對話
+- [ ] 設定 HuggingFace 和 Ollama 憑證
+- [ ] 確認 Ollama 服務正在運行
+- [ ] 下載 `gpt-oss:20b-cloud` 模型
+- [ ] 上傳一個英文測試文件（如 `信用卡權益說明_en.txt`）
+- [ ] 成功進行問答對話（可用中文提問）
 - [ ] 理解 RAG 的基本工作流程
 - [ ] 理解 Embeddings 和 Vector Store 的作用
+- [ ] 理解「英轉英」範例的運作機制
 - [ ] 知道 In-Memory Store 的限制
 - [ ] 準備好學習基礎版或進階版
 
