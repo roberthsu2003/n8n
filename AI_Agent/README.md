@@ -63,8 +63,18 @@
 - ✅ 快速上手，立即看到成果
 
 ---
-#### [⭐ 台北市youbike站點資訊查詢](./智能客服聊天機器人/README.md)
+#### [⭐ 台北市 youbike 站點資訊查詢](./台北市youbike站點資訊查詢/README.md)  
+
 **難度**: ⭐☆☆ (初級)
+
+**台北市交通局 YouBike 客服** — 聊天介面為台北市交通局／youbike服務中心（助理「帥氣的小犬」），透過單一 HTTP Request Tool 查詢台北市 YouBike 即時站點資訊。預設使用 Google Gemini，可改接 Ollama。
+
+**學習重點**：
+- 工具使用：單一外部 API（台北市 YouBike 即時資料）的整合
+- Chat Trigger 介面與 System Prompt 的客服角色設定
+- Simple Memory、AI Agent 與工具的連接
+
+
 ---
 
 #### [⭐ 天氣和新聞查詢（使用 Ollama）](./天氣和新聞查詢_使用Ollama/README.md)
@@ -79,7 +89,6 @@
 - **多工具協作**：AI 在多個工具間做選擇
 - 持續使用 Ollama 本地模型（零成本）
 
-**使用節點**：Chat Trigger、AI Agent、Ollama Chat Model、Window Buffer Memory、HTTP Request Tool、RSS Feed Read Tool
 
 **💡 為什麼學習這個範例？**
 - ✅ 從純對話進階到工具使用

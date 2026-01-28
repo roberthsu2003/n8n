@@ -1,0 +1,169 @@
+{
+  "name": "台北市youbike站點資訊查詢",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "您好:\n這是台北市youbike服務中心",
+        "availableInChat": true,
+        "agentName": "帥氣的小犬",
+        "agentDescription": "客服人員",
+        "options": {
+          "inputPlaceholder": "請輸入您的問題",
+          "subtitle": "youbike服務中心",
+          "title": "台北市交通局"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        96,
+        -64
+      ],
+      "id": "0810f2f8-0a85-4550-bee6-12d3b8593644",
+      "name": "When chat message received",
+      "webhookId": "bfbd8663-9d40-4ad5-9466-2f8b0a4bc9dd"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=角色:\n你是一個政府交通局內的youbike客服人員,友善且專業的客服助理。你的任務是協助客戶解決問題、回答疑問，並提供優質的服務體驗。\n\n\n個性:\n- 友善、耐心、樂於助人\n- 回應清晰、簡潔、易懂\n- 保持專業但不失親切\n- 善於傾聽並理解客戶需求\n\n可以使用的工具:\n專門取得台北市youbike即時資訊的API\n\n\n你的職責:\n1. **親切地回應客戶問題**\n   - 使用禮貌且友善的語氣\n   - 確保客戶感受到被重視\n\n2. **提供準確的產品資訊**\n   - 回答有關youbike的資訊\n   \n\n3. **協助解決客戶問題**\n   - 仔細聆聽問題描述\n   - 提供清晰的解決步驟\n   - 確認問題是否已解決\n\n4. **在無法解決時，禮貌地引導**\n   - 若問題超出能力範圍，引導客戶聯繫人工客服\n   - 提供聯繫方式或相關資源\n   - 如果無法回答，請告機關聯絡人:李彥安,聯絡人電話:02-27208889#6907,聯絡人電子郵件:pn9607@gov.taipei\n\n對話原則:\n- 保持回應簡潔，不超過 150 字\n- 使用繁體中文溝通\n- 記住對話中的重要資訊（客戶姓名、訂單號碼等）\n- 主動提供相關建議\n- 若客戶情緒不佳，展現同理心\n\n當前時間:\n{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }} (台北時間)\n\n\n輸出格式:\n- 使用友善、對話式的語氣回應\n- 根據對話脈絡給予個人化回覆\n- 適時使用表情符號增加親切感（但不過度）\n- 保持專業且有幫助的態度\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        -64
+      ],
+      "id": "ac6340bb-ab9f-4758-b547-4a056e328eda",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:20b-cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        0,
+        128
+      ],
+      "id": "53398469-d3cc-4a59-ac54-022ea22937b0",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "puHSzMoUUx9WwTbB",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 1
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        112
+      ],
+      "id": "d1b3afbb-6e23-4e12-b228-aecb2e3c8395",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "modelName": "=gemini-3-flash-preview",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        192,
+        112
+      ],
+      "id": "840e4b26-8ca4-41db-b5ea-f60ffd7cf658",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "a2DHnK6MGTaS59sC",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "專門取得台北市youbike即時資訊的API",
+        "url": "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        528,
+        112
+      ],
+      "id": "63a5596b-f98a-414c-8b0b-f897e2df918d",
+      "name": "台北市youbike即時資訊"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "台北市youbike即時資訊": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "78f84176-7531-4633-98cc-adacf037df54",
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "id": "nyuRdVSp7pymcTXglHDFb",
+  "tags": []
+}
