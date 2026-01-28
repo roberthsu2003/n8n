@@ -542,365 +542,61 @@ Ollama Chat Model 生成繁體中文回答
 
 ---
 
-## 🎓 給學生的重點整理
+## 🎓 重點整理
 
-完成這個範例後，請確保您理解以下重點：
+### **核心概念**
 
-### **1. 理解兩個獨立的觸發器**
-
-**表單觸發 vs 聊天觸發**：
-
-| 特性 | 表單觸發（Form Trigger） | 聊天觸發（Chat Trigger） |
-|------|------------------------|------------------------|
-| **功能** | 上傳資料 | 提問查詢 |
-| **執行時機** | 上傳檔案時 | 發送訊息時 |
-| **資料流向** | 檔案 → 向量資料庫 | 問題 → AI → 答案 |
-| **是否共享** | 共享同一個 Vector Store | 共享同一個 Vector Store |
-
-**重要**：
-- 兩者是**分開的流程**，但共享同一個向量資料庫
-- 必須先執行表單觸發（上傳檔案），才能使用聊天觸發（問答）
-- 它們通過 `vector_store_key` 連接在一起
+1. **兩個獨立觸發器**：表單觸發（上傳）和聊天觸發（問答）共享同一個 `vector_store_key`
+2. **Embedding 一致性**：插入和檢索必須使用相同的 Embedding 模型，才能正確計算相似度
+3. **Memory Key 共享**：兩個 Vector Store 節點使用相同的 Memory Key 才能共享資料
+4. **RAG 三要素**：R（檢索）+ A（增強）+ G（生成）= 完整的 RAG 系統
+5. **英轉英架構**：中文提問 → 轉英文 → 英文檢索 → 中文回答
 
 ---
 
-### **2. Embedding 的重要性**
+## 💪 動手練習
 
-**為什麼同一個 Embedding 要連接兩個地方？**
+### **練習 1：測試不同問題類型**
+上傳文件後測試：簡單事實、需要理解、需要推理、超出範圍的問題，觀察 AI 如何回答。
 
-```
-Embeddings HuggingFace Inference
-    ↓                    ↓
-插入節點          檢索節點
-(儲存時)          (查詢時)
-```
+### **練習 2：理解 Memory Key**
+修改檢索節點的 Memory Key 為 `different_key`，觀察會發生什麼（應該會失敗），然後改回 `vector_store_key`。
 
-**原因**：
-- ✅ **一致性**：確保「存入」和「查詢」使用相同的向量化方式
-- ✅ **相似度計算**：只有用同樣的模型，才能正確計算相似度
-- ✅ **避免錯誤**：如果用不同模型，查詢會找不到資料
-
-**比喻**：
-就像用同一把尺來測量和比較，如果存入時用公分、查詢時用英吋，就會出錯！
-
----
-
-### **3. AI Agent 的智慧決策**
-
-**AI Agent 如何決定要不要使用工具？**
-
-```
-使用者問：「今天天氣如何？」
-AI Agent 思考：這個問題和上傳的文件無關
-決策：不使用 Query Data Tool
-回答：「抱歉，我無法回答天氣相關問題」
-
-使用者問：「這份文件的主要內容是什麼？」
-AI Agent 思考：需要查看文件內容
-決策：使用 Query Data Tool 檢索資料
-回答：基於文件內容的答案
-```
-
-**關鍵因素**：
-- 📝 **工具描述**：「Use this knowledge base to answer questions form the user」
-- 🧠 **AI 判斷**：根據問題和工具描述，決定是否使用
-- 🔄 **多次呼叫**：可能多次使用工具來找到完整答案
-
----
-
-### **4. RAG 架構的三個核心**
-
-**記住這個簡單的公式**：
-
-```
-RAG = R + A + G
-```
-
-- **R** (Retrieval / 檢索)：從資料庫找資料
-  - 使用 Query Data Tool
-  - 語義搜尋，找最相關片段
-  
-- **A** (Augmented / 增強)：用找到的資料增強提示
-  - AI Agent 整合問題和資料
-  - 組合成完整的上下文
-  
-- **G** (Generation / 生成)：根據增強後的提示生成回答
-  - OpenRouter Chat Model 生成答案
-  - 自然語言回答
-
----
-
-### **5. Memory Key 的共享機制**
-
-**為什麼 Memory Key 這麼重要？**
-
-```
-┌─────────────────────────────────────┐
-│     Memory Key = "vector_store_key"  │
-├─────────────────────────────────────┤
-│                                     │
-│  插入節點 (Insert)                   │
-│    使用：vector_store_key           │
-│    功能：寫入向量資料                │
-│                                     │
-│  檢索節點 (Retrieve)                 │
-│    使用：vector_store_key           │
-│    功能：讀取向量資料                │
-│                                     │
-└─────────────────────────────────────┘
-```
-
-**實驗**：
-- 如果兩個節點使用不同的 Memory Key，會發生什麼？
-  - 答案：檢索節點會找不到資料！
-  - 因為它們指向不同的「資料庫」
-
----
-
-### **6. 可以改進的方向**
-
-完成基礎版本後，您可以嘗試以下改進：
-
-#### **改進 1：更換模型**
-- 🔄 更換不同的 Embedding 模型（測試效果差異）
-- 🔄 更換不同的 Chat Model（比較回答品質）
-
-#### **改進 2：增加功能**
-- ➕ 添加對話記憶（Simple Memory 節點）
-- ➕ 增加更多工具給 AI Agent 使用
-- ➕ 添加錯誤處理機制
-
-#### **改進 3：優化參數**
-- ⚙️ 調整 Top K 值（檢索數量）
-- ⚙️ 調整 Temperature（回答隨機性）
-- ⚙️ 調整 Chunk Size（文件分割大小）
-
-#### **改進 4：擴展應用**
-- 🌐 支援更多檔案格式（Word、Excel、TXT）
-- 🔐 添加使用者驗證
-- 📊 記錄查詢歷史和統計
-
----
-
-## 💪 動手練習建議
-
-### **練習 1：測試不同的問題類型**
-
-上傳一份文件後，測試：
-- ✅ 簡單事實問題：「文件中提到的主要產品是什麼？」
-- ✅ 需要理解的問題：「這個方法的優缺點是什麼？」
-- ✅ 需要推理的問題：「為什麼要使用這個技術？」
-- ✅ 超出範圍的問題：「明天天氣如何？」
-
-觀察 AI 如何回答不同類型的問題。
-
----
-
-### **練習 2：比較不同的 Embedding 模型**
-
-1. 使用預設的 `sentence-transformers/all-MiniLM-L6-v2`，上傳英文文件並測試
-2. 更換為 `BAAI/bge-m3`（多語言模型），重新上傳並測試
-3. 比較兩者的回答準確度和速度
-
-**記錄觀察**：
-- 哪個模型回答更準確？
-- 哪個模型速度更快？
-- 如果使用多語言模型，可以嘗試移除「將中文轉換為英文」節點，直接使用中文檢索
-
----
-
-### **練習 3：調整 Top K 參數**
-
-在 Query Data Tool 節點中：
-1. 設定 Top K = 2，測試回答
-2. 設定 Top K = 4（預設），測試回答
-3. 設定 Top K = 8，測試回答
-
-**觀察**：
-- Top K 太小會怎樣？（可能資訊不足）
-- Top K 太大會怎樣？（可能混入不相關資訊）
-- 最佳值是多少？
-
----
-
-### **練習 4：理解 Memory Key 的作用**
-
-**實驗步驟**：
-1. 修改檢索節點（Simple Vector Store1）的 Memory Key 為 `different_key`
-2. 上傳文件後嘗試問答
-3. 觀察會發生什麼（應該會失敗，因為找不到資料）
-4. 改回 `vector_store_key`，確認恢復正常
-
-**學習目標**：深刻理解 Memory Key 的共享機制
-
----
-
-### **練習 5：測試「英轉英」流程**
-
-**實驗步驟**：
-1. 上傳英文檔案（如 `信用卡權益說明_en.txt`）
-2. 用中文提問：「這個信用卡有什麼優惠？」
-3. 觀察執行日誌，確認：
-   - 「將中文轉換為英文」節點是否正確翻譯
-   - Simple Vector Store1 是否找到相關英文內容
-   - AI Agent 是否生成繁體中文回答
-
-**學習目標**：理解多語言 RAG 系統的運作流程
+### **練習 3：測試「英轉英」流程**
+上傳英文檔案，用中文提問，觀察執行日誌中「將中文轉換為英文」節點的翻譯結果。
 
 ---
 
 ## 🔧 進階調整
 
-### **調整 1：更換 Embedding 模型**
+### **更換模型**
+- **Embedding**：可更換為 `BAAI/bge-m3`（多語言，支援中文），若更換可考慮移除「將中文轉換為英文」節點
+- **Chat Model**：可更換為其他 Ollama 模型（如 `llama3.2:3b`、`qwen2.5:7b`）
 
-**預設模型**：`sentence-transformers/all-MiniLM-L6-v2`（輕量級，速度快，主要針對英文）
+### **調整參數**
+- **Top K**：預設 4，可調整為 6-8 提高準確度（但會增加處理時間）
 
-**其他選擇**：
-- `BAAI/bge-m3`（多語言支援，效果好，支援中文）
-- `intfloat/multilingual-e5-large`（大型模型，效果更好但較慢）
-
-**如何更換**：
-1. 點擊 `Embeddings HuggingFace Inference` 節點
-2. 修改 `Model Name` 參數
-3. **注意**：Insert 和 Retrieve 兩個地方都要改成同一個模型
-4. **注意**：如果更換為多語言模型，可以考慮移除「將中文轉換為英文」節點
-
-### **調整 2：更換語言模型**
-
-**預設模型**：`gpt-oss:20b-cloud`（Ollama 本地模型）
-
-**其他選擇**：
-```bash
-# Ollama 支援的模型（需先下載）
-ollama pull llama3.2:3b
-ollama pull qwen2.5:7b
-ollama pull mistral:7b
-```
-
-**如何更換**：
-1. 下載新模型：`ollama pull <模型名稱>`
-2. 點擊 `Ollama Chat Model` 節點
-3. 修改 `Model` 參數為新模型名稱
-4. 同樣更新「將中文轉換為英文」節點的模型（如果需要）
-
-### **調整 3：限制檢索數量**
-
-在 `Simple Vector Store1` 節點中：
-- `Top K`：預設為 4，表示檢索 4 個最相關片段
-- 增加到 6-8 可以提高準確度，但會增加處理時間和記憶體使用
-
-### **調整 4：移除中文轉英文步驟（進階）**
-
-如果您想直接使用中文進行檢索：
-
-1. **更換 Embedding 模型**為多語言模型（如 `BAAI/bge-m3`）
-2. **移除「將中文轉換為英文」節點**
-3. **直接連接** `When chat message received` → `AI Agent`
-4. **更新 System Message**，確保 AI Agent 理解要處理中文問題
-
-這樣可以簡化流程，但需要確保 Embedding 模型支援中文。
+### **移除中文轉英文（進階）**
+更換為多語言 Embedding 模型後，可移除「將中文轉換為英文」節點，直接使用中文檢索。
 
 ---
 
 ## ❓ 常見問題
 
-### **Q1: 為什麼我的文件上傳後無法問答？**
+### **Q1: 文件上傳後無法問答？**
+- 檢查兩個 Vector Store 節點的 `Memory Key` 都設為 `vector_store_key`
+- 確認 Ollama 服務正在運行：`curl http://localhost:11434/api/tags`
+- **確認上傳的是英文檔案**（此範例為「英轉英」）
 
-**可能原因**：
-1. Embedding 模型設定不一致
-2. Memory Key 設定錯誤
-3. 文件格式不支援
-4. Ollama 服務未啟動
-5. 上傳了中文檔案但使用英文 Embedding 模型
+### **Q2: 重新執行後文件不見了？**
+這是正常的！In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新的索引。如需持久化，請升級到基礎版或進階版。
 
-**解決方法**：
-1. 檢查兩個 Vector Store 節點的 `Memory Key` 都設為 `vector_store_key`
-2. 確認 Embeddings 節點使用 `sentence-transformers/all-MiniLM-L6-v2`
-3. 確認文件是 TXT、PDF 或 CSV 格式
-4. 確認 Ollama 服務正在運行：`curl http://localhost:11434/api/tags`
-5. **確認上傳的是英文檔案**（此範例為「英轉英」）
+### **Q3: Ollama 連接失敗？**
+- 確認 Ollama 正在運行：`curl http://localhost:11434/api/tags`
+- 檢查 n8n 中的 Ollama API 憑證設定，Base URL 應為 `http://localhost:11434`
 
-### **Q2: 重新執行工作流程後，之前上傳的文件不見了？**
-
-**這是正常的！**
-
-In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新的索引。
-
-**解決方案**：
-- 升級到 **基礎版**（使用 Simple Vector Store，資料會持久化）
-- 或升級到 **進階版**（使用雲端向量資料庫）
-
-### **Q3: 支援哪些文件格式？**
-
-**目前支援**：
-- ✅ TXT（.txt）
-- ✅ PDF（.pdf）
-- ✅ CSV（.csv）
-
-**想支援更多格式？**
-1. 點擊 `上傳檔案` 節點
-2. 修改 `Accept File Types` 參數
-3. 加入：`.docx,.xlsx`
-
-**⚠️ 重要提醒**：
-- 此範例為「英轉英」範例，請上傳**英文檔案**
-- 如果上傳中文檔案，檢索效果可能不佳
-
-### **Q4: 可以一次上傳多個文件嗎？**
-
-可以！Form Trigger 支援多檔案上傳。
-
-**設定方法**：
-1. 點擊 `上傳檔案` 節點
-2. 在 `Upload your file(s)` 欄位設定中
-3. 確認允許多檔案選擇
-
-### **Q5: HuggingFace Embedding 太慢怎麼辦？**
-
-**替代方案**：
-
-**選項 1**：使用 OpenAI Embeddings（付費但快速）
-- 節點類型：`Embeddings OpenAI`
-- 模型：`text-embedding-3-small`
-- 成本：約 $0.02 / 1M tokens
-
-**選項 2**：使用 Google Gemini Embeddings（免費且快速）
-- 節點類型：`Embeddings Google Gemini`  
-- 模型：`text-embedding-004`
-- 成本：免費（有配額限制）
-
-**選項 3**：使用本地 Embedding 模型（Ollama）
-- 節點類型：`Embeddings Ollama`
-- 需要先下載支援 Embedding 的模型
-- 完全免費且隱私性高
-
-### **Q6: Ollama 連接失敗怎麼辦？**
-
-**可能原因**：
-1. Ollama 服務未啟動
-2. Base URL 設定錯誤
-3. 防火牆阻擋連接
-
-**解決方法**：
-1. 確認 Ollama 正在運行：
-   ```bash
-   curl http://localhost:11434/api/tags
-   ```
-2. 檢查 n8n 中的 Ollama API 憑證設定
-3. Base URL 應為：`http://localhost:11434`（本地）或您的 Ollama 服務地址
-4. 確認防火牆允許本地連接
-
-### **Q7: 為什麼要將中文轉換為英文？**
-
-**原因**：
-- 此範例使用的 Embedding 模型 `sentence-transformers/all-MiniLM-L6-v2` 主要針對英文優化
-- 英文 Embedding 模型對英文文件的檢索效果更好
-- 上傳的檔案是英文，所以問題也需要轉換為英文才能正確檢索
-
-**如果想直接使用中文**：
-- 更換為多語言 Embedding 模型（如 `BAAI/bge-m3`）
-- 移除「將中文轉換為英文」節點
-- 直接連接 Chat Trigger → AI Agent
+### **Q4: 為什麼要將中文轉換為英文？**
+此範例使用的 Embedding 模型主要針對英文優化。如果想直接使用中文，可更換為多語言模型（如 `BAAI/bge-m3`）並移除「將中文轉換為英文」節點。
 
 ---
 
@@ -930,64 +626,28 @@ In-Memory Vector Store 的資料儲存在記憶體中，每次執行都是全新
 
 ---
 
-## 🎓 教學建議
+## 🎓 教學建議（45 分鐘）
 
-### **教學流程（45 分鐘）**
-
-#### **Part 1：概念講解（15 分鐘）**
-1. 什麼是 RAG？為什麼需要 RAG？
-2. Embeddings 和 Vector Store 的基本概念
-3. 語義搜尋的工作原理
-4. 介紹範例架構
-
-#### **Part 2：實作演示（20 分鐘）**
-1. 匯入工作流程
-2. 確認 Ollama 服務運行中
-3. 設定憑證（HuggingFace + Ollama）
-4. 上傳英文測試文件（如 `信用卡權益說明_en.txt`）
-5. 執行問答測試（可用中文提問）
-6. 觀察執行日誌，理解每個節點的作用（特別注意「將中文轉換為英文」節點）
-
-#### **Part 3：互動實驗（10 分鐘）**
-1. 學生上傳自己的英文文件
-2. 測試不同類型的中文問題
-3. 觀察「將中文轉換為英文」節點的翻譯結果
-4. 討論 AI 回答的準確度
-5. 嘗試調整參數（Top K、Temperature）
-6. 討論「英轉英」架構的優缺點
+1. **概念講解（15 分鐘）**：RAG 基本概念、Embeddings、Vector Store、語義搜尋
+2. **實作演示（20 分鐘）**：匯入工作流程、設定憑證、上傳測試文件、執行問答測試
+3. **互動實驗（10 分鐘）**：學生上傳文件、測試不同問題、觀察執行日誌、討論結果
 
 ---
 
 ## 📖 參考資源
 
-### **官方文件**
+- [n8n RAG 完整指南](https://docs.n8n.io/advanced-ai/rag-in-n8n/)
 - [n8n AI Agent 文件](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.agent/)
 - [Vector Store 說明](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.vectorstoreinmemory/)
-- [RAG 完整指南](https://docs.n8n.io/advanced-ai/rag-in-n8n/)
-
-### **相關範本**
-- [n8n RAG Starter](https://n8n.io/workflows/5010)
-- [Document Q&A Template](https://n8n.io/workflows/2340)
-
-### **延伸閱讀**
-- [什麼是 RAG？](https://aws.amazon.com/what-is/retrieval-augmented-generation/)
-- [Embeddings 深入解析](https://platform.openai.com/docs/guides/embeddings)
-- [向量資料庫比較](https://zilliz.com/blog/vector-database-comparison)
 
 ---
 
 ## 🎉 完成檢查清單
 
-- [ ] 成功匯入工作流程
-- [ ] 設定 HuggingFace 和 Ollama 憑證
-- [ ] 確認 Ollama 服務正在運行
-- [ ] 下載 `gpt-oss:20b-cloud` 模型
-- [ ] 上傳一個英文測試文件（如 `信用卡權益說明_en.txt`）
-- [ ] 成功進行問答對話（可用中文提問）
-- [ ] 理解 RAG 的基本工作流程
-- [ ] 理解 Embeddings 和 Vector Store 的作用
-- [ ] 理解「英轉英」範例的運作機制
-- [ ] 知道 In-Memory Store 的限制
+- [ ] 成功匯入工作流程並設定憑證（HuggingFace + Ollama）
+- [ ] 確認 Ollama 服務運行並下載 `gpt-oss:20b-cloud` 模型
+- [ ] 上傳英文測試文件並成功進行問答對話
+- [ ] 理解 RAG 基本工作流程和「英轉英」架構
 - [ ] 準備好學習基礎版或進階版
 
 ---
