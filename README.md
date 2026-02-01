@@ -99,9 +99,6 @@
 
 ---
 
-## 🗄️ [Supabase 整合](./supabase整合/README.md)
-使用開源的 Firebase 替代方案 Supabase，學習即時資料庫、檔案儲存和身份驗證的整合。
-
 ## 📜 [Google Apps Script (GAS) 整合](./GAS整合/README.md)
 結合 Google Apps Script 的自訂函數與 n8n 工作流，打造更強大的 Google 工作區自動化。
 
