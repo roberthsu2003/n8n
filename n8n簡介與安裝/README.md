@@ -186,24 +186,38 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 - **我的 ngrok 帳號 (Email):** `__________________________`
 - **我的 ngrok Authtoken:** `__________________________`
-- **我的固定網址 (Static Domain):** `__________________________` *(例如: poodle-calm-roughly.ngrok-free.app)*
+- **我的固定網址 (Static Domain):** `__________________________` *(例如: poodle-calm-roughly.ngrok-free.app 或 xxx.ngrok-free.dev)*
 
 ##### 操作步驟
 
+現在 ngrok 的 Dashboard 提供了一站式引導，登入後就會有非常友善的互動教學引導您完成設定。
+
 **步驟 1：註冊/登入 ngrok**
-- 前往 [dashboard.ngrok.com/signup](https://dashboard.ngrok.com/signup)
-- 建議使用 **Google 帳號登入**
+- 前往 [dashboard.ngrok.com](https://dashboard.ngrok.com/)
+- 建議直接使用 **Google 帳號登入**
 
-**步驟 2：領取免費固定網址** ⭐️
-- 登入後，點選左側選單的 **Universal Gateway** > **Domains**
-- 點擊 **「+ Create Domain」** 按鈕
-- 系統會自動配發一個網址
-- **請將這個網址抄寫到上方的筆記區**
+**步驟 2：進入 Setup & Installation 互動教學**
+- 登入後，點選左側選單的 **Getting Started** > **Setup & Installation**。
+- 您會看到系統已自動偵測您的作業系統（例如 macOS），並在右側列出安裝與設定的逐步說明。
 
-**步驟 3：取得身分驗證碼 (Authtoken)**
-- 點選左側選單的 **Getting Started** > **Your Authtoken**
-- 複製那串以 `2...` 開頭的長代碼
-- **請將 Token 抄寫或暫存起來**
+**步驟 3：取得專屬 Authtoken**
+- 在 **Setup & Installation** 網頁的第 1 步中，會直接顯示您專屬的綁定指令，例如：
+  `ngrok config add-authtoken 36YWSnJRrwW...`
+- 直接複製該整行指令，即可將您的 Authtoken 綁定到您的電腦中。
+- *（或者也可以點選左側選單的 **Your Authtoken** 來單獨複製驗證代碼）*
+
+**步驟 4：領取並複製免費固定網址 (Static Domain)** ⭐️
+- 往下拉到頁面最底部的「**Deploy your app online**」區塊。
+- 系統會為您自動生成並顯示一個免費的開發用固定網址（例如：`https://xxx.ngrok-free.dev`）。
+- **請將這個網址抄寫到上方的筆記區。**
+- *（如需手動管理網址，亦可點選左側選單 **Universal Gateway** > **Domains** 進行設定）*
+
+> ⚠️ **關鍵注意（必改 Port 5678）**：
+> ngrok 官方網頁預設教學的啟動指令是 `ngrok http 80`。但因為 **n8n 的預設服務埠號 (Port) 是 5678**，所以在本機啟動時，您**必須將指令改為連接 5678**：
+> ```bash
+> # 加上您的固定網址，並將 port 改為 5678
+> ngrok http 5678 --domain=<您的固定網址>
+> ```
 
 ---
 
@@ -226,11 +240,11 @@ docker run -d \
   --name n8n \
   --restart always \
   -p 5678:5678 \
-  -e N8N_HOST=abcd-1234.ngrok-free.app \
+  -e N8N_HOST=<abcd-1234.ngrok-free.app> \
   -e N8N_PROTOCOL=https \
   -e N8N_PORT=5678 \
-  -e N8N_EDITOR_BASE_URL=https://abcd-1234.ngrok-free.app \
-  -e WEBHOOK_URL=https://abcd-1234.ngrok-free.app \
+  -e N8N_EDITOR_BASE_URL=<https://abcd-1234.ngrok-free.app> \
+  -e WEBHOOK_URL=<https://abcd-1234.ngrok-free.app> \
   -e GENERIC_TIMEZONE=Asia/Taipei \
   -v n8n_data:/home/node/.n8n \
   docker.n8n.io/n8nio/n8n
