@@ -18,11 +18,13 @@
 
 ## 📚 課程章節
 
+### 📈 [2026 年趨勢前瞻：n8n 市場定位與轉型分析](./n8n_2026_market_analysis.md)
+深入剖析 2026 年 AI Agent 時代下，n8n 的定位轉變、與 AI 原生工具的競合關係、雲端計費陷阱，以及為什麼「自建服務 (Self-hosting)」在成本控管與資安上是必要選擇。
+
+
 ### 🐳 [Docker容器化基礎與n8n部署準備](./Docker容器化基礎與n8n部署準備/README.md)
 學習 Docker 容器化基礎與 n8n 部署準備，包括 Docker 核心概念、安裝與 Hello World、基礎指令實戰、網路與與資料持久化、進階管理與 Docker Compose、專題實戰 - 模擬 n8n 部署環境。
 
-### 📈 [2026 年趨勢前瞻：n8n 市場定位與轉型分析](./n8n_2026_market_analysis.md)
-深入剖析 2026 年 AI Agent 時代下，n8n 的定位轉變、與 AI 原生工具的競合關係、雲端計費陷阱，以及為什麼「自建服務 (Self-hosting)」在成本控管與資安上是必要選擇。
 
 ### 🚀 [第一章：n8n 簡介與安裝](./n8n簡介與安裝/README.md)
 學習 n8n 的核心概念、支援的安裝方式（Docker、npm），以及如何建立固定網址（ngrok）以接收外部 Webhook。
