@@ -32,9 +32,6 @@
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
 
-### ☁️ [Google Cloud 的 API 服務設定重點](./Google_Cloud_api服務/README.md)
-學習如何在 Google Cloud Platform 建立專案、啟用 API，以及設定 OAuth 憑證。
-
 ---
 
 ## 🎯 [初體驗範例](./初階範例/README.md)
