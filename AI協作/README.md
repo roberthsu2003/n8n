@@ -1,111 +1,86 @@
-# AI協作
+# AI協作 — 使用 Claude Connector 連接 n8n
 
-## 目錄
+## 範例 Workflow
 
-- [n8n MCP Server 整合](#n8n-mcp-server-整合)
+### 🚲 [台北市的 YouBike 低車輛站點自動記錄](./台北市的youbike/README.md)
+從台北市政府開放資料即時抓取 YouBike 2.0 所有站點資訊，自動篩選可借或可還車輛不足 3 輛的低車輛站點，並依日期寫入 Google Sheets，方便追蹤各站點供車狀況。本範例同時附有**給 AI 的 Prompt 範本**，可直接貼給 Claude 重新建出此 workflow。
 
 ---
 
-# n8n MCP 設定與功能說明
+## 什麼是 Claude n8n Connector？
 
-本文件說明如何設定 n8n 的 **原生 MCP (Model Context Protocol) 存取功能**。此功能允許您將 n8n Workflow 直接作為 AI 工具 (Tools) 暴露給 Claude Desktop 或其他 MCP Client 使用。
+**Claude Connector** 是 Claude 內建的整合功能，由 **n8n GmbH** 官方開發。透過 Connector，Claude 可以直接與您的 n8n 實例溝通，無需手動設定 MCP Server 或 ngrok。
 
-> **注意**：此說明適用於 n8n v1.122.5 或更高版本，並使用原生的 "MCP Access" 設定面板。
+連線後 Claude 可以：
+- 建立、搜尋、執行 Workflow
+- 管理 Data Tables、專案與資料夾
+- 查詢執行紀錄與節點定義
+
+> 共提供 **27 個工具**，涵蓋 `search_workflows`、`execute_workflow`、`get_workflow_details`、`publish_workflow` 等完整操作。
+
+---
 
 ## 設定步驟
 
-### 1. 啟用 n8n MCP 功能 (全域設定)
-1. 進入 n8n 的 **Settings** (設定)。
-2. 點選左側選單的 **MCP Access**。
-3. 將右上角的 **Enable MCP** 開關打開。
+### 1. 在 n8n 開啟 Instance-level MCP
 
-### 2. 開放 Workflow 權限 (個別設定)
-**這是最關鍵的一步！** 只有被明確授權的 Workflow 才會變成 AI 可用的工具。
+1. 進入 n8n 的 **Settings（設定）**。
+2. 點選左側選單的 **Instance-level MCP**（標示 Preview）。
+3. 確認右上角 **Enabled** 開關已打開（綠色）。
+4. 點選 **Connection details**，選擇 **OAuth** 頁籤，記下 **Server URL**。
 
-您可以透過兩種方式開啟權限：
+### 2. 啟動 ngrok 取得 HTTPS 網址
 
-**方法 A：從 Workflow 列表 (最快)**
-1. 在 n8n 的 **Workflows** 列表頁面。
-2. 點擊該 Workflow 右側的三個點選單 `⋮`。
-3. 選擇 **Grant MCP access** (如果已開啟則會顯示 Remove MCP access)。
+OAuth 授權流程要求 n8n 必須透過 **HTTPS** 對外提供服務，因此需先用 ngrok 將本機 n8n 暴露為公開 HTTPS 網址。
 
-**方法 B：從 Workflow 編輯器**
-1. 進入該 Workflow 的編輯畫面。
-2. 開啟 **Settings**。
-3. 啟用 **MCP Access** 選項。
-
-> **提示**：開啟後，您可以回到 **Settings > MCP Access** 頁面，下方會列出 **Available Workflows**，確認 AI 目前可以看到哪些工具。
-
-### 3. 設定 MCP Client (以 Claude Desktop 為例)
-在您的 Claude Desktop 設定檔 (`claude_desktop_config.json`) 中，加入以下設定。這會使用 `supergateway` 來連接 n8n 的 HTTP Endpoint。
-
-請將 `<YOUR_SERVER_URL>` 和 `<YOUR_ACCESS_TOKEN>` 替換為 **Settings > MCP Access** 頁面上顯示的實際數值。
-
-```json
-{
-  "mcpServers": {
-    "n8n-mcp": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "supergateway",
-        "--streamableHttp",
-        "<YOUR_SERVER_URL>", 
-        "--header",
-        "authorization:Bearer <YOUR_ACCESS_TOKEN>"
-      ]
-    }
-  }
-}
+```bash
+ngrok http 5678
 ```
 
-- **Server URL**: 在 MCP Access 頁面的 "Server URL" 欄位複製 (結尾通常是 `/mcp-server/http`)。
-- **Access Token**: 在 MCP Access 頁面的 "Access Token" 欄位複製。
+啟動後複製 ngrok 產生的 HTTPS 網址，例如：
 
-## AI 可以透過這個 MCP 做什麼
+```
+https://superinnocent-hillary-unwholesome.ngrok-free.app
+```
 
-一旦設定完成，每個被授權的 Workflow 都會變成 AI 的一個 **"工具" (Tool)**。
+> **提示**：新版 ngrok 大部分情況會提供固定網址，重新啟動後網址不變，無需重新設定 Claude Connector。
 
-- **自動化執行**：
-    AI 不再是"操作 n8n"，而是**直接使用您定義好的功能**。
-    - *場景*：您有一個 "新增 Notion 筆記" 的 Workflow。
-    - *AI 的視角*：它會看到一個名為 `create_notion_note` 的工具，並知道需要填入 `title` 和 `content`。
-    - *使用者指令*：當您對 AI 說「幫我把今天的會議記錄記下來」，AI 就會自動呼叫這個工具。
+### 3. 在 Claude 新增 n8n Connector
 
-    您可以在 n8n 中使用任何節點 (HTTP Request, Slack, Google Sheets 等) 建立複雜邏輯，然後將其包裝成一個簡單的工具給 AI 使用。
+1. 開啟 Claude 桌面版，點選左側 **Connectors**。
+2. 點選右上角 **+** 搜尋 `n8n`。
+3. 選擇由 **n8n GmbH** 開發的官方 Connector。
+4. 點選 **Connect**，輸入上一步取得的 **ngrok HTTPS 網址** 作為 Server URL。
+5. 完成 **OAuth 授權**，瀏覽器會跳出 n8n 登入/授權頁面，確認後即完成連線。
 
-## 💡 實用場景範例
+### 3. 授權 Workflow（開放給 Claude 使用）
 
-以下是幾個結合「AI 智慧腦」與「n8n 自動化手腳」的強大應用場景：
+回到 n8n **Settings > Instance-level MCP > Workflows** 頁籤：
 
-### 1. 智慧資料庫查詢助手
-使用者問：「**幫我查一下上個月銷售額超過 1 萬的訂單有哪些？**」
-- **AI (腦)**：解析使用者的意圖，提取時間範圍「上個月」與金額條件「>10000」。
-- **n8n (手)**：執行 `search_orders` workflow → 連接 MySQL/Google Sheet 撈取資料 → 回傳 JSON。
-- **AI (腦)**：將回傳的 JSON 資料整理成易讀的表格或摘要回答使用者。
+1. 點選右上角 **Enable workflows** 按鈕。
+2. 選擇要開放給 Claude 的 Workflow。
 
-### 2. 多平台社群發布機
-使用者輸入：「**這是我剛寫好的部落格文章，幫我發布到網站並分享到粉絲團。**」
-- **AI (腦)**：先將文章內容生成一段適合社群的簡短貼文 (Post)。
-- **n8n (手)**：執行 `publish_content` workflow，接收 `title`, `body`, `social_post` 參數。
-    - 步驟 A：透過 WordPress 節點發布文章。
-    - 步驟 B：透過 Facebook/Line 節點發送社群貼文。
-    - 步驟 C：回傳兩者的發布連結。
-- **AI (腦)**：回報：「發布成功！這裡是您的文章連結...」
+| 欄位 | 說明 |
+|------|------|
+| Name | Workflow 名稱 |
+| Location | 所在專案 / 資料夾 |
+| Description | Claude 識別此工具的說明（建議填寫，避免 ⚠️ No description）|
 
-### 3. 客戶支援票務系統
-使用者（客服人員）輸入：「**來自 user@example.com 的這個抱怨信，幫我建一張緊急工單。**」
-- **AI (腦)**：分析信件內容，摘要出「問題描述」與「緊急程度」。
-- **n8n (手)**：執行 `create_ticket` workflow。
-    - 步驟 A：在 Jira/Asana 建立任務。
-    - 步驟 B：發送 Slack 通知給技術主管。
-    - 步驟 C：回傳工單編號。
-- **AI (腦)**：回覆：「已建立緊急工單 #T-8821，並通知技術主管。」
+> **提示**：Description 是 Claude 判斷何時呼叫此 Workflow 的依據，請盡量填寫清楚。
 
-### 4. 系統健康度檢查
-使用者問：「**現在網站和 API 運作都正常嗎？**」
-- **n8n (手)**：執行 `health_check` workflow。
-    - 步驟 A：發送 HTTP Request 測試官網回應時間。
-    - 步驟 B：檢查資料庫連線狀態。
-    - 步驟 C：回傳狀態報告 (例如：`{web: "200 OK", db: "Connected", latency: "120ms"}`)。
-- **AI (腦)**：解讀數據並回答：「一切正常，網站回應速度很快 (120ms)。」
+### 4. 確認連線狀態
+
+- 在 n8n **Settings > Instance-level MCP > Connected clients** 頁籤可看到 Claude 已連線。
+- 在 Claude **Connectors** 清單中，n8n 顯示於 **Web** 區塊且狀態為已連線。
+
+---
+
+## Tool 權限說明
+
+Claude Connector 提供兩類工具，可在 Claude 的 Connector 設定中調整權限：
+
+| 類型 | 說明 | 預設 |
+|------|------|------|
+| Read-only tools（14個）| 查詢類，如 Get Execution、Search Workflows | 自動允許 |
+| Write tools | 建立、執行、發布類操作 | 需手動確認 |
+
