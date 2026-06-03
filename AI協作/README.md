@@ -1,3 +1,11 @@
+# AI協作
+
+## 目錄
+
+- [n8n MCP Server 整合](#n8n-mcp-server-整合)
+
+---
+
 # n8n MCP 設定與功能說明
 
 本文件說明如何設定 n8n 的 **原生 MCP (Model Context Protocol) 存取功能**。此功能允許您將 n8n Workflow 直接作為 AI 工具 (Tools) 暴露給 Claude Desktop 或其他 MCP Client 使用。
