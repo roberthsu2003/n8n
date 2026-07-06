@@ -119,4 +119,6 @@
 
 [n8n 官方教學範例](https://blog.n8n.io/tag/tutorial/)
 
+[n8n 官方證照](https://learn.n8n.io/?fbclid=IwVERDUAS3xtZleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAo2NjI4NTY4Mzc5AAEe1J1uU6OplbGvEmVNwKO60GdrEHioGpxe-lFKyOSpxv0sVb3Dc1J12KbI6tk_aem_T4_qC0VlprGI5qRMTNy4VQ)
+
 
