@@ -32,6 +32,7 @@
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
 
+### [mcp設定](./mcp連結/README.md)
 ---
 
 ## 🎯 [初體驗範例](./初階範例/README.md)
