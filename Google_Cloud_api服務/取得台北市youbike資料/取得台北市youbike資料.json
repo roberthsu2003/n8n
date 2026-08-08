@@ -1,0 +1,641 @@
+{
+  "name": "取得台北市youbike資料",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        112
+      ],
+      "id": "47e6124b-480a-4df0-9bdd-fe617aad1cf2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -160,
+        112
+      ],
+      "id": "d9219b4a-46b8-41ac-b251-d4e136439a58",
+      "name": "取得台北市youbike資料"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "站點編號",
+              "value": "={{ $json.sno }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "站點名稱",
+              "value": "={{ $json.sna }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "區域",
+              "value": "={{ $json.sarea }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "時間",
+              "value": "={{ $json.mday }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "地址",
+              "value": "={{ $json.ar }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "站點狀況",
+              "value": "={{ $json.act }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "總停車格數",
+              "value": "={{ $json.Quantity }}",
+              "type": "number"
+            },
+            {
+              "id": "a8",
+              "name": "可借車輛數",
+              "value": "={{ $json.available_rent_bikes }}",
+              "type": "number"
+            },
+            {
+              "id": "a9",
+              "name": "可還車輛數",
+              "value": "={{ $json.available_return_bikes }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "12720565-a1b5-483c-bf12-ed3d69b1d25a",
+      "name": "欄位繁體中文化",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ $json['可借車輛數'] }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "cond2",
+              "leftValue": "={{ $json['可還車輛數'] }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "938c1569-8db8-4418-bfb1-b2f5dec6b4d1",
+      "name": "過濾低車輛站點",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        288,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $now.format('yyyy-MM-dd') }}_youbike低車輛站點",
+        "returnAll": true,
+        "filter": {
+          "whatToSearch": "files",
+          "fileTypes": [
+            "application/vnd.google-apps.spreadsheet"
+          ]
+        },
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "id": "59bb7545-cddb-4281-a8ae-ee5dd10a1183",
+      "name": "搜尋今天試算表",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        736,
+        16
+      ],
+      "executeOnce": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "UuwAiNy1MABcXWLE",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "title": "={{ $now.format('HH-mm-ss') }}",
+        "options": {}
+      },
+      "id": "2e7c34c3-10de-4548-8456-3e3d78106d2f",
+      "name": "新增Sheet至現有試算表",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5aeSky9Aez0k63U",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "={{ $now.format('yyyy-MM-dd') }}_youbike低車輛站點",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "={{ $now.format('HH-mm-ss') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f403f884-3670-4eea-874f-e53fac47a48b",
+      "name": "建立新試算表",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5aeSky9Aez0k63U",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('新增Sheet至現有試算表').first().json.spreadsheetId }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('新增Sheet至現有試算表').first().json.title }}"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "站點編號",
+              "displayName": "站點編號",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "站點名稱",
+              "displayName": "站點名稱",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "區域",
+              "displayName": "區域",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "時間",
+              "displayName": "時間",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "地址",
+              "displayName": "地址",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "站點狀況",
+              "displayName": "站點狀況",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "總停車格數",
+              "displayName": "總停車格數",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "可借車輛數",
+              "displayName": "可借車輛數",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "可還車輛數",
+              "displayName": "可還車輛數",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "bcad7dbf-bf90-4d7e-94ae-92003dbbbdf0",
+      "name": "寫入資料（現有）",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1632,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5aeSky9Aez0k63U",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('建立新試算表').first().json.spreadsheetId }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('建立新試算表').first().json.sheets[0].properties.title }}"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "schema": [],
+          "matchingColumns": []
+        },
+        "options": {
+          "useAppend": true
+        }
+      },
+      "id": "c7bb9342-649d-4039-abfd-75269590e86a",
+      "name": "寫入資料（新建）",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1632,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "P5aeSky9Aez0k63U",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.exists }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c25998e6-3eef-4cf6-b98f-36a18e43a4f7",
+      "name": "判斷是否存在",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "站點清單",
+        "options": {}
+      },
+      "id": "d5289a71-9190-4941-8863-256d03a71ecf",
+      "name": "彙整為一筆",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        512,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = [];\ntry { items = $('搜尋今天試算表').all(); } catch (e) { items = []; }\nconst found = items.find(i => i.json && i.json.id);\nif (found) {\n  return [{ json: { id: found.json.id, name: found.json.name, exists: true } }];\n}\nreturn [{ json: { id: '', name: '', exists: false } }];"
+      },
+      "id": "a8e18937-c989-448a-91e1-1ea557ce0a68",
+      "name": "整理搜尋結果",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const list = $('彙整為一筆').first().json['站點清單'] || [];\nreturn list.map(row => ({ json: row }));"
+      },
+      "id": "c3b57a2b-c371-4008-9818-b43a139d0a04",
+      "name": "展開站點（新建）",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const list = $('彙整為一筆').first().json['站點清單'] || [];\nreturn list.map(row => ({ json: row }));"
+      },
+      "id": "0c9c66b8-56ac-4be7-90a0-2af37b699dbc",
+      "name": "展開站點（現有）",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        112
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "取得台北市youbike資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "取得台北市youbike資料": {
+      "main": [
+        [
+          {
+            "node": "欄位繁體中文化",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "欄位繁體中文化": {
+      "main": [
+        [
+          {
+            "node": "過濾低車輛站點",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "過濾低車輛站點": {
+      "main": [
+        [
+          {
+            "node": "彙整為一筆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "新增Sheet至現有試算表": {
+      "main": [
+        [
+          {
+            "node": "展開站點（現有）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立新試算表": {
+      "main": [
+        [
+          {
+            "node": "展開站點（新建）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷是否存在": {
+      "main": [
+        [
+          {
+            "node": "新增Sheet至現有試算表",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "建立新試算表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "彙整為一筆": {
+      "main": [
+        [
+          {
+            "node": "搜尋今天試算表",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "整理搜尋結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理搜尋結果": {
+      "main": [
+        [
+          {
+            "node": "判斷是否存在",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "展開站點（新建）": {
+      "main": [
+        [
+          {
+            "node": "寫入資料（新建）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "展開站點（現有）": {
+      "main": [
+        [
+          {
+            "node": "寫入資料（現有）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "dbe1a086-316e-4842-a4b4-4b7c65e438ee",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  },
+  "nodeGroups": [],
+  "id": "lrZQRokoq465kbO1",
+  "tags": []
+}
