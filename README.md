@@ -90,12 +90,6 @@
 ---
 
 
-
-## 🤝 [AI協作](./AI協作/README.md)
-透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具，讓 AI 能夠搜尋、檢查並直接執行自動化任務。
-
----
-
 ## 💻 [Code Node (JavaScript) 進階應用](./code_node(javascript)節點/README.md)
 
 掌握 Node.js Code 節點，突破 Low Code 的限制。學習如何處理複雜的資料轉換、多重條件判斷與陣列重組，讓您的工作流程更靈活高效。
@@ -111,6 +105,9 @@
 ## 🌍 [n8n 的免費部署方案](./n8n的部署/README.md)
 了解如何將 n8n 部署到本機、Raspberry Pi、Oracle Cloud 等免費平台，打造 7x24 小時運行的自動化伺服器。
 
+---
+## 🤝 [AI協作](./AI協作/README.md)
+透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具，讓 AI 能夠搜尋、檢查並直接執行自動化任務。
 ---
 
 
