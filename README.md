@@ -106,8 +106,10 @@
 了解如何將 n8n 部署到本機、Raspberry Pi、Oracle Cloud 等免費平台，打造 7x24 小時運行的自動化伺服器。
 
 ---
+
 ## 🤝 [AI協作](./AI協作/README.md)
 透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具，讓 AI 能夠搜尋、檢查並直接執行自動化任務。
+
 ---
 
 
