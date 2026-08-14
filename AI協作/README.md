@@ -1,86 +1,141 @@
-# AI協作 — 使用 Claude Connector 連接 n8n
+# AI 協作指南 (AI Collaboration with n8n)
 
-## 範例 Workflow
-
-### 🚲 [台北市的 YouBike 低車輛站點自動記錄](./台北市的youbike/README.md)
-從台北市政府開放資料即時抓取 YouBike 2.0 所有站點資訊，自動篩選可借或可還車輛不足 3 輛的低車輛站點，並依日期寫入 Google Sheets，方便追蹤各站點供車狀況。本範例同時附有**給 AI 的 Prompt 範本**，可直接貼給 Claude 重新建出此 workflow。
+本章節介紹如何結合現代 AI 工具（如 Claude、OpenCode、多模態視覺模型等）與 n8n 進行高效協作，涵蓋**瀏覽器/視覺互動**與 **MCP (Model Context Protocol) 協議整合**兩大維度。
 
 ---
 
-## 什麼是 Claude n8n Connector？
+## 📑 目錄
 
-**Claude Connector** 是 Claude 內建的整合功能，由 **n8n GmbH** 官方開發。透過 Connector，Claude 可以直接與您的 n8n 實例溝通，無需手動設定 MCP Server 或 ngrok。
-
-連線後 Claude 可以：
-- 建立、搜尋、執行 Workflow
-- 管理 Data Tables、專案與資料夾
-- 查詢執行紀錄與節點定義
-
-> 共提供 **27 個工具**，涵蓋 `search_workflows`、`execute_workflow`、`get_workflow_details`、`publish_workflow` 等完整操作。
-
----
-
-## 設定步驟
-
-### 1. 在 n8n 開啟 Instance-level MCP
-
-1. 進入 n8n 的 **Settings（設定）**。
-2. 點選左側選單的 **Instance-level MCP**（標示 Preview）。
-3. 確認右上角 **Enabled** 開關已打開（綠色）。
-4. 點選 **Connection details**，選擇 **OAuth** 頁籤，記下 **Server URL**。
-
-### 2. 啟動 ngrok 取得 HTTPS 網址
-
-OAuth 授權流程要求 n8n 必須透過 **HTTPS** 對外提供服務，因此需先用 ngrok 將本機 n8n 暴露為公開 HTTPS 網址。
-
-```bash
-ngrok http 5678
-```
-
-啟動後複製 ngrok 產生的 HTTPS 網址，例如：
-
-```
-https://superinnocent-hillary-unwholesome.ngrok-free.app
-```
-
-> **提示**：新版 ngrok 大部分情況會提供固定網址，重新啟動後網址不變，無需重新設定 Claude Connector。
-
-### 3. 在 Claude 新增 n8n Connector
-
-1. 開啟 Claude 桌面版，點選左側 **Connectors**。
-2. 點選右上角 **+** 搜尋 `n8n`。
-3. 選擇由 **n8n GmbH** 開發的官方 Connector。
-4. 點選 **Connect**，輸入上一步取得的 **ngrok HTTPS 網址** 作為 Server URL。
-5. 完成 **OAuth 授權**，瀏覽器會跳出 n8n 登入/授權頁面，確認後即完成連線。
-
-### 3. 授權 Workflow（開放給 Claude 使用）
-
-回到 n8n **Settings > Instance-level MCP > Workflows** 頁籤：
-
-1. 點選右上角 **Enable workflows** 按鈕。
-2. 選擇要開放給 Claude 的 Workflow。
-
-| 欄位 | 說明 |
-|------|------|
-| Name | Workflow 名稱 |
-| Location | 所在專案 / 資料夾 |
-| Description | Claude 識別此工具的說明（建議填寫，避免 ⚠️ No description）|
-
-> **提示**：Description 是 Claude 判斷何時呼叫此 Workflow 的依據，請盡量填寫清楚。
-
-### 4. 確認連線狀態
-
-- 在 n8n **Settings > Instance-level MCP > Connected clients** 頁籤可看到 Claude 已連線。
-- 在 Claude **Connectors** 清單中，n8n 顯示於 **Web** 區塊且狀態為已連線。
+- [一、視覺與瀏覽器操作協作（支援任意輸入模式）](#一視覺與瀏覽器操作協作支援任意輸入模式)
+  - [方式 1：使用 Claude in Chrome 方式](#方式-1使用-claude-in-chrome-方式)
+  - [方式 2：使用 Codex / 多模態 Computer Vision 方式](#方式-2使用-codex--多模態-computer-vision-方式)
+- [二、n8n MCP 連結方式（工具呼叫與自動化執行）](#二n8n-mcp-連結方式工具呼叫與自動化執行)
+  - [⚠️ 核心先決條件 (MCP 存取要求)](#️-核心先決條件-mcp-存取要求)
+  - [⚙️ n8n 後台設定位置與介面](#️-n8n-後台設定位置與介面)
+  - [🔌 連線方式（依客戶端類型）](#-連線方式依客戶端類型)
+    - [模式 A：OAuth 授權連線（Claude Connector）](#模式-aoauth-授權連線適用於-claudeai--claude-desktop)
+    - [模式 B：Token / 遠端端點連線（OpenCode / Cursor / Claude Code）](#模式-btoken--遠端端點連線適用於-opencodecursorclaude-code)
+- [實戰範例](#實戰範例)
 
 ---
 
-## Tool 權限說明
+## 一、視覺與瀏覽器操作協作（支援任意輸入模式）
 
-Claude Connector 提供兩類工具，可在 Claude 的 Connector 設定中調整權限：
+此模式下，n8n 工作流的觸發節點可以是**任何輸入模式**（例如手動點擊 Manual Trigger、排程 Schedule、表單 Form 等），由 AI 透過畫面解析或瀏覽器控制來輔助建立與偵錯。
 
-| 類型 | 說明 | 預設 |
-|------|------|------|
-| Read-only tools（14個）| 查詢類，如 Get Execution、Search Workflows | 自動允許 |
-| Write tools | 建立、執行、發布類操作 | 需手動確認 |
+### 方式 1：使用 Claude in Chrome 方式
 
+* **運作機制**：利用 Claude 瀏覽器外掛直接讀取當前 n8n Web 編輯器畫面的 DOM 與內容。
+* **適用情境**：
+  * 在瀏覽器中直接與 AI 對話，讓 AI 根據當前畫布上的節點配置給出修改建議。
+  * 複製/貼上 JSON 工作流或自動填入複雜表達式（Expressions）。
+
+### 方式 2：使用 Codex / 多模態 Computer Vision 方式
+
+* **運作機制**：透過多模態 AI 的電腦視覺（Computer Vision）能力，直接截圖分析 n8n 畫布流程、節點連線狀態或執行報錯資訊。
+* **適用情境**：
+  * 流程拓撲結構與邏輯檢查（檢查分流是否漏掉條件）。
+  * 節點執行失敗時，截圖 Error Log 給 AI 進行即時診斷與修復建議。
+
+---
+
+## 二、n8n MCP 連結方式（工具呼叫與自動化執行）
+
+透過 **Model Context Protocol (MCP)**，AI 助理能直接將 n8n 作為外部工具箱，執行搜尋、建立工作流或直接觸發指定任務。
+
+### ⚠️ 核心先決條件 (MCP 存取要求)
+
+當使用 MCP 讓 AI 存取、呼叫並執行 n8n 工作流程時，該 Workflow 必須符合以下要件：
+
+1. **工作流程必須已發布/啟動 (Published / Active)**：
+   * 只有處於已發布 (Published) 且啟用狀態的 Workflow 才能開放給 MCP 存取與執行。
+2. **支援的觸發節點類型 (Trigger Nodes)**：
+   * Workflow 的觸發起點**必須是以下四種節點之一**：
+     * 🌐 **Webhook**（HTTP 外部請求觸發）
+     * 📝 **Form**（n8n 表單輸入觸發）
+     * ⏰ **Schedule**（排程定時觸發）
+     * 💬 **Chat Trigger**（AI 對話介面觸發）
+3. **公開 HTTPS 網址**：
+   * 本機端 (Self-hosted) 的 n8n 實例需透過 ngrok 或反向代理暴露為 HTTPS 網址，以供 MCP Client / OAuth 正常連線。
+
+---
+
+### ⚙️ n8n 後台設定位置與介面
+
+從 n8n **v2.23+** 開始，MCP 服務由內建的 **Instance-level MCP** 管理：
+
+1. **功能位置**：
+   * 點選左下角 **Settings（設定）** ➔ 左側選單選擇 **Instance-level MCP (Preview)**。
+2. **啟用服務**：
+   * 將右上角的開關切換為 **Enabled（綠色）**。
+3. **連線資訊 (Connection details)**：
+   * 點選右上角的 **Connection details** 按鈕，彈出視窗提供兩種連線憑證：
+     * 🔑 **OAuth**：提供 `Server URL`（例如 ngrok 的公開 HTTPS 網址），供支援 OAuth 流程的客戶端（如 **Claude Connector**）使用。
+     * 🎫 **Access token**：提供專屬 API Token，供使用 Token 驗證的開發者工具（如 **Claude Code**、**Cursor**、**OpenCode**）使用。
+4. **工作流程授權 (Workflows 頁籤)**：
+   * 點選 **Enable workflows** 按鈕，勾選要開放給 AI 呼叫的已發布 Workflow。
+   * **Description（說明）**：為每個開放的 Workflow 填寫清楚的描述，AI 會依據這段說明判斷何時呼叫該工具。
+5. **已連線客戶端管理 (Connected clients 頁籤)**：
+   * 查看目前已成功連線並取得授權的外部 AI 客戶端列表。
+
+---
+
+### 🔌 連線方式（依客戶端類型）
+
+根據不同的 AI 工具，支援以下兩種連線整合方式：
+
+#### 模式 A：OAuth 授權連線（適用於 Claude.ai / Claude Desktop）
+
+利用 n8n GmbH 官方提供的 **Claude Connector**，透過圖形化 OAuth 流程快速連線：
+
+* **詳細步驟說明**：請參閱 [Claude Connector 完整設定手冊](./README1.md)
+* **快速步驟**：
+  1. 在 n8n **Connection details > OAuth** 記下 `Server URL`（需為 ngrok 等公開 HTTPS 網址）。
+  2. 在 Claude 的 **Connectors** 搜尋並新增官方 `n8n`。
+  3. 貼上 Server URL 點擊 Connect，完成瀏覽器跳轉授權即可。
+
+#### 模式 B：Token / 遠端端點連線（適用於 OpenCode、Cursor、Claude Code）
+
+透過遠端 MCP 端點 (HTTP / SSE) 或 Access Token 配置文件直接連線：
+
+* **詳細設定說明**：請參閱 [n8n MCP Server 設定與連結指南](../mcp連結/README.md)
+
+---
+
+### 方式 4：使用 OpenCode Desktop / CLI 方式
+
+在開發者導向的 **OpenCode** 環境中，透過遠端 MCP 端點直接整合 n8n。
+
+* **詳細設定說明**：請參閱 [n8n MCP Server 設定與連結指南](../mcp連結/README.md)
+* **指令操作**：
+  ```bash
+  # 新增 n8n MCP 服務
+  opencode mcp add n8n
+  
+  # 檢查 MCP 連線狀態
+  opencode mcp list
+  ```
+* **配置文件範例 (`~/.config/opencode/opencode.json`)**：
+  ```json
+  {
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+      "n8n": {
+        "type": "remote",
+        "url": "https://<your-ngrok-domain>.ngrok-free.app/mcp-server/http",
+        "enabled": true,
+        "headers": {
+          "Accept-Encoding": "identity"
+        }
+      }
+    }
+  }
+  ```
+
+---
+
+## 🚲 實戰範例
+
+* **[台北市 YouBike 低車輛站點自動記錄](./台北市的youbike/README.md)**
+  * 即時抓取開放資料、條件篩選並寫入 Google Sheets。
+  * 內附完整 **給 AI 的 Prompt 範本**，可直接提供給 Claude / OpenCode 自動建置整個 Workflow。
