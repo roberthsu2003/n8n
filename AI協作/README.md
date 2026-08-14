@@ -7,8 +7,9 @@
 ## 📑 目錄
 
 - [一、視覺與瀏覽器操作協作（支援任意輸入模式）](#一視覺與瀏覽器操作協作支援任意輸入模式)
-  - [方式 1：使用 Claude in Chrome 方式](#方式-1使用-claude-in-chrome-方式)
-  - [方式 2：使用 Codex / 多模態 Computer Vision 方式](#方式-2使用-codex--多模態-computer-vision-方式)
+  - [方式 1：使用 Chrome 內建「問問 Gemini」方式（唯讀諮詢）](#方式-1使用-chrome-內建問問-gemini-方式唯讀諮詢)
+  - [方式 2：使用 Claude in Chrome 方式](#方式-2使用-claude-in-chrome-方式)
+  - [方式 3：使用 Codex / 多模態 Computer Vision 方式](#方式-3使用-codex--多模態-computer-vision-方式)
 - [二、n8n MCP 連結方式（工具呼叫與自動化執行）](#二n8n-mcp-連結方式工具呼叫與自動化執行)
   - [⚠️ 核心先決條件 (MCP 存取要求)](#️-核心先決條件-mcp-存取要求)
   - [⚙️ n8n 後台設定位置與介面](#️-n8n-後台設定位置與介面)
@@ -23,14 +24,21 @@
 
 此模式下，n8n 工作流的觸發節點可以是**任何輸入模式**（例如手動點擊 Manual Trigger、排程 Schedule、表單 Form 等），由 AI 透過畫面解析或瀏覽器控制來輔助建立與偵錯。
 
-### 方式 1：使用 Claude in Chrome 方式
+### 方式 1：使用 Chrome 內建「問問 Gemini」方式（唯讀諮詢）
+
+* **運作機制**：利用 Chrome 瀏覽器側邊欄內建的「問問 Gemini (Ask Gemini in Chrome)」，自動抓取當前 n8n 網頁分頁的畫面與文字內容進行即時分析。
+* **特點與限制**：
+  * 💡 **只可給意見 / 諮詢建議**：能快速分析當前畫面上的節點拓撲、解讀執行失敗的錯誤原因、或給予 Code 節點語法與正則表達式撰寫建議。
+  * 🔒 **無法直接修改**：屬於唯讀的對話諮詢輔助模式，AI **無法直接替您點擊、新增或修改 n8n 畫布上的節點**，需由使用者手動調整。
+
+### 方式 2：使用 Claude in Chrome 方式
 
 * **運作機制**：利用 Claude 瀏覽器外掛直接讀取當前 n8n Web 編輯器畫面的 DOM 與內容。
 * **適用情境**：
   * 在瀏覽器中直接與 AI 對話，讓 AI 根據當前畫布上的節點配置給出修改建議。
   * 複製/貼上 JSON 工作流或自動填入複雜表達式（Expressions）。
 
-### 方式 2：使用 Codex / 多模態 Computer Vision 方式
+### 方式 3：使用 Codex / 多模態 Computer Vision 方式
 
 * **運作機制**：透過多模態 AI 的電腦視覺（Computer Vision）能力，直接截圖分析 n8n 畫布流程、節點連線狀態或執行報錯資訊。
 * **適用情境**：
