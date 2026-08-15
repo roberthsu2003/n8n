@@ -6,16 +6,17 @@
 
 ## 📑 目錄
 
-1. [🌟 台灣三大 AI 帳號連線 n8n 總覽（一張表快速對照）](#-台灣三大-ai-帳號連線-n8n-總覽一張表快速對照)
-2. [💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問](#-通用輔助免設定的-chrome-瀏覽器側邊欄顧問)
-3. [⚙️ n8n Instance-level MCP 設定與功能指南](#-n8n-instance-level-mcp-設定與功能指南)
-4. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#-路線一如果你只有-gemini-帳號google--透過-antigravity-連體協作)
-5. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#-路線二如果你只有-chatgpt-帳號openai--透過-opencode-橋樑連線)
-6. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#-路線三如果你只有-claude-帳號anthropic--透過官方-connector-直連)
-7. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#-課堂實戰範例附-ai-prompt-提詞)
+1. [🌟 台灣三大 AI 帳號連線 n8n 總覽（一張表快速對照）](#overview)
+2. [💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問](#chrome-assistant)
+3. [⚙️ n8n Instance-level MCP 設定與功能指南](#n8n-mcp-settings)
+4. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#route-gemini-antigravity)
+5. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#route-chatgpt-opencode)
+6. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#route-claude-connector)
+7. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#practical-examples)
 
 ---
 
+<a id="overview"></a>
 ## 🌟 台灣三大 AI 帳號連線 n8n 總覽（一張表快速對照）
 
 找到你目前擁有的 AI 帳號，直接選擇對應的連線方式：
@@ -28,6 +29,7 @@
 
 ---
 
+<a id="chrome-assistant"></a>
 ## 💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問
 
 不管你用哪一家 AI，在 Chrome 瀏覽器安裝對應擴充套件，都能享有「邊看畫面邊發問」的即時輔助：
@@ -38,6 +40,7 @@
 
 ---
 
+<a id="n8n-mcp-settings"></a>
 ## ⚙️ n8n Instance-level MCP 設定與功能指南
 
 n8n 內建的 **Instance-level MCP Server** 是讓所有外部 AI 工具（Antigravity、OpenCode、Claude 等）能夠安全讀取、操作與執行 n8n 工作流程的核心樞紐。
@@ -51,6 +54,7 @@ n8n 內建的 **Instance-level MCP Server** 是讓所有外部 AI 工具（Antig
 
 ---
 
+<a id="route-gemini-antigravity"></a>
 ## 🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作
 
 Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravity**，您可以將 Gemini 與 n8n 深度「連體」整合：
@@ -107,6 +111,7 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
 
 ---
 
+<a id="route-chatgpt-opencode"></a>
 ## 🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線
 
 許多人擁有 ChatGPT Plus / OpenAI 帳號，但發現 **ChatGPT 官方網頁版目前沒有內建 MCP 連線按鈕**。解決方式就是**使用 OpenCode 作為連線橋樑**！
@@ -156,6 +161,7 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
 
 ---
 
+<a id="route-claude-connector"></a>
 ## 🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連
 
 如果您訂閱的是 Claude Pro 或擁有 Claude 帳號，可以使用官方的 **Claude Connector** 進行免寫程式碼的點擊授權連線：
@@ -172,10 +178,11 @@ Claude 透過 Connector 自動在您的 n8n 畫布上建好所有節點！
 2. **在 Claude.ai 連線**：前往 Claude.ai ➔ 側邊欄 **Customize** ➔ **Connectors** ➔ 找到 **n8n** 點選 **`Connect`** ➔ 輸入 ngrok 公開網址。
 3. **完成 OAuth 授權**：瀏覽器跳轉允許授權後，Status 顯示 **`✓` (已連線)** 即可開始對話建流程。
 
-> 📘 **詳細設定教學**：[Claude Connector 設定手冊 (OAuth 模式)](./n8n_mcp_setup_guide.md#2-claude-connector-oauth-模式)
+> 📘 **詳細設定教學**：[Claude Connector 設定手冊 (OAuth 模式)](./n8n_mcp_setup_guide.md#claude-connector)
 
 ---
 
+<a id="practical-examples"></a>
 ## 🚲 課堂實戰範例（附 AI Prompt 提詞）
 
 選好你的 AI 工具後，立即跟著實戰範例動手練習：
