@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "n8n": {
+      "serverUrl": "https://<你的ngrok或公開網址>/mcp-server/http",
+      "headers": {
+        "Accept-Encoding": "identity"
+      }
+    }
+  }
+}

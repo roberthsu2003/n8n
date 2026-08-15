@@ -72,6 +72,39 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
 2. **多模態視覺除錯**：可直接辨識 n8n 畫布截圖與節點 Error Log，即時指出工作流連線哪裡斷掉、邏輯條件哪裡漏掉。
 3. **搭配 Chrome「問問 Gemini」**：在 Chrome 瀏覽器中一邊編輯 n8n，一邊透過側邊欄隨時向 Gemini 發問，無需頻繁切換視窗。
 
+### 🚀 專案等級（Workspace-level）快速設定 3 步驟：
+
+1. **建立 `.agents` 專案目錄結構**：
+   在專案根目錄下建立 `.agents` 與 Plugin 設定：
+   ```text
+   專案根目錄/
+   └── .agents/
+       ├── mcp_config.json
+       └── plugins/
+           └── n8n/
+               ├── plugin.json
+               └── mcp_config.json
+   ```
+
+2. **填寫 n8n MCP 設定檔 (`.agents/mcp_config.json`)**：
+   ```json
+   {
+     "mcpServers": {
+       "n8n": {
+         "serverUrl": "https://<你的ngrok或公開網址>/mcp-server/http",
+         "headers": {
+           "Accept-Encoding": "identity"
+         }
+       }
+     }
+   }
+   ```
+
+3. **開啟新對話開始操作**：
+   在 Antigravity 中開啟新對話（New Chat），即可直接向 Agent 提問：*「請列出目前 n8n 上的所有工作流」*。
+
+> 📘 **詳細設定教學**：請參閱專題指南 **[Antigravity 專案等級 n8n MCP 設定教學](./antigravity_mcp_setup_guide.md)**。
+
 ---
 
 ## 🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線

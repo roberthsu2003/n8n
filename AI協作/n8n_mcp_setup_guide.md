@@ -17,9 +17,10 @@
    - [Connected clients（已連線客戶端管理區）](#3-connected-clients已連線客戶端管理區)
 3. [Expose（開放）與連線權限的關鍵差異](#三expose開放與連線權限的關鍵差異)
 4. [各 AI 客戶端連線設定教學](#四各-ai-客戶端連線設定教學)
-   - [OpenCode 設定檔與常用指令](#1-opencode-設定檔與常用指令)
-   - [Claude Connector (OAuth 模式)](#2-claude-connector-oauth-模式)
-   - [Cursor / 遠端 Token 模式](#3-cursor--遠端-token-模式)
+   - [Google Antigravity 專案等級 MCP 設定](#1-google-antigravity-專案等級-mcp-設定)
+   - [OpenCode 設定檔與常用指令](#2-opencode-設定檔與常用指令)
+   - [Claude Connector (OAuth 模式)](#3-claude-connector-oauth-模式)
+   - [Cursor / 遠端 Token 模式](#4-cursor--遠端-token-模式)
 5. [安全規範與推薦操作流程](#五安全規範與推薦操作流程)
 6. [常見問題與排查 (Troubleshooting)](#六常見問題與排查-troubleshooting)
 
@@ -107,7 +108,51 @@
 
 ## 四、各 AI 客戶端連線設定教學
 
-### 1. OpenCode 設定檔與常用指令
+### 1. Google Antigravity 專案等級 MCP 設定
+
+Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級（Global-level）**設定：
+
+* 🌐 **全域設定（Global）**：位於 `~/.gemini/config/`，適用於本機所有專案。
+* 📁 **專案等級設定（Workspace）**：位於專案根目錄下的 `.agents/` 資料夾，只對當前專案生效，可隨 Git 版本庫一同提交分享。
+
+#### A. 專案目錄結構
+```text
+專案根目錄/
+├── .agents/
+│   ├── mcp_config.json                 # 專案層級 MCP 設定
+│   └── plugins/
+│       └── n8n/
+│           ├── plugin.json             # Plugin 宣告檔
+│           └── mcp_config.json         # Plugin 內部的 MCP 設定
+└── ...
+```
+
+#### B. 設定檔案內容
+1. **Plugin 宣告檔 (`.agents/plugins/n8n/plugin.json`)**：
+   ```json
+   {
+     "name": "n8n"
+   }
+   ```
+2. **MCP 設定檔 (`.agents/mcp_config.json` 或 `.agents/plugins/n8n/mcp_config.json`)**：
+   ```json
+   {
+     "mcpServers": {
+       "n8n": {
+         "serverUrl": "https://<你的ngrok公開網址>/mcp-server/http",
+         "headers": {
+           "Accept-Encoding": "identity"
+         }
+       }
+     }
+   }
+   ```
+
+> 📘 **詳細指南與除錯範例**：請參閱專題講義 **[Antigravity 專案等級 n8n MCP 設定教學](./antigravity_mcp_setup_guide.md)**。
+
+---
+
+### 2. OpenCode 設定檔與常用指令
 
 OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Level)** 兩種設定方式，配置結構完全相同：
 
@@ -164,7 +209,7 @@ opencode mcp logout n8n
 
 ---
 
-### 2. Claude Connector (OAuth 模式)
+### 3. Claude Connector (OAuth 模式)
 
 適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式：
 
@@ -187,7 +232,7 @@ opencode mcp logout n8n
 
 ---
 
-### 3. Cursor / 遠端 Token 模式
+### 4. Cursor / 遠端 Token 模式
 
 在 Cursor 的 `mcp.json` 中配置：
 
