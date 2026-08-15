@@ -70,9 +70,7 @@ https://superinnocent-hillary-unwholesome.ngrok-free.app
 | Location | 所在專案 / 資料夾 |
 | Description | Claude 識別此工具的說明（建議填寫，避免 ⚠️ No description）|
 
-> **⚠️ 重要注意**：只有**已發布 (Published / Active)** 且觸發起點為 **Webhook**、**Form**、**Schedule** 或 **Chat Trigger** 節點之一的 Workflow，才能在 MCP 清單中被啟用與呼叫。
-
-> **提示**：Description 是 Claude 判斷何時呼叫此 Workflow 的依據，請盡量填寫清楚。
+> **💡 提示**：工作流程只需在 n8n 後台設定為啟用/發布狀態，即可直接在 **Workflows exposed** 勾選開放給 Claude 作為 MCP 工具；填寫清晰的 **Description** 能幫助 Claude 準確判斷何時調用該 Workflow。
 
 ### 4. 確認連線狀態
 

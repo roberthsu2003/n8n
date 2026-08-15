@@ -71,7 +71,7 @@
 
 | 介面項目 | 類型 / 狀態標示 | 功能說明與操作指引 |
 | :--- | :--- | :--- |
-| **Workflows exposed** | 導航按鈕<br>`1 workflow >` (依數量顯示) | **管理開放給 MCP 工具呼叫的工作流程清單**。<br>• 點擊進入工作流程選擇頁面，可勾選開放哪些 Workflow。<br>• **限制條件**：僅有**已發布 (Published / Active)** 且觸發節點為 **Webhook**、**Form**、**Schedule** 或 **Chat Trigger** 的 Workflow 才能被開放。<br>• **Description**：強烈建議為每個開放的工作流填寫清晰的描述，AI 會依據這段描述在對話中智能判斷何時呼叫該工具。 |
+| **Workflows exposed** | 導航按鈕<br>`1 workflow >` (依數量顯示) | **管理開放給 MCP 工具呼叫的工作流程清單**。<br>• 點擊進入工作流程選擇頁面，可直接勾選要開放給 AI 的 Workflow。<br>• **Description**：強烈建議為每個開放的工作流填寫清晰的描述，AI 會依據這段描述在對話中智能判斷何時呼叫該工具。 |
 | **Allowed callback URLs** | 安全設定按鈕<br>`All >` / `Custom >` | **限制 OAuth 登入授權的回調（Redirect）網址白名單**。<br>• **All（預設）**：允許所有客戶端重定向網址，方便快速測試，但安全性較寬鬆。<br>• **自訂白名單**：可限定只有特定的客戶端 callback 網址（如 Claude 官方回調網址）才能完成授權，避免未經授權的應用程式發起 OAuth 劫持。 |
 
 ---
@@ -251,9 +251,9 @@ opencode mcp logout n8n
 - [ ] 重新啟動 OpenCode 讓設定重新載入。
 
 ### Q2: 連線成功但 AI 看不到任何可執行的工作流
-- [ ] 檢查該 Workflow 是否已點擊 **Publish / Active**（未啟用的工作流無法由 MCP 觸發）。
-- [ ] 檢查觸發節點是否為 **Webhook / Form / Schedule / Chat Trigger** 之一。
-- [ ] 前往 **Settings > Instance-level MCP > Workflows exposed**，確認該工作流已勾選啟用。
+- [ ] 檢查該 Workflow 是否已點擊 **Publish / Active**（未發布啟用的工作流無法由 MCP 觸發）。
+- [ ] 前往 **Settings > Instance-level MCP > Workflows exposed**，確認該工作流程已勾選開放 (Expose)。
+- [ ] 確認該工作流有填寫清楚的 **Description**，以便 AI 能夠辨識。
 
 ### Q3: 執行工作流時失敗或報錯
 - [ ] 檢查工作流節點中引用的 OAuth / API 憑證是否過期。
