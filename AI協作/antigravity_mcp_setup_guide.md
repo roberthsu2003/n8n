@@ -2,8 +2,20 @@
 
 本講義介紹如何在 **Antigravity** 環境中，為單一專案（Workspace-level）設定 **n8n MCP（Model Context Protocol）** 連線，讓 AI 代理能夠直接操作與查詢 n8n 工作流。
 
+## 📑 目錄
+
+1. [架構與觀念](#architecture)
+2. [專案目錄結構](#directory-structure)
+3. [設定檔案內容](#config-files)
+4. [欄位詳細說明](#field-descriptions)
+5. [OpenCode 與 Antigravity 設定對照](#opencode-vs-antigravity)
+6. [連線驗證步驟](#verification-steps)
+7. [常用操作與提問範例](#example-prompts)
+8. [常見問題排查 (Troubleshooting)](#troubleshooting)
+
 ---
 
+<a id="architecture"></a>
 ## 一、架構與觀念
 
 ### 1. 什麼是專案等級（Project-level / Workspace-level）設定？
@@ -27,6 +39,7 @@ Antigravity Agent
 
 ---
 
+<a id="directory-structure"></a>
 ## 二、專案目錄結構
 
 在專案根目錄下建立 `.agents` 目錄，結構如下：
@@ -45,6 +58,7 @@ Antigravity Agent
 
 ---
 
+<a id="config-files"></a>
 ## 三、設定檔案內容
 
 ### 步驟 1：建立 Plugin 宣告檔 (`.agents/plugins/n8n/plugin.json`)
@@ -94,6 +108,7 @@ Antigravity Agent
 
 ---
 
+<a id="field-descriptions"></a>
 ## 四、欄位詳細說明
 
 | 欄位 | 型別 | 說明 |
@@ -105,6 +120,7 @@ Antigravity Agent
 
 ---
 
+<a id="opencode-vs-antigravity"></a>
 ## 五、OpenCode 與 Antigravity 設定對照
 
 若先前使用 `opencode.json`，兩者的對應關係如下：
@@ -119,6 +135,7 @@ Antigravity Agent
 
 ---
 
+<a id="verification-steps"></a>
 ## 六、連線驗證步驟
 
 1. **確認 n8n 服務**：
@@ -133,6 +150,7 @@ Antigravity Agent
 
 ---
 
+<a id="example-prompts"></a>
 ## 七、常用操作與提問範例
 
 ### 1. 查詢工作流清單
@@ -157,6 +175,7 @@ Antigravity Agent
 
 ---
 
+<a id="troubleshooting"></a>
 ## 八、常見問題排查（Troubleshooting）
 
 1. **Agent 回應找不到 n8n 工具**：

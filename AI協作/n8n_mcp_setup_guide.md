@@ -9,23 +9,23 @@
 
 ## 📑 目錄
 
-1. [架構概念與連線流程](#一架構概念與連線流程)
-2. [n8n 後台介面與所有按鈕功能詳解 (v2.34.6)](#二n8n-後台介面與所有按鈕功能詳解-v2346)
-   - [進入路徑](#進入路徑)
-   - [Connection details（連線設定區）](#1-connection-details連線設定區)
-   - [Access（存取控制區）](#2-access存取控制區)
-   - [Connected clients（已連線客戶端管理區）](#3-connected-clients已連線客戶端管理區)
-3. [Expose（開放）與連線權限的關鍵差異](#三expose開放與連線權限的關鍵差異)
-4. [各 AI 客戶端連線設定教學](#四各-ai-客戶端連線設定教學)
-   - [Google Antigravity 專案等級 MCP 設定](#1-google-antigravity-專案等級-mcp-設定)
-   - [OpenCode 設定檔與常用指令](#2-opencode-設定檔與常用指令)
-   - [Claude Connector (OAuth 模式)](#3-claude-connector-oauth-模式)
-   - [Cursor / 遠端 Token 模式](#4-cursor--遠端-token-模式)
-5. [安全規範與推薦操作流程](#五安全規範與推薦操作流程)
-6. [常見問題與排查 (Troubleshooting)](#六常見問題與排查-troubleshooting)
+1. [架構概念與連線流程](#architecture)
+2. [n8n 後台介面與所有按鈕功能詳解 (v2.34.6)](#n8n-ui-features)
+   - [Connection details（連線設定區）](#connection-details)
+   - [Access（存取控制區）](#access-control)
+   - [Connected clients（已連線客戶端管理區）](#connected-clients)
+3. [Expose（開放）與連線權限的關鍵差異](#expose-vs-permissions)
+4. [各 AI 客戶端連線設定教學](#client-setups)
+   - [Google Antigravity 專案等級 MCP 設定](#antigravity-mcp)
+   - [OpenCode 設定檔與常用指令](#opencode-mcp)
+   - [Claude Connector (OAuth 模式)](#claude-connector)
+   - [Cursor / 遠端 Token 模式](#cursor-mcp)
+5. [安全規範與推薦操作流程](#security-and-workflow)
+6. [常見問題與排查 (Troubleshooting)](#troubleshooting)
 
 ---
 
+<a id="architecture"></a>
 ## 一、架構概念與連線流程
 
 ```text
@@ -53,6 +53,7 @@
 
 ---
 
+<a id="n8n-ui-features"></a>
 ## 二、n8n 後台介面與所有按鈕功能詳解 (v2.34.6)
 
 ### 進入路徑
@@ -60,6 +61,7 @@
 
 ---
 
+<a id="connection-details"></a>
 ### 1. Connection details（連線設定區）
 
 | 介面項目 | 類型 / 狀態標示 | 功能說明與操作指引 |
@@ -69,6 +71,7 @@
 
 ---
 
+<a id="access-control"></a>
 ### 2. Access（存取控制區）
 
 | 介面項目 | 類型 / 狀態標示 | 功能說明與操作指引 |
@@ -78,6 +81,7 @@
 
 ---
 
+<a id="connected-clients"></a>
 ### 3. Connected clients（已連線客戶端管理區）
 
 | 介面項目 | 類型 / 狀態標示 | 功能說明與操作指引 |
@@ -86,6 +90,7 @@
 
 ---
 
+<a id="expose-vs-permissions"></a>
 ## 三、Expose（開放）與連線權限的關鍵差異
 
 在 n8n MCP 協作中，這是最核心且容易混淆的概念：
@@ -106,8 +111,10 @@
 
 ---
 
+<a id="client-setups"></a>
 ## 四、各 AI 客戶端連線設定教學
 
+<a id="antigravity-mcp"></a>
 ### 1. Google Antigravity 專案等級 MCP 設定
 
 Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級（Global-level）**設定：
@@ -152,6 +159,7 @@ Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級�
 
 ---
 
+<a id="opencode-mcp"></a>
 ### 2. OpenCode 設定檔與常用指令
 
 OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Level)** 兩種設定方式，配置結構完全相同：
@@ -209,6 +217,7 @@ opencode mcp logout n8n
 
 ---
 
+<a id="claude-connector"></a>
 ### 3. Claude Connector (OAuth 模式)
 
 適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式：
@@ -232,6 +241,7 @@ opencode mcp logout n8n
 
 ---
 
+<a id="cursor-mcp"></a>
 ### 4. Cursor / 遠端 Token 模式
 
 在 Cursor 的 `mcp.json` 中配置：
@@ -251,6 +261,7 @@ opencode mcp logout n8n
 
 ---
 
+<a id="security-and-workflow"></a>
 ## 五、安全規範與推薦操作流程
 
 ### 🔒 安全重點
@@ -293,6 +304,7 @@ opencode mcp logout n8n
 
 ---
 
+<a id="troubleshooting"></a>
 ## 六、常見問題與排查 (Troubleshooting)
 
 ### Q1: OpenCode 顯示找不到 n8n 或連線逾時
@@ -309,3 +321,4 @@ opencode mcp logout n8n
 ### Q3: 執行工作流時失敗或報錯
 - [ ] 檢查工作流節點中引用的 OAuth / API 憑證是否過期。
 - [ ] 先以測試資料模式手動觸發，檢查 n8n 的 **Executions** 頁籤定位失敗的具體節點。
+
