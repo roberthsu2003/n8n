@@ -142,12 +142,15 @@ Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級�
    }
    ```
 2. **MCP 設定檔 (`.agents/mcp_config.json` 或 `.agents/plugins/n8n/mcp_config.json`)**：
+   > 💡 **認證注意**：Antigravity 不支援瀏覽器 OAuth 授權流程，若啟用認證需在 `headers` 帶入 `"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"`。
+
    ```json
    {
      "mcpServers": {
        "n8n": {
          "serverUrl": "https://<你的ngrok公開網址>/mcp-server/http",
          "headers": {
+           "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
            "Accept-Encoding": "identity"
          }
        }

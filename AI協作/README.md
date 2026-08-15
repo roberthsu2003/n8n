@@ -76,6 +76,10 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
 2. **多模態視覺除錯**：可直接辨識 n8n 畫布截圖與節點 Error Log，即時指出工作流連線哪裡斷掉、邏輯條件哪裡漏掉。
 3. **搭配 Chrome「問問 Gemini」**：在 Chrome 瀏覽器中一邊編輯 n8n，一邊透過側邊欄隨時向 Gemini 發問，無需頻繁切換視窗。
 
+> [!IMPORTANT]
+> **認證方式重要提醒**：
+> **Google Antigravity 目前不支援互動式 OAuth 授權流程**。若 n8n 服務端啟用了 MCP 認證，**請使用 Access Token（Bearer Token）**，在設定檔中的 `headers` 加入 `"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"` 進行驗證。
+
 ### 🚀 專案等級（Workspace-level）快速設定 3 步驟：
 
 1. **建立 `.agents` 專案目錄結構**：
@@ -97,6 +101,7 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
        "n8n": {
          "serverUrl": "https://<你的ngrok或公開網址>/mcp-server/http",
          "headers": {
+           "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
            "Accept-Encoding": "identity"
          }
        }
