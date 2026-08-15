@@ -2,7 +2,8 @@
 
 > **適用版本**：`n8n Version 2.34.6` 或更高版本  
 > **功能定位**：Instance-level MCP (Preview)  
-> **核心目標**：讓外部 AI 助理與 IDE（如 OpenCode、Claude、Cursor、ChatGPT 等）透過 **Model Context Protocol (MCP)** 協議安全連線至 n8n 實例，並精細控制開放的工作流程與權限。
+> **核心目標**：讓外部 AI 助理與 IDE（如 OpenCode、Claude、Cursor 等）透過 **Model Context Protocol (MCP)** 協議安全連線至 n8n 實例，並精細控制開放的工作流程與權限。  
+> 💡 **客戶端現況說明**：目前 **Claude.ai** 與 **OpenCode / Cursor** 已完整支援 MCP 直連；**ChatGPT 網頁與桌面版** 目前尚未支援原生 MCP Connector 連線（ChatGPT 需透過瀏覽器擴充套件或自訂 Actions 進行協作）。
 
 ---
 
@@ -143,6 +144,9 @@ OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Leve
 
 #### C. 常用管理指令
 ```bash
+# 登入 OpenAI / ChatGPT 帳號提供者（供 ChatGPT 用戶使用）
+opencode auth login
+
 # 新增 n8n MCP 服務
 opencode mcp add n8n
 
@@ -155,6 +159,8 @@ opencode mcp debug n8n
 # 登出或移除連線
 opencode mcp logout n8n
 ```
+
+> 💡 **ChatGPT 用戶專屬優勢**：若您擁有 ChatGPT / OpenAI 帳號，可在 OpenCode 透過 `opencode auth login` 登入 OpenAI 帳號，即可直接使用 ChatGPT 的模型（如 GPT-4o、o1 等）藉由 MCP 自動化操控 n8n 工作流程！
 
 ---
 

@@ -31,6 +31,12 @@
  
  ### 常用管理指令
  
+ * **登入 OpenAI / ChatGPT 帳號提供者**：
+   ```bash
+   opencode auth login
+   ```
+   *(選擇 OpenAI / ChatGPT 登入，即可使用 ChatGPT 帳號與模型連線 n8n)*
+ 
  * **新增 n8n MCP 服務**：
    ```bash
    opencode mcp add n8n
