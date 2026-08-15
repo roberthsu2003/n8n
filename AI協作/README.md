@@ -7,10 +7,10 @@
 ## 📑 目錄
 
 1. [🌟 台灣三大 AI 帳號連線 n8n 總覽（一張表快速對照）](#-台灣三大-ai-帳號連線-n8n-總覽一張表快速對照)
-2. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#-路線一如果你只有-gemini-帳號google--透過-antigravity-連體協作)
-3. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#-路線二如果你只有-chatgpt-帳號openai--透過-opencode-橋樑連線)
-4. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#-路線三如果你只有-claude-帳號anthropic--透過官方-connector-直連)
-5. [💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問](#-通用輔助免設定的-chrome-瀏覽器側邊欄顧問)
+2. [💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問](#-通用輔助免設定的-chrome-瀏覽器側邊欄顧問)
+3. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#-路線一如果你只有-gemini-帳號google--透過-antigravity-連體協作)
+4. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#-路線二如果你只有-chatgpt-帳號openai--透過-opencode-橋樑連線)
+5. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#-路線三如果你只有-claude-帳號anthropic--透過官方-connector-直連)
 6. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#-課堂實戰範例附-ai-prompt-提詞)
 
 ---
@@ -24,6 +24,16 @@
 | 🥇 **Gemini**<br>(Google) | **Google Antigravity 連體協作**<br>+ Chrome「問問 Gemini」 | 🟢 **直覺強大** | 透過 Antigravity 內建的 Gemini 智慧代理與 MCP 協議，直接在開發環境中對話生成、除錯與執行工作流。 |
 | 🥈 **ChatGPT**<br>(OpenAI) | **OpenCode 登入 OpenAI 帳號**<br>+ ChatGPT in Chrome | 🟡 **靈活萬用** | 官方 ChatGPT 網頁無 MCP 連接器，但透過 OpenCode 登入 ChatGPT 帳號後，即可用 GPT-4o 模型全自動操控 n8n。 |
 | 🥉 **Claude**<br>(Anthropic) | **Claude.ai 官方 Connector**<br>(網頁版 / 桌面版) | 🟡 **圖形化串接** | 在 Claude.ai 的 Connectors 設定中輸入 n8n 網址，完成 OAuth 授權後即可在對話框直接打字建流程。 |
+
+---
+
+## 💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問
+
+不管你用哪一家 AI，在 Chrome 瀏覽器安裝對應擴充套件，都能享有「邊看畫面邊發問」的即時輔助：
+
+* 🌐 **Chrome 內建「問問 Gemini」**：點擊右上角側邊欄，自動抓取當前 n8n 網頁畫面與節點錯誤，即時診斷修復。
+* 💬 **ChatGPT in Chrome**：在側邊欄即時生成 JavaScript 表達式、資料轉換函數與正則表達式。
+* 🟣 **Claude in Chrome**：直接讀取畫布 DOM 結構，協助產生可複製貼上的 JSON 流程代碼。
 
 ---
 
@@ -116,16 +126,6 @@ Claude 透過 Connector 自動在您的 n8n 畫布上建好所有節點！
 3. **完成 OAuth 授權**：瀏覽器跳轉允許授權後，Status 顯示 **`✓` (已連線)** 即可開始對話建流程。
 
 > 📘 **詳細圖文教學**：[Claude Connector 完整設定手冊](./README1.md)
-
----
-
-## 💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問
-
-不管你用哪一家 AI，在 Chrome 瀏覽器安裝對應擴充套件，都能享有「邊看畫面邊發問」的即時輔助：
-
-* 🌐 **Chrome 內建「問問 Gemini」**：點擊右上角側邊欄，自動抓取當前 n8n 網頁畫面與節點錯誤，即時診斷修復。
-* 💬 **ChatGPT in Chrome**：在側邊欄即時生成 JavaScript 表達式、資料轉換函數與正則表達式。
-* 🟣 **Claude in Chrome**：直接讀取畫布 DOM 結構，協助產生可複製貼上的 JSON 流程代碼。
 
 ---
 
