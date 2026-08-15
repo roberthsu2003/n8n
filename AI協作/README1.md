@@ -47,18 +47,22 @@ https://superinnocent-hillary-unwholesome.ngrok-free.app
 
 ### 3. 在 Claude 新增 n8n Connector
 
-1. 開啟 Claude 桌面版，點選左側 **Connectors**。
-2. 點選右上角 **+** 搜尋 `n8n`。
-3. 選擇由 **n8n GmbH** 開發的官方 Connector。
-4. 點選 **Connect**，輸入上一步取得的 **ngrok HTTPS 網址** 作為 Server URL。
-5. 完成 **OAuth 授權**，瀏覽器會跳出 n8n 登入/授權頁面，確認後即完成連線。
+1. 開啟 **Claude.ai**（網頁版或桌面版應用程式）。
+2. 在左側選單點選 **Customize** 底下的 **Connectors**（或前往 **Settings > Connectors**）。
+3. 尋找與新增 n8n 連接器：
+   * **方法 A（推薦）**：在 Connector 清單或搜尋列中搜尋 `n8n`（Type 標示為 `Web`）。
+   * **方法 B**：點擊右上角 **`Add ˇ`** ➔ 選擇 **`Browse connectors`** 找到由 **n8n GmbH** 開發的官方連接器（或選擇 `Add custom connector`）。
+4. 點選 n8n 旁邊的 **`Connect`** 按鈕。
+5. 在跳出的連線視窗中，輸入上一步取得的 **ngrok HTTPS 網址** 作為 `Server URL`（例如 `https://<你的ngrok網域>.ngrok-free.app`）。
+6. 完成 **OAuth 授權**：瀏覽器會自動彈出 n8n 登入/授權確認頁面，點擊允許確認。
+7. 授權成功後，Claude 的 Connectors 列表中 **n8n** 的 Status 會顯示為 **`✓` (已連線)**。
 
-### 3. 授權 Workflow（開放給 Claude 使用）
+### 4. 授權 Workflow（開放給 Claude 使用）
 
-回到 n8n **Settings > Instance-level MCP > Workflows** 頁籤：
+回到 n8n **Settings > Instance-level MCP > Workflows exposed**：
 
-1. 點選右上角 **Enable workflows** 按鈕。
-2. 選擇要開放給 Claude 的 Workflow。
+1. 點選 **Workflows exposed** 進入工作流清單。
+2. 勾選要開放給 Claude 呼叫的已發布 Workflow。
 
 | 欄位 | 說明 |
 |------|------|
