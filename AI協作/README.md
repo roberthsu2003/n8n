@@ -8,10 +8,11 @@
 
 1. [🌟 台灣三大 AI 帳號連線 n8n 總覽（一張表快速對照）](#-台灣三大-ai-帳號連線-n8n-總覽一張表快速對照)
 2. [💡 通用輔助：免設定的 Chrome 瀏覽器側邊欄顧問](#-通用輔助免設定的-chrome-瀏覽器側邊欄顧問)
-3. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#-路線一如果你只有-gemini-帳號google--透過-antigravity-連體協作)
-4. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#-路線二如果你只有-chatgpt-帳號openai--透過-opencode-橋樑連線)
-5. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#-路線三如果你只有-claude-帳號anthropic--透過官方-connector-直連)
-6. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#-課堂實戰範例附-ai-prompt-提詞)
+3. [⚙️ n8n Instance-level MCP 設定與功能指南](#-n8n-instance-level-mcp-設定與功能指南)
+4. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#-路線一如果你只有-gemini-帳號google--透過-antigravity-連體協作)
+5. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#-路線二如果你只有-chatgpt-帳號openai--透過-opencode-橋樑連線)
+6. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#-路線三如果你只有-claude-帳號anthropic--透過官方-connector-直連)
+7. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#-課堂實戰範例附-ai-prompt-提詞)
 
 ---
 
@@ -34,6 +35,19 @@
 * 🌐 **Chrome 內建「問問 Gemini」**：點擊右上角側邊欄，自動抓取當前 n8n 網頁畫面與節點錯誤，即時診斷修復。
 * 💬 **ChatGPT in Chrome**：在側邊欄即時生成 JavaScript 表達式、資料轉換函數與正則表達式。
 * 🟣 **Claude in Chrome**：直接讀取畫布 DOM 結構，協助產生可複製貼上的 JSON 流程代碼。
+
+---
+
+## ⚙️ n8n Instance-level MCP 設定與功能指南
+
+n8n 內建的 **Instance-level MCP Server** 是讓所有外部 AI 工具（Antigravity、OpenCode、Claude 等）能夠安全讀取、操作與執行 n8n 工作流程的核心樞紐。
+
+### 🛠️ 後台 3 大核心設定步驟：
+1. **啟用 MCP 狀態**：前往 n8n 左下角 **Settings** ➔ **Instance-level MCP**，將 **MCP status** 切換為 **`● Enabled`**（綠色）。
+2. **開放工作流程 (Workflows exposed)**：在 **Access** 區塊點選 **Workflows exposed**，勾選允許 AI 調用的工作流程並填寫詳細 Description（讓 AI 知道何時觸發該流程）。
+3. **取得連線端點與授權**：點擊 **`[ 🔌 Connect ]`** 按鈕取得連線 Endpoint（需搭配 ngrok 等公開 HTTPS 網址：`https://<你的ngrok網域>/mcp-server/http`）。
+
+> 📖 **完整介面按鈕解析與進階設定**：請參閱專題指南 **[n8n Instance-level MCP 連線設定與介面功能詳解 (v2.34.6)](./n8n_mcp_setup_guide.md)**。
 
 ---
 
@@ -105,7 +119,7 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
 3. **對話操控 n8n**：
    在 OpenCode 中直接打字：*「請讀取目前 n8n 的所有工作流程，並幫我檢查哪一個執行失敗」*，ChatGPT 模型即會透過 OpenCode 自動操作 n8n！
 
-> 📘 **進階指南**：[n8n MCP Server 設定與連結指南](../mcp連結/README.md)
+> 📘 **進階指南**：[n8n Instance-level MCP 連線設定與介面指南](./n8n_mcp_setup_guide.md)
 
 ---
 
@@ -125,7 +139,7 @@ Claude 透過 Connector 自動在您的 n8n 畫布上建好所有節點！
 2. **在 Claude.ai 連線**：前往 Claude.ai ➔ 側邊欄 **Customize** ➔ **Connectors** ➔ 找到 **n8n** 點選 **`Connect`** ➔ 輸入 ngrok 公開網址。
 3. **完成 OAuth 授權**：瀏覽器跳轉允許授權後，Status 顯示 **`✓` (已連線)** 即可開始對話建流程。
 
-> 📘 **詳細圖文教學**：[Claude Connector 完整設定手冊](./README1.md)
+> 📘 **詳細設定教學**：[Claude Connector 設定手冊 (OAuth 模式)](./n8n_mcp_setup_guide.md#2-claude-connector-oauth-模式)
 
 ---
 

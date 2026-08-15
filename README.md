@@ -32,7 +32,9 @@
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
 
-### [mcp設定](./mcp連結/README.md)
+### ⚙️ [n8n Instance-level MCP 設定與介面指南](./AI協作/n8n_mcp_setup_guide.md)
+掌握 n8n 內建 Instance-level MCP Server 的後台設定、工作流 Expose 開放與 AI 客戶端連線。
+
 ---
 
 ## 🎯 [初體驗範例](./初階範例/README.md)
