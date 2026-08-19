@@ -132,17 +132,7 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 ---
 
-#### 第一階段：安裝 ngrok 與申請固定網址
-
-##### 📝 準備工作（筆記區）
-
-請在操作過程中將您的專屬資訊填寫在此處：
-
-- **我的 ngrok 帳號 (Email):** `__________________________`
-- **我的 ngrok Authtoken:** `__________________________`
-- **我的固定網址 (Static Domain):** `__________________________` *(例如: xxx.ngrok-free.app 或 xxx.ngrok-free.dev)*
-
-##### 操作步驟
+#### 第一階段：安裝 ngrok 並啟動通道取得網址
 
 ngrok 登入後的 **Setup & Installation** 提供了完整的引導流程，請依序完成以下 4 個步驟：
 
@@ -169,21 +159,25 @@ ngrok 登入後的 **Setup & Installation** 提供了完整的引導流程，請
   - **Raspberry Pi / 其他方式**：請參考 [👉 各平台詳細安裝教學](./ngrok各平台設定教學.md)。
 
 **步驟 3：綁定專屬 Authtoken (Add your authtoken)**
-- 在 **Setup & Installation** 頁面的第 2 步（或左側選單 **Your Authtoken**），可直接一鍵複製已包含您專屬 Token 的指令並於終端機執行：
+- 在 **Setup & Installation** 頁面的第 2 步（或左側選單 **Your Authtoken**），直接複製指令並於終端機執行：
   ```bash
   ngrok config add-authtoken <您的Authtoken>
   ```
 
-**步驟 4：取得免費固定網址 (Your dev domain) 並啟動** ⭐️
-- 在頁面的第 3 & 4 步，會看到系統為您配發的專屬開發固定網址（例如：`https://xxx.ngrok-free.dev`）。
-- **請將這個網址抄寫到上方的筆記區。**
-- ⚠️ **關鍵注意（必改 Port 5678）**：
-  ngrok 官方預設範例為連接 80 埠號，但因為 **n8n 的預設服務埠號 (Port) 是 5678**，所以在啟動通道時，您**必須將 port 改為 5678**：
+**步驟 4：啟動 ngrok 並取得專屬公開網址** ⭐️
+- 在終端機直接輸入以下指令啟動通道：
   ```bash
-  ngrok http 5678 --domain=<您的固定網址>
-  # 或最新格式：
-  # ngrok http --url=<您的固定網址> 5678
+  ngrok http 5678
   ```
+- 啟動後，終端機會直接顯示所有連線資訊面板（包含帳號、狀態與固定網址）：
+  ```text
+  Session Status                online
+  Account                       your-name@gmail.com (Plan: Free)
+  Web Interface                 http://127.0.0.1:4040
+  Forwarding                    https://xxxx-xxxx.ngrok-free.dev -> http://localhost:5678
+  ```
+- **請複製 `Forwarding` 欄位中的 HTTPS 網址**（例如：`https://xxxx-xxxx.ngrok-free.dev`），接下來啟動 n8n 容器時會使用此網址！
+- ⚠️ **請保持此終端機視窗開啟**，不要關閉它（關閉則通道中斷）。若需執行後續指令，請另外開啟新的終端機視窗。
 
 ---
 
