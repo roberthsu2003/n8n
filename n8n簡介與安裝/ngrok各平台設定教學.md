@@ -106,20 +106,31 @@ ngrok config add-authtoken <您的Authtoken>
 
 ## ⚡ 步驟 4：啟動 ngrok Tunnel
 
-將本地 `5678` Port (n8n 預設埠) 的流量透過 ngrok 轉發到您的固定網址：
+直接執行以下指令將本地 `5678` Port (n8n 預設埠) 的流量建立通道：
 
 ### 🍎 macOS 與 🪟 Windows (前景執行)
 ```bash
-ngrok http 5678 --domain=<您的固定網址>
+ngrok http 5678
 ```
+> 💡 **自動綁定固定網址**：
+> 只要帳號已綁定 Authtoken，ngrok 會**自動使用您的專屬免費固定網址**（例如 `https://xxx.ngrok-free.dev`），無需每次手動輸入 `--domain` 參數！
+> 
+> 啟動後終端機會顯示即時狀態面板：
+> ```text
+> Session Status                online
+> Account                       your-email@gmail.com (Plan: Free)
+> Web Interface                 http://127.0.0.1:4040
+> Forwarding                    https://xxxx-xxxx.ngrok-free.dev -> http://localhost:5678
+> ```
+> 
 > ⚠️ **注意**：
-> - 請將 `<您的固定網址>` 替換為實際網址（不含 `https://`，例如：`xxx.ngrok-free.dev`）。
-> - 前景執行會顯示即時狀態面板。**請勿關閉此終端機視窗**，否則通道會中斷。若需執行其他指令，請另開新視窗/分頁。
+> - **請複製 `Forwarding` 欄位的網址**，用於 n8n 容器的連線與 Webhook 設定。
+> - 前景執行時**請勿關閉此終端機視窗**，否則通道會中斷。若需執行其他指令，請另開新終端機視窗。
 
 ### 🍓 Raspberry Pi (背景執行)
 為了避免 SSH 斷線導致 ngrok 關閉，建議在背景運行：
 ```bash
-ngrok http 5678 --domain=<您的固定網址> > /dev/null &
+ngrok http 5678 > /dev/null &
 ```
 
 ---
