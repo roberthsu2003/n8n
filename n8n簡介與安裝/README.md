@@ -191,28 +191,26 @@ docker volume create n8n_data
 
 **步驟 2：啟動 n8n 容器**
 
-⚠️ **請務必將 `<你的網址>` 替換為您在 ngrok 申請的固定網址**
+> ⚠️ **指令語法關鍵注意事項（避免語法報錯）**：
+> 1. **請勿保留 `<>` 符號**：請直接將範例中的網址替換為您從 ngrok 取得的真實網址（例如 `abcd-1234.ngrok-free.dev`）。
+> 2. **`=` 符號左右不可有空格**：例如 `-e N8N_PORT=5678`，寫成 `-e N8N_PORT = 5678` 會導致容器啟動失敗。
+> 3. **每行結尾反斜線 `\` 前方需有空格**：換行反斜線 `\` 前請保留一個空格，且 `\` 之後不可有任何空格或字元。
+> 4. **網址格式區分**：`N8N_HOST` **不加** `https://`；而 `N8N_EDITOR_BASE_URL` 與 `WEBHOOK_URL` **必須包含** `https://`。
 
 ```bash
 docker run -d \
   --name n8n \
   --restart always \
   -p 5678:5678 \
-  -e N8N_HOST=<abcd-1234.ngrok-free.app> \
+  -e N8N_HOST=abcd-1234.ngrok-free.dev \
   -e N8N_PROTOCOL=https \
   -e N8N_PORT=5678 \
-  -e N8N_EDITOR_BASE_URL=<https://abcd-1234.ngrok-free.app> \
-  -e WEBHOOK_URL=<https://abcd-1234.ngrok-free.app> \
+  -e N8N_EDITOR_BASE_URL=https://abcd-1234.ngrok-free.dev \
+  -e WEBHOOK_URL=https://abcd-1234.ngrok-free.dev \
   -e GENERIC_TIMEZONE=Asia/Taipei \
   -v n8n_data:/home/node/.n8n \
   docker.n8n.io/n8nio/n8n
 ```
-
-**步驟 3：設定 ngrok tunnel**
-
-請參考專屬的跨平台教學，在您的系統上完成安裝、帳號綁定並啟動通道：
-
-👉 [**ngrok 各平台（Mac / Windows / Raspberry Pi）設定教學**](./ngrok各平台設定教學.md)
 
 ![](./images/本機安裝概念圖_ngrok.png)
 
