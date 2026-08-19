@@ -132,7 +132,7 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 ---
 
-#### 第一階段：申請 ngrok 固定網址
+#### 第一階段：安裝 ngrok 與申請固定網址
 
 ##### 📝 準備工作（筆記區）
 
@@ -140,38 +140,50 @@ ssh -L 5678:localhost:5678 pi@192.168.1.100
 
 - **我的 ngrok 帳號 (Email):** `__________________________`
 - **我的 ngrok Authtoken:** `__________________________`
-- **我的固定網址 (Static Domain):** `__________________________` *(例如: poodle-calm-roughly.ngrok-free.app 或 xxx.ngrok-free.dev)*
+- **我的固定網址 (Static Domain):** `__________________________` *(例如: xxx.ngrok-free.app 或 xxx.ngrok-free.dev)*
 
 ##### 操作步驟
 
-現在 ngrok 的 Dashboard 提供了一站式引導，登入後就會有非常友善的互動教學引導您完成設定。
+ngrok 登入後的 **Setup & Installation** 提供了完整的引導流程，請依序完成以下 4 個步驟：
 
-**步驟 1：註冊/登入 ngrok**
-- 前往 [dashboard.ngrok.com](https://dashboard.ngrok.com/)
-- 建議直接使用 **Google 帳號登入**
+**步驟 1：註冊 / 登入 ngrok**
+- 前往 [dashboard.ngrok.com](https://dashboard.ngrok.com/)。
+- 推薦直接點選 **「Continue with Google」/ Google 帳號快速登入**。
 
-**步驟 2：進入 Setup & Installation 互動教學**
-- 登入後，點選左側選單的 **Getting Started** > **Setup & Installation**。
-- 您會看到系統已自動偵測您的作業系統（例如 macOS），並在右側列出安裝與設定的逐步說明。
+**步驟 2：安裝 ngrok 應用程式 (Install the ngrok agent)**
+- 登入後，點選左側選單 **Getting Started** > **Setup & Installation**。
+- 系統會自動偵測您的作業系統，並提供安裝指令：
+  - **macOS**（推薦使用 Homebrew 安裝）：
+    ```bash
+    brew install ngrok
+    ```
+  - **Windows**（推薦使用 PowerShell 透過 Scoop 安裝）：
+    ```powershell
+    # 1. 若尚未安裝 Scoop，先在 PowerShell 執行安裝 Scoop
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
-**步驟 3：取得專屬 Authtoken**
-- 在 **Setup & Installation** 網頁的第 1 步中，會直接顯示您專屬的綁定指令，例如：
-  `ngrok config add-authtoken 36YWSnJRrwW...`
-- 直接複製該整行指令，即可將您的 Authtoken 綁定到您的電腦中。
-- *（或者也可以點選左側選單的 **Your Authtoken** 來單獨複製驗證代碼）*
+    # 2. 透過 Scoop 安裝 ngrok
+    scoop install ngrok
+    ```
+  - **Raspberry Pi / 其他方式**：請參考 [👉 各平台詳細安裝教學](./ngrok各平台設定教學.md)。
 
-**步驟 4：領取並複製免費固定網址 (Static Domain)** ⭐️
-- 往下拉到頁面最底部的「**Deploy your app online**」區塊。
-- 系統會為您自動生成並顯示一個免費的開發用固定網址（例如：`https://xxx.ngrok-free.dev`）。
+**步驟 3：綁定專屬 Authtoken (Add your authtoken)**
+- 在 **Setup & Installation** 頁面的第 2 步（或左側選單 **Your Authtoken**），可直接一鍵複製已包含您專屬 Token 的指令並於終端機執行：
+  ```bash
+  ngrok config add-authtoken <您的Authtoken>
+  ```
+
+**步驟 4：取得免費固定網址 (Your dev domain) 並啟動** ⭐️
+- 在頁面的第 3 & 4 步，會看到系統為您配發的專屬開發固定網址（例如：`https://xxx.ngrok-free.dev`）。
 - **請將這個網址抄寫到上方的筆記區。**
-- *（如需手動管理網址，亦可點選左側選單 **Universal Gateway** > **Domains** 進行設定）*
-
-> ⚠️ **關鍵注意（必改 Port 5678）**：
-> ngrok 官方網頁預設教學的啟動指令是 `ngrok http 80`。但因為 **n8n 的預設服務埠號 (Port) 是 5678**，所以在本機啟動時，您**必須將指令改為連接 5678**：
-> ```bash
-> # 加上您的固定網址，並將 port 改為 5678
-> ngrok http 5678 --domain=<您的固定網址>
-> ```
+- ⚠️ **關鍵注意（必改 Port 5678）**：
+  ngrok 官方預設範例為連接 80 埠號，但因為 **n8n 的預設服務埠號 (Port) 是 5678**，所以在啟動通道時，您**必須將 port 改為 5678**：
+  ```bash
+  ngrok http 5678 --domain=<您的固定網址>
+  # 或最新格式：
+  # ngrok http --url=<您的固定網址> 5678
+  ```
 
 ---
 

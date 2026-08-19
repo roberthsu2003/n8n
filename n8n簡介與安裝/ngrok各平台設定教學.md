@@ -10,9 +10,10 @@
 
 在開始之前，請確認：
 1. **Docker 環境**：您的本機或遠端裝置已成功運行 Docker 且 n8n 容器已經啟動（請參考主安裝文件）。
-2. **ngrok 帳號與資訊**：您已登入 ngrok 取得：
-   - 專屬的 **Authtoken**。
-   - 配發或申請的 **固定網址 (Static Domain)**（例如：`xxx.ngrok-free.app` 或 `xxx.ngrok-free.dev`）。
+2. **ngrok 帳號與資訊**：
+   - 前往 [dashboard.ngrok.com](https://dashboard.ngrok.com/)，建議直接點選 **「Continue with Google」** 進行快速登入。
+   - 進入左側選單 **Getting Started** > **Your Authtoken** 取得專屬的 **Authtoken**。
+   - 進入左側選單 **Network** > **Domains** 取得配發的 **固定網址 (Static Domain)**（例如：`xxx.ngrok-free.app` 或 `xxx.ngrok-free.dev`）。
 
 ---
 
@@ -43,19 +44,39 @@
 ### 🍎 macOS 安裝方式
 推薦使用 Homebrew 安裝。若未安裝 Homebrew，可先至 [brew.sh](https://brew.sh/) 安裝。
 ```bash
-brew install ngrok/ngrok/ngrok
+brew install ngrok
 ```
 *（手動下載：下載官方 Mac ZIP 檔，解壓後將 `ngrok` 移至 `/usr/local/bin/` 並執行 `chmod +x` 給予權限。）*
 
 ### 🪟 Windows 安裝方式
-- **方式 A (推薦，適合開發者)**：如果您有安裝 Chocolatey，可執行：
+ngrok 官方推薦 Windows 用戶使用 **Scoop** 進行安裝管理：
+
+#### 方式 A (推薦：使用 PowerShell + Scoop)
+1. 開啟 **PowerShell**。
+2. 若尚未安裝 Scoop，執行以下指令安裝 Scoop（設定執行原則並下載安裝）：
+   ```powershell
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+   ```
+3. 透過 Scoop 安裝 ngrok：
+   ```powershell
+   scoop install ngrok
+   ```
+
+#### 方式 B (使用 WinGet 或 Chocolatey)
+- **WinGet** (Windows 10/11 內建)：
+  ```powershell
+  winget install ngrok.ngrok
+  ```
+- **Chocolatey**：
   ```powershell
   choco install ngrok
   ```
-- **方式 B (手動安裝)**：
-  1. 前往 [ngrok 下載頁面](https://ngrok.com/download) 下載 Windows (64-bit) 壓縮檔。
-  2. 解壓縮後將 `ngrok.exe` 放於方便的資料夾（如 `C:\Tools\ngrok\`）。
-  3. 在該資料夾內按住 `Shift` + 滑鼠右鍵，選擇「在此處開啟 PowerShell 視窗」。
+
+#### 方式 C (手動下載安裝)
+1. 前往 [ngrok 下載頁面](https://ngrok.com/download) 下載 Windows (64-bit) 壓縮檔。
+2. 解壓縮後將 `ngrok.exe` 放於方便的資料夾（如 `C:\Tools\ngrok\`）。
+3. 在該資料夾內按住 `Shift` + 滑鼠右鍵，選擇「在此處開啟 PowerShell 視窗」。
 
 ### 🍓 Raspberry Pi 安裝方式
 在 Pi 的 SSH 終端機中執行以下一鍵安裝指令：
@@ -74,12 +95,12 @@ curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
 
 ## 🔑 步驟 3：綁定 ngrok 帳號 (Authtoken)
 
-將您在 ngrok Dashboard 取得的帳號專屬 Token 綁定至本地環境（此指令跨平台通用，Windows 下為 `ngrok.exe` 或 `./ngrok`）：
+前往 ngrok Dashboard 左側選單 **Getting Started** > **Your Authtoken**，在 **Command Line** 區塊可直接複製已填入 Token 的指令（或點擊 Copy 複製 Token）：
 
 ```bash
 ngrok config add-authtoken <您的Authtoken>
 ```
-> ⚠️ **請將 `<您的Authtoken>` 替換為您網頁上實際的 Token**（例如以 `2...` 或 `3...` 開頭的長字串）。
+> ⚠️ **說明**：此指令跨平台通用（Windows PowerShell / CMD 亦相同），執行後會將 Token 儲存至本地設定檔，只需執行一次即可。
 
 ---
 
