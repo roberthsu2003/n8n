@@ -66,7 +66,7 @@
 **OAuth Client（用戶端）** 代表一個**已向 OAuth Provider（例如 Google）註冊的應用程式身份**。
 
 #### 為什麼需要註冊 OAuth Client？
-當您的系統或應用程式（如飲料訂購系統、自建的 n8n 等）想要使用 Google 的登入或 API 服務時，由於 Google 預先不知道您的應用程式在哪裡，您必須**到 Google Cloud Console 註冊您的應用程式**，Google 才會發給您專屬的 **OAuth Client 資訊**。
+當您的系統或應用程式（如飲料訂購系統、自建的 n8n 等）想要使用 Google 的登入或 API 服務時，由於 Google 預先不知道您的應用程式在哪裡，您必須**到 Google Cloud Console 註冊您的應用程式**（💡 *小提示：進入 Console 後可直接搜尋 **`Google Auth Platform`** 直達設定介面*），Google 才會發給您專屬的 **OAuth Client 資訊**。
 
 #### OAuth Client 提供的主要資訊
 *   **Client ID (客戶端識別碼 / 身份證字號)：**

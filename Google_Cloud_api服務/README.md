@@ -55,10 +55,11 @@
 1.  **登入並選擇專案**
     * 登入 [Google Cloud Console](https://console.cloud.google.com/)。
     * 確保您已選擇了您的個人免費專案 (或建立一個新專案)。
+    * 💡 **快速提示 (新版 GCP 介面)**：Google 目前已將 OAuth 相關設定統一整併至 **「Google Auth Platform」(Google 驗證平台)**。進入 Console 後，可在頂部搜尋欄直接搜尋 **`Google Auth Platform`** 直達設定頁面！
 
 2.  **啟用您需要的 API**
     * 這是**非常關鍵**的一步。您必須先「啟用」您想用的服務 API，否則 n8n 連線了也無法運作。
-    * 到「API 與服務」>「程式庫」。
+    * 到「API 與服務」>「程式庫」(或頂部搜尋目標 API 名稱)。
     * 搜尋並啟用您需要的 API，例如：
         * **Google Sheets API** (用於 Google Sheets 節點)
         * **Google Drive API** (用於 Google Drive 節點)
@@ -66,9 +67,9 @@
         * **Gmail API** (用於 Gmail 節點)
     * *提醒：啟用 API 是免費的，費用是根據「用量」計算的，而個人專案的免費額度 (Free Tier) 通常綽綽有餘。*
 
-3.  **設定 OAuth 同意畫面 (Consent Screen)**
+3.  **設定 OAuth 同意畫面 (Consent Screen) / Google Auth Platform**
     * 這是 Google 向您顯示「您是否同意 n8n 存取您的資料？」的那個畫面。
-    * 到「API 與服務」>「OAuth 同意畫面」。
+    * 在頂部搜尋 **`Google Auth Platform`**，或至左側導覽「API 與服務」>「OAuth 同意畫面」。
     * 選擇「**外部 (External)**」。(因為您的帳號不是 Google Workspace 企業版)
     * **填寫基本資料**：
         * **應用程式名稱**：隨便填，例如 "My n8n Workflow"。

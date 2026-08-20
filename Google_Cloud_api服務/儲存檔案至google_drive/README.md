@@ -150,13 +150,14 @@
 1. **開啟 Google Cloud Console**
    - 前往 [Google Cloud Console](https://console.cloud.google.com/)
    - 建立新專案或選擇現有專案
+   - 💡 **快速捷徑**：在 Google Cloud Console 頂部搜尋欄輸入 **`Google Auth Platform`**，可直接進入整合式驗證管理中心設定 OAuth 與憑證。
 
 2. **啟用 Google Drive API**
-   - 在左側選單選擇「API 和服務」→「程式庫」
-   - 搜尋「Google Drive API」並啟用
+   - 在左側選單選擇「API 和服務」→「程式庫」（或直接於頂端搜尋「Google Drive API」）
+   - 啟用 **Google Drive API**
 
 3. **建立 OAuth 2.0 憑證**
-   - 進入「API 和服務」→「憑證」
+   - 進入 **Google Auth Platform**（或「API 和服務」→「憑證」）
    - 點擊「建立憑證」→「OAuth 用戶端 ID」
    - 應用程式類型選擇「網頁應用程式」
    - 在「已授權的重新導向 URI」中加入您的 n8n 回調 URL
