@@ -16,12 +16,11 @@
    - [Connected clients（已連線客戶端管理區）](#connected-clients)
 3. [Expose（開放）與連線權限的關鍵差異](#expose-vs-permissions)
 4. [各 AI 客戶端連線設定教學](#client-setups)
-   - [Google Antigravity 專案等級 MCP 設定](#antigravity-mcp)
-   - [OpenCode 設定檔與常用指令](#opencode-mcp)
    - [Claude Connector (OAuth 模式)](#claude-connector)
-   - [Cursor / 遠端 Token 模式](#cursor-mcp)
+   - [OpenCode 設定檔與常用指令](#opencode-mcp)
+   - [Google Antigravity 專案等級 MCP 設定](#antigravity-mcp)
 5. [安全規範與推薦操作流程](#security-and-workflow)
-6. [常見問題與排查 (Troubleshooting)](#troubleshooting)
+6. [課堂實戰範例（附 AI Prompt 提詞）](#practical-examples)
 
 ---
 
@@ -114,51 +113,27 @@
 <a id="client-setups"></a>
 ## 四、各 AI 客戶端連線設定教學
 
-<a id="antigravity-mcp"></a>
-### 1. Google Antigravity 專案等級 MCP 設定
+<a id="claude-connector"></a>
+### 1. Claude.ai Connector (OAuth 模式)
 
-Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級（Global-level）**設定：
+適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式：
 
-* 🌐 **全域設定（Global）**：位於 `~/.gemini/config/`，適用於本機所有專案。
-* 📁 **專案等級設定（Workspace）**：位於專案根目錄下的 `.agents/` 資料夾，只對當前專案生效，可隨 Git 版本庫一同提交分享。
-
-#### A. 專案目錄結構
-```text
-專案根目錄/
-├── .agents/
-│   ├── mcp_config.json                 # 專案層級 MCP 設定
-│   └── plugins/
-│       └── n8n/
-│           ├── plugin.json             # Plugin 宣告檔
-│           └── mcp_config.json         # Plugin 內部的 MCP 設定
-└── ...
-```
-
-#### B. 設定檔案內容
-1. **Plugin 宣告檔 (`.agents/plugins/n8n/plugin.json`)**：
-   ```json
-   {
-     "name": "n8n"
-   }
+1. **取得公開 HTTPS 網址**：
+   確保本機已啟動 ngrok 並轉發 n8n 埠號（預設 5678）：
+   ```bash
+   ngrok http 5678
    ```
-2. **MCP 設定檔 (`.agents/mcp_config.json` 或 `.agents/plugins/n8n/mcp_config.json`)**：
-   > 💡 **認證注意**：Antigravity 不支援瀏覽器 OAuth 授權流程，若啟用認證需在 `headers` 帶入 `"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"`。
-
-   ```json
-   {
-     "mcpServers": {
-       "n8n": {
-         "serverUrl": "https://<你的ngrok公開網址>/mcp-server/http",
-         "headers": {
-           "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
-           "Accept-Encoding": "identity"
-         }
-       }
-     }
-   }
-   ```
-
-> 📘 **詳細指南與除錯範例**：請參閱專題講義 **[Antigravity 專案等級 n8n MCP 設定教學](./antigravity_mcp_setup_guide.md)**。
+2. **開啟 Claude Connectors 介面**：
+   * 在 Claude.ai 側邊欄點選 **Customize** ➔ **Connectors**（或 **Settings > Connectors**）。
+3. **新增與連線 n8n**：
+   * **搜尋連線**：在 Connectors 列表中找到 **n8n**（Type 為 `Web`），或點擊右上角 **`Add ˇ`** ➔ 選擇 **`Browse connectors`** 搜尋 official `n8n` (by n8n GmbH)。
+   * 點選 **`Connect`** 按鈕。
+   * 輸入 ngrok 產生的 Server URL（例如 `https://<你的ngrok網域>.ngrok-free.app`）。
+4. **瀏覽器 OAuth 授權**：
+   * 系統會自動開啟 n8n 登入/授權畫面，點擊確認允許連線。
+5. **確認連線狀態**：
+   * 授權完成後，Claude Connectors 列表中的 n8n 狀態會變更為 **`✓` (已連線)**。
+   * 同步可在 n8n 後台 **Settings > Instance-level MCP > Connected clients** 查看到 Claude 已連線。
 
 ---
 
@@ -243,49 +218,55 @@ opencode mcp logout n8n
 
 ---
 
-<a id="claude-connector"></a>
-### 3. Claude Connector (OAuth 模式)
+<a id="antigravity-mcp"></a>
+### 3. Google Antigravity 專案等級 MCP 設定
 
-適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式：
+Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級（Global-level）**設定：
 
-1. **取得公開 HTTPS 網址**：
-   確保本機已啟動 ngrok 並轉發 n8n 埠號（預設 5678）：
-   ```bash
-   ngrok http 5678
-   ```
-2. **開啟 Claude Connectors 介面**：
-   * 在 Claude.ai 側邊欄點選 **Customize** ➔ **Connectors**（或 **Settings > Connectors**）。
-3. **新增與連線 n8n**：
-   * **搜尋連線**：在 Connectors 列表中找到 **n8n**（Type 為 `Web`），或點擊右上角 **`Add ˇ`** ➔ 選擇 **`Browse connectors`** 搜尋 official `n8n` (by n8n GmbH)。
-   * 點選 **`Connect`** 按鈕。
-   * 輸入 ngrok 產生的 Server URL（例如 `https://<你的ngrok網域>.ngrok-free.app`）。
-4. **瀏覽器 OAuth 授權**：
-   * 系統會自動開啟 n8n 登入/授權畫面，點擊確認允許連線。
-5. **確認連線狀態**：
-   * 授權完成後，Claude Connectors 列表中的 n8n 狀態會變更為 **`✓` (已連線)**。
-   * 同步可在 n8n 後台 **Settings > Instance-level MCP > Connected clients** 查看到 Claude 已連線。
+* 🌐 **全域設定（Global）**：位於 `~/.gemini/config/`，適用於本機所有專案。
+* 📁 **專案等級設定（Workspace）**：位於專案根目錄下的 `.agents/` 資料夾，只對當前專案生效，可隨 Git 版本庫一同提交分享。
 
----
-
-<a id="cursor-mcp"></a>
-### 4. Cursor / 遠端 Token 模式
-
-在 Cursor 的 `mcp.json` 中配置：
-
-```json
-{
-  "mcpServers": {
-    "n8n": {
-      "url": "https://<你的ngrok公開網域>/mcp-server/http",
-      "headers": {
-        "Accept-Encoding": "identity"
-      }
-    }
-  }
-}
+#### A. 專案目錄結構
+```text
+專案根目錄/
+├── .agents/
+│   ├── mcp_config.json                 # 專案層級 MCP 設定
+│   └── plugins/
+│       └── n8n/
+│           ├── plugin.json             # Plugin 宣告檔
+│           └── mcp_config.json         # Plugin 內部的 MCP 設定
+└── ...
 ```
 
+#### B. 設定檔案內容
+1. **Plugin 宣告檔 (`.agents/plugins/n8n/plugin.json`)**：
+   ```json
+   {
+     "name": "n8n"
+   }
+   ```
+2. **MCP 設定檔 (`.agents/mcp_config.json` 或 `.agents/plugins/n8n/mcp_config.json`)**：
+   > 💡 **認證注意**：Antigravity 不支援瀏覽器 OAuth 授權流程，若啟用認證需在 `headers` 帶入 `"Authorization": "Bearer <YOUR_ACCESS_TOKEN>"`。
+
+   ```json
+   {
+     "mcpServers": {
+       "n8n": {
+         "serverUrl": "https://<你的ngrok公開網址>/mcp-server/http",
+         "headers": {
+           "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
+           "Accept-Encoding": "identity"
+         }
+       }
+     }
+   }
+   ```
+
+> 📘 **詳細指南與除錯範例**：請參閱專題講義 **[Antigravity 專案等級 n8n MCP 設定教學](./antigravity_mcp_setup_guide.md)**。
+
 ---
+
+
 
 <a id="security-and-workflow"></a>
 ## 五、安全規範與推薦操作流程
