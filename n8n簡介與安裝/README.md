@@ -38,15 +38,23 @@ ngrok 登入後的 **Setup & Installation** 提供了完整的引導流程，請
     ```bash
     brew install ngrok
     ```
-  - **Windows**（推薦使用 PowerShell 透過 Scoop 安裝）：
-    ```powershell
-    # 1. 若尚未安裝 Scoop，先在 PowerShell 執行安裝 Scoop
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+  - **Windows**（優先使用 Windows Store / winget，若無法使用才改用 Scoop；**⚠️ 注意：兩者請二選一，切勿同時安裝**）：
+    - **方法一（首選：Windows Store / winget）**：
+      開啟 PowerShell 執行：
+      ```powershell
+      winget install ngrok
+      ```
+      *（或直接開啟 Microsoft Store 應用程式搜尋 `ngrok` 安裝）*
+    - **方法二（備選：若 Store / winget 無法安裝，改用 Scoop）**：
+      在 PowerShell 執行：
+      ```powershell
+      # 1. 若尚未安裝 Scoop，先在 PowerShell 執行安裝 Scoop
+      Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+      Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
-    # 2. 透過 Scoop 安裝 ngrok
-    scoop install ngrok
-    ```
+      # 2. 透過 Scoop 安裝 ngrok
+      scoop install ngrok
+      ```
   - **Linux / Raspberry Pi**（使用 Apt 安裝）：
     ```bash
     curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
