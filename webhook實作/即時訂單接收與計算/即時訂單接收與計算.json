@@ -1,0 +1,95 @@
+{
+  "name": "即時訂單接收與計算",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### 📦 即時訂單接收與運算流程\n1. Webhook 接收外部購物車 POST 訂單資料\n2. 運算品項總額、VIP 折扣與運費\n3. 即時回傳 JSON 訂單確認收據",
+        "height": 280,
+        "width": 380
+      },
+      "id": "sticky-note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "order",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "接收訂單 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        360
+      ],
+      "webhookId": "order-webhook-endpoint"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取得訂單輸入資料\nconst body = $input.first().json.body || {};\nconst customer = body.customer_name || '訪客';\nconst isVip = body.is_vip === true;\nconst items = Array.isArray(body.items) ? body.items : [];\n\n// 計算商品小計\nlet subtotal = 0;\nconst processedItems = items.map(item => {\n  const itemTotal = (item.price || 0) * (item.quantity || 1);\n  subtotal += itemTotal;\n  return {\n    name: item.name,\n    price: item.price,\n    quantity: item.quantity || 1,\n    total: itemTotal\n  };\n});\n\n// 計算 VIP 折扣 (VIP 享 9 折)\nconst discountRate = isVip ? 0.1 : 0;\nconst discountAmount = Math.round(subtotal * discountRate);\n\n// 運費規則 (滿 1000 免運，否則 60 元)\nconst shippingFee = subtotal >= 1000 || subtotal === 0 ? 0 : 60;\nconst finalAmount = subtotal - discountAmount + shippingFee;\n\nreturn [{\n  json: {\n    order_id: 'ORD-' + Date.now(),\n    customer_name: customer,\n    is_vip: isVip,\n    item_count: items.length,\n    items: processedItems,\n    subtotal: subtotal,\n    discount_amount: discountAmount,\n    shipping_fee: shippingFee,\n    final_amount: finalAmount,\n    status: 'confirmed',\n    created_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "calculate-order",
+      "name": "運算金額與折扣",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-to-webhook",
+      "name": "回傳訂單確認",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "接收訂單 Webhook": {
+      "main": [
+        [
+          {
+            "node": "運算金額與折扣",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "運算金額與折扣": {
+      "main": [
+        [
+          {
+            "node": "回傳訂單確認",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -58,6 +58,9 @@
 
 **包含範例**：
 - 自動化問候系統：學習 Webhook 觸發器、條件判斷與 JSON 回應
+- 即時訂單接收與計算：電商購物車資料處理、折扣與運費運算
+- 檔案上傳與自動處理：Multipart Form-Data 檔案上傳與 CSV 自動解析
+- 多事件分流與安全驗證：Header 金鑰驗證與 Switch 多路分流
 
 ## 🔗 [整合 Google 服務](./Google_Cloud_api服務/README.md)
 

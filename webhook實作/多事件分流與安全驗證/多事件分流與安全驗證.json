@@ -1,0 +1,298 @@
+{
+  "name": "多事件分流與安全驗證",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### 🛡️ Webhook 安全金鑰驗證與事件分流\n1. Webhook 接收帶有自訂 Header (`x-api-key`) 的 POST 事件\n2. IF 節點驗證金鑰是否正確（錯誤則回傳 401 Unauthorized）\n3. Switch 節點依據事件類型 (`event_type`) 進行多路分流處理",
+        "height": 280,
+        "width": 420
+      },
+      "id": "sticky-note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "secure-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-secure-events",
+      "name": "安全事件 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        360
+      ],
+      "webhookId": "secure-events-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.headers['x-api-key'] }}",
+              "value2": "secret-token-12345"
+            }
+          ]
+        }
+      },
+      "id": "check-auth",
+      "name": "驗證 API Key",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        420,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"無效的 API Key，請在 Header 帶入正確的 x-api-key\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "respond-unauthorized",
+      "name": "回傳 401 未授權",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.event_type }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "user_signup",
+              "output": 0
+            },
+            {
+              "value2": "order_paid",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 2
+      },
+      "id": "switch-events",
+      "name": "分流事件類型",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [
+        640,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "status",
+              "stringValue": "success"
+            },
+            {
+              "name": "event",
+              "stringValue": "user_signup"
+            },
+            {
+              "name": "action",
+              "stringValue": "新會員歡迎信已排程發送"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "handle-signup",
+      "name": "處理新會員註冊",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "status",
+              "stringValue": "success"
+            },
+            {
+              "name": "event",
+              "stringValue": "order_paid"
+            },
+            {
+              "name": "action",
+              "stringValue": "訂單付款成功，通知倉庫出貨"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "handle-payment",
+      "name": "處理訂單付款",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "status",
+              "stringValue": "warning"
+            },
+            {
+              "name": "event",
+              "stringValue": "unknown"
+            },
+            {
+              "name": "action",
+              "stringValue": "未知的事件類型，已記錄 Log"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "handle-fallback",
+      "name": "處理未知事件",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        880,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-success",
+      "name": "回傳處理結果",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        280
+      ]
+    }
+  ],
+  "connections": {
+    "安全事件 Webhook": {
+      "main": [
+        [
+          {
+            "node": "驗證 API Key",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "驗證 API Key": {
+      "main": [
+        [
+          {
+            "node": "分流事件類型",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回傳 401 未授權",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "分流事件類型": {
+      "main": [
+        [
+          {
+            "node": "處理新會員註冊",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "處理訂單付款",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "處理未知事件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "處理新會員註冊": {
+      "main": [
+        [
+          {
+            "node": "回傳處理結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "處理訂單付款": {
+      "main": [
+        [
+          {
+            "node": "回傳處理結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "處理未知事件": {
+      "main": [
+        [
+          {
+            "node": "回傳處理結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

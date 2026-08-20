@@ -1,0 +1,125 @@
+{
+  "name": "檔案上傳與自動處理",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "### 📁 Webhook 檔案上傳與解析流程\n1. Webhook 接收外部以 Multipart Form-Data 上傳的 CSV 檔案\n2. Extract from File 解析檔案二進位資料為 JSON\n3. 統計資料筆數並即時回傳處理摘要",
+        "height": 280,
+        "width": 380
+      },
+      "id": "sticky-note-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-file",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "webhook-file-upload",
+      "name": "檔案上傳 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        360
+      ],
+      "webhookId": "file-upload-webhook"
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "binaryPropertyName": "data",
+        "options": {
+          "headerRow": true
+        }
+      },
+      "id": "extract-csv",
+      "name": "解析 CSV 內容",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        480,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst recordCount = items.length;\n\nreturn [{\n  json: {\n    message: '檔案解析成功',\n    total_records: recordCount,\n    sample_records: items.slice(0, 3).map(i => i.json),\n    processed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "summarize-records",
+      "name": "生成處理摘要",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-upload-result",
+      "name": "回傳解析結果",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        360
+      ]
+    }
+  ],
+  "connections": {
+    "檔案上傳 Webhook": {
+      "main": [
+        [
+          {
+            "node": "解析 CSV 內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 CSV 內容": {
+      "main": [
+        [
+          {
+            "node": "生成處理摘要",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成處理摘要": {
+      "main": [
+        [
+          {
+            "node": "回傳解析結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
