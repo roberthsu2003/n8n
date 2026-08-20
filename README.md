@@ -32,8 +32,11 @@
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
 
-### ⚙️ [n8n Instance-level MCP 設定與介面指南](./AI協作/n8n_mcp_setup_guide.md)
-掌握 n8n 內建 Instance-level MCP Server 的後台設定、工作流 Expose 開放與 AI 客戶端連線。
+### ⚙️ [AI 協作與 n8n MCP 設定指南](./AI協作/README.md)
+透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具：
+1. **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連。
+2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與 `opencode.json` 設定。
+3. **Google Antigravity 專案協作**：Gemini 智慧代理深度連體整合與 Bearer Token 配置。
 
 ---
 
@@ -107,8 +110,23 @@
 
 ---
 
-## 🤝 [AI協作](./AI協作/README.md)
-透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具，讓 AI 能夠搜尋、檢查並直接執行自動化任務。
+## 🤝 [AI 協作與 MCP 工具整合](./AI協作/README.md)
+
+透過 **Model Context Protocol (MCP)**，將 n8n 工作流轉變為外部 AI 助手的專屬工具箱，讓 AI 能夠即時搜尋、檢視並直接執行自動化任務。
+
+本單元依序介紹三大 AI 途徑與實戰：
+
+1. 🟣 **[Claude.ai Connector 直連 (OAuth 模式)](./AI協作/README.md#claude-connector)**
+   * 適合 Claude 網頁版或桌面版用戶。
+   * 免寫程式碼，透過官方 Connector 輸入 ngrok 網址並完成 OAuth 授權，即可直接在對話框操控 n8n。
+2. 🟢 **[OpenCode 橋樑連線 (ChatGPT / OpenAI 帳號)](./AI協作/README.md#opencode-mcp)**
+   * 解決 ChatGPT 官方網頁目前無 MCP 按鈕的問題。
+   * 透過 `opencode auth login` 登入 OpenAI 帳號，並在 `opencode.json` 中配置 n8n MCP 服務端點。
+3. 🔵 **[Google Antigravity 專案等級協作 (Gemini)](./AI協作/antigravity_mcp_setup_guide.md)**
+   * 適合在 Antigravity 開發環境中與 Gemini 大模型連體協作。
+   * 支援專案等級（`.agents/mcp_config.json`）設定與 Bearer Token 驗證。
+
+* 🚲 **[課堂實戰範例：台北市 YouBike 低車輛站點自動記錄](./AI協作/台北市的youbike/README.md)**（內附 AI Prompt 提詞範本）
 
 ---
 
