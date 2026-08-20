@@ -17,7 +17,7 @@
 3. [Expose（開放）與連線權限的關鍵差異](#expose-vs-permissions)
 4. [各 AI 客戶端連線設定教學](#client-setups)
    - [Claude Connector (OAuth 模式)](#claude-connector)
-   - [OpenCode 設定檔與常用指令](#opencode-mcp)
+   - [OpenCode 全域管理指令（推薦免手寫設定檔）](#opencode-mcp)
    - [Google Antigravity 專案等級 MCP 設定](#antigravity-mcp)
 5. [安全規範與推薦操作流程](#security-and-workflow)
 6. [課堂實戰範例（附 AI Prompt 提詞）](#practical-examples)
@@ -138,65 +138,22 @@
 ---
 
 <a id="opencode-mcp"></a>
-### 2. OpenCode 設定檔與常用指令
+### 2. OpenCode 全域管理指令（推薦免手寫設定檔）
 
 > [!TIP]
-> **強烈推薦使用「全域設定 (Global)」（特別是使用 OpenCode Desktop 桌面版時）**：
-> - **OpenCode Desktop 用戶**：桌面版在不同工作區或開啟不同資料夾時，會預設讀取全域設定。將 n8n MCP 設在全域可確保在任何專案介面中都能無縫調用。
-> - **一次配置、到處可用**：只需設定一次（或執行一次 `opencode mcp add`），免去每個專案重複配置或更新 ngrok 網址的繁瑣步驟，最為省時且不易出錯！
+> **全域設定推薦使用 CLI 指令直接操作**：
+> OpenCode 內建完整的 MCP CLI 管理工具。**不需要手動建立或編輯 `opencode.json`**，只需透過指令即可在全域完成 n8n MCP 的新增、OAuth 授權與狀態管理，設定一次即在任何目錄與 OpenCode Desktop 桌面版中全域生效！
 
-OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Level)** 兩種設定方式，配置結構完全相同：
-
-#### A. 設定檔層級說明
-* 🌐 **全域等級 (Global Level，⭐ 強烈推薦)**：
-  * **設定檔位置**：`~/.config/opencode/opencode.json`
-  * **優勢**：一次設定，終生受用。**OpenCode Desktop 桌面版**與 CLI 在任何專案或目錄啟動時，皆自動共用這組 n8n MCP 連線。
-* 📁 **專案等級 (Project Level)**：
-  * **設定檔位置**：`<專案根目錄>/opencode.json`
-  * **適用情境**：只對當前專案生效。若特定專案需要連線至不同 n8n 實例或需個別客製化 headers，才在專案根目錄建立。
-
-#### B. 設定檔內容範例 (`opencode.json`)
-
-> ⚠️ **OAuth 與 Access Token 模式說明**：
-> OpenCode 支援 **OAuth 自動授權** 功能（連線時由 CLI 引導開啟瀏覽器授權）。但因 OAuth 屬於較新功能，在特定環境下有時可能無法自動完成授權。
-> **若遇到 OAuth 無法授權的情形，請改用傳統穩定的 Access Token 方式**（在 `headers` 帶入 `Authorization: "Bearer <TOKEN>"`）；若使用 OAuth 模式則可省略 `Authorization` 欄位。
-
-```json
-{
-  "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "n8n": {
-      "type": "remote",
-      "url": "https://<你的ngrok公開網域>/mcp-server/http",
-      "enabled": true,
-      "headers": {
-        "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
-        "Accept-Encoding": "identity"
-      }
-    }
-  }
-}
-```
-
-> **欄位說明**：
-> - `mcp.n8n`：MCP 服務識別名稱（可自訂）。
-> - `type`：`remote`（遠端端點）。
-> - `url`：n8n MCP 端點，路徑通常為 `/mcp-server/http`。
-> - `headers.Accept-Encoding`：設定為 `identity`，可避免網關 Gzip 壓縮破壞 SSE/流式傳輸連線。
-> - `headers.Authorization`：填入 Access Token（Bearer Token 格式）。當 OAuth 自動授權失敗時，以此方式可直接通過驗證。
-
-#### C. 常用管理指令（全域 / Global 設定）
-
-> 💡 **全域說明**：以下所有 `opencode` CLI 指令均預設針對**全域環境**（設定檔儲存於 `~/.config/opencode/opencode.json`，認證憑證儲存於 `~/.local/share/opencode/`），設定完成後在任何專案目錄皆可生效。
+#### 🛠️ 常用管理指令（全域 / Global 設定）
 
 ```bash
 # 1. 登入 OpenAI / ChatGPT 帳號提供者（全域登入，供 ChatGPT 用戶使用）
 opencode auth login
 
-# 2. 全域新增 n8n MCP 服務（預設寫入 ~/.config/opencode/opencode.json）
+# 2. 全域新增 n8n MCP 服務（自動註冊至全域環境）
 opencode mcp add n8n --url https://<你的ngrok公開網域>/mcp-server/http
 
-# 3. 手動觸發 / 重新進行全域 OAuth 網頁授權
+# 3. 手動觸發 / 進行全域 OAuth 網頁授權（若首次加入未自動彈出時執行）
 opencode mcp auth n8n
 
 # 4. 查看全域所有已註冊的 MCP 連線狀態
@@ -209,12 +166,18 @@ opencode mcp debug n8n
 opencode mcp logout n8n
 ```
 
-> 📌 **模式與授權說明**：
-> - **OAuth 模式**：執行 `opencode mcp add n8n --url ...` 後，首次連線時會自動喚起瀏覽器進行 n8n 登入授權（或執行 `opencode mcp auth n8n` 手動喚起），Token 會由 OpenCode 自動保存至本地全域憑證。
-> - **Access Token 模式**：直接在 `opencode.json` 中配置 `"Authorization": "Bearer <TOKEN>"`，連線時直接通過驗證，無需透過瀏覽器進行 OAuth 跳轉。
-> - **專案專屬範圍**：若希望將 MCP 設定僅限制在特定專案（非全域），請直接手動在該專案根目錄建立 `opencode.json` 進行配置。
+> [!IMPORTANT]
+> **⭐ 進入 Session 最關鍵驗證：在 Prompt 輸入 `/mcp`**：
+> 指令授權完成後，**不代表當前 OpenCode Session 已經正確掛載 n8n**。
+> 1. 執行 `opencode` 進入對話互動介面（或開啟 OpenCode Desktop 桌面版）。
+> 2. 在對話輸入框中直接輸入斜線指令 **`/mcp`**。
+> 3. **確認連線狀態**：檢查選單列表中是否包含 `n8n`，且狀態是否為已連線 (Active / Connected)。
+> 4. 只有在 `/mcp` 列表中確認看到 `n8n` 連線成功後，ChatGPT / GPT-4o 模型才能在 Session 中自動調用 n8n 工作流程與工具！
 
-> 💡 **ChatGPT 用戶專屬優勢**：若您擁有 ChatGPT / OpenAI 帳號，可在 OpenCode 透過 `opencode auth login` 登入 OpenAI 帳號，即可直接使用 ChatGPT 的模型（如 GPT-4o、o1 等）藉由 MCP 自動化操控 n8n 工作流程！
+> 📌 **運作與授權機制說明**：
+> - **OAuth 自動授權流程**：執行 `opencode mcp add n8n --url ...` 後，連線時會自動喚起瀏覽器進行 n8n 登入授權（或執行 `opencode mcp auth n8n` 手動喚起），授權 Token 會由 OpenCode 自動保存至本地憑證庫（`~/.local/share/opencode/`）。
+> - **全域共用優勢**：設定完成後，在終端機任何目錄執行 `opencode` 或開啟 **OpenCode Desktop 桌面版**，皆能自動辨識並調用 n8n MCP 工具。
+> - **ChatGPT 用戶專屬優勢**：若您擁有 ChatGPT / OpenAI 帳號，在 OpenCode 透過 `opencode auth login` 登入後，即可直接使用 ChatGPT 的模型（如 GPT-4o、o1 等）藉由 MCP 自動化操控 n8n 工作流程！
 
 ---
 

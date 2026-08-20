@@ -35,7 +35,7 @@
 ### ⚙️ [AI 協作與 n8n MCP 設定指南](./AI協作/README.md)
 透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具：
 1. **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連。
-2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與 `opencode.json` 設定。
+2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理指令（免手寫設定檔）。
 3. **Google Antigravity 專案協作**：Gemini 智慧代理深度連體整合與 Bearer Token 配置。
 
 ---
@@ -121,7 +121,7 @@
    * 免寫程式碼，透過官方 Connector 輸入 ngrok 網址並完成 OAuth 授權，即可直接在對話框操控 n8n。
 2. 🟢 **[OpenCode 橋樑連線 (ChatGPT / OpenAI 帳號)](./AI協作/README.md#opencode-mcp)**
    * 解決 ChatGPT 官方網頁目前無 MCP 按鈕的問題。
-   * 透過 `opencode auth login` 登入 OpenAI 帳號，並在 `opencode.json` 中配置 n8n MCP 服務端點。
+   * 透過 `opencode auth login` 登入 OpenAI 帳號，並以 `opencode mcp add` 指令全域註冊 n8n MCP 服務端點。
 3. 🔵 **[Google Antigravity 專案等級協作 (Gemini)](./AI協作/antigravity_mcp_setup_guide.md)**
    * 適合在 Antigravity 開發環境中與 Gemini 大模型連體協作。
    * 支援專案等級（`.agents/mcp_config.json`）設定與 Bearer Token 驗證。
