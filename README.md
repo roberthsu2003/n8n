@@ -113,26 +113,6 @@
 
 ---
 
-## 🤝 [AI 協作與 MCP 工具整合](./AI協作/README.md)
-
-透過 **Model Context Protocol (MCP)**，將 n8n 工作流轉變為外部 AI 助手的專屬工具箱，讓 AI 能夠即時搜尋、檢視並直接執行自動化任務。
-
-本單元依序介紹三大 AI 途徑與實戰：
-
-1. 🟣 **[Claude.ai Connector 直連 (OAuth 模式)](./AI協作/README.md#claude-connector)**
-   * 適合 Claude 網頁版或桌面版用戶。
-   * 免寫程式碼，透過官方 Connector 輸入 ngrok 網址並完成 OAuth 授權，即可直接在對話框操控 n8n。
-2. 🟢 **[OpenCode 橋樑連線 (ChatGPT / OpenAI 帳號)](./AI協作/README.md#opencode-mcp)**
-   * 解決 ChatGPT 官方網頁目前無 MCP 按鈕的問題。
-   * 透過 `opencode auth login` 登入 OpenAI 帳號，並以 `opencode mcp add` 指令全域註冊 n8n MCP 服務端點。
-3. 🔵 **[Google Antigravity 專案等級協作 (Gemini)](./AI協作/antigravity_mcp_setup_guide.md)**
-   * 適合在 Antigravity 開發環境中與 Gemini 大模型連體協作。
-   * 支援專案等級（`.agents/mcp_config.json`）設定與 Bearer Token 驗證。
-
-* 🚲 **[課堂實戰範例：台北市 YouBike 低車輛站點自動記錄](./AI協作/台北市的youbike/README.md)**（內附 AI Prompt 提詞範本）
-
----
-
 
 ## 📚 [關於n8n的更多學習資源]
 
