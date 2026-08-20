@@ -59,3 +59,38 @@
 
 ---
 
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（串接本地 Ollama 模型 Prompt）</strong></summary>
+
+> 💡 **任務目標**：抓取英文名言後，由 **Ollama** 雲端模型（`gemma4:31b-cloud`）自動翻譯為繁體中文，並生成 30 字的今日行動啟發建議。
+
+> ⚠️ **執行前準備（註冊與建立 Ollama Credentials 必做步驟）**：
+> 1. **本機安裝 Ollama**：至 [Ollama 官網](https://ollama.com/) 下載並安裝。
+> 2. **註冊 Ollama 帳號並建立 API Key**：
+>    - 登入 [Ollama 官方網站](https://ollama.com/)。
+>    - 進入個人設定頁面點選 **Keys**（或 **Settings > API keys**）。
+>    - 點擊 **`Add API Key`**，建立並複製產生的 API Key。
+> 3. **終端機下載並啟動模型**：
+>    - 開啟終端機執行指令登入並啟動模型：
+>      ```bash
+>      ollama run gemma4:31b-cloud
+>      ```
+> 4. **在 n8n 建立 Ollama Credentials（憑證）**：
+>    - 在 n8n 左側選單點選 **Credentials** ➔ **Add Credential** ➔ 選擇 **Ollama**。
+>    - **Base URL**：
+>      - Docker 容器環境填入：`http://host.docker.internal:11434`
+>      - 本機 npm 運行環境填入：`http://localhost:11434`
+>    - **API Key**：貼上剛才在 Ollama 網站產生的 API Key。
+>    - 點擊 **Save**，確認上方出現 **`Connection tested successfully`**（綠色連線成功提示）。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+我想將「取得隨機引言」工作流程升級為「每日 AI 哲理金句機器人」：
+1. 保留原本的 HTTP Request 節點（向 https://zenquotes.io/api/random 抓取引言）。
+2. 在後面串接 Basic LLM Chain（或 AI Agent）節點，並連接「Ollama Chat Model」模型節點。
+3. 憑證請選擇已建立好的 Ollama Account，模型指定使用 `gemma4:31b-cloud`。
+4. 設定 AI Prompt 提詞：將抓到的英文名言（{{ $json.q }}）與作者（{{ $json.a }}）翻譯為優美的繁體中文，並自動生成一句 30 字以內的「今日行動建議與啟發」。
+5. 最後將英文原文、中文翻譯與行動啟發整理為結構化的 JSON 輸出。
+請直接幫我在工作流中新增、設定好這些節點並完成連線！
+```
+</details>
