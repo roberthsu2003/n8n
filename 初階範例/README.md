@@ -84,18 +84,27 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 - n8n 表達式的實際應用
 
 <details>
-<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+<summary>🤖 <strong>AI 賦能延伸實作（串接本地 Ollama 模型 Prompt）</strong></summary>
 
-> 💡 **任務目標**：抓取英文名言後，由 AI 自動翻譯為繁體中文，並生成 30 字的今日行動啟發建議。
+> 💡 **任務目標**：抓取英文名言後，由本地 **Ollama** 模型（`gemma4:31b-cloud`）自動翻譯為繁體中文，並生成 30 字的今日行動啟發建議。
+
+> ⚠️ **執行前準備（重要）**：
+> 1. 本機需先安裝 [Ollama](https://ollama.com/)。
+> 2. 請先在終端機執行指令以預先下載並啟動模型：
+>    ```bash
+>    ollama run gemma4:31b-cloud
+>    ```
+> 3. 確保本機 Ollama 服務處於運行狀態（預設埠號為 `11434`），這樣 n8n 才能順利連線調用該模型。
 
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
 我想將「取得隨機引言」工作流程升級為「每日 AI 哲理金句機器人」：
 1. 保留原本的 HTTP Request 節點（向 https://zenquotes.io/api/random 抓取引言）。
-2. 在後面串接一個 AI 處理節點（例如使用 Basic LLM Chain 或 Code 節點），將抓到的英文名言（q）與作者（a）翻譯為優美的繁體中文。
-3. 自動生成一句 30 字以內的「今日行動建議與啟發」。
-4. 最後將原文、中文翻譯與啟發整理為乾淨的 JSON 物件輸出。
-請直接幫我在工作流中新增與設定這些節點！
+2. 在後面串接 Basic LLM Chain（或 AI Agent）節點，並連接「Ollama Chat Model」模型節點。
+3. Ollama 模型請指定使用 `gemma4:31b-cloud`（Base URL 請依環境設定為 http://localhost:11434 或 http://host.docker.internal:11434）。
+4. 設定 AI Prompt 提詞：將抓到的英文名言（{{ $json.q }}）與作者（{{ $json.a }}）翻譯為優美的繁體中文，並自動生成一句 30 字以內的「今日行動建議與啟發」。
+5. 最後將英文原文、中文翻譯與行動啟發整理為結構化的 JSON 輸出。
+請直接幫我在工作流中新增、設定好這些節點並完成連線！
 ```
 </details>
 
