@@ -166,15 +166,16 @@ Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級�
 ### 2. OpenCode 設定檔與常用指令
 
 > [!TIP]
-> **強烈推薦使用「全域設定 (Global)」**：
-> 設定為全域只需配置一次（或執行一次 `opencode mcp add`），之後無論在電腦上的哪一個專案目錄開啟 OpenCode，都能隨時呼叫 n8n MCP 工具，免去每個專案重複配置或更新 ngrok 網址的繁瑣步驟，最為省時且不易出錯！
+> **強烈推薦使用「全域設定 (Global)」（特別是使用 OpenCode Desktop 桌面版時）**：
+> - **OpenCode Desktop 用戶**：桌面版在不同工作區或開啟不同資料夾時，會預設讀取全域設定。將 n8n MCP 設在全域可確保在任何專案介面中都能無縫調用。
+> - **一次配置、到處可用**：只需設定一次（或執行一次 `opencode mcp add`），免去每個專案重複配置或更新 ngrok 網址的繁瑣步驟，最為省時且不易出錯！
 
 OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Level)** 兩種設定方式，配置結構完全相同：
 
 #### A. 設定檔層級說明
 * 🌐 **全域等級 (Global Level，⭐ 強烈推薦)**：
   * **設定檔位置**：`~/.config/opencode/opencode.jsonc`（或 `opencode.json`）
-  * **優勢**：一次設定，終生受用。電腦上的所有專案在啟動 OpenCode 時，皆自動共用這組 n8n MCP 連線。
+  * **優勢**：一次設定，終生受用。**OpenCode Desktop 桌面版**與 CLI 在任何專案或目錄啟動時，皆自動共用這組 n8n MCP 連線。
 * 📁 **專案等級 (Project Level)**：
   * **設定檔位置**：`<專案根目錄>/opencode.jsonc`（或 `opencode.json`）
   * **適用情境**：只對當前專案生效。若特定專案需要連線至不同 n8n 實例或需個別客製化 headers，才在專案根目錄建立。
