@@ -11,8 +11,9 @@
 3. [⚙️ n8n Instance-level MCP 設定與功能指南](#n8n-mcp-settings)
 4. [🥇 路線一：如果你只有 Gemini 帳號（Google）➔ 透過 Antigravity 連體協作](#route-gemini-antigravity)
 5. [🥈 路線二：如果你只有 ChatGPT 帳號（OpenAI）➔ 透過 OpenCode 橋樑連線](#route-chatgpt-opencode)
-6. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連](#route-claude-connector)
-7. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#practical-examples)
+6. [🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過 Claude.ai Connector 直連](#route-claude-connector)
+7. [📚 專題教學文件快速傳送門](#guides-links)
+8. [🚲 課堂實戰範例（附 AI Prompt 提詞）](#practical-examples)
 
 ---
 
@@ -21,11 +22,11 @@
 
 找到你目前擁有的 AI 帳號，直接選擇對應的連線方式：
 
-| 你的 AI 帳號 | 推薦的最佳協作方式 | 連線難易度 | 如何操控 n8n？ |
-| :--- | :--- | :---: | :--- |
-| 🥇 **Gemini**<br>(Google) | **Google Antigravity 連體協作**<br>+ Chrome「問問 Gemini」 | 🟢 **直覺強大** | 透過 Antigravity 內建的 Gemini 智慧代理與 MCP 協議，直接在開發環境中對話生成、除錯與執行工作流。 |
-| 🥈 **ChatGPT**<br>(OpenAI) | **OpenCode 登入 OpenAI 帳號**<br>+ ChatGPT in Chrome | 🟡 **靈活萬用** | 官方 ChatGPT 網頁無 MCP 連接器，但透過 OpenCode 登入 ChatGPT 帳號後，即可用 GPT-4o 模型全自動操控 n8n。 |
-| 🥉 **Claude**<br>(Anthropic) | **Claude.ai 官方 Connector**<br>(網頁版 / 桌面版) | 🟡 **圖形化串接** | 在 Claude.ai 的 Connectors 設定中輸入 n8n 網址，完成 OAuth 授權後即可在對話框直接打字建流程。 |
+| 你的 AI 帳號 | 推薦的最佳協作方式 | 連線難易度 | 如何操控 n8n？ | 詳細指南連結 |
+| :--- | :--- | :---: | :--- | :--- |
+| 🥇 **Gemini**<br>(Google) | **Google Antigravity 連體協作**<br>+ Chrome「問問 Gemini」 | 🟢 **直覺強大** | 透過 Antigravity 內建的 Gemini 智慧代理與 MCP 協議，直接在開發環境中對話生成、除錯與執行工作流。 | 📘 [Antigravity 教學](./antigravity_mcp_setup_guide.md) |
+| 🥈 **ChatGPT**<br>(OpenAI) | **OpenCode 登入 OpenAI 帳號**<br>+ ChatGPT in Chrome | 🟡 **靈活萬用** | 官方 ChatGPT 網頁無 MCP 連接器，但透過 OpenCode 登入 ChatGPT 帳號後，即可用 GPT-4o 模型全自動操控 n8n。 | 📘 [OpenCode 教學](./n8n_mcp_setup_guide.md#opencode-mcp) |
+| 🥉 **Claude**<br>(Anthropic) | **Claude.ai 官方 Connector**<br>(網頁版 / 桌面版) | 🟡 **圖形化串接** | 在 Claude.ai 的 Connectors 設定中輸入 n8n 網址，完成 OAuth 授權後即可在對話框直接打字建流程。 | 📘 [Claude Connector 教學](./n8n_mcp_setup_guide.md#claude-connector) |
 
 ---
 
@@ -154,7 +155,10 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
          "type": "remote",
          "url": "https://<你的ngrok公開網域>/mcp-server/http",
          "enabled": true,
-         "headers": { "Accept-Encoding": "identity" }
+         "headers": {
+           "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
+           "Accept-Encoding": "identity"
+         }
        }
      }
    }
@@ -162,12 +166,12 @@ Google Gemini 是目前普及度極高的 AI 工具。透過 **Google Antigravit
 3. **對話操控 n8n**：
    在 OpenCode 中直接打字：*「請讀取目前 n8n 的所有工作流程，並幫我檢查哪一個執行失敗」*，ChatGPT 模型即會透過 OpenCode 自動操作 n8n！
 
-> 📘 **進階指南**：[n8n Instance-level MCP 連線設定與介面指南](./n8n_mcp_setup_guide.md)
+> 📘 **進階指南**：請參閱專題指南 **[n8n Instance-level MCP 連線設定與介面指南](./n8n_mcp_setup_guide.md#opencode-mcp)**。
 
 ---
 
 <a id="route-claude-connector"></a>
-## 🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過官方 Connector 直連
+## 🥉 路線三：如果你只有 Claude 帳號（Anthropic）➔ 透過 Claude.ai Connector 直連
 
 如果您訂閱的是 Claude Pro 或擁有 Claude 帳號，可以使用官方的 **Claude Connector** 進行免寫程式碼的點擊授權連線：
 
@@ -183,7 +187,18 @@ Claude 透過 Connector 自動在您的 n8n 畫布上建好所有節點！
 2. **在 Claude.ai 連線**：前往 Claude.ai ➔ 側邊欄 **Customize** ➔ **Connectors** ➔ 找到 **n8n** 點選 **`Connect`** ➔ 輸入 ngrok 公開網址。
 3. **完成 OAuth 授權**：瀏覽器跳轉允許授權後，Status 顯示 **`✓` (已連線)** 即可開始對話建流程。
 
-> 📘 **詳細設定教學**：[Claude Connector 設定手冊 (OAuth 模式)](./n8n_mcp_setup_guide.md#claude-connector)
+> 📘 **詳細設定教學**：請參閱專題指南 **[Claude Connector 設定手冊 (OAuth 模式)](./n8n_mcp_setup_guide.md#claude-connector)**。
+
+---
+
+<a id="guides-links"></a>
+## 📚 專題教學文件快速傳送門
+
+為方便快速查閱，各 AI 工具與 n8n MCP 的專題指引如下：
+
+* 📘 **Antigravity 設定教學**：[Antigravity 專案等級 n8n MCP 設定教學](./antigravity_mcp_setup_guide.md)
+* 📘 **n8n MCP 完整設定指南**：[n8n Instance-level MCP 連線設定與介面功能詳解 (v2.34.6)](./n8n_mcp_setup_guide.md)
+* 📘 **Claude.ai 直連教學**：[Claude.ai Connector 設定手冊 (OAuth 模式)](./n8n_mcp_setup_guide.md#claude-connector)
 
 ---
 

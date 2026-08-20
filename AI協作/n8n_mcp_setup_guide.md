@@ -330,21 +330,11 @@ opencode mcp logout n8n
 
 ---
 
-<a id="troubleshooting"></a>
-## 六、常見問題與排查 (Troubleshooting)
+<a id="practical-examples"></a>
+## 🚲 課堂實戰範例（附 AI Prompt 提詞）
 
-### Q1: OpenCode 顯示找不到 n8n 或連線逾時
-- [ ] 檢查 n8n 本地實例是否正常運行。
-- [ ] 檢查 ngrok 或反向代理是否在線，且網址使用的是 `https://`。
-- [ ] 確認 endpoint 路徑結尾是否包含 `/mcp-server/http`。
-- [ ] 重新啟動 OpenCode 讓設定重新載入。
+選好你的 AI 工具後，立即跟著實戰範例動手練習：
 
-### Q2: 連線成功但 AI 看不到任何可執行的工作流
-- [ ] 檢查該 Workflow 是否已點擊 **Publish / Active**（未發布啟用的工作流無法由 MCP 觸發）。
-- [ ] 前往 **Settings > Instance-level MCP > Workflows exposed**，確認該工作流程已勾選開放 (Expose)。
-- [ ] 確認該工作流有填寫清楚的 **Description**，以便 AI 能夠辨識。
-
-### Q3: 執行工作流時失敗或報錯
-- [ ] 檢查工作流節點中引用的 OAuth / API 憑證是否過期。
-- [ ] 先以測試資料模式手動觸發，檢查 n8n 的 **Executions** 頁籤定位失敗的具體節點。
-
+* 🚲 **[台北市 YouBike 低車輛站點自動記錄](./台北市的youbike/README.md)**
+  * **任務目標**：定時抓取政府即時開放資料，篩選車輛不足 3 輛的站點並自動寫入 Google Sheets。
+  * **課堂提詞**：內附完整的 **「AI Prompt 範本」**，直接貼給 Gemini、ChatGPT 或 Claude，讓 AI 替你全自動打造完整工作流程！
