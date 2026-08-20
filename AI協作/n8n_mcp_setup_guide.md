@@ -213,33 +213,34 @@ OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Leve
 > - `headers.Accept-Encoding`：設定為 `identity`，可避免網關 Gzip 壓縮破壞 SSE/流式傳輸連線。
 > - `headers.Authorization`：填入 Access Token（Bearer Token 格式）。當 OAuth 自動授權失敗時，以此方式可直接通過驗證。
 
-#### C. 常用管理指令
+#### C. 常用管理指令（全域 / Global 設定）
+
+> 💡 **全域說明**：以下所有 `opencode` CLI 指令均預設針對**全域環境**（設定檔儲存於 `~/.config/opencode/opencode.json`，認證憑證儲存於 `~/.local/share/opencode/`），設定完成後在任何專案目錄皆可生效。
 
 ```bash
-# 1. 登入 OpenAI / ChatGPT 帳號提供者（供 ChatGPT 用戶使用）
+# 1. 登入 OpenAI / ChatGPT 帳號提供者（全域登入，供 ChatGPT 用戶使用）
 opencode auth login
 
-# 2. 新增 n8n MCP 服務（CLI 預設即為「全域生效」，會寫入 ~/.config/opencode/opencode.json）
+# 2. 全域新增 n8n MCP 服務（預設寫入 ~/.config/opencode/opencode.json）
 opencode mcp add n8n --url https://<你的ngrok公開網域>/mcp-server/http
 
-# 3. 手動觸發 / 重新進行 OAuth 網頁授權
+# 3. 手動觸發 / 重新進行全域 OAuth 網頁授權
 opencode mcp auth n8n
 
-# 4. 查看所有 MCP 連線狀態
+# 4. 查看全域所有已註冊的 MCP 連線狀態
 opencode mcp list
 
-# 5. 診斷與測試連線
+# 5. 診斷與測試全域 n8n 連線狀態
 opencode mcp debug n8n
 
-# 6. 登出或移除連線
+# 6. 登出或移除全域 n8n 連線憑證
 opencode mcp logout n8n
 ```
 
-> 📌 **設定範圍與授權說明**：
-> - **全域預設（Global by Default）**：執行 `opencode mcp add` 指令時，OpenCode **預設會將 MCP 設定直接寫入全域設定檔**（`~/.config/opencode/opencode.json`），因此在任何專案目錄開啟 OpenCode 都能直接操控 n8n。
-> - **專案專屬（Project Scope）**：若希望只在特定專案生效，可手動在該專案根目錄建立 `opencode.json` 並填入 MCP 設定。
-> - **OAuth 模式**：執行 `opencode mcp add n8n --url ...` 後，首次連線時會自動喚起瀏覽器進行 n8n 登入授權（或執行 `opencode mcp auth n8n` 手動喚起），Token 會由 OpenCode 自動保存至本地。
+> 📌 **模式與授權說明**：
+> - **OAuth 模式**：執行 `opencode mcp add n8n --url ...` 後，首次連線時會自動喚起瀏覽器進行 n8n 登入授權（或執行 `opencode mcp auth n8n` 手動喚起），Token 會由 OpenCode 自動保存至本地全域憑證。
 > - **Access Token 模式**：直接在 `opencode.json` 中配置 `"Authorization": "Bearer <TOKEN>"`，連線時直接通過驗證，無需透過瀏覽器進行 OAuth 跳轉。
+> - **專案專屬範圍**：若希望將 MCP 設定僅限制在特定專案（非全域），請直接手動在該專案根目錄建立 `opencode.json` 進行配置。
 
 > 💡 **ChatGPT 用戶專屬優勢**：若您擁有 ChatGPT / OpenAI 帳號，可在 OpenCode 透過 `opencode auth login` 登入 OpenAI 帳號，即可直接使用 ChatGPT 的模型（如 GPT-4o、o1 等）藉由 MCP 自動化操控 n8n 工作流程！
 
