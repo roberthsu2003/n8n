@@ -169,14 +169,21 @@ OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Leve
 
 #### A. 設定檔層級說明
 * 🌐 **全域等級 (Global Level)**：
-  * **設定檔位置**：`~/.config/opencode/opencode.json`
+  * **設定檔位置**：`~/.config/opencode/opencode.jsonc`（或 `opencode.json`）
   * **適用情境**：電腦上的所有專案在啟動 OpenCode 時，皆自動共用這組 n8n MCP 連線設定。
 * 📁 **專案等級 (Project Level)**：
-  * **設定檔位置**：`<專案根目錄>/opencode.json`
+  * **設定檔位置**：`<專案根目錄>/opencode.jsonc`（或 `opencode.json`）
   * **適用情境**：只對當前專案生效。若特定專案需要連線至不同實例、專屬 ngrok 網域或需客製化 headers，可直接在專案根目錄建立。
 
-#### B. 設定檔內容範例 (`opencode.json`)
-```json
+> 💡 **推薦使用 `.jsonc`**：OpenCode 支援 JSON with Comments (`.jsonc`) 格式，方便在設定檔中撰寫註解與切換不同驗證模式。
+
+#### B. 設定檔內容範例 (`opencode.jsonc`)
+
+> ⚠️ **OAuth 與 Access Token 模式說明**：
+> OpenCode 支援 **OAuth 自動授權** 功能（連線時由 CLI 引導開啟瀏覽器授權）。但因 OAuth 屬於較新功能，在特定環境下有時可能無法自動完成授權。
+> **若遇到 OAuth 無法授權的情形，請改用傳統穩定的 Access Token 方式**（在 `headers` 帶入 `Authorization: "Bearer <TOKEN>"`）。
+
+```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
@@ -185,7 +192,14 @@ OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Leve
       "url": "https://<你的ngrok公開網域>/mcp-server/http",
       "enabled": true,
       "headers": {
+        // 【模式一：OAuth 授權（新功能）】
+        // 若使用 OAuth 自動授權流程，通常只需保留 Accept-Encoding，無需設定 Authorization
         "Accept-Encoding": "identity"
+
+        // 【模式二：Access Token 授權（舊版 / 備援穩定方式）】
+        // 若 OAuth 無法自動授權，請取消下方註解並填入 n8n 產生的 Access Token：
+        // "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
+        // "Accept-Encoding": "identity"
       }
     }
   }
@@ -197,6 +211,7 @@ OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Leve
 > - `type`：`remote`（遠端端點）。
 > - `url`：n8n MCP 端點，路徑通常為 `/mcp-server/http`。
 > - `headers.Accept-Encoding`：設定為 `identity`，可避免網關 Gzip 壓縮破壞 SSE/流式傳輸連線。
+> - `headers.Authorization`：填入 Access Token（Bearer Token 格式）。當 OAuth 自動授權失敗時，以此方式可直接通過驗證。
 
 #### C. 常用管理指令
 ```bash
@@ -269,7 +284,7 @@ opencode mcp logout n8n
 
 ### 🔒 安全重點
 1. **切勿提交金鑰至公開 Git**：包含 API Key、Webhook URL、Access Token。
-2. **ngrok 網址監控**：免費版 ngrok 重新啟動後網址會變更，需同步更新 `opencode.json`。
+2. **ngrok 網址監控**：免費版 ngrok 重新啟動後網址會變更，需同步更新 `opencode.jsonc`（或各客戶端設定檔）。
 3. **最小權限原則**：不隨意開放 `workflow:update`、`workflow:publish` 等寫入與發布權限。
 4. **測試完成後關閉**：開發或教學結束後，請關閉 ngrok 隧道或將 n8n 的 MCP status 暫時切為 **Disabled**。
 
