@@ -1,14 +1,13 @@
 {
-  "name": "CSV轉換為Excel",
   "nodes": [
     {
       "parameters": {},
-      "id": "96d8fa73-2805-4316-8b22-973e93e84192",
+      "id": "2d7e2c1f-d2c2-40b9-bd4f-8d79403cf280",
       "name": "手動觸發",
       "type": "n8n-nodes-base.manualTrigger",
       "position": [
-        768,
-        624
+        -640,
+        448
       ],
       "typeVersion": 1
     },
@@ -23,12 +22,12 @@
           }
         }
       },
-      "id": "8fb180d6-1045-47b9-8f23-6e558c1aa939",
+      "id": "b4e74d5b-4e2c-4b26-8fb5-ee694cc11fc3",
       "name": "下載CSV檔案",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        992,
-        624
+        -416,
+        448
       ],
       "typeVersion": 4.2
     },
@@ -40,43 +39,29 @@
           "headerRow": true
         }
       },
-      "id": "95637e7f-463d-4c3b-9920-ef690d7a570e",
+      "id": "834dbda1-e8dd-4e28-ad1c-41f7e2c765b8",
       "name": "解析CSV資料",
       "type": "n8n-nodes-base.extractFromFile",
       "position": [
-        1296,
-        624
+        -112,
+        448
       ],
       "typeVersion": 1
     },
     {
       "parameters": {
-        "operation": "toXlsx"
+        "operation": "xlsx",
+        "options": {}
       },
-      "id": "3e488e2a-226d-4499-a8e3-92e598cf4285",
+      "id": "be5609f8-04c0-4fd0-9923-97e23070cdeb",
       "name": "轉換為Excel",
       "type": "n8n-nodes-base.convertToFile",
       "position": [
-        1600,
-        624
+        192,
+        448
       ],
-      "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "content": "## 📊 CSV 轉換為 Excel 工作流程 (使用最新節點)\n\n### 🔄 工作流程說明：\n\n1️⃣ **手動觸發** - 點擊「執行工作流程」按鈕開始\n\n2️⃣ **下載CSV檔案** - 從台北市資料平台下載求職求才資料\n\n3️⃣ **解析CSV資料** - 使用 Extract from File 節點將 CSV 轉換為 JSON\n\n4️⃣ **轉換為Excel** - 使用 Convert to File 節點將資料輸出為 .xlsx 格式\n\n---\n\n### 📝 更新說明：\n- ✅ 使用最新的 **Extract from File** 節點取代舊的 Spreadsheet File (讀取)\n- ✅ 使用最新的 **Convert to File** 節點取代舊的 Spreadsheet File (寫入)\n- ✅ 設定適當的檔案名稱和工作表名稱\n- ✅ 保留原有的 UTF-8 編碼和標題列設定\n\n---\n\n### 📂 資料來源：\n台北市就業服務處求職求才缺資訊\nhttps://data.taipei/api/dataset/9cb8ebf1-8d21-4523-908c-af853867eea1",
-        "height": 680,
-        "width": 520,
-        "color": 4
-      },
-      "id": "08373a4a-dbf8-44db-963a-60277ff45c80",
-      "name": "工作流程說明",
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        160,
-        304
-      ],
-      "typeVersion": 1
+      "typeVersion": 1.1,
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -85,12 +70,12 @@
         "width": 280,
         "color": 5
       },
-      "id": "13a1cda9-2e0e-41d3-ab91-2ac252499754",
+      "id": "11b23ef2-ff40-4862-bd91-80d2aef26925",
       "name": "節點說明1",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        896,
-        288
+        -512,
+        112
       ],
       "typeVersion": 1
     },
@@ -101,12 +86,12 @@
         "width": 280,
         "color": 6
       },
-      "id": "7af57f51-e5f1-4d32-86a9-1147ce55c3b5",
+      "id": "2108c7a1-7fb4-4bf7-b4b8-7b40f16b4fb5",
       "name": "節點說明2",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1232,
-        288
+        -176,
+        112
       ],
       "typeVersion": 1
     },
@@ -117,17 +102,16 @@
         "width": 280,
         "color": 3
       },
-      "id": "46732f5f-819c-4b02-b1f5-190893909ce3",
+      "id": "d43e8a6c-4c0f-4ea7-897e-0143ade277a0",
       "name": "節點說明3",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1568,
-        272
+        160,
+        96
       ],
       "typeVersion": 1
     }
   ],
-  "pinData": {},
   "connections": {
     "手動觸發": {
       "main": [
@@ -163,21 +147,8 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "2e009d1a-2577-44ab-8df7-83be9e4b0b73",
+  "pinData": {},
   "meta": {
     "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
-  },
-  "id": "J1S77u2xIrKPMDEA",
-  "tags": [
-    {
-      "updatedAt": "2025-11-20T02:34:19.787Z",
-      "createdAt": "2025-11-20T02:34:19.787Z",
-      "id": "0jpUyf1qykdlExqM",
-      "name": "上課用"
-    }
-  ]
+  }
 }
