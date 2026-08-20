@@ -6,8 +6,25 @@
 
 以下是針對 n8n 節點設定 Google Cloud 個人專案的完整步驟、注意事項和流程。
 
+---
+
+## 📍 申請位置與快速入口
+
+* **步驟 1**：進入 [Google Cloud Console](https://console.cloud.google.com/)（首次使用請先建立新專案）。
+* **步驟 2**：在頂部搜尋欄輸入搜尋 **`Google Auth Platform`**（或「Google 驗證平台」），點選進入整合式驗證設定頁面。
+* **步驟 3**：在「**總覽 (Overview)**」頁面，點擊「**建立 OAuth 用戶端**」按鈕開始設定。
+* **步驟 4**：應用程式類型選擇「**網頁應用程式 (Web application)**」。
+* **步驟 5**：建立「**用戶端名稱**」並在「**已授權的重新導向 URI**」加入 n8n 的回呼網址。
+* **步驟 6**：在用戶端取得 **Client ID** 與 **Client Secret**，填入 n8n 的 Credentials (憑證) 內，並點擊「**Sign in with Google**」按鈕完成授權。
+
+> 💡 **教學展示小提示**：
+> 若教學或測試時需要重新演示完整流程，可至「**用戶端 (Clients / 憑證)**」頁面中，將已建立的應用端憑證**刪除**，即可重新建立並完整練習設定。
+
+---
+
 ## 目錄
 
+- [📍 申請位置與快速入口](#-申請位置與快速入口)
 - [圖片設定說明](#圖片設定說明)
 - [注意事項](#注意事項)
 - [🚀 設定的步驟](#-設定的步驟)
@@ -23,10 +40,22 @@
 
 ### Google Cloud 設定畫面參考
 
-- **品牌設定**
+- **品牌設定 (OAuth 同意畫面 / 品牌資訊)**
+  > 📌 **品牌設定填寫注意事項**：
+  > 1. **應用程式名稱**：設定自訂的應用程式名稱（例如：`My n8n Workflow`）。
+  > 2. **使用者支援電子郵件**：選擇您自己的 Google / Gmail 電子郵件。
+  > 3. **授權網域 (Authorized domains)**：點擊「新增網域」，填入您的 **n8n 自訂網域**（例如：`your-n8n-instance.com`，請勿加上 `https://` 或路徑）。
+  > 4. **開發人員聯絡資訊**：填寫您自己的 Email，以便接收 Google 安全性相關通知。
+  
   ![品牌](./images/品牌.png)
 
-- **目標對象設定**
+- **目標對象設定 (Audience / 使用者類型與測試設定)**
+  > 📌 **目標對象設定注意事項**：
+  > 1. **使用者類型**：設定為「**外部 (External)**」（適用於一般個人 Gmail 帳號）。
+  > 2. **發佈狀態 (Publishing status)**：
+  >    - 建議直接點擊「**發布應用程式 (Publish App)**」讓狀態變更為「正式發布 (In production)」，這樣任何授權帳號皆可登入；
+  >    - 若維持「**測試 (Testing)**」狀態，則**必須在「測試使用者 (Test users)」清單中加入您的 Gmail 電子郵件**，否則驗證授權時會被 Google 拒絕 (Error 403)。
+  
   ![目標對象](./images/目標對象.png)
 
 - **用戶端 ID 設定**
@@ -52,9 +81,10 @@
 
 ### 第 1 部分：Google Cloud 平台設定
 
-1.  **登入並選擇專案**
+1.  **登入並建立/選擇專案**
     * 登入 [Google Cloud Console](https://console.cloud.google.com/)。
-    * 確保您已選擇了您的個人免費專案 (或建立一個新專案)。
+    * **首次設定**：如果您是第 1 次使用 Google Cloud Console，請點擊頂部專案下拉選單，點選「**新增專案 (New Project)**」，輸入專案名稱（例如：`n8n-automation`）並點擊「建立」。
+    * 確保頂部專案選單已切換至剛剛建立的專案。
     * 💡 **快速提示 (新版 GCP 介面)**：Google 目前已將 OAuth 相關設定統一整併至 **「Google Auth Platform」(Google 驗證平台)**。進入 Console 後，可在頂部搜尋欄直接搜尋 **`Google Auth Platform`** 直達設定頁面！
 
 2.  **啟用您需要的 API**
@@ -67,20 +97,21 @@
         * **Gmail API** (用於 Gmail 節點)
     * *提醒：啟用 API 是免費的，費用是根據「用量」計算的，而個人專案的免費額度 (Free Tier) 通常綽綽有餘。*
 
-3.  **設定 OAuth 同意畫面 (Consent Screen) / Google Auth Platform**
+3.  **設定 OAuth 同意畫面 (Consent Screen) / 品牌設定**
     * 這是 Google 向您顯示「您是否同意 n8n 存取您的資料？」的那個畫面。
-    * 在頂部搜尋 **`Google Auth Platform`**，或至左側導覽「API 與服務」>「OAuth 同意畫面」。
+    * 在頂部搜尋 **`Google Auth Platform`**，或至左側導覽「API 與服務」>「OAuth 同意畫面」/「品牌」。
     * 選擇「**外部 (External)**」。(因為您的帳號不是 Google Workspace 企業版)
-    * **填寫基本資料**：
-        * **應用程式名稱**：隨便填，例如 "My n8n Workflow"。
+    * **填寫品牌與基本資料**：
+        * **應用程式名稱**：設定自訂的應用程式名稱（例如：`My n8n Workflow`）。
         * **使用者支援電子郵件**：選擇您自己的 Gmail。
         * **應用程式標誌**：可不填。
+        * **授權網域 (Authorized domains)**：點擊新增網域，輸入您的 **n8n 自訂網域**（例如：`n8n.yourdomain.com`，不需帶 `https://`）。
         * **開發人員聯絡資訊**：填寫您自己的 Gmail。
     * **設定範圍 (Scopes)**：您可以**先跳過**此步驟，n8n 會在連線時自動要求它需要的範圍。
     * **設定測試使用者 (Test Users)**：
         * **⚠️ 這是個人專案的【絕對重點】！**
         * 由於您的應用程式是「外部」且未發布，Google 會限制只有「測試使用者」才能登入。
-        * 在「Test users」步驟中，點選「+ ADD USERS」，然後**輸入您自己的 Gmail 帳號**。
+        * 在「Test users / 目標對象」步驟中，點選「+ ADD USERS」，然後**輸入您自己的 Gmail 帳號**。
         * 如果您漏了這一步，您在 n8n 進行驗證時 100% 會被 Google 拒絕 (錯誤訊息 403: access_denied)。
 
 4.  **建立 OAuth 2.0 憑證 (Client ID)**
