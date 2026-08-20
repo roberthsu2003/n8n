@@ -214,22 +214,34 @@ OpenCode 支援 **全域等級 (Global Level)** 與 **專案等級 (Project Leve
 > - `headers.Authorization`：填入 Access Token（Bearer Token 格式）。當 OAuth 自動授權失敗時，以此方式可直接通過驗證。
 
 #### C. 常用管理指令
+
 ```bash
-# 登入 OpenAI / ChatGPT 帳號提供者（供 ChatGPT 用戶使用）
+# 1. 登入 OpenAI / ChatGPT 帳號提供者（供 ChatGPT 用戶使用）
 opencode auth login
 
-# 新增 n8n MCP 服務
-opencode mcp add n8n
+# 2. 新增 n8n MCP 服務：
+# 【模式一：OAuth 模式】指定 --url，連線時會自動開啟瀏覽器進行 OAuth 授權（或使用 opencode mcp auth）
+opencode mcp add n8n --url https://<你的ngrok公開網域>/mcp-server/http
 
-# 查看所有 MCP 連線狀態
+# 【模式二：Access Token 模式】建議直接在 opencode.json 設定 headers，或執行互動式引導指令手動填寫：
+# opencode mcp add
+
+# 3. 手動觸發 / 重新進行 OAuth 網頁授權
+opencode mcp auth n8n
+
+# 4. 查看所有 MCP 連線狀態（已在 opencode.json 設定好的話，可直接查閱）
 opencode mcp list
 
-# 診斷與測試連線
+# 5. 診斷與測試連線
 opencode mcp debug n8n
 
-# 登出或移除連線
+# 6. 登出或移除連線
 opencode mcp logout n8n
 ```
+
+> 📌 **模式說明**：
+> - **OAuth 模式**：執行 `opencode mcp add n8n --url ...` 後，OpenCode 會在首次連線時開啟瀏覽器跳轉至 n8n 進行授權，授權後的 Token 會由 OpenCode 自動保存管理。若未自動跳轉，可執行 `opencode mcp auth n8n` 手動喚起。
+> - **Access Token 模式**：直接在 `opencode.json` 中配置 `"Authorization": "Bearer <TOKEN>"`，連線時直接通過驗證，無需透過瀏覽器進行 OAuth 跳轉。
 
 > 💡 **ChatGPT 用戶專屬優勢**：若您擁有 ChatGPT / OpenAI 帳號，可在 OpenCode 透過 `opencode auth login` 登入 OpenAI 帳號，即可直接使用 ChatGPT 的模型（如 GPT-4o、o1 等）藉由 MCP 自動化操控 n8n 工作流程！
 
