@@ -1,5 +1,4 @@
 {
-  "name": "表單節點",
   "nodes": [
     {
       "parameters": {
@@ -53,30 +52,30 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.4,
       "position": [
-        -144,
-        -48
+        -16,
+        80
       ],
-      "id": "a07dac5a-d49a-40d6-942a-99b3a11e2b09",
+      "id": "4b4732bb-d354-4f71-8097-6e9c7e3d1354",
       "name": "On form submission",
-      "webhookId": "fe0041e9-f67b-4eee-b1be-4cbf263d93d4"
+      "webhookId": "80e58391-094e-474f-b3ef-15fa58d240fa"
     },
     {
       "parameters": {
         "dataTableId": {
           "__rl": true,
-          "value": "fiJfzQizxYrIeUpF",
+          "value": "eZKF1CxJouzs4tzv",
           "mode": "list",
-          "cachedResultName": "學生成績單",
-          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/fiJfzQizxYrIeUpF"
+          "cachedResultName": "學生成績表格",
+          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/eZKF1CxJouzs4tzv"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "chinese": "={{ $json[\"國文\"] }}",
-            "english": "={{ $json[\"英文\"] }}",
-            "math": "={{ $json[\"數學\"] }}",
-            "name": "={{ $json[\"姓名\"] }}",
-            "student_id": "={{ $json[\"學號\"] }}"
+            "class_id": "={{ $json['學號'] }}",
+            "chinese": "={{ $json['學號'] }}",
+            "english": "={{ $json['英文'] }}",
+            "math": "={{ $json['數學'] }}",
+            "name": "={{ $json['姓名'] }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -91,8 +90,8 @@
               "removed": false
             },
             {
-              "id": "student_id",
-              "displayName": "student_id",
+              "id": "class_id",
+              "displayName": "class_id",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -139,10 +138,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        48,
-        -48
+        176,
+        80
       ],
-      "id": "a5f9f02e-c80f-4558-83da-b4f75f4a3b24",
+      "id": "21a2ece5-9599-49d0-a440-9ebe6b27af03",
       "name": "Insert row"
     },
     {
@@ -151,15 +150,14 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -464,
-        -80
+        -336,
+        48
       ],
       "typeVersion": 1,
-      "id": "8efd7827-aebb-445f-ab30-358a46f24c89",
+      "id": "fd134ea8-7c77-40fe-ba9f-dd68ec4f26ab",
       "name": "Sticky Note"
     }
   ],
-  "pinData": {},
   "connections": {
     "On form submission": {
       "main": [
@@ -173,22 +171,8 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": false
-  },
-  "versionId": "97444d9a-d0df-48a9-9ea0-cf65295e927c",
+  "pinData": {},
   "meta": {
     "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
-  },
-  "id": "LRiKvjT3DQZ8p76g",
-  "tags": [
-    {
-      "updatedAt": "2025-11-20T02:34:19.787Z",
-      "createdAt": "2025-11-20T02:34:19.787Z",
-      "id": "0jpUyf1qykdlExqM",
-      "name": "上課用"
-    }
-  ]
+  }
 }
