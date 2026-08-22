@@ -116,6 +116,19 @@
 
 ---
 
+## 🗄️ [雲端資料庫整合 (PostgreSQL / Supabase)](./雲端資料庫整合/README.md)
+
+學習如何將 n8n 與業界標準關聯式資料庫 **PostgreSQL** 及最熱門的開源雲端平台 **Supabase** 整合，打造具備資料持久化與 AI 向量搜尋能力的系統：
+
+- **[🐘 Supabase (PostgreSQL) 實作指南](./雲端資料庫整合/Supabase/README.md)**：
+  - **資料表結構設計**：提供開箱即用的 SQL 腳本 [`schema.sql`](./雲端資料庫整合/Supabase/schema.sql)，建立客戶表、訂單表與向量表。
+  - **Postgres 節點實戰**：透過原生 SQL 執行 CRUD、防注入參數化查詢、Upsert（避免重複寫入）與跨表統計。
+  - **Supabase 節點應用**：透過 REST API 進行無程式碼 (Low-Code) 的資料庫讀寫。
+  - **pgvector 向量知識庫**：整合 n8n 的 Supabase Vector Store 實現 RAG 語意搜尋。
+  - 支援範例工作流：[`supabase_crud_workflow.json`](./雲端資料庫整合/Supabase/supabase_crud_workflow.json)。
+
+---
+
 
 ## 💻 [Code Node (JavaScript) 進階應用](./code_node(javascript)節點/README.md)
 

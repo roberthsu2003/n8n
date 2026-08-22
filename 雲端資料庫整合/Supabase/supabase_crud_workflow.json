@@ -1,0 +1,137 @@
+{
+  "name": "Supabase (PostgreSQL) 雲端資料庫 CRUD 實戰工作流",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        300
+      ],
+      "id": "manual-trigger",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "customer-name",
+              "name": "name",
+              "value": "陳小華",
+              "type": "string"
+            },
+            {
+              "id": "customer-email",
+              "name": "email",
+              "value": "hua.chen@example.com",
+              "type": "string"
+            },
+            {
+              "id": "customer-phone",
+              "name": "phone",
+              "value": "0988-777-666",
+              "type": "string"
+            },
+            {
+              "id": "customer-vip",
+              "name": "vip_level",
+              "value": "Platinum",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -100,
+        300
+      ],
+      "id": "prepare-new-customer",
+      "name": "建立新客戶資料"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.customers (name, email, phone, vip_level)\nVALUES ($1, $2, $3, $4)\nON CONFLICT (email) DO UPDATE \nSET phone = EXCLUDED.phone, vip_level = EXCLUDED.vip_level, updated_at = NOW()\nRETURNING *;",
+        "options": {
+          "queryParams": "={{ [$json.name, $json.email, $json.phone, $json.vip_level] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        140,
+        300
+      ],
+      "id": "postgres-insert-customer",
+      "name": "Postgres 節點 (新增/更新客戶)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_SUPABASE_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    c.id AS customer_id,\n    c.name AS customer_name,\n    c.email,\n    c.vip_level,\n    COUNT(o.id) AS total_orders,\n    COALESCE(SUM(o.total_amount), 0) AS total_spent\nFROM public.customers c\nLEFT JOIN public.orders o ON c.id = o.customer_id\nGROUP BY c.id, c.name, c.email, c.vip_level\nORDER BY c.id DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        380,
+        300
+      ],
+      "id": "postgres-query-stats",
+      "name": "Postgres 節點 (聯表統計查詢)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_SUPABASE_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "建立新客戶資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立新客戶資料": {
+      "main": [
+        [
+          {
+            "node": "Postgres 節點 (新增/更新客戶)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres 節點 (新增/更新客戶)": {
+      "main": [
+        [
+          {
+            "node": "Postgres 節點 (聯表統計查詢)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
