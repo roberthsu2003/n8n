@@ -18,10 +18,6 @@
 
 ## 📚 課程章節
 
-### 📈 [2026 年趨勢前瞻：n8n 市場定位與轉型分析](./n8n_2026_market_analysis.md)
-深入剖析 2026 年 AI Agent 時代下，n8n 的定位轉變、與 AI 原生工具的競合關係、雲端計費陷阱，以及為什麼「自建服務 (Self-hosting)」在成本控管與資安上是必要選擇。
-
-
 ### 🐳 [docker安裝](./docker安裝/README.md)
 完整說明 Windows、macOS 與 Raspberry Pi (Linux) 的 Docker 安裝步驟、環境設定與驗證方式。
 
