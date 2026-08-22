@@ -16,7 +16,7 @@
 
 ---
 
-## 📚 課程章節
+## 🛠️ 環境建置與基礎設定
 
 ### 🐳 [docker安裝](./docker安裝/README.md)
 完整說明 Windows、macOS 與 Raspberry Pi (Linux) 的 Docker 安裝步驟、環境設定與驗證方式。
