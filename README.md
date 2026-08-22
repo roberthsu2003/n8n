@@ -40,8 +40,8 @@
 ### 🦙 [Ollama 安裝](./ollama安裝/README.md)
 學習如何在 Windows、macOS 與 Raspberry Pi 安裝 Ollama、登入帳號建立 API Key、使用 `:cloud` 雲端模型（如 `gemma4:cloud`），以及與 n8n 容器的連線配置。
 
-
-
+### ☁️ [Google Cloud 設定](./google_cloud設定/README.md)
+詳細說明如何在 Google Cloud Console (Google Auth Platform) 建立專案、啟用 Google 服務 API、配置 OAuth 2.0 同意畫面、取得用戶端 ID 與密碼，並於 n8n 中完成授權綁定。
 
 ---
 
@@ -69,7 +69,7 @@
 
 ## 🔗 [整合 Google 服務](./Google_Cloud_api服務/README.md)
 
-學習如何整合 Google Cloud API 服務，包含完整的 OAuth 2.0 設定指南與實作範例。
+提供 Google Drive、Gmail、Google Sheets 與 Google 表單等服務的整合實作範例。
 
 **包含範例**：
 - 儲存檔案至Google Drive：學習 Google Drive API 整合
