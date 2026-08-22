@@ -1,6 +1,6 @@
 # Ollama 安裝指南 🦙
 
-**Ollama** 是一個能在本機與雲端環境輕鬆下載、管理與執行大型語言模型（LLM）的工具。透過 Ollama，您可以登入官方帳號獲取 API Key，直接使用帶有 **`:cloud`** 標籤的雲端模型（如 `gpt-oss:20b-cloud`），無需消耗本機硬體算力，即可與 n8n 的 AI Agent 及 LLM 節點進行串接。
+**Ollama** 是一個能在本機與雲端環境輕鬆下載、管理與執行大型語言模型（LLM）的工具。透過 Ollama，您可以登入官方帳號獲取 API Key，直接使用帶有 **`:cloud`** 標籤的雲端模型（如 **`gemma2:9b-cloud`**），無需消耗本機硬體算力，即可與 n8n 的 AI Agent 及 LLM 節點進行串接。
 
 ---
 
@@ -13,11 +13,11 @@
   - [步驟 3：測試 Docker 容器內部連線](#步驟-3測試-docker-容器內部連線)
   - [步驟 4：備用方案（若非 systemd 服務啟動）](#步驟-4備用方案若非-systemd-服務啟動)
 - [3. 登入 Ollama 帳號與建立 API Key](#3-登入-ollama-帳號與建立-api-key)
-- [4. 執行雲端 (Cloud) 模型（`:cloud` 標籤）](#4-執行雲端-cloud-模型cloud-標籤)
+- [4. 執行 Gemma 雲端 (Cloud) 模型（`:cloud` 標籤）](#4-執行-gemma-雲端-cloud-模型cloud-標籤)
   - [雲端模型命名規則（必須包含 `:cloud`）](#雲端模型命名規則必須包含-cloud)
-  - [常用雲端模型推薦與執行指令](#常用雲端模型推薦與執行指令)
+  - [Gemma 雲端模型推薦與執行指令](#gemma-雲端模型推薦與執行指令)
   - [查詢目前已附加 / 支援的模型清單 (`ollama list`)](#查詢目前已附加--支援的模型清單-ollama-list)
-- [5. 在 n8n 中設定 Ollama 憑證與雲端模型](#5-在-n8n-中設定-ollama-憑證與雲端模型)
+- [5. 在 n8n 中設定 Ollama 憑證與 Gemma 雲端模型](#5-在-n8n-中設定-ollama-憑證與-gemma-雲端模型)
 
 ---
 
@@ -108,38 +108,31 @@ OLLAMA_HOST=0.0.0.0:11434 ollama serve
 
 ---
 
-## 4. 執行雲端 (Cloud) 模型（`:cloud` 標籤）☁️
+## 4. 執行 Gemma 雲端 (Cloud) 模型（`:cloud` 標籤）☁️
 
 ### 雲端模型命名規則（必須包含 `:cloud`）
 > 💡 **關鍵概念**：
-> 在 Ollama 中，所有雲端模型名稱後面**必須帶有 `:cloud` 標籤**（例如 `gpt-oss:20b-cloud`、`gemma2:9b-cloud`、`llama3.3:70b-cloud`）。
+> 在 Ollama 中，所有雲端模型名稱後面**必須帶有 `:cloud` 標籤**（例如 `gemma2:9b-cloud`、`gemma2:27b-cloud`）。
 > 當您指定 `:cloud` 模型時，本地 Ollama 客戶端會自動將推理請求導向雲端伺服器，**完全不佔用本地硬碟與 GPU 記憶體**。
 
-### 常用雲端模型推薦與執行指令：
+### Gemma 雲端模型推薦與執行指令：
 
-| 模型系列 | 雲端模型完整名稱（附 `:cloud`） | 說明 |
+| 模型名稱 | 雲端標籤 | 說明 |
 | :--- | :--- | :--- |
-| ⭐️ **GPT 系列** | **`gpt-oss:20b-cloud`** | 具備出色的邏輯推理與 Function Calling / Tools 工具調用能力，**本課程推薦首選** |
-| 💎 **Gemma 系列** | **`gemma2:9b-cloud`** / **`gemma2:27b-cloud`** | Google 開源雲端架構，繁體中文語義理解與長文摘要效果極佳 |
-| 🦙 **Llama 系列** | **`llama3.3:70b-cloud`** / **`llama3.2:3b-cloud`** | Meta 最新開源旗艦模型，泛用性高且生態支援最廣 |
+| **`gemma2:9b-cloud`** | ☁️ 雲端 | ⭐️ **本課程推薦首選**，Google 架構，繁體中文語義理解極佳，推論快速 |
+| **`gemma2:27b-cloud`** | ☁️ 雲端 | 高參數量旗艦版，適合複雜分析與長文本深度推理 |
 
 #### 執行與對話測試指令：
 ```bash
-# 1. 執行 GPT 系列雲端模型（課程推薦）
-ollama run gpt-oss:20b-cloud
-
-# 2. 執行 Gemma 系列雲端模型
+# 執行 Gemma 雲端模型（課程推薦首選）
 ollama run gemma2:9b-cloud
-
-# 3. 執行 Llama 系列雲端模型
-ollama run llama3.3:70b-cloud
 ```
 
 ---
 
 ### 查詢目前已附加 / 支援的模型清單 (`ollama list`)
 
-在終端機中執行 `ollama list`（或 `ollama ls`），即可查看目前本機已附加、下載或可直接呼叫的模型清單：
+在終端機中執行 `ollama list`（或 `ollama ls`），即可查看目前已附加的雲端模型清單：
 
 ```bash
 ollama list
@@ -148,15 +141,13 @@ ollama list
 預期輸出範例：
 ```text
 NAME                     ID              SIZE      MODIFIED
-gpt-oss:20b-cloud        cloud-abc1234   0 B       2 minutes ago
-gemma2:9b-cloud          cloud-def5678   0 B       10 minutes ago
-llama3.3:70b-cloud       cloud-789xyz    0 B       1 hour ago
+gemma2:9b-cloud          cloud-def5678   0 B       2 minutes ago
 ```
 *(注意：雲端模型的 `SIZE` 通常為 `0 B` 或極小，因為權重直接運行於 Ollama 雲端硬體上)*
 
 ---
 
-## 5. 在 n8n 中設定 Ollama 憑證與雲端模型
+## 5. 在 n8n 中設定 Ollama 憑證與 Gemma 雲端模型
 
 1. 開啟 n8n 工作區，進入 **Credentials** > 新增 **Ollama API** 憑證。
 2. 填入連線設定：
@@ -167,5 +158,5 @@ llama3.3:70b-cloud       cloud-789xyz    0 B       1 hour ago
    - **API Key**：填入在 [ollama.com](https://ollama.com) 取得的 API Key。
 3. 點選 **Save** 儲存並測試連線。
 4. 在工作流中新增 **Ollama Chat Model** 節點：
-   - 在 **Model** 欄位**手動輸入帶有 `:cloud` 的完整名稱**（例如 **`gpt-oss:20b-cloud`**、**`gemma2:9b-cloud`** 或 **`llama3.3:70b-cloud`**）。
-5. 將 Ollama Chat Model 節點連線至 **AI Agent** 節點，即可開始在工作流中調用雲端大模型！
+   - 在 **Model** 欄位**手動輸入帶有 `:cloud` 的完整名稱**：**`gemma2:9b-cloud`**。
+5. 將 Ollama Chat Model 節點連線至 **AI Agent** 節點，即可開始在工作流中調用 Gemma 雲端模型！
