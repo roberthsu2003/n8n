@@ -21,9 +21,11 @@
 ### 🐳 [docker安裝](./docker安裝/README.md)
 完整說明 Windows、macOS 與 Raspberry Pi (Linux) 的 Docker 安裝步驟、環境設定與驗證方式。
 
+### 🌐 [ngrok安裝](./ngrok安裝/README.md)
+學習如何安裝與設定 ngrok 建立安全通道，取得公開 HTTPS 網址以接收外部 Webhook 與 OAuth 回調。
 
-### 🚀 [第一章：n8n 簡介與安裝](./n8n簡介與安裝/README.md)
-學習 n8n 的核心概念、支援的安裝方式（Docker、npm），以及如何建立固定網址（ngrok）以接收外部 Webhook。
+### 🚀 [n8n 簡介與安裝](./n8n簡介與安裝/README.md)
+學習 n8n 的核心概念、透過 Docker 啟動 n8n 容器、備份還原、版本升級與重置方式。
 
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
