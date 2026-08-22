@@ -156,6 +156,9 @@
 #### 🛠️ 常用管理指令（全域 / Global 設定）
 
 ```bash
+# 0. 啟動 ngrok 反向代理（必加 Accept-Encoding 參數避免串流出錯）
+ngrok http 5678 --request-header-add "Accept-Encoding: identity"
+
 # 1. 登入 OpenAI / ChatGPT 帳號提供者（全域登入，供 ChatGPT 用戶使用）
 opencode auth login
 
