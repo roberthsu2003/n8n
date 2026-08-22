@@ -27,6 +27,7 @@
 ### 🚀 [n8n 簡介與安裝](./n8n簡介與安裝/README.md)
 學習 n8n 的核心概念、透過 Docker 啟動 n8n 容器、備份還原、版本升級與重置方式。
 
+
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
 
@@ -35,6 +36,10 @@
 1. **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連。
 2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理指令（免手寫設定檔）。
 3. **Google Antigravity 專案協作**：Gemini 智慧代理深度連體整合與 Bearer Token 配置。
+
+### 🦙 [Ollama 安裝](./ollama安裝/README.md)
+學習如何在 Windows、macOS 與 Raspberry Pi (Linux) 安裝 Ollama 本地模型引擎，並設定允許 n8n 容器直接串接開源 LLM。
+
 
 
 
