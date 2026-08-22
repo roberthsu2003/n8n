@@ -1,6 +1,6 @@
 # Ollama 安裝指南 🦙
 
-**Ollama** 是一個能在本機輕鬆下載、管理與執行開源大型語言模型（LLM）的工具。透過 Ollama，您可以在不依賴付費雲端 API 的情況下，免費在本地運行 AI 模型，並與 n8n 的 AI Agent 與 LLM 節點進行串接。
+**Ollama** 是一個能在本機與雲端環境輕鬆下載、管理與執行開源大型語言模型（LLM）的工具。透過 Ollama，您可以登入官方帳號獲取 API Key 並執行雲端與本地模型（如 `gpt-oss:20b`），與 n8n 的 AI Agent 及 LLM 節點進行串接。
 
 ---
 
@@ -12,8 +12,9 @@
   - [步驟 2：設定 Ollama 監聽所有 IP（解決 ECONNREFUSED 錯誤）](#步驟-2設定-ollama-監聽所有-ip解決-econnrefused-錯誤)
   - [步驟 3：測試 Docker 容器內部連線](#步驟-3測試-docker-容器內部連線)
   - [步驟 4：備用方案（若非 systemd 服務啟動）](#步驟-4備用方案若非-systemd-服務啟動)
-- [3. 下載推薦模型](#3-下載推薦模型)
-- [4. 在 n8n 中設定 Ollama 憑證](#4-在-n8n-中設定-ollama-憑證)
+- [3. 登入 Ollama 帳號與建立 API Key](#3-登入-ollama-帳號與建立-api-key)
+- [4. 下載與執行雲端模型 (gpt-oss:20b)](#4-下載與執行雲端模型-gpt-oss20b)
+- [5. 在 n8n 中設定 Ollama 憑證](#5-在-n8n-中設定-ollama-憑證)
 
 ---
 
@@ -28,7 +29,7 @@ Windows 與 macOS 使用者可直接前往官網下載安裝程式：
 
 ## 2. Raspberry Pi (Linux) 安裝與設定流程
 
-在 Raspberry Pi (需 64-bit 系統) 或 Linux 伺服器上，為了讓運行於 Docker 容器內的 n8n 能夠成功連線到本機的 Ollama，必須確保 Ollama 監聽 `0.0.0.0:11434`。
+在 Raspberry Pi (需 64-bit 系統) 或 Linux 伺服器上，為了讓運行於 Docker 容器內的 n8n 能夠成功連線到主機的 Ollama，必須確保 Ollama 監聽 `0.0.0.0:11434`。
 
 ### 步驟 1：安裝 Ollama
 
@@ -43,7 +44,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ### 步驟 2：設定 Ollama 監聽所有 IP（解決 ECONNREFUSED 錯誤）
 
 > ⚠️ **常見錯誤原因**：
-> 當 n8n 出現 `ECONNREFUSED 172.17.0.1:11434`，代表 Docker 容器已找到 Raspberry Pi 主機，但 Ollama 預設僅監聽 `127.0.0.1`，拒絕了來自 Docker 橋接網卡（`172.17.0.1`）的連線。
+> 當 n8n 出現 `ECONNREFUSED 172.17.0.1:11434`，代表 Docker 容器已找到主機，但 Ollama 預設僅監聽 `127.0.0.1`，拒絕了來自 Docker 橋接網卡（`172.17.0.1`）的連線。
 
 請依序執行以下步驟進行設定：
 
@@ -109,36 +110,56 @@ OLLAMA_HOST=0.0.0.0:11434 ollama serve
 
 ---
 
-## 3. 下載推薦模型
+## 3. 登入 Ollama 帳號與建立 API Key 🔑
 
-在樹莓派或終端機中下載適合的模型：
+為了存取 Ollama 雲端服務與進行授權驗證，請完成以下登入與金鑰建立流程：
 
-| 模型名稱 | 參數量 / 大小 | 記憶體需求 | 說明 |
-| :--- | :--- | :--- | :--- |
-| **`llama3.2:1b`** | 約 1.3 GB | ~ 2 GB | 🍓 Raspberry Pi 4/5 速度最快首選 |
-| **`qwen2.5:1.5b`** | 約 1.0 GB | ~ 2 GB | 🍓 樹莓派繁體中文極佳選擇 |
-| **`llama3.2:3b`** | 約 2.0 GB | ~ 4 GB | 💻 繁中與工具調用平衡推薦 |
-| **`qwen2.5:7b`** | 約 4.7 GB | ~ 8 GB | 💻 PC / 筆電推薦高理解力模型 |
+1. **註冊 / 登入 Ollama 帳號**：
+   - 前往 [ollama.com](https://ollama.com) 並登入帳號。
+2. **建立 / 複製 API Key**：
+   - 前往個人設定頁面（Settings / API Keys），建立一組專屬的 API Key 並妥善保存。
+3. **在終端機登入 Ollama**：
+   - 開啟終端機執行以下指令完成帳號授權綁定：
+     ```bash
+     ollama login
+     ```
+   - 依照終端機提示在瀏覽器中完成授權。
 
-#### 下載指令：
+---
+
+## 4. 下載與執行雲端模型 (gpt-oss:20b) ☁️
+
+本教學課程推薦使用 **`gpt-oss:20b`** 模型，具備優秀的邏輯推理與工具使用（Function Calling / Tools）能力，非常適合搭配 n8n AI Agent 節點：
+
+### 下載並執行指令：
 ```bash
-# 以下載 llama3.2:1b 為例
-ollama run llama3.2:1b
+ollama run gpt-oss:20b
+```
 
-# 查看已下載的模型
+### 常用模型速查表：
+
+| 模型名稱 | 類型 | 參數量 / 大小 | 說明 |
+| :--- | :--- | :--- | :--- |
+| **`gpt-oss:20b`** | ☁️ 雲端 / 強大推理 | 約 12 GB | ⭐️ **本課程推薦**，專注於工具調用與複雜工作流 |
+| **`llama3.2:1b`** | 🍓 本機極輕量 | 約 1.3 GB | Raspberry Pi 4/5 順暢運行 |
+| **`qwen2.5:1.5b`** | 🍓 本機繁中推薦 | 約 1.0 GB | 樹莓派繁體中文理解優異 |
+| **`llama3.2:3b`** | 💻 筆電平衡版 | 約 2.0 GB | 一般筆電本機推薦 |
+
+```bash
+# 查看所有已下載模型
 ollama list
 ```
 
 ---
 
-## 4. 在 n8n 中設定 Ollama 憑證
+## 5. 在 n8n 中設定 Ollama 憑證
 
-在 n8n 建立 Ollama 憑證（Ollama API）：
-
-- **Base URL**：
-  ```text
-  http://host.docker.internal:11434
-  ```
-- **API Key**：`留白`
-
-點選 **Test Connection** 測試連線成功後，即可在 **Ollama Chat Model** 節點中選擇您剛下載的模型！
+1. 開啟 n8n 工作區，進入 **Credentials** > 新增 **Ollama API** 憑證。
+2. 填入連線設定：
+   - **Base URL**：
+     ```text
+     http://host.docker.internal:11434
+     ```
+   - **API Key**：填入在 [ollama.com](https://ollama.com) 取得的 API Key（若純本機使用可留白）。
+3. 點選 **Save** 儲存並測試連線。
+4. 在工作流中新增 **Ollama Chat Model** 節點，模型名稱選擇或輸入 **`gpt-oss:20b`** 即可開始串接 AI Agent！

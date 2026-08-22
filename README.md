@@ -38,7 +38,7 @@
 3. **Google Antigravity 專案協作**：Gemini 智慧代理深度連體整合與 Bearer Token 配置。
 
 ### 🦙 [Ollama 安裝](./ollama安裝/README.md)
-學習如何在 Windows、macOS 與 Raspberry Pi (Linux) 安裝 Ollama 本地模型引擎，並設定允許 n8n 容器直接串接開源 LLM。
+學習如何在 Windows、macOS 與 Raspberry Pi 安裝 Ollama、登入帳號建立 API Key、下載並執行雲端推薦模型 `gpt-oss:20b`，以及與 n8n 容器的連線配置。
 
 
 
