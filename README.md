@@ -32,7 +32,7 @@
 ### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
 了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
 
-### ⚙️ [AI 協作與 n8n MCP 設定指南](./AI協作/README.md)
+### ⚙️ [n8n MCP 設定指南](./n8n_mcp/README.md)
 透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具：
 1. **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連。
 2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理指令（免手寫設定檔）。
