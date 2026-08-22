@@ -10,14 +10,17 @@
 - [2. Raspberry Pi (Linux) 安裝與設定流程](#2-raspberry-pi-linux-安裝與設定流程)
   - [步驟 1：安裝 Ollama](#步驟-1安裝-ollama)
   - [步驟 2：設定 Ollama 監聽所有 IP（解決 ECONNREFUSED 錯誤）](#步驟-2設定-ollama-監聽所有-ip解決-econnrefused-錯誤)
-  - [步驟 3：測試 Docker 容器內部連線](#步驟-3測試-docker-容器內部連線)
-  - [步驟 4：備用方案（若非 systemd 服務啟動）](#步驟-4備用方案若非-systemd-服務啟動)
+  - [步驟 3：備用方案（若非 systemd 服務啟動）](#步驟-3備用方案若非-systemd-服務啟動)
 - [3. 登入 Ollama 帳號與建立 API Key](#3-登入-ollama-帳號與建立-api-key)
-- [4. 執行 Gemma 4 雲端 (Cloud) 模型（`:cloud` 標籤）](#4-執行-gemma-4-雲端-cloud-模型cloud-標籤)
+- [4. 安裝與執行 Gemma 4 雲端 (Cloud) 模型（`:cloud` 標籤）](#4-安裝與執行-gemma-4-雲端-cloud-模型cloud-標籤)
   - [雲端模型命名規則（必須包含 `:cloud`）](#雲端模型命名規則必須包含-cloud)
-  - [Gemma 4 雲端模型推薦與執行指令](#gemma-4-雲端模型推薦與執行指令)
+  - [Gemma 4 雲端模型推薦清單](#gemma-4-雲端模型推薦清單)
+  - [安裝與執行指令](#安裝與執行指令)
   - [查詢目前已附加 / 支援的模型清單 (`ollama list`)](#查詢目前已附加--支援的模型清單-ollama-list)
-- [5. 在 n8n 中設定 Ollama 憑證與 Gemma 4 雲端模型](#5-在-n8n-中設定-ollama-憑證與-gemma-4-雲端模型)
+- [5. 驗證與測試模型是否可正常運作 🧪](#5-驗證與測試模型是否可正常運作-)
+  - [測試 1：本機終端機快速單行測試](#測試-1本機終端機快速單行測試)
+  - [測試 2：從 Docker n8n 容器內部測試 API 推論](#測試-2從-docker-n8n-容器內部測試-api-推論)
+- [6. 在 n8n 中設定 Ollama 憑證與 Gemma 4 雲端模型](#6-在-n8n-中設定-ollama-憑證與-gemma-4-雲端模型)
 
 ---
 
@@ -67,19 +70,7 @@ sudo ss -ltnp | grep 11434
 
 ---
 
-### 步驟 3：測試 Docker 容器內部連線
-
-在終端機直接測試 n8n 容器是否能成功呼叫 Ollama API：
-
-```bash
-docker exec n8n node -e "fetch('http://host.docker.internal:11434/api/tags').then(r=>r.text()).then(console.log).catch(console.error)"
-```
-
-如果能正常印出 JSON 模型資訊（或 `{"models":[]}`），即代表連線完全正常！🎉
-
----
-
-### 步驟 4：備用方案（若非 systemd 服務啟動）
+### 步驟 3：備用方案（若非 systemd 服務啟動）
 
 如果執行 `sudo systemctl restart ollama` 顯示找不到服務，請改用指令直接前景啟動：
 
@@ -108,25 +99,34 @@ OLLAMA_HOST=0.0.0.0:11434 ollama serve
 
 ---
 
-## 4. 執行 Gemma 4 雲端 (Cloud) 模型（`:cloud` 標籤）☁️
+## 4. 安裝與執行 Gemma 4 雲端 (Cloud) 模型（`:cloud` 標籤）☁️
 
 ### 雲端模型命名規則（必須包含 `:cloud`）
 > 💡 **關鍵概念**：
 > 在 Ollama 中，所有雲端模型名稱後面**必須帶有 `:cloud` 標籤**（例如 `gemma4:cloud`、`gemma4:26b-cloud`、`gemma4:31b-cloud`）。
 > 當您指定 `:cloud` 模型時，本地 Ollama 客戶端會自動將推理請求導向雲端伺服器，**完全不佔用本地硬碟與 GPU 記憶體**。
 
-### Gemma 4 雲端模型推薦與執行指令：
+### Gemma 4 雲端模型推薦清單：
 
 | 模型名稱 | 雲端標籤 | 說明 |
 | :--- | :--- | :--- |
 | **`gemma4:cloud`** | ☁️ 雲端 | ⭐️ **本課程推薦首選**，最新 Google Gemma 4 架構，兼具超高推論速度、中文語意理解與強大 Tool-Calling 工具調用能力 |
 | **`gemma4:26b-cloud`** / **`gemma4:31b-cloud`** | ☁️ 雲端 | Gemma 4 高參數量旗艦版，適合複雜邏輯分析與長文本深度推理 |
 
-#### 執行與對話測試指令：
+### 安裝與執行指令：
+
+#### 1. 下載 / 附加雲端模型至 Ollama (`ollama pull`)
 ```bash
-# 執行 Gemma 4 雲端模型（課程推薦首選）
+# 下載並綁定 Gemma 4 雲端模型（課程推薦首選）
+ollama pull gemma4:cloud
+```
+
+#### 2. 互動式對話測試 (`ollama run`)
+```bash
+# 啟動 Gemma 4 雲端模型進行即時互動對話
 ollama run gemma4:cloud
 ```
+*(輸入 `/bye` 可隨時退出對話介面)*
 
 ---
 
@@ -147,7 +147,44 @@ gemma4:cloud             cloud-g4abc12   0 B       2 minutes ago
 
 ---
 
-## 5. 在 n8n 中設定 Ollama 憑證與 Gemma 4 雲端模型
+## 5. 驗證與測試模型是否可正常運作 🧪
+
+在將模型連接到 n8n 前，您可以透過以下兩種方式快速驗證雲端模型與 Docker 網路是否正常：
+
+### 測試 1：本機終端機快速單行測試
+直接在終端機發送一句提問，測試模型能否成功回應：
+
+```bash
+ollama run gemma4:cloud "請用繁體中文回答：Gemma 4 雲端模型測試成功！"
+```
+*如果能直接印出繁體中文回覆，代表 Ollama 雲端連線與帳號授權完全正常！*
+
+---
+
+### 測試 2：從 Docker n8n 容器內部測試 API 推論
+這一步能直接驗證 **n8n 容器是否能透過宿主機網路成功呼叫 Ollama 並獲得回答**：
+
+```bash
+docker exec n8n node -e "
+fetch('http://host.docker.internal:11434/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'gemma4:cloud',
+    prompt: '請回答：Docker 容器與 Ollama 連線成功！',
+    stream: false
+  })
+})
+.then(r => r.json())
+.then(d => console.log('✅ 模型回應結果：\n', d.response))
+.catch(err => console.error('❌ 連線失敗：', err));
+"
+```
+*預期輸出：印出 `✅ 模型回應結果：` 與 Gemma 4 的回答，代表容器網路完全打通！*
+
+---
+
+## 6. 在 n8n 中設定 Ollama 憑證與 Gemma 4 雲端模型
 
 1. 開啟 n8n 工作區，進入 **Credentials** > 新增 **Ollama API** 憑證。
 2. 填入連線設定：
