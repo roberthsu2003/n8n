@@ -14,7 +14,7 @@
    - [Connection details（連線設定區）](#connection-details)
    - [Access（存取控制區）](#access-control)
    - [Connected clients（已連線客戶端管理區）](#connected-clients)
-3. [Expose（開放）與連線權限的關鍵差異](#expose-vs-permissions)
+3. [n8n MCP 的兩大核心維度：AI 輔助建構 vs. Expose 工具化調用](#expose-vs-permissions)
 4. [各 AI 客戶端連線設定教學](#client-setups)
    - [Claude Connector (OAuth 模式)](#claude-connector)
    - [OpenCode 全域管理指令（推薦免手寫設定檔）](#opencode-mcp)
@@ -89,23 +89,67 @@
 ---
 
 <a id="expose-vs-permissions"></a>
-## 三、Expose（開放）與連線權限的關鍵差異
+## 三、n8n MCP 的兩大核心維度：AI 輔助建構 vs. Expose 工具化調用
 
-在 n8n MCP 協作中，這是最核心且容易混淆的概念：
+在 n8n MCP 協作中，最核心的價值在於將 **「AI 輔助開發」** 與 **「工作流程工具化」** 完美結合：
 
-### 1. Expose（工作流程開放）
-* 工作流程是否被標記為可作為獨立 MCP Tool 供 AI 執行，在內部資料中通常標記為：
-  ```text
-  availableInMCP: true
+```mermaid
+graph TD
+    subgraph Dimension1["維度一：AI 輔助人類建構工作流 (Workflow Co-pilot)"]
+        AI1["🤖 AI 助理 (Claude / Cursor / OpenCode)"] -->|管理與建構 API| BuildTools["🛠️ 讀取工作流結構 / 建立節點 / 排錯優化"]
+        BuildTools --> n8nCanvas["🎨 n8n 畫布與工作流程庫"]
+    end
+
+    subgraph Dimension2["維度二：Expose 工作流程轉化為 AI 工具 (Workflows as Tools)"]
+        AI2["💬 使用者日常對話問答"] -->|意圖匹配 Description| ToolCall["⚡ AI 自動發起 Tool Call"]
+        ToolCall -->|呼叫已 Expose 的工作流| ExposedWorkflow["🚀 執行已發布的工作流程 (availableInMCP: true)"]
+        ExposedWorkflow --> ReturnResult["📤 回傳結果給 AI 組裝回答"]
+    end
+```
+
+---
+
+### 1. 維度一：AI 輔助人類建構與維護工作流程 (Workflow Builder & Co-pilot)
+* **主要功能**：讓 AI 成為您的 **n8n 結對程式設計師（Pair Programmer）**。
+* **運作機制**：透過 MCP 連線提供的管理權限，AI 可以：
+  - 檢視目前畫布上現有的工作流程結構與節點設定。
+  - 自動生成、新增或修改節點連線與 JavaScript Code。
+  - 讀取執行日誌（Execution Logs），協助分析報錯原因並即時修復流程。
+
+---
+
+### 2. 維度二：Expose 功能 — 將已完成的工作流程封裝為 AI 工具 (Workflows as Tools)
+* **主要功能**：當您在 n8n 完成並測試好某個自動化流程（例如：查詢今日營收、發送 LINE 推播、發票核銷等），透過 **Expose** 可直接將其變成 AI 的「外掛技能（Custom Tool）」。
+* **底層標記**：被勾選 Expose 的工作流程，其設定檔會標記為：
+  ```json
+  "settings": {
+    "availableInMCP": true
+  }
   ```
-* 例如後台顯示 **`1 workflow exposed`**，代表明確開放給 AI 呼叫的封裝工具數量為 1 個。
+* 後台顯示例如 **`1 workflow exposed`**，代表已對外註冊 1 個可供 AI 自主執行的功能工具。
 
-### 2. n8n 連線帳號管理權限 (Management Permissions)
-* 當 OpenCode 或 Claude 透過 MCP Token / OAuth 連線時，連線本身如果具有 n8n 實例的管理權限，AI 仍然可以透過管理 API 執行查詢工作流列表、讀取工作流 JSON 結構、修改節點等動作。
-* **重點結論**：
-  * **「已 Expose」** ＝ AI 可將該工作流當作獨立功能工具直接帶參數觸發。
-  * **「管理權限」** ＝ AI 可檢視與維護 n8n 畫布上的工作流程。
-  * 兩者層次不同，因此即使只 Expose 1 個工作流，AI 仍可能列出後台全部的 7 個工作流程。
+---
+
+### 3. 🎯 AI 如何觸發 Expose 的工作流程？—— 核心關鍵：Description（描述）
+
+外部 AI 大模型（LLM）無法直接看穿您複雜的工作流節點圖，**AI 完全是透過「工作流程名稱」與「Description（描述文字）」來理解工具用途並決定何時觸發**！
+
+#### 🔍 AI 意圖匹配與觸發流程：
+1. **工具註冊 (Tool Discovery)**：當 AI 客戶端連線至 n8n 時，n8n 會將所有已 Expose 的工作流程清單，連同它們的 **名稱**、**Description** 與 **輸入參數格式 (Input Schema)** 提供給 AI。
+2. **語意意圖匹配 (Semantic Matching)**：
+   - 當使用者在聊天中輸入：「*幫我查一下上個月營業額*」或「*發送一則推播給客戶*」。
+   - LLM 會在背景比對所有可用工具的 **Description**。
+3. **發起工具調用 (Tool Call)**：
+   - 當 LLM 判定某個 Expose 工作流程的 Description 符合使用者需求，便會自動提取對話中的參數，發起 MCP Tool 執行請求。
+   - n8n 執行該工作流程後，將結果回傳給 AI，由 AI 整理成自然語言回覆給使用者。
+
+#### 💡 撰寫 Description 的黃金法則（Best Practices）：
+
+> [!TIP]
+> **寫好 Description 是讓 AI 精準調用工作流程的關鍵！**
+> 
+> * ❌ **不良範例**：`查詢資料用的流程`、`Test Workflow 1`（AI 無法判斷使用時機與輸入內容）。
+> * ✅ **優良範例**：`用於查詢指定日期區間的電商營業額與訂單數量。輸入參數包含 startDate (YYYY-MM-DD) 與 endDate (YYYY-MM-DD)，執行完成後會回傳訂單總金額與熱銷品項清單。`
 
 ---
 
