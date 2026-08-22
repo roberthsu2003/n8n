@@ -13,7 +13,7 @@
   - [步驟 3：測試 Docker 容器內部連線](#步驟-3測試-docker-容器內部連線)
   - [步驟 4：備用方案（若非 systemd 服務啟動）](#步驟-4備用方案若非-systemd-服務啟動)
 - [3. 登入 Ollama 帳號與建立 API Key](#3-登入-ollama-帳號與建立-api-key)
-- [4. 下載與執行雲端模型 (gpt-oss:20b)](#4-下載與執行雲端模型-gpt-oss20b)
+- [4. 執行雲端 (Cloud) 模型（GPT、Gemma、Llama）](#4-執行雲端-cloud-模型gptgemmallama)
 - [5. 在 n8n 中設定 Ollama 憑證](#5-在-n8n-中設定-ollama-憑證)
 
 ---
@@ -127,26 +127,31 @@ OLLAMA_HOST=0.0.0.0:11434 ollama serve
 
 ---
 
-## 4. 下載與執行雲端模型 (gpt-oss:20b) ☁️
+## 4. 執行雲端 (Cloud) 模型（GPT、Gemma、Llama）☁️
 
-本教學課程推薦使用 **`gpt-oss:20b`** 模型，具備優秀的邏輯推理與工具使用（Function Calling / Tools）能力，非常適合搭配 n8n AI Agent 節點：
+在登入 Ollama 帳號並完成 API Key 設定後，您可以直接調用雲端支援的各類主流大型語言模型（無需消耗本機龐大的 GPU 與記憶體算力）：
 
-### 下載並執行指令：
-```bash
-ollama run gpt-oss:20b
-```
+### 常用雲端 (Cloud) 模型清單：
 
-### 常用模型速查表：
-
-| 模型名稱 | 類型 | 參數量 / 大小 | 說明 |
+| 模型系列 | 推薦模型名稱 | 類型 | 說明 |
 | :--- | :--- | :--- | :--- |
-| **`gpt-oss:20b`** | ☁️ 雲端 / 強大推理 | 約 12 GB | ⭐️ **本課程推薦**，專注於工具調用與複雜工作流 |
-| **`llama3.2:1b`** | 🍓 本機極輕量 | 約 1.3 GB | Raspberry Pi 4/5 順暢運行 |
-| **`qwen2.5:1.5b`** | 🍓 本機繁中推薦 | 約 1.0 GB | 樹莓派繁體中文理解優異 |
-| **`llama3.2:3b`** | 💻 筆電平衡版 | 約 2.0 GB | 一般筆電本機推薦 |
+| ⭐️ **GPT 系列** | **`gpt-oss:20b`** | ☁️ 雲端強力推薦 | 具備出色的邏輯推理與工具使用（Function Calling / Tools）能力，為本課程 AI Agent 首選 |
+| 💎 **Gemma 系列** | **`gemma2:9b`** / **`gemma2:27b`** | ☁️ 雲端 Google 架構 | Google 開源的高效能模型，在繁體中文理解與摘要上表現極佳 |
+| 🦙 **Llama 系列** | **`llama3.3:70b`** / **`llama3.2:3b`** | ☁️ 雲端 Meta 架構 | Meta 最新開源旗艦模型，泛用性高且生態支援最完整 |
+
+### 執行與測試指令：
 
 ```bash
-# 查看所有已下載模型
+# 1. 執行 GPT 雲端模型（課程推薦）
+ollama run gpt-oss:20b
+
+# 2. 執行 Gemma 雲端模型
+ollama run gemma2:9b
+
+# 3. 執行 Llama 雲端模型
+ollama run llama3.3:70b
+
+# 4. 查看目前已下載/可用的模型清單
 ollama list
 ```
 
@@ -160,6 +165,7 @@ ollama list
      ```text
      http://host.docker.internal:11434
      ```
-   - **API Key**：填入在 [ollama.com](https://ollama.com) 取得的 API Key（若純本機使用可留白）。
+   - **API Key**：填入在 [ollama.com](https://ollama.com) 取得的 API Key。
 3. 點選 **Save** 儲存並測試連線。
-4. 在工作流中新增 **Ollama Chat Model** 節點，模型名稱選擇或輸入 **`gpt-oss:20b`** 即可開始串接 AI Agent！
+4. 在工作流中新增 **Ollama Chat Model** 節點，在 Model 欄位填入或選擇您要使用的雲端模型（例如 **`gpt-oss:20b`**、**`gemma2:9b`** 或 **`llama3.3:70b`**），即可無縫整合至 AI Agent 工作流！
+
