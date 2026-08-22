@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui1
+    restart: always
+    network_mode: host
+    volumes:
+      - open-webui:/app/backend/data
+    environment:
+      OLLAMA_BASE_URL: http://127.0.0.1:11434
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared1
+    restart: unless-stopped
+    network_mode: host
+    command: tunnel run --token <TOKEN>
+
+volumes:
+  open-webui:
+    external: true
