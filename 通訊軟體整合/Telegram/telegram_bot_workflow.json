@@ -1,0 +1,110 @@
+{
+  "name": "Telegram 雙向通訊工作流（接收訊息與自動回覆）",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        300
+      ],
+      "id": "telegram-trigger",
+      "name": "Telegram 訊息觸發器",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-chat-id",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "extract-text",
+              "name": "userMessage",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-user-name",
+              "name": "userName",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        300
+      ],
+      "id": "extract-telegram-data",
+      "name": "整理 Telegram 訊息資料"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "=哈囉 {{ $json.userName }}！n8n 已收到您的訊息：\n\n「{{ $json.userMessage }}」\n\n🕒 處理時間：{{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        360,
+        300
+      ],
+      "id": "send-telegram-message",
+      "name": "發送 Telegram 回覆訊息",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram 訊息觸發器": {
+      "main": [
+        [
+          {
+            "node": "整理 Telegram 訊息資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理 Telegram 訊息資料": {
+      "main": [
+        [
+          {
+            "node": "發送 Telegram 回覆訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

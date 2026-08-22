@@ -1,0 +1,210 @@
+{
+  "name": "LINE 雙向通訊工作流（接收訊息與自動回覆）",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        300
+      ],
+      "id": "line-webhook-trigger",
+      "name": "LINE Webhook 觸發器"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"ok\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        60,
+        180
+      ],
+      "id": "respond-line-ok",
+      "name": "即時回傳 200 OK"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body || {};\nconst events = body.events || [];\n\nif (events.length === 0) {\n  return [];\n}\n\nconst event = events[0];\nconst messageType = event.message?.type || '';\nconst userMessage = event.message?.text || '';\nconst replyToken = event.replyToken || '';\nconst userId = event.source?.userId || '';\nconst eventType = event.type || '';\n\nreturn [{\n  json: {\n    eventType,\n    messageType,\n    userMessage,\n    replyToken,\n    userId,\n    timestamp: event.timestamp\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        380
+      ],
+      "id": "parse-line-event",
+      "name": "解析 LINE 訊息事件"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-text-event",
+              "leftValue": "={{ $json.eventType }}",
+              "rightValue": "message",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check-text-type",
+              "leftValue": "={{ $json.messageType }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        300,
+        380
+      ],
+      "id": "check-is-text-message",
+      "name": "是否為文字訊息？"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-reply-text",
+              "name": "replyText",
+              "value": "=您好！n8n 已收到您的訊息：「{{ $json.userMessage }}」\n處理時間：{{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "set-reply-token",
+              "name": "replyToken",
+              "value": "={{ $json.replyToken }}",
+              "type": "string"
+            },
+            {
+              "id": "set-user-id",
+              "name": "userId",
+              "value": "={{ $json.userId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        540,
+        320
+      ],
+      "id": "prepare-reply-message",
+      "name": "準備回覆內容"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_LINE_CHANNEL_ACCESS_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $json.replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{ $json.replyText }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        780,
+        320
+      ],
+      "id": "send-line-reply",
+      "name": "呼叫 LINE Reply API 回覆訊息"
+    }
+  ],
+  "connections": {
+    "LINE Webhook 觸發器": {
+      "main": [
+        [
+          {
+            "node": "即時回傳 200 OK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "解析 LINE 訊息事件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 LINE 訊息事件": {
+      "main": [
+        [
+          {
+            "node": "是否為文字訊息？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否為文字訊息？": {
+      "main": [
+        [
+          {
+            "node": "準備回覆內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "準備回覆內容": {
+      "main": [
+        [
+          {
+            "node": "呼叫 LINE Reply API 回覆訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

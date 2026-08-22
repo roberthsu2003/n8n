@@ -100,6 +100,22 @@
 
 ---
 
+## 💬 [通訊軟體整合 (LINE & Telegram)](./通訊軟體整合/README.md)
+
+學習如何將 n8n 與主流即時通訊軟體（LINE 與 Telegram）進行雙向串接，實現事件觸發與智慧助理自動化：
+
+- **[📱 LINE 整合實作](./通訊軟體整合/LINE/README.md)**：
+  - **LINE 訊息觸發 n8n 工作流**：設定 Webhook 接收用戶傳送的文字、圖片或加入好友事件，即時啟動自動化流程。
+  - **n8n 節點呼叫 LINE Message 服務**：透過 HTTP Request 節點調用 LINE Messaging API，實現免費即時回覆 (`Reply Message`) 與主動推播通知 (`Push Message`)。
+  - 支援範例工作流：[`line_bot_workflow.json`](./通訊軟體整合/LINE/line_bot_workflow.json)。
+- **[✈️ Telegram 整合實作](./通訊軟體整合/Telegram/README.md)**：
+  - 使用 `@BotFather` 快速建立機器人並綁定 n8n Telegram API 憑證。
+  - 使用 `Telegram Trigger` 節點即時監聽指令與聊天室訊息。
+  - 使用 `Telegram` 節點發送富文本通知、圖片與系統警報。
+  - 支援範例工作流：[`telegram_bot_workflow.json`](./通訊軟體整合/Telegram/telegram_bot_workflow.json)。
+
+---
+
 
 ## 💻 [Code Node (JavaScript) 進階應用](./code_node(javascript)節點/README.md)
 
