@@ -36,6 +36,8 @@
 2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理指令（免手寫設定檔）。
 3. **Google Antigravity 專案協作**：Gemini 智慧代理深度連體整合與 Bearer Token 配置。
 
+
+
 ---
 
 ## 🎯 [初體驗範例](./初階範例/README.md)
