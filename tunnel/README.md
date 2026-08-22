@@ -10,10 +10,10 @@
 
 ```mermaid
 graph TD
-    A[安全通道與穿透方案] --> B[☁️ Cloudflare Tunnel (推薦生產首選)]
-    A --> C[🔐 SSH Reverse Tunnel]
-    A --> D[🌐 Local Network / 反向代理]
-    A --> E[⚡ ngrok (開發測試用)]
+    A["安全通道與穿透方案"] --> B["☁️ Cloudflare Tunnel（推薦生產首選）"]
+    A --> C["🔐 SSH Reverse Tunnel"]
+    A --> D["🌐 Local Network 與反向代理"]
+    A --> E["⚡ ngrok（開發測試用）"]
 ```
 
 ### 1. [☁️ Cloudflare Tunnel 設定指南](./cloudflare_tunnel.md) ⭐️ **(生產環境首選)**

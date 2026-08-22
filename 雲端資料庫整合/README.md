@@ -10,12 +10,12 @@
 
 ```mermaid
 graph LR
-    A[雲端資料庫整合] --> B[🐘 Supabase PostgreSQL]
-    A --> C[🌐 雲端 PostgreSQL 服務評估]
+    A["雲端資料庫整合"] --> B["🐘 Supabase PostgreSQL"]
+    A --> C["🌐 雲端 PostgreSQL 服務評估"]
     
-    B --> B1[Postgres 原生 SQL 節點]
-    B --> B2[Supabase REST API 節點]
-    B --> B3[pgvector 向量知識庫檢索]
+    B --> B1["Postgres 原生 SQL 節點"]
+    B --> B2["Supabase REST API 節點"]
+    B --> B3["pgvector 向量知識庫檢索"]
 ```
 
 ### 1. [🐘 Supabase (PostgreSQL) 實作指南](./Supabase/README.md)

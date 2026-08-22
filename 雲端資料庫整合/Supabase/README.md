@@ -8,11 +8,11 @@
 
 ```mermaid
 graph TD
-    n8n[n8n 自動化核心] -->|方式 1: 原生 SQL / Connection Pooler| PostgresNode[Postgres 節點]
-    n8n -->|方式 2: REST API| SupabaseNode[Supabase 節點]
-    n8n -->|方式 3: 向量檢索 / RAG| VectorNode[Supabase Vector Store]
+    n8n["n8n 自動化核心"] -->|方式 1: 原生 SQL / Connection Pooler| PostgresNode["Postgres 節點"]
+    n8n -->|方式 2: REST API| SupabaseNode["Supabase 節點"]
+    n8n -->|方式 3: 向量檢索 / RAG| VectorNode["Supabase Vector Store"]
     
-    PostgresNode --> SupabaseDB[(Supabase 雲端 PostgreSQL)]
+    PostgresNode --> SupabaseDB[("Supabase 雲端 PostgreSQL")]
     SupabaseNode --> SupabaseDB
     VectorNode --> SupabaseDB
 ```

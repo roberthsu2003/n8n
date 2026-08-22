@@ -12,14 +12,14 @@
 
 ```mermaid
 graph LR
-    A[通訊軟體整合] --> B[📱 LINE 整合]
-    A --> C[✈️ Telegram 整合]
+    A["通訊軟體整合"] --> B["📱 LINE 整合"]
+    A --> C["✈️ Telegram 整合"]
     
-    B --> B1[LINE 訊息觸發 n8n]
-    B --> B2[n8n 呼叫 LINE Reply / Push API]
+    B --> B1["LINE 訊息觸發 n8n"]
+    B --> B2["n8n 呼叫 LINE Reply / Push API"]
     
-    C --> C1[Telegram Trigger 接收指令]
-    C --> C2[Telegram 節點發送推播]
+    C --> C1["Telegram Trigger 接收指令"]
+    C --> C2["Telegram 節點發送推播"]
 ```
 
 ### 1. [📱 LINE Messaging API 雙向整合](./LINE/README.md)
