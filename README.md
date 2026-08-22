@@ -22,8 +22,8 @@
 深入剖析 2026 年 AI Agent 時代下，n8n 的定位轉變、與 AI 原生工具的競合關係、雲端計費陷阱，以及為什麼「自建服務 (Self-hosting)」在成本控管與資安上是必要選擇。
 
 
-### 🐳 [Docker容器化基礎與n8n部署準備](./Docker容器化基礎與n8n部署準備/README.md)
-學習 Docker 容器化基礎與 n8n 部署準備，包括 Docker 核心概念、安裝與 Hello World、基礎指令實戰、網路與與資料持久化、進階管理與 Docker Compose、專題實戰 - 模擬 n8n 部署環境。
+### 🐳 [docker安裝](./docker安裝/README.md)
+完整說明 Windows、macOS 與 Raspberry Pi (Linux) 的 Docker 安裝步驟、環境設定與驗證方式。
 
 
 ### 🚀 [第一章：n8n 簡介與安裝](./n8n簡介與安裝/README.md)
