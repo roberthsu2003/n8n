@@ -69,13 +69,16 @@
 
 ## 🔗 [整合 Google 服務](./Google_Cloud_api服務/README.md)
 
-提供 Google Drive、Gmail、Google Sheets 與 Google 表單等服務的整合實作範例。
+提供 Google Drive、Gmail、Google Sheets、Google Docs 與 Google 表單等服務的整合實作範例。
 
 **包含範例**：
-- 儲存檔案至Google Drive：學習 Google Drive API 整合
+- 儲存檔案至 Google Drive：學習 Google Drive API 整合與檔案上傳
 - 自動寄送 Gmail：掌握排程觸發與郵件發送
 - 寄送一則笑話：進階的多 API 串接技巧
 - 學生體驗回饋問卷範本：完整的表單處理自動化流程
+- 訂便當系統：表單觸發器與 Google Sheets 資料寫入
+- 取得台北市 YouBike 資料：動態檔案搜尋、條件分支與進階 Sheets 歸檔
+- **動態文件生成與 PDF 自動化**：使用 Google Docs `{{placeholder}}` 佔位符範本替換、自動轉存 PDF 並透過 Gmail 寄出附件
 
 ---
 

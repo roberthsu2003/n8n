@@ -1,0 +1,281 @@
+{
+  "name": "Google 文件範本佔位符替換與自動轉存 PDF 寄送",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "結業證書與文件自動產生系統",
+        "formDescription": "填寫學員資訊，系統將自動套用 Google Docs 範本、替換 {{placeholder}} 佔位符、產出專屬 PDF 證書並透過 Gmail 自動寄送！",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "學員姓名",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "學員 Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "完訓課程名稱",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "結業總成績",
+              "fieldType": "number",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -300,
+        300
+      ],
+      "id": "form-trigger-cert",
+      "name": "填寫申請表單"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "student-name",
+              "name": "student_name",
+              "value": "={{ $json['學員姓名'] }}",
+              "type": "string"
+            },
+            {
+              "id": "student-email",
+              "name": "student_email",
+              "value": "={{ $json['學員 Email'] }}",
+              "type": "string"
+            },
+            {
+              "id": "course-name",
+              "name": "course_name",
+              "value": "={{ $json['完訓課程名稱'] }}",
+              "type": "string"
+            },
+            {
+              "id": "student-score",
+              "name": "score",
+              "value": "={{ $json['結業總成績'] }}",
+              "type": "number"
+            },
+            {
+              "id": "issue-date",
+              "name": "issue_date",
+              "value": "={{ $now.format('yyyy 年 MM 月 dd 日') }}",
+              "type": "string"
+            },
+            {
+              "id": "new-doc-name",
+              "name": "new_doc_name",
+              "value": "=結業證書_{{ $json['學員姓名'] }}_{{ $now.format('yyyyMMdd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -60,
+        300
+      ],
+      "id": "prepare-template-data",
+      "name": "整理範本變數資料"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "fileId": {
+          "__rl": true,
+          "value": "YOUR_TEMPLATE_GOOGLE_DOC_FILE_ID",
+          "mode": "id"
+        },
+        "options": {
+          "name": "={{ $json.new_doc_name }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        160,
+        300
+      ],
+      "id": "copy-template-doc",
+      "name": "Google Drive (複製範本文件)",
+      "credentials": {
+        "googleDriveOAuth2": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionValues": [
+            {
+              "action": "replaceAllText",
+              "textToReplace": "{{student_name}}",
+              "replaceText": "={{ $('整理範本變數資料').item.json.student_name }}"
+            },
+            {
+              "action": "replaceAllText",
+              "textToReplace": "{{course_name}}",
+              "replaceText": "={{ $('整理範本變數資料').item.json.course_name }}"
+            },
+            {
+              "action": "replaceAllText",
+              "textToReplace": "{{score}}",
+              "replaceText": "={{ $('整理範本變數資料').item.json.score.toString() }}"
+            },
+            {
+              "action": "replaceAllText",
+              "textToReplace": "{{issue_date}}",
+              "replaceText": "={{ $('整理範本變數資料').item.json.issue_date }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        380,
+        300
+      ],
+      "id": "replace-placeholders-in-doc",
+      "name": "Google Docs (替換佔位符文字)",
+      "credentials": {
+        "googleDocsOAuth2": {
+          "id": "YOUR_GOOGLE_DOCS_CREDENTIAL_ID",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Google Drive (複製範本文件)').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "mimeType": "application/pdf"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        600,
+        300
+      ],
+      "id": "export-as-pdf",
+      "name": "Google Drive (匯出為 PDF 檔案)",
+      "credentials": {
+        "googleDriveOAuth2": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('整理範本變數資料').item.json.student_email }}",
+        "subject": "=🎉 恭喜完成課程！您的結業證書已核發（{{ $('整理範本變數資料').item.json.course_name }}）",
+        "message": "=親愛的 {{ $('整理範本變數資料').item.json.student_name }} 您好：\n\n恭喜您順利完成「{{ $('整理範本變數資料').item.json.course_name }}」課程！\n您的總結業成績為：{{ $('整理範本變數資料').item.json.score }} 分。\n\n隨信附上您的正式電子結業證書 PDF 檔案，感謝您的參與！\n\n祝 學習順心\n教學團隊 敬上",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        820,
+        300
+      ],
+      "id": "send-gmail-with-pdf",
+      "name": "Gmail (自動寄送 PDF 附件證書)",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "填寫申請表單": {
+      "main": [
+        [
+          {
+            "node": "整理範本變數資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理範本變數資料": {
+      "main": [
+        [
+          {
+            "node": "Google Drive (複製範本文件)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive (複製範本文件)": {
+      "main": [
+        [
+          {
+            "node": "Google Docs (替換佔位符文字)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs (替換佔位符文字)": {
+      "main": [
+        [
+          {
+            "node": "Google Drive (匯出為 PDF 檔案)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive (匯出為 PDF 檔案)": {
+      "main": [
+        [
+          {
+            "node": "Gmail (自動寄送 PDF 附件證書)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
