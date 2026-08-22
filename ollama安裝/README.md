@@ -46,46 +46,24 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 ### 步驟 2：設定 Ollama 監聽所有 IP（解決 ECONNREFUSED 錯誤）
 
-> ⚠️ **常見錯誤原因**：
-> 當 n8n 出現 `ECONNREFUSED 172.17.0.1:11434`，代表 Docker 容器已找到主機，但 Ollama 預設僅監聽 `127.0.0.1`，拒絕了來自 Docker 橋接網卡（`172.17.0.1`）的連線。
+> 💡 **為什麼需要設定？**
+> n8n 運行在 Docker 容器內，會透過宿主機網關（如 `172.17.0.1`）連線。但 Ollama 預設僅監聽 `127.0.0.1`，因此會出現 `ECONNREFUSED` 連線被拒錯誤。
 
-請依序執行以下步驟進行設定：
-
-#### 1. 檢查目前環境變數與監聽 Port
-```bash
-sudo systemctl show ollama --property=Environment
-```
+只需在樹莓派終端機**直接複製並執行以下一行指令**即可完成設定並自動重啟服務（免手動開啟編輯器）：
 
 ```bash
-sudo ss -ltnp | grep 11434
-```
-
-如果沒有看到 `0.0.0.0:11434` 或 `*:11434`，請繼續以下步驟建立覆寫設定檔。
-
-#### 2. 建立 systemd 覆寫設定檔
-```bash
-sudo mkdir -p /etc/systemd/system/ollama.service.d
-sudo nano /etc/systemd/system/ollama.service.d/override.conf
-```
-
-在檔案中貼上以下內容：
-```ini
-[Service]
-Environment="OLLAMA_HOST=0.0.0.0:11434"
-```
-*(在 nano 編輯器中，按 `Ctrl + O` 存檔，按 `Enter` 確認，再按 `Ctrl + X` 離開)*
-
-#### 3. 重新載入並重啟 Ollama 服務
-```bash
-sudo systemctl daemon-reload
+sudo mkdir -p /etc/systemd/system/ollama.service.d && \
+echo -e '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0:11434"' | sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null && \
+sudo systemctl daemon-reload && \
 sudo systemctl restart ollama
 ```
 
-#### 4. 再次確認監聽狀態
+#### 驗證設定：
+執行以下指令確認是否已監聽 `0.0.0.0:11434`：
 ```bash
 sudo ss -ltnp | grep 11434
 ```
-確認輸出中包含 `0.0.0.0:11434`。
+*看到 `0.0.0.0:11434` 或 `*:11434` 即代表設定成功！*
 
 ---
 
