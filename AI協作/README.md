@@ -117,10 +117,13 @@
 
 適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式：
 
-1. **取得公開 HTTPS 網址**：
-   確保本機已啟動 ngrok 並轉發 n8n 埠號（預設 5678）：
+1. **啟動 ngrok 反向代理（必備指令）**：
+   確保本機已啟動 ngrok 並轉發 n8n 埠號（預設 5678）。
+   > [!WARNING]
+   > **⚠️ ngrok 反向代理必加參數**：
+   > 使用 ngrok 代理 n8n MCP 時，若未停用壓縮可能導致 SSE / MCP 串流解析失敗，**必須**使用以下指令啟動：
    ```bash
-   ngrok http 5678
+   ngrok http 5678 --request-header-add "Accept-Encoding: identity"
    ```
 2. **開啟 Claude Connectors 介面**：
    * 在 Claude.ai 側邊欄點選 **Customize** ➔ **Connectors**（或 **Settings > Connectors**）。
@@ -142,6 +145,13 @@
 > [!TIP]
 > **全域設定推薦使用 CLI 指令直接操作**：
 > OpenCode 內建完整的 MCP CLI 管理工具。**不需要手動建立或編輯 `opencode.json`**，只需透過指令即可在全域完成 n8n MCP 的新增、OAuth 授權與狀態管理，設定一次即在任何目錄與 OpenCode Desktop 桌面版中全域生效！
+
+> [!WARNING]
+> **⚠️ 啟動 ngrok 反向代理的重要指令**：
+> 當透過 ngrok 提供公開 HTTPS 供 OpenCode 或其他 AI 客戶端連線時，為避免串流與編碼壓縮問題，ngrok 請一律使用以下指令啟動：
+> ```bash
+> ngrok http 5678 --request-header-add "Accept-Encoding: identity"
+> ```
 
 #### 🛠️ 常用管理指令（全域 / Global 設定）
 
