@@ -103,6 +103,9 @@ docker volume create n8n_data
 > 3. **每行結尾反斜線 `\` 前方需有空格**：換行反斜線 `\` 前請保留一個空格，且 `\` 之後不可有任何空格或字元。
 > 4. **網址格式區分**：`N8N_HOST` **不加** `https://`；而 `N8N_EDITOR_BASE_URL` 與 `WEBHOOK_URL` **必須包含** `https://`。
 
+請依據您的作業系統選擇對應的啟動指令：
+
+##### 💻 macOS / Windows（Docker Desktop）
 ```bash
 docker run -d \
   --name n8n \
@@ -118,13 +121,34 @@ docker run -d \
   docker.n8n.io/n8nio/n8n
 ```
 
+##### 🍓 Raspberry Pi / Linux（原生 Docker Engine）
+```bash
+docker run -d \
+  --name n8n \
+  --restart always \
+  --add-host=host.docker.internal:host-gateway \
+  -p 5678:5678 \
+  -e N8N_HOST=abcd-1234.ngrok-free.dev \
+  -e N8N_PROTOCOL=https \
+  -e N8N_PORT=5678 \
+  -e N8N_EDITOR_BASE_URL=https://abcd-1234.ngrok-free.dev \
+  -e WEBHOOK_URL=https://abcd-1234.ngrok-free.dev \
+  -e GENERIC_TIMEZONE=Asia/Taipei \
+  -v n8n_data:/home/node/.n8n \
+  docker.n8n.io/n8nio/n8n
+```
+
+> 💡 **為什麼 Raspberry Pi / Linux 需要額外加上 `--add-host`？**
+> - **macOS / Windows (Docker Desktop)**：自帶虛擬化網路路由，預設就支援透過 `host.docker.internal` 連線到本機 Host。
+> - **Raspberry Pi / Linux (Docker Engine)**：原生 Linux Docker 預設不會解析 `host.docker.internal`。加入 `--add-host=host.docker.internal:host-gateway` 會在容器內部的 hosts 設定中將主機網關（通常為 `172.17.0.1`）指向 `host.docker.internal`，如此一來 n8n 容器內的工作流才能連線到樹莓派本機執行的服務（如 MQTT Broker、資料庫或本地 API）。
+
 ![](./images/本機安裝概念圖_ngrok.png)
 
 ---
 
 #### 重要說明
 
-- **連接本機服務**：若需要在 n8n 工作流程中連接本機電腦的服務（如本地 API、資料庫等），請使用 `host.docker.internal` 作為主機名稱
+- **連接本機服務**：若需要在 n8n 工作流程中連接本機電腦的服務（如本地 API、資料庫、MQTT 等），請使用 `host.docker.internal` 作為主機名稱
   - 例如：`http://host.docker.internal:8080/api`
 - **時區設定**：已設定為 `Asia/Taipei`，確保工作流程的時間戳記正確
 - **資料持久化**：使用 `n8n_data` 卷儲存所有設定，即使容器重新啟動也不會遺失資料
