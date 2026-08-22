@@ -6,139 +6,139 @@
 
 ## 目錄
 
-- [1. Windows 安裝 Ollama](#1-windows-安裝-ollama)
-- [2. macOS 安裝 Ollama](#2-macos-安裝-ollama)
-- [3. Raspberry Pi / Linux 安裝 Ollama](#3-raspberry-pi--linux-安裝-ollama)
-- [4. 關鍵設定：允許 Docker 容器連線 (OLLAMA_HOST)](#4-關鍵設定允許-docker-容器連線-ollama_host)
-- [5. 常用模型下載與驗證](#5-常用模型下載與驗證)
-- [6. 在 n8n 中連接 Ollama](#6-在-n8n-中連接-ollama)
+- [1. Windows 與 macOS 安裝](#1-windows-與-macos-安裝)
+- [2. Raspberry Pi (Linux) 安裝與設定流程](#2-raspberry-pi-linux-安裝與設定流程)
+  - [步驟 1：安裝 Ollama](#步驟-1安裝-ollama)
+  - [步驟 2：設定 Ollama 監聽所有 IP（解決 ECONNREFUSED 錯誤）](#步驟-2設定-ollama-監聽所有-ip解決-econnrefused-錯誤)
+  - [步驟 3：測試 Docker 容器內部連線](#步驟-3測試-docker-容器內部連線)
+  - [步驟 4：備用方案（若非 systemd 服務啟動）](#步驟-4備用方案若非-systemd-服務啟動)
+- [3. 下載推薦模型](#3-下載推薦模型)
+- [4. 在 n8n 中設定 Ollama 憑證](#4-在-n8n-中設定-ollama-憑證)
 
 ---
 
-## 1. Windows 安裝 Ollama
+## 1. Windows 與 macOS 安裝
 
-### 步驟 1：下載與安裝
-您可以選擇以下任一種方式安裝：
+Windows 與 macOS 使用者可直接前往官網下載安裝程式：
 
-- **方法一（官方安裝檔）**：
-  前往 [Ollama 官網下載頁面](https://ollama.com/download/windows) 下載 `OllamaSetup.exe`，直接執行並完成安裝。
-- **方法二（透過 winget 安裝）**：
-  以系統管理員身分開啟 PowerShell 執行：
-  ```powershell
-  winget install Ollama.Ollama
-  ```
-
-### 步驟 2：啟動 Ollama
-安裝完成後，Ollama 會自動在背景啟動（系統匣會出現羊駝圖示）。
+- 💻 **Windows**：[下載 Ollama for Windows](https://ollama.com/download/windows)
+- 🍎 **macOS**：[下載 Ollama for macOS](https://ollama.com/download/mac)
 
 ---
 
-## 2. macOS 安裝 Ollama
+## 2. Raspberry Pi (Linux) 安裝與設定流程
 
-### 步驟 1：下載與安裝
-您可以選擇以下任一種方式安裝：
+在 Raspberry Pi (需 64-bit 系統) 或 Linux 伺服器上，為了讓運行於 Docker 容器內的 n8n 能夠成功連線到本機的 Ollama，必須確保 Ollama 監聽 `0.0.0.0:11434`。
 
-- **方法一（官方安裝檔）**：
-  前往 [Ollama 官網下載頁面](https://ollama.com/download/mac) 下載 `Ollama-darwin.zip`，解壓縮後將 `Ollama.app` 拖移至「應用程式」資料夾。
-- **方法二（透過 Homebrew 安裝）**：
-  開啟終端機執行：
-  ```bash
-  brew install ollama
-  ```
+### 步驟 1：安裝 Ollama
 
-### 步驟 2：啟動 Ollama
-在應用程式中開啟 **Ollama**，依提示安裝 Command Line 工具。
+在樹莓派終端機執行官方一鍵安裝腳本：
 
----
-
-## 3. Raspberry Pi / Linux 安裝 Ollama
-
-Raspberry Pi OS（需使用 64-bit 系統）與 Linux 支援透過官方一鍵安裝腳本快速安裝。
-
-### 步驟 1：執行官方安裝腳本
-在樹莓派終端機執行：
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-### 步驟 2：檢查服務狀態
-安裝完成後，Ollama 會自動註冊為 systemd 系統服務並在背景運行：
+---
+
+### 步驟 2：設定 Ollama 監聽所有 IP（解決 ECONNREFUSED 錯誤）
+
+> ⚠️ **常見錯誤原因**：
+> 當 n8n 出現 `ECONNREFUSED 172.17.0.1:11434`，代表 Docker 容器已找到 Raspberry Pi 主機，但 Ollama 預設僅監聽 `127.0.0.1`，拒絕了來自 Docker 橋接網卡（`172.17.0.1`）的連線。
+
+請依序執行以下步驟進行設定：
+
+#### 1. 檢查目前環境變數與監聽 Port
 ```bash
-sudo systemctl status ollama
+sudo systemctl show ollama --property=Environment
 ```
 
----
-
-## 4. 關鍵設定：允許 Docker 容器連線 (OLLAMA_HOST)
-
-> ⚠️ **重要觀念**：
-> 預設情況下，Ollama 僅監聽本機 `127.0.0.1:11434`。如果您的 **n8n 運行在 Docker 容器內**，n8n 容器將無法直接訪問宿主機的 `127.0.0.1`。
-> 因此必須將 Ollama 的監聽位址設定為 `0.0.0.0`。
-
-### 各平台設定方式：
-
-- **macOS**：
-  開啟終端機執行指令設定環境變數並重啟：
-  ```bash
-  launchctl setenv OLLAMA_HOST "0.0.0.0"
-  ```
-  *(或在終端機手動啟動：`OLLAMA_HOST=0.0.0.0 ollama serve`)*
-
-- **Windows**：
-  1. 開啟「系統內容」 > 「進階」 > 「環境變數」。
-  2. 在「使用者變數」或「系統變數」中新增：
-     - 變數名稱：`OLLAMA_HOST`
-     - 變數值：`0.0.0.0`
-  3. 重新啟動 Ollama 應用程式。
-
-- **Raspberry Pi / Linux**：
-  修改 systemd 服務設定檔：
-  ```bash
-  sudo systemctl edit ollama.service
-  ```
-  在開啟的編輯區塊中加入以下內容：
-  ```ini
-  [Service]
-  Environment="OLLAMA_HOST=0.0.0.0"
-  ```
-  儲存後重啟服務：
-  ```bash
-  sudo systemctl daemon-reload
-  sudo systemctl restart ollama
-  ```
-
----
-
-## 5. 常用模型下載與驗證
-
-在終端機（PowerShell 或 Terminal）中執行以下指令下載並執行模型：
-
-### 推薦常用模型：
-
-| 模型名稱 | 參數大小 | 記憶體需求 | 推薦適用平台 |
-| :--- | :--- | :--- | :--- |
-| **`llama3.2:1b`** | 約 1.3 GB | ~ 2 GB | 🍓 Raspberry Pi 4/5 首選 |
-| **`qwen2.5:1.5b`** | 約 1.0 GB | ~ 2 GB | 🍓 樹莓派繁體中文極佳選擇 |
-| **`llama3.2:3b`** | 約 2.0 GB | ~ 4 GB | 💻 筆電 / PC 平衡推薦 |
-| **`qwen2.5:7b`** | 約 4.7 GB | ~ 8 GB | 💻 繁中理解與工具調用推薦 |
-
-### 下載與測試指令：
 ```bash
-# 下載並直接進入對話測試
-ollama run llama3.2:3b
+sudo ss -ltnp | grep 11434
+```
 
-# 查看已下載的模型清單
+如果沒有看到 `0.0.0.0:11434` 或 `*:11434`，請繼續以下步驟建立覆寫設定檔。
+
+#### 2. 建立 systemd 覆寫設定檔
+```bash
+sudo mkdir -p /etc/systemd/system/ollama.service.d
+sudo nano /etc/systemd/system/ollama.service.d/override.conf
+```
+
+在檔案中貼上以下內容：
+```ini
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+```
+*(在 nano 編輯器中，按 `Ctrl + O` 存檔，按 `Enter` 確認，再按 `Ctrl + X` 離開)*
+
+#### 3. 重新載入並重啟 Ollama 服務
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+```
+
+#### 4. 再次確認監聽狀態
+```bash
+sudo ss -ltnp | grep 11434
+```
+確認輸出中包含 `0.0.0.0:11434`。
+
+---
+
+### 步驟 3：測試 Docker 容器內部連線
+
+在終端機直接測試 n8n 容器是否能成功呼叫 Ollama API：
+
+```bash
+docker exec n8n node -e "fetch('http://host.docker.internal:11434/api/tags').then(r=>r.text()).then(console.log).catch(console.error)"
+```
+
+如果能正常印出 JSON 模型資訊（或 `{"models":[]}`），即代表連線完全正常！🎉
+
+---
+
+### 步驟 4：備用方案（若非 systemd 服務啟動）
+
+如果執行 `sudo systemctl restart ollama` 顯示找不到服務，請改用指令直接前景啟動：
+
+```bash
+pkill ollama
+OLLAMA_HOST=0.0.0.0:11434 ollama serve
+```
+> ⚠️ **請保持該終端機視窗開啟運行**。
+
+---
+
+## 3. 下載推薦模型
+
+在樹莓派或終端機中下載適合的模型：
+
+| 模型名稱 | 參數量 / 大小 | 記憶體需求 | 說明 |
+| :--- | :--- | :--- | :--- |
+| **`llama3.2:1b`** | 約 1.3 GB | ~ 2 GB | 🍓 Raspberry Pi 4/5 速度最快首選 |
+| **`qwen2.5:1.5b`** | 約 1.0 GB | ~ 2 GB | 🍓 樹莓派繁體中文極佳選擇 |
+| **`llama3.2:3b`** | 約 2.0 GB | ~ 4 GB | 💻 繁中與工具調用平衡推薦 |
+| **`qwen2.5:7b`** | 約 4.7 GB | ~ 8 GB | 💻 PC / 筆電推薦高理解力模型 |
+
+#### 下載指令：
+```bash
+# 以下載 llama3.2:1b 為例
+ollama run llama3.2:1b
+
+# 查看已下載的模型
 ollama list
 ```
 
 ---
 
-## 6. 在 n8n 中連接 Ollama
+## 4. 在 n8n 中設定 Ollama 憑證
 
-1. 開啟 n8n 畫布，新增 **Ollama Model** 或 **Ollama Chat Model** 節點。
-2. 在 **Credential to connect with** 建立新的 Ollama 憑證：
-   - **Base URL** 請設定為：
-     ```text
-     http://host.docker.internal:11434
-     ```
-3. 點選 **Test Connection** 測試連線，成功後即可在節點的 **Model** 下拉選單選擇已下載的本機模型！
+在 n8n 建立 Ollama 憑證（Ollama API）：
+
+- **Base URL**：
+  ```text
+  http://host.docker.internal:11434
+  ```
+- **API Key**：`留白`
+
+點選 **Test Connection** 測試連線成功後，即可在 **Ollama Chat Model** 節點中選擇您剛下載的模型！
