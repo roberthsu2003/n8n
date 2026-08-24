@@ -1,15 +1,14 @@
 {
-  "name": "DataTable簡單操作",
   "nodes": [
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -288,
-        -176
+        -960,
+        144
       ],
-      "id": "bbd756bf-c46b-421e-9c40-8a8131c9f687",
+      "id": "ff0d87b7-5fa8-49d2-aa3e-348af550f565",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -17,66 +16,52 @@
         "operation": "get",
         "dataTableId": {
           "__rl": true,
-          "value": "fiJfzQizxYrIeUpF",
+          "value": "bpMJc0nkFpBa3iy3",
           "mode": "list",
-          "cachedResultName": "學生成績單",
-          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/fiJfzQizxYrIeUpF"
+          "cachedResultName": "學生成績",
+          "cachedResultUrl": "/projects/rEj62SV7csk3F3D3/datatables/bpMJc0nkFpBa3iy3"
         },
         "returnAll": true
       },
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        -80,
-        -176
+        -800,
+        -224
       ],
-      "id": "ab432e40-3950-441f-9b0d-fd276f4d83eb",
-      "name": "Get row(s)"
-    },
-    {
-      "parameters": {
-        "content": "## 顯示dataTable",
-        "height": 80
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -608,
-        -160
-      ],
-      "id": "b49783f2-8ffd-4b49-bc12-04a4dedd4618",
-      "name": "Sticky Note"
+      "id": "2b53b268-72f9-492a-864b-cc66c9f33695",
+      "name": "取得學生成績資料"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "b3907822-8ff5-490a-96c2-9f9d3f9183d4",
+              "id": "6c323854-3319-473a-b165-d408058f5c67",
               "name": "姓名",
-              "value": "={{ $json.name }}",
+              "value": "={{$json.name}}",
               "type": "string"
             },
             {
-              "id": "7e97ba47-4640-4b97-aef8-c9ee7614b833",
+              "id": "e68eaa7f-63ff-42eb-a300-4997a9a82116",
               "name": "學號",
-              "value": "={{ $json.student_id }}",
-              "type": "number"
+              "value": "={{ $json.sn }}",
+              "type": "string"
             },
             {
-              "id": "123e2eeb-7d94-42b8-8bd9-9d61ac4f01da",
+              "id": "526326a4-672f-4f0c-8c95-182e9c98864b",
               "name": "國文",
               "value": "={{ $json.chinese }}",
               "type": "number"
             },
             {
-              "id": "a8c98c1a-c358-49fc-8a32-09bf5dd51969",
+              "id": "b9834af4-7b88-4521-95da-d745cba54219",
               "name": "英文",
               "value": "={{ $json.english }}",
               "type": "number"
             },
             {
-              "id": "4cc07d47-6d03-41f5-8c8a-19b2d02be728",
+              "id": "83d32d73-ba10-4826-b6f1-f48d5ed6425d",
               "name": "數學",
               "value": "={{ $json.math }}",
               "type": "number"
@@ -86,53 +71,84 @@
         "options": {}
       },
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
-        128,
-        -176
+        -624,
+        -224
       ],
-      "id": "21f21900-e8af-4b18-ad9e-b42ea62db6b2",
-      "name": "將英文欄位改為中文欄位"
+      "id": "78ec31a4-4542-492e-9bc1-bf46ed18a954",
+      "name": "將欄位改為中文"
     },
     {
       "parameters": {
-        "content": "## 使用if過濾dataTable資料",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4536cee4-3c87-4862-90ca-a98eb4fc6129",
+              "name": "姓名",
+              "value": "={{ $json['姓名'] }}",
+              "type": "string"
+            },
+            {
+              "id": "8c5c5d8b-872d-4bb5-be70-4f9f2f5c4fea",
+              "name": "學號",
+              "value": "={{ $json['學號'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9788e111-c055-4c59-82b2-1a4df75caa31",
+              "name": "總分",
+              "value": "={{ $json.國文 + $json.英文 + $json.數學 }}",
+              "type": "number"
+            },
+            {
+              "id": "775ed599-387d-4c03-ac63-e9385d0d6899",
+              "name": "平均",
+              "value": "={{ (($json.國文 + $json.英文 + $json.數學) / 3).toFixed(2) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -448,
+        -224
+      ],
+      "id": "1c146394-46c0-47c1-840c-d4d1bcb8c083",
+      "name": "計算分數"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ranked = items\n  .map((item, index) => ({ item, index, average: Number(item.json['平均']) }))\n  .sort((a, b) => {\n    const aAverage = Number.isFinite(a.average) ? a.average : -Infinity;\n    const bAverage = Number.isFinite(b.average) ? b.average : -Infinity;\n    return bAverage - aAverage || a.index - b.index;\n  });\n\nlet previousAverage;\nlet previousRank = 0;\n\nreturn ranked.map((entry, index) => {\n  const average = entry.average;\n  if (average !== previousAverage) {\n    previousRank = index + 1;\n    previousAverage = average;\n  }\n\n  return {\n    json: {\n      ...entry.item.json,\n      '排名': previousRank,\n    },\n    pairedItem: { item: entry.index },\n  };\n});"
+      },
+      "id": "ad13632d-c568-48f2-a03f-78e3e2ba8d16",
+      "name": "排序並排名",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        -224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 學習取得DataTable的資料",
         "height": 80
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -624,
-        64
+        -1152,
+        -160
       ],
-      "id": "7d81bf8d-c721-4fcb-bdbc-0b8ff32f8d24",
+      "id": "822f5598-a0f6-41a3-8e97-33fd5840f6ee",
       "name": "Sticky Note1"
     },
     {
       "parameters": {
-        "operation": "get",
-        "dataTableId": {
-          "__rl": true,
-          "value": "fiJfzQizxYrIeUpF",
-          "mode": "list",
-          "cachedResultName": "學生成績單",
-          "cachedResultUrl": "/projects/GqUktFsecD8oxSKs/datatables/fiJfzQizxYrIeUpF"
-        },
-        "matchType": "allConditions",
-        "returnAll": true
-      },
-      "type": "n8n-nodes-base.dataTable",
-      "typeVersion": 1.1,
-      "position": [
-        -64,
-        48
-      ],
-      "id": "5f39d2ab-9530-4b21-af95-22fa384f647e",
-      "name": "Get row(s)1",
-      "alwaysOutputData": true
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
@@ -172,10 +188,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        416,
-        -48
+        -272,
+        64
       ],
-      "id": "178222e5-463f-4f66-8446-4b5073e8bb56",
+      "id": "0b407ec5-9a8e-4395-96b7-96daf8e1c47f",
       "name": "將英文欄位改為中文欄位1"
     },
     {
@@ -219,10 +235,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        416,
-        128
+        -272,
+        224
       ],
-      "id": "9a71d9bd-3ca9-4811-9051-4833c9bf4706",
+      "id": "58de37bb-c500-4d77-88d0-cab89027e22b",
       "name": "將英文欄位改為中文欄位2"
     },
     {
@@ -270,42 +286,798 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        144,
-        48
+        -544,
+        144
       ],
-      "id": "7bfc4107-0817-4ba8-9a0d-e562cb28129f",
+      "id": "d7d4bad0-a9e1-4185-8f09-b02095af1e7d",
       "name": "每科有小於80分的"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "bpMJc0nkFpBa3iy3",
+          "mode": "list",
+          "cachedResultName": "學生成績",
+          "cachedResultUrl": "/projects/rEj62SV7csk3F3D3/datatables/bpMJc0nkFpBa3iy3"
+        },
+        "matchType": "allConditions",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -752,
+        144
+      ],
+      "id": "799050e8-767e-457a-905a-28dfd35c7a7f",
+      "name": "取得學生成績單1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.chinese }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "721d85fe-b809-4aac-87d9-362f2b847ada",
+      "name": "教學1_判斷國文達60",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t1y",
+              "name": "判斷結果",
+              "value": "國文達到60分以上",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "67ca97e4-6ed7-4ed2-a769-8842d7d7ac3d",
+      "name": "教學1_符合_國文達60",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t1n",
+              "name": "判斷結果",
+              "value": "國文未達60分",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "5e75b06b-e336-46e5-b484-3b57eb03b542",
+      "name": "教學1_不符合_國文未達60",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.english }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e466bb09-c72c-4703-b91c-17bb92f628ae",
+      "name": "教學2_判斷英文小於80",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t2y",
+              "name": "判斷結果",
+              "value": "英文小於80分",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "a9e7076d-c779-401d-ae74-d2429924a2ba",
+      "name": "教學2_符合_英文小於80",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t2n",
+              "name": "判斷結果",
+              "value": "英文大於等於80分",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "c053e24b-4c1a-4fc4-ba15-a21c366412e0",
+      "name": "教學2_不符合_英文達80",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.math }}",
+              "rightValue": 80,
+              "rightValue2": 100,
+              "operator": {
+                "type": "number",
+                "operation": "between"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e7bbd0db-0ded-4f87-b52d-fe41776e7578",
+      "name": "教學3_判斷數學介於80到100",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t3y",
+              "name": "判斷結果",
+              "value": "數學介於80到100分",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ef92470a-3e69-4cf5-8054-988f8f6c74ae",
+      "name": "教學3_符合_數學在區間",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        928
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t3n",
+              "name": "判斷結果",
+              "value": "數學不在80到100分之間",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "7747b9ac-dddb-45e4-8ed6-fbb52d6d25d9",
+      "name": "教學3_不符合_數學不在區間",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "王",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9a7ed189-ad98-4ddb-8f58-6f940cf8c2a8",
+      "name": "教學4_判斷姓名包含王",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t4y",
+              "name": "判斷結果",
+              "value": "姓名包含王",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "21291bbe-4712-4801-bdec-2c5b6d52765c",
+      "name": "教學4_符合_姓名包含王",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t4n",
+              "name": "判斷結果",
+              "value": "姓名不包含王",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "e880a24e-41e2-4544-ba74-3c4bf5490768",
+      "name": "教學4_不符合_姓名不含王",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1312
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "王",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bea862ac-58da-4a5c-89db-e7cb4fb21556",
+      "name": "教學5_判斷姓名以王開頭",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t5y",
+              "name": "判斷結果",
+              "value": "姓名以王開頭",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "34380998-8cf6-415b-b2ff-f393b98b3ec3",
+      "name": "教學5_符合_姓名以王開頭",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t5n",
+              "name": "判斷結果",
+              "value": "姓名不是以王開頭",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8dbe184d-340c-4c60-9e95-572b1ac9eeda",
+      "name": "教學5_不符合_姓名非王開頭",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1568
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.student_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2ae3393d-b906-42c1-b254-bf0dadc764d2",
+      "name": "教學6_判斷學號有資料",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        1776
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t6y",
+              "name": "判斷結果",
+              "value": "學號欄位有資料",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8f2564b2-f76a-4920-aa17-7f39273d6bf2",
+      "name": "教學6_符合_學號有資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1712
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t6n",
+              "name": "判斷結果",
+              "value": "學號欄位沒有資料",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "3f7e40bf-a5da-4ec0-9d1c-76d3ee393c71",
+      "name": "教學6_不符合_學號無資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.chinese }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "leftValue": "={{ $json.english }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "785a3724-f773-4cfc-b3f5-1c29795f02ac",
+      "name": "教學7_判斷國文英文都及格",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        2032
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t7y",
+              "name": "判斷結果",
+              "value": "國文與英文都及格",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "50bcd66d-d9cf-4d6e-b434-931d3d3b5ced",
+      "name": "教學7_符合_AND都及格",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        1968
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t7n",
+              "name": "判斷結果",
+              "value": "至少一科不及格",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "8931a8e8-cd4c-4c7b-a2c3-fe3b9103668d",
+      "name": "教學7_不符合_AND至少一科不及格",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        2096
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.chinese }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "leftValue": "={{ $json.english }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "leftValue": "={{ $json.math }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "cae65490-eeba-4371-8c86-8f7e4b0f25ae",
+      "name": "教學8_判斷任一科低於60",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        2288
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t8y",
+              "name": "判斷結果",
+              "value": "至少一科低於60分",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9917fac4-4095-4c15-9822-3f076e85698e",
+      "name": "教學8_符合_OR任一科低於60",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        2240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t8n",
+              "name": "判斷結果",
+              "value": "每一科都達到60分",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "4d3270dc-aba5-4d1b-9ca0-ecf17f15f279",
+      "name": "教學8_不符合_OR沒有低於60",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        32,
+        2352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 計算總分和平均",
+        "height": 80,
+        "width": 166
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "06f15caf-8ba6-4e8e-ad1b-6c1f62dce656",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 排序並排名\n(AI賦能)",
+        "height": 80,
+        "width": 166
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "3ea008fe-7117-4b6c-af3b-789338b6908f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 學習取得DataTable的資料",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -208
+      ],
+      "id": "6db5f896-8f15-48b1-bb6b-db5de4c8ce14",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## 手動改變觸發節點",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -272
+      ],
+      "id": "097dbb15-42cd-4f69-a336-aea1dfeb41cc",
+      "name": "Sticky Note4"
     }
   ],
-  "pinData": {},
   "connections": {
     "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
-            "node": "Get row(s)",
+            "node": "取得學生成績單1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get row(s)": {
+    "取得學生成績資料": {
       "main": [
         [
           {
-            "node": "將英文欄位改為中文欄位",
+            "node": "將欄位改為中文",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get row(s)1": {
+    "將欄位改為中文": {
       "main": [
         [
           {
-            "node": "每科有小於80分的",
+            "node": "計算分數",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "計算分數": {
+      "main": [
+        [
+          {
+            "node": "排序並排名",
             "type": "main",
             "index": 0
           }
@@ -329,24 +1101,205 @@
           }
         ]
       ]
+    },
+    "取得學生成績單1": {
+      "main": [
+        [
+          {
+            "node": "每科有小於80分的",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學1_判斷國文達60",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學2_判斷英文小於80",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學3_判斷數學介於80到100",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學4_判斷姓名包含王",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學5_判斷姓名以王開頭",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學6_判斷學號有資料",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學7_判斷國文英文都及格",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "教學8_判斷任一科低於60",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學1_判斷國文達60": {
+      "main": [
+        [
+          {
+            "node": "教學1_符合_國文達60",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學1_不符合_國文未達60",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學2_判斷英文小於80": {
+      "main": [
+        [
+          {
+            "node": "教學2_符合_英文小於80",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學2_不符合_英文達80",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學3_判斷數學介於80到100": {
+      "main": [
+        [
+          {
+            "node": "教學3_符合_數學在區間",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學3_不符合_數學不在區間",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學4_判斷姓名包含王": {
+      "main": [
+        [
+          {
+            "node": "教學4_符合_姓名包含王",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學4_不符合_姓名不含王",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學5_判斷姓名以王開頭": {
+      "main": [
+        [
+          {
+            "node": "教學5_符合_姓名以王開頭",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學5_不符合_姓名非王開頭",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學6_判斷學號有資料": {
+      "main": [
+        [
+          {
+            "node": "教學6_符合_學號有資料",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學6_不符合_學號無資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學7_判斷國文英文都及格": {
+      "main": [
+        [
+          {
+            "node": "教學7_符合_AND都及格",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學7_不符合_AND至少一科不及格",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "教學8_判斷任一科低於60": {
+      "main": [
+        [
+          {
+            "node": "教學8_符合_OR任一科低於60",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "教學8_不符合_OR沒有低於60",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "availableInMCP": false
-  },
-  "versionId": "eea27d26-289d-4e6b-a161-cc290f189c93",
+  "pinData": {},
   "meta": {
     "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
-  },
-  "id": "JDkReNcGwY7dbcYx",
-  "tags": [
-    {
-      "updatedAt": "2025-11-20T02:34:19.787Z",
-      "createdAt": "2025-11-20T02:34:19.787Z",
-      "id": "0jpUyf1qykdlExqM",
-      "name": "上課用"
-    }
-  ]
+  }
 }
