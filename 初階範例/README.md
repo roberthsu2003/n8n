@@ -225,15 +225,6 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 ```
 </details>
 
----
 
-## 📚 相關資源
-
-- [n8n 官方文件](https://docs.n8n.io/)
-- [n8n 官方教學範例](https://blog.n8n.io/tag/tutorial/)
-- [n8n 簡介與安裝](../n8n簡介與安裝/README.md)
-- [AI 協作指南與 MCP 連線教學](../AI協作/README.md)
-
----
 
 **🎓 完成這些範例後，您將具備基礎的 n8n 操作能力，可以開始探索更進階的 AI Agent 與多服務整合功能！**
