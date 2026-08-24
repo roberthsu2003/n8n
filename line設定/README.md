@@ -20,7 +20,11 @@
    - **Channel name**：機器人名稱
    - **Channel description**：機器人描述
    - **Category / Subcategory**：選擇合適的分類
+   - **Email address**：聯絡電子信箱
 4. 勾選同意相關服務條款後，點擊 **Create** 完成建立。
+
+> [!NOTE]
+> 建立 Channel 時僅需填寫基本必要欄位，**不需要**加入或綁定商用 ID（Business ID）。
 
 ---
 
