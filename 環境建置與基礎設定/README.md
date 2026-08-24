@@ -6,33 +6,6 @@
 
 ## 🗺️ 環境架構與設定地圖
 
-```mermaid
-graph TD
-    subgraph S1 ["1. 容器基礎與核心引擎"]
-        Docker["🐳 Docker 容器引擎安裝"] --> N8N["🚀 n8n 容器部署與初始化"]
-    end
-
-    subgraph S2 ["2. 網路穿透與外網通訊"]
-        N8N --> Tunnel["🌐 Cloudflare Tunnel (生產級)"]
-        N8N --> Ngrok["🌐 ngrok (開發測試用)"]
-    end
-
-    subgraph S3 ["3. 身份驗證與雲端授權"]
-        OAuth["🔐 OAuth 2.0 授權核心概念"] --> GoogleAuth["☁️ Google Cloud 專案與 OAuth 綁定"]
-    end
-
-    subgraph S4 ["4. AI 模型與智慧代理協作"]
-        MCP["⚙️ n8n MCP 協議設定 (Claude / OpenCode / Antigravity)"]
-        Ollama["🦙 Ollama 安裝與 Gemma 4 雲端模型 (:cloud)"]
-    end
-
-    subgraph S5 ["5. 系統維運與資料安全"]
-        Backup["💾 n8n 資料備份與自動還原"]
-        Deploy["📦 n8n 生產環境部署架構"]
-    end
-```
-
----
 
 ## 📚 基礎設定模組導覽
 
@@ -69,7 +42,7 @@ graph TD
 
 ---
 
-### 🔐 三、身份驗證與雲端服務授權
+### 🔐 三、身份驗證與通訊/雲端服務授權
 
 #### 🔑 5. [關於 OAuth 2.0 開放授權的概念](../OAuth/README.md)
 **重點內容**：
@@ -84,18 +57,26 @@ graph TD
 - 配置 OAuth 2.0 同意畫面與取得用戶端憑證
 - 在 n8n 中完成 Google 憑證授權綁定與常見連線排錯
 
+#### 💬 7. [LINE Messaging API 設定指南](../line設定/README.md)
+**重點內容**：
+- LINE Developers Console 建立 Provider 與 Messaging API Channel
+- 取得 Channel Secret 與 Channel Access Token (long-lived)
+- 設定 HTTPS Webhook URL 接收訊息事件
+- LINE Official Account Manager 回應模式與自動回應設定
+- 在 n8n 建立 LINE 憑證與測試驗證流程
+
 ---
 
 ### 🤖 四、AI 智慧代理與本機/雲端模型
 
-#### ⚙️ 7. [n8n MCP (Model Context Protocol) 設定指南](../n8n_mcp/README.md)
+#### ⚙️ 8. [n8n MCP (Model Context Protocol) 設定指南](../n8n_mcp/README.md)
 **重點內容**：
 - 將 n8n 工作流轉變為 AI 助手的全功能工具箱（Tools）
 - **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連
 - **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理
 - **Google Antigravity 專案協作**：Gemini 智慧代理深度整合與 Bearer Token 設定
 
-#### 🦙 8. [Ollama 安裝與 Gemma 4 雲端模型整合](../ollama安裝/README.md)
+#### 🦙 9. [Ollama 安裝與 Gemma 4 雲端模型整合](../ollama安裝/README.md)
 **重點內容**：
 - Windows、macOS 與 **Raspberry Pi (Linux 一行指令 systemd override)** 安裝指南
 - 登入 Ollama 帳號並建立 API Key
@@ -106,32 +87,15 @@ graph TD
 
 ### 🛡️ 五、系統維運、備份與正式部署
 
-#### 💾 9. [n8n 的備份方式](../n8n的備份方式/README.md)
+#### 💾 10. [n8n 的備份方式](../n8n的備份方式/README.md)
 **重點內容**：
 - Docker Volume 手動備份與匯出工作流 JSON
 - 透過 n8n 內建排程工作流實現全自動定時備份
 - 資料庫與憑證之異地備份與災害復原流程
 
-#### 🚢 10. [n8n 的生產環境部署](../n8n的部署/README.md)
+#### 🚢 11. [n8n 的生產環境部署](../n8n的部署/README.md)
 **重點內容**：
 - Docker Compose 多容器編排設定（搭配 PostgreSQL 資料庫）
 - 反向代理（Reverse Proxy）、環境變數與安全金鑰管理
 - 正式上線維運最佳實踐與高可用性架構
 
----
-
-## 🧭 推薦建置路線
-
-```mermaid
-flowchart LR
-    A[1. 安裝 Docker] --> B[2. 啟動 n8n 容器]
-    B --> C{選擇使用情境}
-    
-    C -->|開發測試| D[設定 ngrok + 本機測試]
-    C -->|正式上線| E[設定 Cloudflare Tunnel + 網域]
-    
-    D --> F[配置 Google Cloud / OAuth / AI MCP]
-    E --> F
-    
-    F --> G[定期備份與自動化維運]
-```
