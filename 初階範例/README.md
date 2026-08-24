@@ -128,9 +128,6 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 - 使用 Extract from File 節點解析 CSV
 - 使用 Convert to File 節點轉換為 Excel
 
-**練習資源**：
-- [財務報表 PDF 範例](https://www.sample-videos.com/pdf/Sample-pdf-5-mb.pdf)
-- [發票報表範例](https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dense/invoice.pdf)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
