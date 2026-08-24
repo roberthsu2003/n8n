@@ -16,32 +16,16 @@
 
 ---
 
-## 🛠️ 環境建置與基礎設定
+## 🛠️ [環境建置與基礎設定](./環境建置與基礎設定/README.md)
 
-### 🐳 [docker安裝](./docker安裝/README.md)
-完整說明 Windows、macOS 與 Raspberry Pi (Linux) 的 Docker 安裝步驟、環境設定與驗證方式。
+提供從容器引擎、安全通道、n8n 部署到 AI / MCP / Cloud 授權的完整基礎建設教學，詳見 **[👉 進入環境建置與基礎設定總覽](./環境建置與基礎設定/README.md)**。
 
-### 🌐 [ngrok安裝 (開發測試用)](./ngrok安裝/README.md)
-學習如何安裝與設定 ngrok 建立臨時安全通道，快速取得公開 HTTPS 網址以接收外部 Webhook 與 OAuth 回調（正式生產環境推薦使用 **[生產級 Tunnel 方案](./tunnel/README.md)**）。
-
-### 🚀 [n8n 簡介與安裝](./n8n簡介與安裝/README.md)
-學習 n8n 的核心概念、透過 Docker 啟動 n8n 容器、備份還原、版本升級與重置方式。
-
-
-### 🔐 [關於 OAuth (開放授權) 的概念](./OAuth/README.md)
-了解 OAuth 2.0 的運作原理，這是連接 Google、LINE 等第三方服務的關鍵技術。
-
-### ⚙️ [n8n MCP 設定指南](./n8n_mcp/README.md)
-透過 Model Context Protocol (MCP)，將 n8n 工作流轉變為 AI 助手的強大工具：
-1. **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連。
-2. **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理指令（免手寫設定檔）。
-3. **Google Antigravity 專案協作**：Gemini 智慧代理深度連體整合與 Bearer Token 配置。
-
-### 🦙 [Ollama 安裝](./ollama安裝/README.md)
-學習如何在 Windows、macOS 與 Raspberry Pi 安裝 Ollama、登入帳號建立 API Key、使用 `:cloud` 雲端模型（如 `gemma4:cloud`），以及與 n8n 容器的連線配置。
-
-### ☁️ [Google Cloud 設定](./google_cloud設定/README.md)
-詳細說明如何在 Google Cloud Console (Google Auth Platform) 建立專案、啟用 Google 服務 API、配置 OAuth 2.0 同意畫面、取得用戶端 ID 與密碼，並於 n8n 中完成授權綁定。
+**包含主題**：
+- 🐳 **容器基礎**：[Docker 安裝指南](./docker安裝/README.md) ｜ [n8n 容器安裝與啟動](./n8n簡介與安裝/README.md)
+- 🌐 **外網通道**：[生產級 Tunnel 安全方案](./tunnel/README.md) ｜ [ngrok 開發測試通道](./ngrok安裝/README.md)
+- 🔐 **授權與雲端**：[OAuth 2.0 概念解析](./OAuth/README.md) ｜ [Google Cloud Platform 設定](./google_cloud設定/README.md)
+- 🤖 **AI 助手與模型**：[n8n MCP 協議設定指南](./n8n_mcp/README.md) ｜ [Ollama 雲端模型整合](./ollama安裝/README.md)
+- 🛡️ **維運與部署**：[n8n 資料備份與還原](./n8n的備份方式/README.md) ｜ [n8n 生產環境部署架構](./n8n的部署/README.md)
 
 ---
 
