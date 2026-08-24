@@ -46,25 +46,25 @@ DataTable 是 n8n 中用於儲存永久性資料的內建資料庫功能，具�
 
 ```mermaid
 graph TD
-    Trigger([When clicking 'Execute workflow']) --> Get1[取得學生成績單1]
-    Trigger --> Get2[取得學生成績資料]
+    Trigger["When clicking 'Execute workflow'"] --> Get1["取得學生成績單1"]
+    Trigger --> Get2["取得學生成績資料"]
     
-    subgraph 流程一：成績計算與排序排名
-    Get2 --> Rename[將欄位改為中文]
-    Rename --> Calc[計算分數: 總分與平均]
-    Calc --> Rank[排序並排名: Code 節點]
+    subgraph Flow1 ["流程一：成績計算與排序排名"]
+        Get2 --> Rename["將欄位改為中文"]
+        Rename --> Calc["計算分數 (總分與平均)"]
+        Calc --> Rank["排序並排名 (Code 節點)"]
     end
 
-    subgraph 流程二：多情境條件判斷 (IF 節點示範)
-    Get1 --> IF0[每科有小於80分的]
-    Get1 --> IF1[教學1: 判斷國文達60 (gte)]
-    Get1 --> IF2[教學2: 判斷英文小於80 (lt)]
-    Get1 --> IF3[教學3: 判斷數學介於80~100 (between)]
-    Get1 --> IF4[教學4: 判斷姓名包含王 (contains)]
-    Get1 --> IF5[教學5: 判斷姓名以王開頭 (startsWith)]
-    Get1 --> IF6[教學6: 判斷學號有資料 (isNotEmpty)]
-    Get1 --> IF7[教學7: 國文英文都及格 (AND)]
-    Get1 --> IF8[教學8: 任一科低於60 (OR)]
+    subgraph Flow2 ["流程二：多情境條件判斷 (IF 節點示範)"]
+        Get1 --> IF0["每科有小於80分的"]
+        Get1 --> IF1["教學1: 判斷國文達60 (gte)"]
+        Get1 --> IF2["教學2: 判斷英文小於80 (lt)"]
+        Get1 --> IF3["教學3: 判斷數學介於80~100 (between)"]
+        Get1 --> IF4["教學4: 判斷姓名包含王 (contains)"]
+        Get1 --> IF5["教學5: 判斷姓名以王開頭 (startsWith)"]
+        Get1 --> IF6["教學6: 判斷學號有資料 (isNotEmpty)"]
+        Get1 --> IF7["教學7: 國文英文都及格 (AND)"]
+        Get1 --> IF8["教學8: 任一科低於60 (OR)"]
     end
 ```
 
