@@ -154,15 +154,17 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 
 ---
 
-### 5. [範例：DataTable 簡單操作](./DataTable/)
-**難度**: 初級 | **學習時間**: 20 分鐘
+### 5. [範例：DataTable 簡單操作](./DataTable/README.md)
+**難度**: 初級 | **學習時間**: 20-25 分鐘
 
-學習如何使用 n8n 內建 DataTable 功能進行永久性資料存儲與查詢。
+學習如何使用 n8n 內建 DataTable 進行永久性資料存儲、統計運算與條件邏輯判斷。
 
 **學習重點**：
-- n8n 內建 DataTable 基本概念
-- 透過手動或 CSV 匯入建立「學生成績單」
-- 使用 DataTable 節點進行資料讀取、新增與過濾
+- n8n 內建 DataTable 基本概念與 CSV 批次匯入
+- 使用 DataTable 節點讀取資料與欄位對應（英轉中）
+- 利用 Edit Fields (Set) 節點計算總分與平均值
+- 使用 Code (JavaScript) 節點實現同分同名次的成績降序排名
+- 掌握 IF 節點的 8 種常見條件判斷（數值比較、區間 between、字串 contains/startsWith、非空判斷及 AND/OR 多條件邏輯）
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（巢狀條件判斷 Prompt 提詞）</strong></summary>
@@ -200,7 +202,7 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 
 ---
 
-### 6. [範例：n8n 內建表單節點](./表單節點/)
+### 6. [範例：n8n 內建表單節點](./表單節點/README.md)
 **難度**: 中級 | **學習時間**: 25-30 分鐘
 
 學習如何使用 Form Trigger 快速建立網頁輸入表單，提交後自動寫入 DataTable。
