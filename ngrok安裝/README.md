@@ -35,22 +35,38 @@
 登入後，可至左側選單 **Getting Started** > **Setup & Installation** 查看官方引導，或依您的作業系統選擇以下指令：
 
 ### 💻 Windows 安裝方式
-請以系統管理員身分開啟 PowerShell，選擇以下其中一種方式（**⚠️ 注意：兩者請二選一，切勿重複安裝**）：
 
-- **方法一（首選：Windows Store / winget）**：
+> ⚠️ **【重要前提】切勿重複安裝**：
+> 系統中**只能保留 1 個 ngrok**！若之前安裝失敗或想切換安裝方式，請**務必先將舊的 ngrok 徹底移除**（例如至 Windows「設定」>「應用程式」>「已安裝的應用程式」中解除安裝），避免造成環境變數衝突或執行異常。
+
+請以系統管理員身分開啟 PowerShell，選擇以下**其中一種**方式安裝：
+
+#### 方法一：Microsoft Store (Windows Store)
+直接開啟 Microsoft Store 搜尋 `ngrok` 點擊安裝。
+- **🚨 防毒誤判處理**：
+  ngrok 屬於穿透工具，在 Windows Store 安裝或執行時極易被 **Windows Defender / Windows 安全性** 誤判為潛在病毒或威脅。
+  - **解決方案**：若被 Windows Defender 攔截，請開啟 **「Windows 安全性」** > **「病毒與威脅防護」** > **「保護歷程記錄」**，找到被封鎖的 ngrok 項目並選擇 **「還原」** 或 **「允許在裝置上」**；或至「病毒與威脅防護設定」中的 **「排除項目」** 將 ngrok 所在資料夾加入排除清單。
+
+#### 方法二：winget (推薦)
+使用 Windows 內建的封裝管理員安裝。由於輸入 `winget install ngrok` 時系統常會提示找到多個相同的 ngrok 套件而中斷，因此請**直接指定完整套件識別碼 (Package ID)**：
+```powershell
+winget install Ngrok.Ngrok
+```
+*(若日後要移除，可執行：`winget uninstall Ngrok.Ngrok`)*
+
+#### 方法三：Scoop 套件管理工具
+若不使用前兩種方式，可改用輕量開發者套件工具 Scoop：
+```powershell
+# 1. 若尚未安裝 Scoop，先在 PowerShell 執行安裝
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+# 2. 透過 Scoop 安裝 ngrok
+scoop install ngrok
+```
+- **⚠️ 移除 / 失敗清理**：若安裝失敗或想改用其他方式，請務必先執行 Scoop 移除指令：
   ```powershell
-  winget install ngrok
-  ```
-  *(或直接開啟 Microsoft Store 應用程式搜尋 `ngrok` 點擊安裝)*
-
-- **方法二（備選：若 winget 無法安裝，改用 Scoop）**：
-  ```powershell
-  # 1. 若尚未安裝 Scoop，先在 PowerShell 執行安裝
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-  Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-
-  # 2. 透過 Scoop 安裝 ngrok
-  scoop install ngrok
+  scoop uninstall ngrok
   ```
 
 ---
