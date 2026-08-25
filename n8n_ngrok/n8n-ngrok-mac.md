@@ -83,30 +83,23 @@ Docker Compose version v2.29.7-desktop.1
 
 ## 步驟一：取得 ngrok Authtoken 與固定網域
 
+ngrok 免費帳號現在預設都會直接提供 **1 組專屬的固定網址 (Static Domain)**，每次啟動通道時網址都會維持固定，不會隨機變動（這代表設定在 LINE Bot 後台的 Webhook URL 永遠不會失效）。
+
 ### 1-1 取得 Authtoken
 
-1. 登入 ngrok 後，左側選單點 **Your Authtoken**
-2. 複製那一長串英數字（長得像 `2abc...XYZ`）
-3. 先貼在備忘錄上，等一下要用
+1. 登入 [dashboard.ngrok.com](https://dashboard.ngrok.com/)。
+2. 左側選單點選 **Your Authtoken**。
+3. 複製那一長串英數字（長得像 `2abc...XYZ`），先貼在備忘錄上備用。
 
-### 1-2 申請固定網域（Static Domain）
+### 1-2 取得專屬固定網域（Static Domain）
 
-> **這一步非常重要，不要跳過。**
-
-1. 左側選單點 **Domains**
-2. 點 **+ New Domain**（或 Create Domain）
-3. ngrok 會給你一個固定網址，長得像 `abcd-1234.ngrok-free.dev`
-4. 複製起來，一樣貼在備忘錄上
-
-**為什麼一定要申請固定網域？**
-
-如果不指定網域，ngrok 每次重開都會給你一個**全新的隨機網址**。這代表：
-
-- 你在 LINE 後台設定的 Webhook URL 會全部失效
-- n8n 裡面已經做好的流程網址也會全部錯掉
-- 每天開機都要重新設定一次
-
-免費帳號可以申請 **1 個**固定網域，足夠上課使用。
+1. 左側選單點選 **Domains**（或 **Cloud Edge** > **Domains**）。
+2. 你會看到 ngrok 系統自動為您分配的一組專屬免費固定網址，長得像：
+   ```text
+   xxxx-xxxx.ngrok-free.dev
+   ```
+   *(若首次進入尚未產生，只需點擊 **+ New Domain** 或 **Claim Domain** 即可立即取得)*
+3. 將這組固定網域名稱複製起來（**只要網域名稱，不包含 `https://`**），一樣先貼在備忘錄上備用。
 
 ---
 
