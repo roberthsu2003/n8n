@@ -202,6 +202,7 @@ services:
 
 volumes:
   n8n_data:
+    name: n8n_data
 ```
 
 **這段設定在做什麼？（給想理解原理的同學）**
@@ -212,7 +213,7 @@ volumes:
 | `container_name` | 容器的名字，方便你下指令時指定 |
 | `ports: 5678:5678` | 把容器的 5678 埠對應到你電腦的 5678 埠，讓你能用 `localhost:5678` 開 |
 | `WEBHOOK_URL` | 告訴 n8n「你對外的網址是這個」，n8n 產生 Webhook 連結時才會給對的網址 |
-| `volumes: n8n_data` | 把 n8n 的資料存在 Docker 的儲存空間，容器刪掉資料也還在 |
+| `volumes: n8n_data` | 指定 Volume 名稱為 `n8n_data`（透過 `name: n8n_data` 固定名稱，與先前的 `n8n_data` 磁區共用，不加專案前綴），把資料持久化儲存，容器刪掉資料也還在 |
 | `depends_on` | 確保 n8n 先啟動，ngrok 才啟動 |
 | `command: ... n8n:5678` | 叫 ngrok 把隧道接到名為 `n8n` 的容器的 5678 埠 |
 
