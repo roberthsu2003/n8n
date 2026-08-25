@@ -16,7 +16,10 @@
 
 ## 前置準備
 
-為了讓 n8n 能夠發揮完整功能（例如接收 LINE Bot 等外部 Webhook、進行 Google / Notion OAuth 2.0 授權、以及使用 n8n MCP 讓 AI 協同控制工作流），請確保已完成以下前置準備：
+> 💡 **想要更簡單的一鍵整合安裝？（推薦 Windows / macOS 用戶）**  
+> 如果您不想在終端機手動輸入長指令，或在 Windows 上曾遇過防毒軟體攔截 ngrok，**強烈推薦改用 [n8n + ngrok 容器化整合安裝方案](../n8n_ngrok/README.md)**！透過 Docker Compose 一次搞定雙容器編排與固定網域。
+
+為了讓獨立運行的 n8n 能夠發揮完整功能（例如接收 LINE Bot 等外部 Webhook、進行 Google / Notion OAuth 2.0 授權、以及使用 n8n MCP 讓 AI 協同控制工作流），若採用獨立容器部署，請確保已完成以下前置準備：
 
 1. 🐳 **已安裝 Docker**：若尚未安裝，請參考 [**Docker安裝教學**](../docker安裝/README.md)。
 2. 🌐 **已啟動 ngrok 取得公開 HTTPS 網址**：若尚未設定，請參考 [**ngrok安裝教學**](../ngrok安裝/README.md) 取得專屬的 `Forwarding` 網址（例如：`https://abcd-1234.ngrok-free.dev`）。
