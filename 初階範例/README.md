@@ -196,12 +196,12 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 
 ### 6. [範例：n8n 內建表單節點](./表單節點/README.md)
 
-學習如何使用 Form Trigger 快速建立網頁輸入表單，提交後自動寫入 DataTable。
+學習如何使用 Form Trigger 快速建立網頁輸入表單，並透過 Switch 節點進行分數範圍檢查，最後將合規資料自動寫入 DataTable。
 
 **學習重點**：
-- n8n 內建 Form Trigger 節點欄位設計
-- 表單驗證與資料提交
-- 自動將表單資料寫入 DataTable
+- n8n 內建 Form Trigger 節點欄位設計與回應模式
+- 使用 Switch 節點進行分數範圍檢查 (0~100 分) 與合規分流
+- 自動將表單資料寫入「學生成績表格」DataTable (欄位：`name`, `class_id`, `chinese`, `english`, `math`)
 
 **影音參考**：
 - [YouTube 內建表單參考影片 1](https://youtu.be/yGm0X6YtME4?si=HGcvQFlu4LdA2B8o)
@@ -210,15 +210,19 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-> 💡 **任務目標**：學生填寫成績表單後，AI 自動生成「個人化學習診斷評語」，並即時顯示於表單完成頁面。
+> 💡 **任務目標**：結合表單驗證分流，當成績合規寫入 DataTable「學生成績表格」後，由 AI 自動生成「個人化學習診斷與建議評語」並即時顯示於完成頁面；若成績超出範圍則回傳錯誤提示。
 
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
 請幫我升級「學生成績輸入表單」工作流程：
-1. 當使用者透過 Form Trigger 提交學生姓名與各科成績後，先將資料寫入 DataTable「學生成績單」。
-2. 接著串接一個 AI 生成節點（或智慧評語邏輯），根據學生的成績表現產生一段 100 字左右的「個人化學習診斷評語」（例如：數學優秀請保持、英文基礎需加強）。
-3. 最後在表單提交後的回應頁面（Respond to Webhook / Form Response），動態顯示「提交成功！AI 導師給 [姓名] 的評語：[評語內容]」。
-請幫我規劃並配置此自動化流程！
+1. 目前流程架構：
+   - 使用者透過 Form Trigger（On form submission）提交學生姓名與各科成績（學號、姓名、國文、英文、數學）。
+   - 透過 Switch 節點（Validate score range）檢查各科成績是否介於 0~100 分。
+   - 合規（Output 1）串接 DataTable 節點（Insert row）將資料寫入「學生成績表格」（欄位：name, class_id, chinese, english, math）。
+2. 請幫我延伸實作：
+   - 【合規成功分支】：在「Insert row」之後串接 AI 生成節點（或 AI Agent / Basic LLM Chain），根據學生的國文、英文、數學成績表現，自動產生一段約 100 字的「個人化學習診斷與鼓勵評語」（如強弱科分析與改善建議），並將評語動態顯示於表單提交完成回應頁面（Respond to Webhook / Form Response）。
+   - 【超出範圍分支（Output 0）】：串接 Respond to Webhook 節點，回傳「⚠️ 成績輸入錯誤：國文、英文與數學分數皆需介於 0 至 100 分之間，請返回重新填寫！」。
+3. 請幫我在畫布上建立所需節點、配置好表達式語法並完成連線！
 ```
 </details>
 

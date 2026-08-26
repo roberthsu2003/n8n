@@ -52,12 +52,12 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.4,
       "position": [
-        -16,
-        80
+        -144,
+        -48
       ],
-      "id": "4b4732bb-d354-4f71-8097-6e9c7e3d1354",
+      "id": "a07dac5a-d49a-40d6-942a-99b3a11e2b09",
       "name": "On form submission",
-      "webhookId": "80e58391-094e-474f-b3ef-15fa58d240fa"
+      "webhookId": "fe0041e9-f67b-4eee-b1be-4cbf263d93d4"
     },
     {
       "parameters": {
@@ -71,11 +71,11 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
+            "name": "={{ $json['姓名'] }}",
             "class_id": "={{ $json['學號'] }}",
-            "chinese": "={{ $json['學號'] }}",
+            "chinese": "={{ $json['國文'] }}",
             "english": "={{ $json['英文'] }}",
-            "math": "={{ $json['數學'] }}",
-            "name": "={{ $json['姓名'] }}"
+            "math": "={{ $json['數學'] }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -138,29 +138,44 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        176,
-        80
+        288,
+        -48
       ],
-      "id": "21a2ece5-9599-49d0-a440-9ebe6b27af03",
+      "id": "a5f9f02e-c80f-4558-83da-b4f75f4a3b24",
       "name": "Insert row"
     },
     {
       "parameters": {
-        "content": "## 新增表單資料至DataTable"
+        "mode": "expression",
+        "numberOutputs": 2,
+        "output": "={{ ($json['國文'] < 0 || $json['國文'] > 100 || $json['英文'] < 0 || $json['英文'] > 100 || $json['數學'] < 0 || $json['數學'] > 100) ? 0 : 1 }}",
+        "looseTypeValidation": "="
       },
-      "type": "n8n-nodes-base.stickyNote",
+      "id": "582c74fc-e119-40cc-b62f-4ffa8e8e8389",
+      "name": "Validate score range",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
       "position": [
-        -336,
-        48
-      ],
-      "typeVersion": 1,
-      "id": "fd134ea8-7c77-40fe-ba9f-dd68ec4f26ab",
-      "name": "Sticky Note"
+        48,
+        -48
+      ]
     }
   ],
   "connections": {
     "On form submission": {
       "main": [
+        [
+          {
+            "node": "Validate score range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate score range": {
+      "main": [
+        [],
         [
           {
             "node": "Insert row",
@@ -173,6 +188,9 @@
   },
   "pinData": {},
   "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
     "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
   }
 }
