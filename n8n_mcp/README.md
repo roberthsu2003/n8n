@@ -2,8 +2,8 @@
 
 > **適用版本**：`n8n Version 2.34.6` 或更高版本  
 > **功能定位**：Instance-level MCP (Preview)  
-> **核心目標**：讓外部 AI 助理與 IDE（如 OpenCode、Claude、Cursor 等）透過 **Model Context Protocol (MCP)** 協議安全連線至 n8n 實例，並精細控制開放的工作流程與權限。  
-> 💡 **客戶端現況說明**：目前 **Claude.ai** 與 **OpenCode / Cursor** 已完整支援 MCP 直連；**ChatGPT 網頁與桌面版** 目前尚未支援原生 MCP Connector 連線（ChatGPT 需透過瀏覽器擴充套件或自訂 Actions 進行協作）。
+> **核心目標**：讓外部 AI 助理與 IDE（如 Claude、ChatGPT、OpenCode、Cursor 等）透過 **Model Context Protocol (MCP)** 協議安全連線至 n8n 實例，並精細控制開放的工作流程與權限。  
+> 💡 **客戶端現況說明**：目前 **Claude.ai**、**ChatGPT** 以及 **OpenCode / Cursor** 均已支援 MCP 直連；透過 n8n 內建的 OAuth 一鍵設定與反向代理，即可快速將 n8n 工作流程整合至各 AI 工具中。
 
 ---
 
@@ -16,7 +16,8 @@
    - [Connected clients（已連線客戶端管理區）](#connected-clients)
 3. [n8n MCP 的兩大核心維度：AI 輔助建構 vs. Expose 工具化調用](#expose-vs-permissions)
 4. [各 AI 客戶端連線設定教學](#client-setups)
-   - [Claude Connector (OAuth 模式)](#claude-connector)
+   - [Claude.ai Connector (OAuth 模式)](#claude-connector)
+   - [ChatGPT Connector (One-click Setup / OAuth 模式)](#chatgpt-connector)
    - [OpenCode 全域管理指令（推薦免手寫設定檔）](#opencode-mcp)
    - [Google Antigravity 專案等級 MCP 設定](#antigravity-mcp)
 5. [課堂實戰範例（附 AI Prompt 提詞）](#practical-examples)
@@ -159,7 +160,7 @@ graph TD
 <a id="claude-connector"></a>
 ### 1. Claude.ai Connector (OAuth 模式)
 
-適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式：
+適用於 **Claude.ai** 網頁版或 **Claude Desktop** 應用程式（**建議先於 Claude.ai 網頁版完成連線與授權設定，之後再使用 Desktop 版**）：
 
 1. **啟動 ngrok 反向代理（必備指令）**：
    確保本機已啟動 ngrok 並轉發 n8n 埠號（預設 5678）。
@@ -183,8 +184,39 @@ graph TD
 
 ---
 
+<a id="chatgpt-connector"></a>
+### 2. ChatGPT Connector (One-click Setup / OAuth 模式)
+
+適用於 **ChatGPT 網頁版** 或 **ChatGPT Desktop** 桌面應用程式（**建議先於 ChatGPT 網頁版完成連線與授權設定，之後再使用 Desktop 版**）：
+
+1. **啟動 ngrok 反向代理（必備指令）**：
+   確保本機已啟動 ngrok 並轉發 n8n 埠號（預設 5678）。
+   > [!WARNING]
+   > **⚠️ ngrok 反向代理必加參數**：
+   > 使用 ngrok 代理 n8n MCP 時，若未停用壓縮可能導致 SSE / MCP 串流解析失敗，**必須**使用以下指令啟動：
+   ```bash
+   ngrok http 5678 --request-header-add "Accept-Encoding: identity"
+   ```
+2. **在 n8n 後台開啟 Connect a client 視窗**：
+   * 進入 n8n **Settings ➔ Instance-level MCP**。
+   * 點選 **Connect a client** 按鈕。
+   * 切換至 **OAuth (recommended)** 分頁。
+   * 在 **Your client** 下拉選單中選擇 **`ChatGPT`**。
+3. **一鍵連線至 ChatGPT (`Add to ChatGPT`)**：
+   * 直接點擊 **`Add to ChatGPT`** 按鈕。
+   * 系統會自動於瀏覽器中開啟 ChatGPT 網頁版的 Connector / MCP 設定頁面。
+   * （*備用*：若需手動設定，可複製彈窗下方的 `Server URL`，例如 `https://<你的ngrok網域>.ngrok-free.app/mcp`，貼入 ChatGPT 相關設定欄位）。
+4. **瀏覽器 OAuth 授權**：
+   * 在 ChatGPT 網頁端確認新增 n8n 連線，並依提示完成 n8n 的 OAuth 帳號登入與授權允許。
+5. **確認連線與桌面版使用**：
+   * **網頁版驗證**：授權完成後，即可在 ChatGPT 網頁版對話中自動調用已 Expose 的 n8n 工具。
+   * **Desktop 桌面版使用**：當網頁版授權成功後，再開啟 **ChatGPT Desktop 桌面版**，即可自動同步已建立好的 n8n 連線狀態進行操作。
+   * 同步可在 n8n 後台 **Settings > Instance-level MCP > Connected clients** 查看到 ChatGPT 已成功連線。
+
+---
+
 <a id="opencode-mcp"></a>
-### 2. OpenCode 全域管理指令（推薦免手寫設定檔）
+### 3. OpenCode 全域管理指令（推薦免手寫設定檔）
 
 > [!TIP]
 > **全域設定推薦使用 CLI 指令直接操作**：
@@ -238,7 +270,7 @@ opencode mcp logout n8n
 ---
 
 <a id="antigravity-mcp"></a>
-### 3. Google Antigravity 專案等級 MCP 設定
+### 4. Google Antigravity 專案等級 MCP 設定
 
 Google Antigravity 支援**專案等級（Workspace-level）**與**全域等級（Global-level）**設定：
 
