@@ -111,6 +111,14 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 
 ![Cloudflare Zero Trust - 選取 Docker 執行連接器](./images/Docker執行連接器.png)
 
+> 🔒 **極重要：請務必妥善複製並記錄您的 Token**：
+> - **此 Token 僅會在建立通道時完整顯示一次**！一旦完成設定進入下一步後，Cloudflare 出於安全考量**不會再提供明文查看 Token**。
+> - 請先將 Token 複製儲存至安全的記事本或密碼庫中。
+> - **若日後遺忘 Token 或需要重新部署**：
+>   您必須回到 Zero Trust 控制台，點選 **`網路 (Networks) > 連接器 (Tunnels)`** > 點入該通道名稱進入「**概覽**」頁面，在右側欄位找到「**重新整理 Token**」，點擊「**輪換 Token (Rotate Token)**」重新產生一組新 Token（舊 Token 會立即失效）。
+> 
+> ![Cloudflare Zero Trust - 重新整理與輪換 Token](./images/重置Token.png)
+
 2. **在終端機中執行 Docker 指令啟動通道**：
    > ⚠️ **重要優化提醒**：Cloudflare 網頁上提供的預設指令缺少 `-d`（背景執行）與 `--network=host`（共享本機網路存取 n8n），直接執行會佔用終端機且無法轉發 localhost。**請務必使用以下改良後的生產級指令**：
 
