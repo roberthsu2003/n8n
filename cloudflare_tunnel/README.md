@@ -2,7 +2,7 @@
 
 本指南詳細說明如何使用 **Cloudflare Tunnel (`cloudflared`)** 為本機或伺服器上的 **Docker n8n** 建立安全、穩定的永久外網 HTTPS 通道。
 
-透過 Cloudflare Tunnel，您的 n8n 能以專屬自訂網域（例如 `n8n.yourdomain.com`）接收 **LINE Bot Webhook、Google / Notion OAuth 2.0 授權回呼** 以及進行遠端工作流管理，**完全無需在路由器設定通訊埠轉發 (Port Forwarding)**，享有 Cloudflare 全球 CDN 快取與 DDoS 安全防護。
+透過 Cloudflare Tunnel，您的 n8n 能以專屬自訂網域（例如 `n8n.yourdomain.com`）接收 **LINE Bot Webhook、Google / Notion OAuth 2.0 授權回呼** 以及進行遠端工作流管理，**完全無需在路由器設定通訊埠轉發 (Port Forwarding)**，自動享有**免費的 HTTPS (SSL/TLS 加密憑證)**、Cloudflare 全球 CDN 快取與 DDoS 安全防護。
 
 ---
 
