@@ -146,23 +146,29 @@ docker run -d \
 
 ### 第 4 階段：設定已發佈應用程式路由 (指向 n8n)
 
-此步驟將您的子網域與本地執行的 Docker n8n 服務進行綁定。
+此步驟將您的子網域與本地執行的 Docker n8n 服務（Port 5678）進行精準綁定。
 
-#### 1. 設定公開主機名稱 (Public Hostname)
-- **子網域 (Subdomain)**：填入欲對外公開的前綴，例如 `n8n`。
-- **網域 (Domain)**：下拉選擇您在 Cloudflare 託管的個人網域（例如 `yourdomain.com`）。
-- **路徑 (Path)**：留空（代表將所有路徑皆導向 n8n）。
-- 完整對外網址即為：`https://n8n.yourdomain.com`
+#### 1. 前往通道的「已發佈應用程式路由」
+1. 在 Cloudflare 左側選單進入 **`Zero Trust`**。
+2. 導覽至 **`網路 (Networks)` > `連接器 (Tunnels)`**。
+3. 點選剛剛建立的 **`n8n-tunnel`** 進入通道詳情。
+4. 切換至頂部的 **「已發佈應用程式路由」** 分頁。
+5. 點擊右上角藍色的「**+ 新增已發佈應用程式路由**」按鈕。
 
-#### 2. 設定後端服務 (Service)
-- **類型 (Type)**：選擇 **`HTTP`**。
-- **URL**：輸入本地 n8n 的通訊埠位址 **`localhost:5678`**（或 `127.0.0.1:5678`）。
+![Zero Trust - 已發佈應用程式路由清單](./images/已發佈應用程式路由清單.png)
 
-![設定已發佈的應用程式路由](./images/pic1.png)
+#### 2. 設定公開主機名稱與後端服務
+- **子網域 (Subdomain)**：輸入 `n8n`。
+- **網域 (Domain)**：下拉選單選取您的個人網域（例如：`roberthsu20030301.site`）。
+- **路徑 (Path)**：留空（代表將此子網域的所有請求皆導向 n8n）。
+- **服務類型 (Type)**：選擇 **`HTTP`**。
+- **URL**：輸入本地 n8n 監聽的連接埠 **`localhost:5678`**。
 
-#### 3. 完成儲存
-- 點擊右下角 **`Save tunnel (完成設定)`**。
-- Cloudflare 會自動在 DNS 中建立一條 CNAME 記錄，將 `n8n.yourdomain.com` 的流量安全導向本機的 n8n。
+![為 n8n-tunnel 新增已發佈應用程式路由](./images/新增應用程式路由.png)
+
+#### 3. 儲存發佈
+- 點擊右下角 **`Save hostname (儲存)`**。
+- Cloudflare 會自動為您在 DNS 中建立 CNAME 記錄，將 `https://n8n.您的網域` 的所有流量透過加密通道導向本地的 n8n。
 
 ---
 
