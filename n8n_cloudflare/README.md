@@ -58,7 +58,7 @@
 
 在部署前，請確認已完成以下步驟（若尚未完成，請先參考 [Cloudflare Tunnel 圖文設定指南](../cloudflare_tunnel/README.md)）：
 
-1. **已申請個人專屬網域**（例如 `roberthsu20030301.site`），並將 DNS 名稱伺服器託管至 Cloudflare（狀態為「使用中」）。
+1. **已申請個人專屬獨立網域**（例如 `yourdomain.com`），並將 DNS 名稱伺服器託管至 Cloudflare（狀態為「使用中」）。
 2. **在 Cloudflare Zero Trust 建立 Tunnel** 並取得 **Tunnel Token**（以 `eyJhIj...` 開頭）。
 3. **在 Zero Trust 設定「已發佈應用程式路由」**：
    - 子網域：`n8n`
@@ -88,8 +88,8 @@ n8n-cloudflare/
 在專案目錄下新增 `.env` 檔案，填入您的網域與 Cloudflare Tunnel Token：
 
 ```env
-# 您的 n8n 完整公開網域名稱（不加 https:// 與結尾斜線）
-DOMAIN=n8n.roberthsu20030301.site
+# 您的 n8n 完整公開自訂網域名稱（不加 https:// 與結尾斜線，請替換為您的實際網域）
+DOMAIN=n8n.yourdomain.com
 
 # Cloudflare Zero Trust 取得的 Tunnel Token
 CLOUDFLARE_TUNNEL_TOKEN=eyJhIjoi...請替換為您的完整Token...
@@ -110,7 +110,14 @@ services:
     ports:
       - "5678:5678"
     environment:
-      - WEBHOOK_URL=https://${DOMAIN}/
+      - N8N_HOST=${DOMAIN}
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - N8N_EDITOR_BASE_URL=https://${DOMAIN}
+      - WEBHOOK_URL=https://${DOMAIN}
+      - GENERIC_TIMEZONE=Asia/Taipei
+      - TZ=Asia/Taipei
+      - N8N_RUNNERS_ENABLED=true
       - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
     volumes:
       - n8n_data:/home/node/.n8n
@@ -126,9 +133,12 @@ services:
 
 volumes:
   n8n_data:
+    name: n8n_data
 ```
 
-> 💡 **關鍵說明**：`cloudflared` 容器使用 `network_mode: host`，可直接連通主機上的 `localhost:5678`，與 Cloudflare 後台設定的 `HTTP://localhost:5678` 完全相符！
+> 💡 **關鍵說明**：
+> - `volumes` 中的 `name: n8n_data` 確保**所有專案皆共用同一個名為 `n8n_data` 的 Volume**，無論日後切換至 ngrok 或單獨 `docker run`，您的 n8n 工作流程與憑證資料都能無縫保留！
+> - `cloudflared` 容器使用 `network_mode: host`，可直接連通主機上的 `localhost:5678`，與 Cloudflare 後台設定的 `HTTP://localhost:5678` 完全相符。
 
 ---
 
@@ -174,7 +184,7 @@ volumes:
 ## 🌐 測試與驗證
 
 1. 執行啟動腳本或終端機執行 `docker compose up -d`。
-2. 打開瀏覽器輸入 `https://n8n.你的網域.site`（例如 `https://n8n.roberthsu20030301.site`）。
+2. 打開瀏覽器輸入 `https://n8n.你的網域`（例如 `https://n8n.yourdomain.com`）。
 3. 確認能順利開啟 n8n 介面，並顯示安全的 **HTTPS 鎖頭** 標誌。
 4. 恭喜！您已擁有企業級的個人 n8n 自動化伺服器！
 
