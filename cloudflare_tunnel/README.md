@@ -10,7 +10,6 @@
 
 - [什麼是 Cloudflare Tunnel？](#什麼是-cloudflare-tunnel)
   - [核心運作觀念](#核心運作觀念)
-  - [Tunnel vs 傳統 Port Forwarding](#tunnel-vs-傳統-port-forwarding)
 - [前置需求](#前置需求)
 - [詳細設定流程](#詳細設定流程)
   - [第 1 階段：設定個人網域與 DNS 移轉](#第-1-階段設定個人網域與-dns-移轉)
@@ -31,18 +30,6 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 > **在主機上透過 Docker 運行輕量級代理程式 `cloudflared`，它會主動向 Cloudflare 發起安全的加密連線（Outbound Connection）。當外部使用者或 Webhook 發送請求至您的公開網域名稱（例如 `https://n8n.yourdomain.com`）時，Cloudflare 會透過此加密通道將流量轉發給本地的 n8n 服務（`http://localhost:5678`）。**
 
 ![設定Cloudflare_Tunnel](./images/設定Cloudflare_Tunnel.png)
-
-### Tunnel vs 傳統 Port Forwarding
-
-| 比較項目 | 傳統 Port Forwarding (路由器轉發) | ☁️ Cloudflare Tunnel (推薦) |
-| :--- | :--- | :--- |
-| **路由器設定** | 需登入家用/公司路由器開啟連接埠 | **完全不需更動路由器設定** |
-| **真實 IP 暴露** | 外部可直接探測到您的真實公網 IP | **真實 IP 完全隱藏**，僅暴露 Cloudflare IP |
-| **SSL 憑證** | 需自行申請、安裝與定期續約憑證 | **自動享有 Cloudflare 免費 Edge SSL 憑證** |
-| **防火牆穿透** | 常被企業防火牆或 NAT 阻擋 | 僅需對外發起連線（Outbound），穿透力強 |
-| **DDoS 防禦** | 無（需自行承擔主機攻擊風險） | **原生享有 Cloudflare 全球 DDoS 防護** |
-
-![Tunnel vs 傳統的port Forwarding的觀念圖](./images/tunnel_portForwarding.png)
 
 ---
 
