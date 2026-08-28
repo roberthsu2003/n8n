@@ -39,29 +39,29 @@ flowchart LR
 
 ## 🛠️ 第一步：LINE Developers Console 前置設定
 
+> [!TIP]
+> 完整的圖文逐步教學（包含 Provider / Channel 建立、手機掃描 QR Code 加好友/進群組、關閉官方自動回應、以及 n8n Header Auth 憑證設定），請參考 **[📱 LINE Messaging API 設定指南（圖文完整版）](../../line設定/README.md)**。
+
 ### 1. 建立 Messaging API Channel
-1. 前往 [LINE Developers Console](https://developers.line.biz/) 並登入您的 LINE 帳號。
-2. 建立或選擇一個 **Provider（提供者）**。
+1. 前往 [LINE Developers Console](https://developers.line.biz/) 並以 LINE 帳號登入。
+2. 建立或選擇 **Provider（提供者）**。
 3. 點擊 **Create a new channel**，選擇 **Messaging API**。
-4. 填寫必要資訊：
-   - **Channel name**：機器人名稱（例如：`n8n 智能助理`）
-   - **Channel description**：機器人簡介
-   - **Category / Subcategory**：類別
-5. 勾選同意條款並點擊 **Create** 建立頻道。
+4. 填寫機器人名稱、描述、分類與 Email 後完成建立。
 
-### 2. 取得 Channel Access Token（存取權杖）
-1. 進入剛建立的 Messaging API 頻道設定頁面。
-2. 切換至 **Messaging API** 分頁。
-3. 滑動到最下方的 **Channel access token (long-lived)**。
-4. 點擊 **Issue**（核發）產生一組長期存取權杖，並將此 Token 複製妥善保存。
+### 2. 掃描 QR Code 將 Bot 加入好友或群組
+1. 進入頻道設定的 **Messaging API** 分頁。
+2. 使用手機 LINE App **掃描 QR code**，將 Bot 加入好友，或邀請加入指定群組。
+3. 確認 **LINE Official Account features** 中的 **Allow bot to join group chats** 為 **Enabled**。
 
-### 3. 設定 LINE 官方帳號回應設定
-1. 在 **Messaging API** 分頁中找到 **LINE Official Account features**。
-2. 點擊 **Auto-reply messages** 旁的 **Edit**，會跳轉至 LINE Official Account Manager。
-3. 在回應設定中進行調整：
-   - **回應模式**：選擇「聊天機器人 (Bot)」
-   - **自動回應訊息**：設定為「停用 (Disabled)」（避免 LINE 官方系統與 n8n 重複回覆）
-   - **Webhook**：設定為「啟用 (Enabled)」
+### 3. 取得 Channel 憑證
+1. **Channel Secret**：在 **Basic settings** 分頁取得並複製保存。
+2. **Channel Access Token (long-lived)**：在 **Messaging API** 分頁最下方點擊 **Issue** 取得長期存取權杖。
+
+### 4. 設定 LINE 官方帳號回應模式
+1. 透過頁面連結前往 **LINE Official Account Manager**。
+2. 進入「回應設定」：
+   - **回應模式**：設為「聊天機器人 (Bot)」
+   - **自動回應訊息**：設為「停用 (Disabled)」（避免官方與 n8n 重複回覆）
 
 ---
 
@@ -138,10 +138,7 @@ return [{
 #### (2) HTTP Request 節點：呼叫 LINE Reply API（回覆訊息）
 - **Method**：`POST`
 - **URL**：`https://api.line.me/v2/bot/message/reply`
-- **Authentication**：`Generic Credential Type` -> `Header Auth` 或直接於 Headers 自訂
-- **Headers**：
-  - `Content-Type`: `application/json`
-  - `Authorization`: `Bearer <你的 Channel Access Token>`
+- **Authentication**：選擇 `Predefined Credential Type` -> `Header Auth`（使用在 [LINE 設定指南](../../line設定/README.md#步驟-4在-n8n-設定-header-auth-憑證與發送訊息) 中建立的 `Authorization` 憑證）
 - **Body (JSON)**：
   ```json
   {
@@ -164,9 +161,7 @@ return [{
 ### HTTP Request 節點設定：
 - **Method**：`POST`
 - **URL**：`https://api.line.me/v2/bot/message/push`
-- **Headers**：
-  - `Content-Type`: `application/json`
-  - `Authorization`: `Bearer <你的 Channel Access Token>`
+- **Authentication**：選擇 `Predefined Credential Type` -> `Header Auth`
 - **Body (JSON)**：
   ```json
   {
@@ -225,7 +220,7 @@ LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** �
 | 問題現象 | 常見原因 | 解決方式 |
 | :--- | :--- | :--- |
 | **LINE Developers 點擊 Verify 顯示錯誤** | Webhook 未啟動或回傳非 200 狀態碼 | 確保 n8n 處於「Listen for test event」或 Workflow 已設為 **Active**，並確保有回傳 HTTP 200。 |
-| **HTTP 401 Unauthorized** | Channel Access Token 錯誤或過期 | 檢查 Headers 中的 `Authorization` 是否為 `Bearer <TOKEN>`，並確認 Token 是否正確複製。 |
+| **HTTP 401 Unauthorized** | Channel Access Token 錯誤或過期 | 檢查 Header Auth 憑證中的 `Authorization` 是否為 `Bearer <TOKEN>`，並確認 Token 是否正確複製。 |
 | **HTTP 400 Bad Request** | `replyToken` 失效或 JSON 格式錯誤 | `replyToken` 只能使用一次且時效極短（約 1 分鐘），請勿在同一次事件中重複呼叫 Reply API。 |
 | **機器人會收到重複訊息** | LINE 伺服器在沒收到 200 回應時會自動重試 | 務必在工作流程中加入 `Respond to Webhook` 節點即時回傳 HTTP 200。 |
 | **LINE 官方帳號重複回覆兩次** | 官方預設自動回應未關閉 | 請至 LINE Official Account Manager 回應設定中關閉「自動回應訊息」。 |
@@ -234,6 +229,7 @@ LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** �
 
 ## 📚 相關資源
 
+- [📱 LINE Messaging API 設定指南（圖文完整版）](../../line設定/README.md)
 - [LINE Developers 官方文件 (Messaging API)](https://developers.line.biz/en/docs/messaging-api/)
 - [LINE Messaging API Reference](https://developers.line.biz/en/reference/messaging-api/)
 - [n8n Webhook 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
