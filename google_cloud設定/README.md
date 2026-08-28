@@ -20,7 +20,7 @@
 
 - [🛠️ 詳細設定標準流程](#️-詳細設定標準流程)
   - [第 1 階段：Google Cloud 專案建立與 API 啟用](#第-1-階段google-cloud-專案建立與-api-啟用)
-  - [第 2 階段：設定 Google Auth Platform（OAuth 同意畫面與測試人員）](#第-2-階段設定-google-auth-platformoauth-同意畫面與測試人員)
+  - [第 2 階段：設定 OAuth 同意畫面與測試人員 (Google Auth Platform)](#第-2-階段設定-oauth-同意畫面與測試人員-google-auth-platform)
   - [第 3 階段：建立 OAuth 用戶端與 n8n 雙向綁定](#第-3-階段建立-oauth-用戶端與-n8n-雙向綁定)
   - [第 4 階段：🔄 授權驗證與登入](#第-4-階段-授權驗證與登入)
 - [⚠️ 常見錯誤與排錯重點 (必看)](#️-常見錯誤與排錯重點-必看)
@@ -47,10 +47,11 @@
 
 ---
 
-### 第 2 階段：設定 Google Auth Platform（OAuth 同意畫面與測試人員）
+### 第 2 階段：設定 OAuth 同意畫面與測試人員 (Google Auth Platform)
 
-1. **進入 Google Auth Platform**
-   - 在 GCP Console 頂部搜尋欄輸入 **`Google Auth Platform`**（或由左側選單「API 與服務」>「Google 驗證平台」進入）。
+1. **進入 OAuth 同意畫面 (Google Auth Platform)**
+   - **主要方式（推薦）**：點擊左側導覽選單「**API 與服務**」>「**OAuth 同意畫面**」（系統會自動導引至 Google Auth Platform 設定流程）。
+   - **輔助方式**：亦可在頂部搜尋欄輸入 **`Google Auth Platform`** 或 **`OAuth 同意畫面`** 快速進入。
 
 2. **設定品牌資訊 (Brand / 同意畫面)**
    - **應用程式名稱**：輸入自訂名稱（例如：`My n8n Workflow` 或 `My n8n Automation`）。
