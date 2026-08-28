@@ -92,8 +92,11 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 ### 第 2 階段：在 Cloudflare 建立 Tunnel
 
 1. 在 Cloudflare Dashboard 左側選單中，點選 **`Zero Trust`** 進入控制台。
-2. 在 Zero Trust 左側選單中，導覽至 **`Networks (網路)` > `Tunnels (連接器)`**。
-3. 點擊 **`Add a tunnel (建立通道)`**。
+2. 在 Zero Trust 左側選單中，導覽至 **`網路 (Networks)` > `連接器 (Tunnels)`**。
+3. 點擊右上角「**+ 建立通道**」按鈕（或畫面中的藍色「**新增通道**」按鈕）。
+
+![Cloudflare Zero Trust - 建立通道](./images/建立通道.png)
+
 4. 選擇連接器類型為 **`Cloudflared`**，點選 Next。
 5. **為通道命名**：輸入識別名稱（例如：`n8n-tunnel`），點擊 **Save tunnel**。
 
