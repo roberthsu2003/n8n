@@ -56,12 +56,17 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 
 ![網域管轄權的轉移](./images/網域管轄權的轉移.png)
 
-#### 1. 新增網站至 Cloudflare
+#### 1. 在 Cloudflare 新增網域
 1. 登入 [Cloudflare Dashboard](https://dash.cloudflare.com/)。
-2. 點擊右上角「**新增站點 (Add a site)**」，輸入您的個人網域名稱（例如：`yourdomain.com`）。
-3. 選擇 **Free (免費)** 方案並繼續。
-4. Cloudflare 會掃描您現有的 DNS 記錄，確認後進入下一步。
-5. 取得 Cloudflare 提供的 **兩組專屬名稱伺服器位址**（例如 `ada.ns.cloudflare.com` 與 `bob.ns.cloudflare.com`）。
+2. 在左側選單點選「**網域 (Domains)**」>「**概覽**」。
+3. 點擊右上角藍色的「**新增網域**」按鈕（或畫面中間的「新增網站」連結）。
+
+![Cloudflare 網域概覽 - 點擊新增網域](./images/新增網域.png)
+
+4. 輸入您在 GoDaddy 購買的個人網域名稱（例如：`roberthsu20030301.site` 或 `yourdomain.com`）。
+5. 選擇 **Free (免費)** 方案並繼續。
+6. Cloudflare 會自動掃描您現有的 DNS 記錄，確認後進入下一步。
+7. 取得 Cloudflare 提供的 **兩組專屬名稱伺服器 (Nameservers) 位址**（例如 `ada.ns.cloudflare.com` 與 `bob.ns.cloudflare.com`）。
 
 #### 2. 在網域註冊商更換 Nameservers
 1. 回到您購買網域的註冊商（如 GoDaddy）。
