@@ -16,8 +16,7 @@
   - [第 2 階段：在 Cloudflare 建立 Tunnel](#第-2-階段在-cloudflare-建立-tunnel)
   - [第 3 階段：使用 Docker 啟動 cloudflared 通道容器](#第-3-階段使用-docker-啟動-cloudflared-通道容器)
   - [第 4 階段：設定已發佈應用程式路由 (指向 n8n)](#第-4-階段設定已發佈應用程式路由-指向-n8n)
-  - [第 5 階段：設定 n8n 環境變數與驗證連線](#第-5-階段設定-n8n-環境變數與驗證連線)
-- [⚠️ 常見問題與排錯指南](#️-常見問題與排錯指南)
+  - [第 5 階段：測試 n8n 外網連線](#第-5-階段測試-n8n-外網連線)
 
 ---
 
@@ -172,48 +171,12 @@ docker run -d \
 
 ---
 
-### 第 5 階段：設定 n8n 環境變數與驗證連線
+### 第 5 階段：測試 n8n 外網連線
 
-為了讓 n8n 正確產生 Webhook 觸發網址與 OAuth 2.0 回呼網址，需將自訂網域寫入 n8n 的環境變數中。
+完成以上設定後，即可驗證透過 Cloudflare Tunnel 是否能順利從外網存取本地的 Docker n8n 服務。
 
-#### 1. 調整 n8n 容器環境變數
-若您使用 `docker run` 啟動 n8n，請確保帶入 `WEBHOOK_URL` 參數：
+#### 1. 瀏覽器開啟測試
+1. 打開瀏覽器，輸入您剛才設定的完整網址（例如：`https://n8n.roberthsu20030301.site`）。
+2. 確認能順利載入本地 Docker 運行的 n8n 登入或工作流程管理介面。
+3. 檢查網址列左側是否顯示安全的 **HTTPS 鎖頭** 標誌，代表 Cloudflare 自動簽發的 SSL/TLS 加密憑證已生效，安全外網連線正式打通！
 
-```bash
-docker run -d \
-  --name n8n \
-  -p 5678:5678 \
-  -e WEBHOOK_URL=https://n8n.yourdomain.com/ \
-  -e N8N_DEFAULT_BINARY_DATA_MODE=filesystem \
-  -v n8n_data:/home/node/.n8n \
-  --restart unless-stopped \
-  docker.n8n.io/n8nio/n8n
-```
-
-> ⚠️ 請將 `https://n8n.yourdomain.com/` 替換為您在 Cloudflare Tunnel 設定的實際網址。
-
-#### 2. 驗證連線與端對端測試
-1. 打開瀏覽器，輸入網址：`https://n8n.yourdomain.com`
-2. 確認能順利開啟 n8n 登入介面，且網址列顯示安全的 **HTTPS 鎖頭** 標誌。
-3. 建立一個包含 **Webhook 節點** 的測試工作流，檢查節點內產生的「Production URL」是否已正確自動帶入 `https://n8n.yourdomain.com/webhook/...`。
-
-![完整連線路徑驗證](./images/the_full_journey.png)
-
----
-
-## ⚠️ 常見問題與排錯指南
-
-### Q1: 瀏覽器開啟出現「502 Bad Gateway」？
-- **原因**：`cloudflared` 容器無法連線到本機的 n8n 服務。
-- **檢查重點**：
-  1. 確認 n8n 容器正在運行中，且於本機瀏覽器輸入 `http://localhost:5678` 可正常開啟。
-  2. 確認 `cloudflared` 容器啟動時有加上 `--network=host` 參數。
-  3. 在 Cloudflare Dashboard 檢查 Tunnel 的 Service URL 是否正確設定為 `HTTP` 與 `localhost:5678`。
-
-### Q2: LINE Webhook 提示驗證失敗 (SSL 憑證問題)？
-- Cloudflare Tunnel 預設提供由全球信任機構簽發的 Edge SSL 憑證，支援 LINE Developers 與 Google OAuth 嚴格的 HTTPS 檢驗。
-- 請確認 Cloudflare 的 **SSL/TLS 加密模式** 設定為 **Full** 或 **Flexible**。
-
-### Q3: 如何同時透過同一個 Tunnel 發布其他本地服務？
-- 在 Cloudflare Zero Trust 的 Tunnels 頁面點擊編輯該 Tunnel，前往 **`Public Hostname`** 標籤頁，點擊 **`Add a public hostname`**。
-- 您可以新增其他子網域（如 `api.yourdomain.com`）並對應至不同的本地 Port（如 `localhost:8000`），完全無需額外增加 Tunnel 費用或重新安裝連線程式！
