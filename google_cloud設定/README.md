@@ -107,8 +107,17 @@
 
    ![OAuth 用戶端已建立 - 取得 ID 與密碼](./images/用戶端已建立.png)
 
-4. **儲存憑證並發起 Google 帳號授權 (Sign in with Google)**
-   - 確認 **Client ID** 與 **Client Secret** 均已正確填入。
+4. **在 Google Auth Platform 加入測試使用者 (Test users)**
+   - 在進行登入授權前，**務必先將要登入的 Google 帳號加入測試名單**，否則驗證會被拒絕失敗！
+   - 點選左側選單「**目標對象 (Audience)**」。
+   - 在「**測試使用者 (Test users)**」區塊中，點擊「**+ Add users**」按鈕。
+   - 輸入您要用來進行 n8n 授權的 **Gmail 電子郵件地址**，點擊儲存加入清單。
+     > ⚠️ **注意**：若未將該 Gmail 帳號加入測試使用者名單，稍後在進行 Sign in with Google 時會出現 `Error 403: access_denied` 錯誤！
+
+   ![Google Auth Platform - 加入測試使用者](./images/測試使用者.png)
+
+5. **儲存憑證並發起 Google 帳號授權 (Sign in with Google)**
+   - 回到 n8n 憑證設定面板，確認 **Client ID** 與 **Client Secret** 均已正確填入。
    - 點擊右上角的「**Save**」按鈕儲存憑證。
    - 儲存成功後，點擊上方提示區塊中的「**Sign in with Google**」按鈕，發起 Google 帳號授權流程。
 
