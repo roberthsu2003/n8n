@@ -21,6 +21,7 @@
 - [🛠️ 詳細設定標準流程](#️-詳細設定標準流程)
   - [第 1 階段：Google Cloud 專案建立與 API 啟用](#第-1-階段google-cloud-專案建立與-api-啟用)
   - [第 2 階段：設定 OAuth 同意畫面與建立品牌 (Google Auth Platform)](#第-2-階段設定-oauth-同意畫面與建立品牌-google-auth-platform)
+  - [第 3 階段：建立 OAuth 用戶端與 n8n 雙向設定](#第-3-階段建立-oauth-用戶端與-n8n-雙向設定)
 
 ---
 
@@ -76,3 +77,23 @@
    - 此時會看到「尚未針對這項專案設定 OAuth 用戶端」提示，後續可由此點擊「**建立 OAuth 用戶端**」繼續下一步。
 
    ![OAuth 總覽畫面 - 建立完成](./images/OAuth總覽.png)
+
+---
+
+### 第 3 階段：建立 OAuth 用戶端與 n8n 雙向設定
+
+1. **在 n8n 建立憑證並複製 OAuth Redirect URL**
+   - 進入 n8n 工作區，點選左側選單「**Credentials (憑證)**」> 點擊右上角「**Create credential**」。
+   - 搜尋並選擇目標 Google 服務（例如：`Google Sheets OAuth2 API` 或 `Google OAuth2 API`）。
+   - 在彈出的憑證設定視窗中，找到並複製「**OAuth Redirect URL**」（例如：`https://xxxx.ngrok-free.dev/rest/oauth2-credential/callback`）。
+
+   ![n8n 憑證設定畫面](./images/n8n憑證.png)
+
+2. **在 Google Cloud 建立 OAuth 2.0 用戶端 ID**
+   - 回到 GCP「OAuth 總覽」點擊「**建立 OAuth 用戶端**」（或點選左側選單「**用戶端**」>「**+ 建立用戶端**」）。
+   - **應用程式類型**：下拉選擇「**網頁應用程式 (Web application)**」。
+   - **名稱**：自訂名稱（例如：`n8n使用` 或 `n8n Client`）。
+   - **已授權的重新導向 URI (Authorized redirect URIs)**：點擊「**+ 新增 URI**」，貼上剛剛從 n8n 複製的 **OAuth Redirect URL**。
+   - 點擊下方「**建立**」按鈕。
+
+   ![GCP 建立 OAuth 用戶端 ID](./images/建立用戶端.png)
