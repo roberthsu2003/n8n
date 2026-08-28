@@ -106,3 +106,10 @@
    - 複製完成後在 Google 彈出視窗點擊「**確定**」。
 
    ![OAuth 用戶端已建立 - 取得 ID 與密碼](./images/用戶端已建立.png)
+
+4. **儲存憑證並發起 Google 帳號授權 (Sign in with Google)**
+   - 確認 **Client ID** 與 **Client Secret** 均已正確填入。
+   - 點擊右上角的「**Save**」按鈕儲存憑證。
+   - 儲存成功後，點擊上方提示區塊中的「**Sign in with Google**」按鈕，發起 Google 帳號授權流程。
+
+   ![n8n 儲存憑證並點擊 Sign in with Google](./images/n8n登入Google.png)
