@@ -1,242 +1,158 @@
-# 📱 LINE Messaging API 雙向整合實作
+# 📱 LINE Messaging API 整合實作
 
-本章節介紹如何將 **LINE Messaging API** 與 **n8n 工作流程** 進行深度整合，實現「**接收 LINE 訊息觸發 n8n**」與「**n8n 呼叫 LINE 發送/回覆訊息**」的完整雙向通訊自動化。
+歡迎來到 LINE Messaging API 與 n8n 整合教學！本章節帶您深入了解如何將 LINE 官方帳號與 n8n 工作流程串接，實現「**接收 LINE 訊息觸發 n8n**」與「**n8n 呼叫 LINE 發送/回覆訊息**」的完整雙向通訊自動化。
+
+> 💡 **AI 協作時代學習法**：在完成基礎節點設定並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製各範例中的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt 提詞，由 AI 助理替您在畫布上全自動建構工作流程與串接 LLM 對話模型！
 
 ---
 
-## 🎯 整合核心目標
+## 🛠️ 前置設定指南
+
+在開始建置工作流程前，您需要完成 LINE Developers 帳號申請、建立 Messaging API Channel、掃描 QR Code 加好友/群組，以及在 n8n 中設定 Header Auth 憑證。
+
+> 📌 **完整圖文設定指南**：
+> 請直接參閱 **[📱 LINE Messaging API 設定指南（圖文完整版）](../../line設定/README.md)**，內含逐步截圖操作說明：
+> 1. [建立 LINE Messaging API Channel](../../line設定/README.md#步驟-1建立-line-messaging-api-channel)
+> 2. [取得 Channel 憑證（Secret 與 Access Token）](../../line設定/README.md#步驟-2取得-channel-憑證)
+> 3. [設定 Webhook 與掃描 QR Code 加入好友/群組](../../line設定/README.md#步驟-3在-line-設定-webhook-與加入好友群組接收訊息進-n8n)
+> 4. [在 n8n 設定 Header Auth 憑證](../../line設定/README.md#步驟-4在-n8n-設定-header-auth-憑證與發送訊息)
+
+---
+
+## 🎯 整合核心架構
 
 ```mermaid
 flowchart LR
     subgraph LINE_Ecosystem["LINE 生態系"]
-        User["📱 LINE 用戶"]
-        LinePlatform["☁️ LINE Messaging API Platform"]
+        User["📱 LINE 用戶 / 群組"]
+        LinePlatform["☁️ LINE Messaging Platform"]
     end
 
     subgraph n8n_Workflow["n8n 自動化工作流程"]
         WebhookTrigger["⚡ Webhook Trigger (接收訊息)"]
         ProcessNode["⚙️ 商業邏輯 / AI Agent / 資料庫"]
-        LineSendNode["📤 HTTP Request / LINE 節點 (發送回覆/推播)"]
+        LineSendNode["📤 HTTP Request (Reply / Push API)"]
     end
 
     User -->|1. 發送訊息| LinePlatform
     LinePlatform -->|2. Webhook 事件推播| WebhookTrigger
     WebhookTrigger --> ProcessNode
     ProcessNode --> LineSendNode
-    LineSendNode -->|3. Reply API / Push API| LinePlatform
+    LineSendNode -->|3. Reply API (免費) / Push API| LinePlatform
     LinePlatform -->|4. 呈現訊息| User
 ```
-
-1. **目標一：LINE 訊息觸發 n8n 工作流程**
-   - 用戶在 LINE 官方帳號傳送訊息時，LINE 伺服器即時透過 Webhook 將事件（JSON payload）推送到 n8n。
-   - n8n 解析用戶 ID (`userId`)、訊息內容 (`text`)、回覆權杖 (`replyToken`) 等資訊，作為後續自動化或 AI 處理的輸入。
-
-2. **目標二：n8n 節點呼叫 LINE Message 服務**
-   - **被動回覆（Reply Message）**：使用 `replyToken` 在時效內（約 1 分鐘內）免費回覆用戶訊息。
-   - **主動推播（Push Message）**：使用用戶的 `userId` 或群組 ID，在特定事件發生（如定時提醒、系統異常、訂單成立）時主動發送推播通知。
 
 ---
 
 ## 📚 實作範例導覽
 
-我們為您規劃了兩個獨立且聚焦的初階入門實作範例，每個範例皆附有獨立的工作流程樣版與 AI 協作 Prompt 提詞：
-
-| 範例名稱 | 核心技術 | 範例說明 | 資源連結 |
-| :--- | :--- | :--- | :--- |
-| **[範例 1：LINE 訊息觸發工作流程](./LINE訊息觸發工作流/README.md)** | Webhook 節點、Respond to Webhook、Code/Set 解析 | 學習如何監聽 LINE 訊息事件，在 1 秒內回傳 200 OK，並精準解析 `userId`、文字內容與 `replyToken`。 | [教學文檔](./LINE訊息觸發工作流/README.md) · [下載樣版](./LINE訊息觸發工作流/line_webhook_trigger.json) |
-| **[範例 2：n8n 呼叫 LINE 發送訊息](./n8n呼叫LINE發送訊息/README.md)** | HTTP Request 節點、Header Auth 憑證、Push API | 學習如何手動或排程觸發，透過 Header Auth 憑證主動推播通知至指定 LINE 用戶或群組。 | [教學文檔](./n8n呼叫LINE發送訊息/README.md) · [下載樣版](./n8n呼叫LINE發送訊息/line_push_message.json) |
-
-> 💡 **進階雙向整合**：若您需要將「訊息接收」與「即時回覆」整合為單一工作流程，可直接參考本頁下方的 [第三步：完整雙向工作流程解析](#第三步n8n-工作流程實作解析) 或下載 [`line_bot_workflow.json`](./line_bot_workflow.json)。
+本教學規劃了兩個獨立且聚焦的初階入門實作範例，幫助您循序漸進掌握 LINE 與 n8n 的整合應用：
 
 ---
 
-## 🛠️ 第一步：LINE Developers Console 前置設定
+### 1. [範例：LINE 訊息觸發 n8n 工作流程](./LINE訊息觸發工作流/README.md)
 
-> [!TIP]
-> 完整的圖文逐步教學（包含 Provider / Channel 建立、手機掃描 QR Code 加好友/進群組、關閉官方自動回應、以及 n8n Header Auth 憑證設定），請參考 **[📱 LINE Messaging API 設定指南（圖文完整版）](../../line設定/README.md)**。
+學習如何使用 Webhook 節點監聽 LINE 官方帳號接收到的訊息事件，並在 n8n 中解析用戶與訊息資料。
 
-### 1. 建立 Messaging API Channel
-1. 前往 [LINE Developers Console](https://developers.line.biz/) 並以 LINE 帳號登入。
-2. 建立或選擇 **Provider（提供者）**。
-3. 點擊 **Create a new channel**，選擇 **Messaging API**。
-4. 填寫機器人名稱、描述、分類與 Email 後完成建立。
+**學習重點**：
+- 使用 Webhook 節點接收 LINE 伺服器推播事件
+- 使用 Respond to Webhook 節點即時回傳 200 OK，防止重試風暴
+- 使用 Code / Set 節點解析 `userId`、`userMessage`、`replyToken`
+- 使用 IF 條件節點分流文字訊息與其他事件
 
-### 2. 掃描 QR Code 將 Bot 加入好友或群組
-1. 進入頻道設定的 **Messaging API** 分頁。
-2. 使用手機 LINE App **掃描 QR code**，將 Bot 加入好友，或邀請加入指定群組。
-3. 確認 **LINE Official Account features** 中的 **Allow bot to join group chats** 為 **Enabled**。
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-### 3. 取得 Channel 憑證
-1. **Channel Secret**：在 **Basic settings** 分頁取得並複製保存。
-2. **Channel Access Token (long-lived)**：在 **Messaging API** 分頁最下方點擊 **Issue** 取得長期存取權杖。
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 自動在畫布上建構出 LINE Webhook 接收與解析工作流程。
 
-### 4. 設定 LINE 官方帳號回應模式
-1. 透過頁面連結前往 **LINE Official Account Manager**。
-2. 進入「回應設定」：
-   - **回應模式**：設為「聊天機器人 (Bot)」
-   - **自動回應訊息**：設為「停用 (Disabled)」（避免官方與 n8n 重複回覆）
-
----
-
-## 🔗 第二步：n8n Webhook 與 LINE Webhook URL 綁定
-
-LINE 要求 Webhook 必須是公開且合法的 **HTTPS** 網址。
-
-### 1. 本地開發環境（使用 ngrok）
-若您的 n8n 運行在本地端（如 `localhost:5678`），請透過 ngrok 開啟公開通道：
-```bash
-ngrok http 5678
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請在我的 n8n 畫布上從無到有建立一個「LINE 訊息接收與解析」工作流程：
+1. 新增 Webhook 觸發節點：
+   - HTTP Method 設為 POST。
+   - Path 設為 line-webhook。
+   - Response Mode 設為 Using 'Respond to Webhook' Node。
+2. 連接 Respond to Webhook 節點，立即回傳 JSON {"status": "ok"}。
+3. 同時連接 Code 節點，JavaScript 邏輯需解析 $input.first().json.body.events[0]，提取出 eventType, messageType, userMessage, replyToken, userId。
+4. 連接 IF 節點，判斷 messageType 是否等於 "text"。
+5. 在 True 分支連接 Edit Fields (Set) 節點，輸出包含 status: "處理成功" 與 logSummary: "收到來自 {{ $json.userId }} 的訊息：{{ $json.userMessage }}"。
+請幫我建立所有節點並完成連線！
 ```
-取得 HTTPS 網址（例如：`https://xxxx-xx-xx.ngrok-free.app`）。
-
-### 2. 取得 n8n Webhook URL
-在 n8n 工作流程中建立 **Webhook** 節點：
-- **HTTP Method**：`POST`
-- **Path**：`line-webhook`
-- **Response Mode**：`Using 'Respond to Webhook' Node`（建議）或 `On Received`
-
-> 📌 **Webhook URL 格式**：
-> - **測試用 (Test URL)**：`https://<你的網域>/webhook-test/line-webhook`
-> - **正式用 (Production URL)**：`https://<你的網域>/webhook/line-webhook`
-
-### 3. 在 LINE Developers 設定 Webhook URL
-1. 回到 LINE Developers 的 **Messaging API** 分頁。
-2. 在 **Webhook URL** 欄位貼上 n8n 的 Webhook URL。
-3. 開啟 **Use webhook** 開關。
-4. 點擊 **Verify** 按鈕測試連線，若 n8n 正在監聽並回應 200，將顯示 `Success`。
+</details>
 
 ---
 
-## 🧩 第三步：n8n 工作流程實作解析
+### 2. [範例：n8n 節點呼叫 LINE Message 服務（主動推播）](./n8n呼叫LINE發送訊息/README.md)
 
-我們提供了開箱即用的工作流程範本：[`line_bot_workflow.json`](./line_bot_workflow.json)。
+學習如何透過 HTTP Request 節點搭配 Header Auth 憑證，主動呼叫 LINE Push Message API 發送推播通知。
 
-### 1. 工作流程節點架構
+**學習重點**：
+- 手動 (Manual) 或排程 (Schedule) 觸發工作流程
+- 使用 Set 節點設定推播目標 `targetUserId` 與訊息內容
+- 使用 HTTP Request 節點調用 `https://api.line.me/v2/bot/message/push`
+- 正確綁定 Header Auth 憑證 (`Authorization: Bearer <Token>`)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 建立每日早上 08:30 自動抓取引言並推播至 LINE 的排程機器人。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我建立一個「每日早上 08:30 AI 晨報推播至 LINE」工作流程：
+1. 起點使用 Schedule Trigger 節點，設定為每天早上 08:30 觸發。
+2. 串接 HTTP Request 節點，向 https://zenquotes.io/api/random 抓取今日隨機名言。
+3. 串接 AI Agent（或 Basic LLM Chain）節點，搭配 Gemini 或 OpenAI Chat Model：
+   - 提示詞設定：「請將傳入的英文名言翻譯為繁體中文，並附加一句 30 字以內的今日工作激勵小語，格式排版美觀易讀。」
+4. 最後串接 HTTP Request 節點，使用 Header Auth 憑證呼叫 LINE Push API (POST https://api.line.me/v2/bot/message/push)，將 AI 產生的晨報推播給指定的 targetUserId。
+請直接幫我在畫布上建立並完成這套自動化流程！
+```
+</details>
+
+---
+
+## 💰 LINE 訊息費用與方案額度說明
+
+LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** 與 **Push (主動推播)**，這是設計自動化流程時最重要的成本考量：
+
+### 1. 訊息類型比較
+
+| 訊息類型 | 觸發方式 | 計費方式 | 配額限制 | 適用場景 |
+| :--- | :--- | :--- | :--- | :--- |
+| **被動回覆 (Reply API)** | 使用者先發訊息進來，n8n 透過 `replyToken` 回覆 | **完全免費** | **無上限**（不佔用任何方案額度） | AI 客服問答、關鍵字回覆、選單操作互動 |
+| **主動推播 (Push API)** | 系統定時或事件觸發，主動發送給特定 `userId` 或群組 | **依方案額度扣抵** | 超過額度需付費或升級方案 | 系統監控警報、定時晨報、訂單出貨通知 |
+
+> ⚠️ **重要注意事項**：
+> - `replyToken` 只能使用一次，且時效約 **1 分鐘**。逾期則無法再使用 Reply API 回覆，必須改用 Push API。
+> - 只要是「用戶主動發問，機器人即時回覆」的客服對話，**完全不需要擔心 LINE 訊息費用**！
+
+---
+
+### 2. LINE 官方帳號方案額度對照表
+
+| 方案名稱 | 月費 (NT$) | 每月免費推播額度 | 超額加購費用 | 適用對象 |
+| :--- | :--- | :--- | :--- | :--- |
+| **輕用量 (免費方案)** | **NT$ 0** | **200 則** | 不可加購（當月用完即無法主動推播） | 個人開發測試、小型內部通知 |
+| **中用量** | **NT$ 800** | **3,000 則** | 不可加購 | 中小型企業、定期推播需求 |
+| **高用量** | **NT$ 1,200** | **6,000 則** | 依量計費（每則約 NT$ 0.2 起） | 大型官方帳號、高頻率行銷通知 |
+
+---
+
+## 🧩 進階雙向整合工作流程樣版
+
+如果您需要將「訊息接收」與「即時回覆」整合為單一完整的雙向對話流程，我們也提供了整合型樣版：
+
+- [📥 下載雙向通訊工作流程樣版 (line_bot_workflow.json)](./line_bot_workflow.json)
 
 ```mermaid
 flowchart TD
     A["Webhook 觸發器\n(POST /line-webhook)"] --> B["Respond to Webhook\n(即時回傳 200 OK)"]
     A --> C["Code 節點\n(解析 LINE Payload)"]
     C --> D{"IF 條件判斷\n(是否為文字訊息?)"}
-    D -- 是 --> E["Set 節點\n(組合回覆字串)"]
-    D -- 否 --> F["結束或處理其他事件\n(圖片/位置/加入好友)"]
+    D -- 是 --> E["Set / AI 節點\n(產生回覆內容)"]
+    D -- 否 --> F["結束或分流其他事件\n(圖片/位置/加入好友)"]
     E --> G["HTTP Request 節點\n(呼叫 LINE Reply API)"]
 ```
-
-### 2. 重點節點設定說明
-
-#### (1) Code 節點：解析 LINE Payload
-LINE 的 Webhook 會包含 `events` 陣列，透過 JavaScript 提取關鍵欄位：
-```javascript
-const body = $input.first().json.body || {};
-const events = body.events || [];
-
-if (events.length === 0) {
-  return [];
-}
-
-const event = events[0];
-return [{
-  json: {
-    eventType: event.type,                  // 事件類型 (message, follow, unfollow...)
-    messageType: event.message?.type || '', // 訊息類型 (text, image, sticker...)
-    userMessage: event.message?.text || '', // 使用者輸入的文字
-    replyToken: event.replyToken || '',     // 回覆用 Token
-    userId: event.source?.userId || '',     // 使用者唯一識別碼
-    timestamp: event.timestamp
-  }
-}];
-```
-
-#### (2) HTTP Request 節點：呼叫 LINE Reply API（回覆訊息）
-- **Method**：`POST`
-- **URL**：`https://api.line.me/v2/bot/message/reply`
-- **Authentication**：選擇 `Predefined Credential Type` -> `Header Auth`（使用在 [LINE 設定指南](../../line設定/README.md#步驟-4在-n8n-設定-header-auth-憑證與發送訊息) 中建立的 `Authorization` 憑證）
-- **Body (JSON)**：
-  ```json
-  {
-    "replyToken": "={{ $json.replyToken }}",
-    "messages": [
-      {
-        "type": "text",
-        "text": "={{ $json.replyText }}"
-      }
-    ]
-  }
-  ```
-
----
-
-## 📢 第四步：主動推播訊息（Push Message）
-
-當您需要在特定時間（如每日定時報表）或外部事件觸發（如監控警報、資料庫異動）時主動發訊息給使用者，可使用 LINE Push API。
-
-### HTTP Request 節點設定：
-- **Method**：`POST`
-- **URL**：`https://api.line.me/v2/bot/message/push`
-- **Authentication**：選擇 `Predefined Credential Type` -> `Header Auth`
-- **Body (JSON)**：
-  ```json
-  {
-    "to": "U1234567890abcdef1234567890abcdef",
-    "messages": [
-      {
-        "type": "text",
-        "text": "🔔 [系統推播通知]\n今日伺服器備份已於 03:00 完成！"
-      }
-    ]
-  }
-  ```
-
-> 💡 **如何取得用戶的 `userId`？**
-> 當用戶第一次傳送訊息給機器人時，LINE Webhook payload 中的 `events[0].source.userId` 即為該用戶的固定 ID（格式為 `U` 開頭的 33 碼字串）。您可以透過 n8n 將其儲存至 Google Sheets、PostgreSQL 或 Notion 中備用。
-
-### 💰 LINE 訊息費用與方案額度說明
-
-LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** 與 **Push (主動推播)**：
-
-1. **被動回覆（Reply API）— 完全免費無上限**：
-   - 使用者發訊息進來，n8n 透過 `replyToken` 在 1 分鐘內回覆，**完全不佔用任何額度，也不收費**。
-2. **主動推播（Push API / Multicast）— 依方案計費**：
-   - 當 n8n 主動發送通知給特定用戶時，會扣除該官方帳號的每月訊息配額。
-   - **LINE 官方帳號方案對照**：
-     - **輕用量 (免費方案)**：月費 NT$0，每月提供 **200 則** 免費推播訊息（超過額度無法加購，當月無法再發送推播）。
-     - **中用量**：月費 NT$800，每月提供 **3,000 則** 訊息（不可加購）。
-     - **高用量**：月費 NT$1,200，每月提供 **6,000 則** 訊息（超過可加購，每則 NT$0.2 起）。
-
----
-
-## 🤖 AI 賦能延伸實作（附 Prompt 提詞）
-
-透過 n8n 的 **AI Agent** 節點與 LINE 串接，可將 LINE 機器人升級為具備記憶、知識庫查詢與工具調用能力的智能助理。
-
-<details>
-<summary>🤖 <strong>複製給 AI 助理的升級 Prompt</strong></summary>
-
-```text
-請幫我在目前的「LINE 雙向通訊工作流程」中加入 AI Agent 對話能力：
-1. 保持原本的 LINE Webhook 觸發器與 Payload 解析。
-2. 在「是否為文字訊息」成立後，將使用者的 userMessage 接入 AI Agent 節點。
-3. 在 AI Agent 中配置：
-   - 模型：OpenAI Chat Model (GPT-4o-mini) 或 Gemini Chat Model
-   - 系統提示詞 (System Prompt)：「你是一個親切的 LINE 智能助手，請用繁體中文以簡潔清晰的語氣回覆使用者問題。」
-   - 記憶組件：Window Buffer Memory（使用 userId 作為 Session Key 維持對話上下文）
-4. 將 AI Agent 產生的回覆文字，透過 HTTP Request 呼叫 LINE Reply API 回傳給使用者。
-請幫我建立相關節點與連線！
-```
-</details>
-
----
-
-## ⚠️ 常見問題與排錯指南
-
-| 問題現象 | 常見原因 | 解決方式 |
-| :--- | :--- | :--- |
-| **LINE Developers 點擊 Verify 顯示錯誤** | Webhook 未啟動或回傳非 200 狀態碼 | 確保 n8n 處於「Listen for test event」或 Workflow 已設為 **Active**，並確保有回傳 HTTP 200。 |
-| **HTTP 401 Unauthorized** | Channel Access Token 錯誤或過期 | 檢查 Header Auth 憑證中的 `Authorization` 是否為 `Bearer <TOKEN>`，並確認 Token 是否正確複製。 |
-| **HTTP 400 Bad Request** | `replyToken` 失效或 JSON 格式錯誤 | `replyToken` 只能使用一次且時效極短（約 1 分鐘），請勿在同一次事件中重複呼叫 Reply API。 |
-| **機器人會收到重複訊息** | LINE 伺服器在沒收到 200 回應時會自動重試 | 務必在工作流程中加入 `Respond to Webhook` 節點即時回傳 HTTP 200。 |
-| **LINE 官方帳號重複回覆兩次** | 官方預設自動回應未關閉 | 請至 LINE Official Account Manager 回應設定中關閉「自動回應訊息」。 |
 
 ---
 
