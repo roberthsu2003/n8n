@@ -46,11 +46,11 @@ flowchart LR
 
 ## 📚 實作範例導覽
 
-本教學規劃了兩個獨立且聚焦的初階入門實作範例，幫助您循序漸進掌握 LINE 與 n8n 的整合應用：
+本教學規劃了三個循序漸進的實作範例，從單向觸發、主動推播到完整的雙向自動回覆對話閉環：
 
 ---
 
-### 1. [範例：LINE 訊息觸發 n8n 工作流程](./LINE訊息觸發工作流/README.md)
+### 1. [範例 1：LINE 訊息觸發 n8n 工作流程](./LINE訊息觸發工作流/README.md)
 
 學習如何使用 Webhook 節點監聽 LINE 官方帳號接收到的訊息事件，並在 n8n 中解析用戶與訊息資料。
 
@@ -82,7 +82,7 @@ flowchart LR
 
 ---
 
-### 2. [範例：n8n 節點呼叫 LINE Message 服務（主動推播）](./n8n呼叫LINE發送訊息/README.md)
+### 2. [範例 2：n8n 節點呼叫 LINE Message 服務（主動推播）](./n8n呼叫LINE發送訊息/README.md)
 
 學習如何透過 HTTP Request 節點搭配 Header Auth 憑證，主動呼叫 LINE Push Message API 發送推播通知。
 
@@ -106,6 +106,36 @@ flowchart LR
    - 提示詞設定：「請將傳入的英文名言翻譯為繁體中文，並附加一句 30 字以內的今日工作激勵小語，格式排版美觀易讀。」
 4. 最後串接 HTTP Request 節點，使用 Header Auth 憑證呼叫 LINE Push API (POST https://api.line.me/v2/bot/message/push)，將 AI 產生的晨報推播給指定的 targetUserId。
 請直接幫我在畫布上建立並完成這套自動化流程！
+```
+</details>
+
+---
+
+### 3. [範例 3：LINE 雙向通訊與自動回覆（Bot 完整對話流程）](./LINE雙向通訊與自動回覆/README.md)
+
+整合「**接收訊息 (Webhook)**」與「**免費即時回覆 (Reply API)**」，建構完整的 LINE Bot 雙向通訊閉環，亦可無縫接入 AI Agent 升級為智慧客服！
+
+**學習重點**：
+- 完整雙向通訊架構：接收 Webhook ➔ 解析 ➔ 條件分流 ➔ 呼叫 Reply API
+- 使用 `replyToken` 在 1 分鐘內免費被動回覆（完全不計入 LINE 訊息費用額度）
+- 透過 Header Auth 憑證安全授權 LINE Messaging API
+- 無縫串接 AI Agent (LLM) 與對話記憶 (Memory) 打造智能客服
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 自動在畫布上建構出完整的雙向自動回覆工作流程，或升級為 AI 智慧問答客服。
+
+**可直接複製給 AI 的 Prompt 提詞（建立雙向工作流）**：
+```text
+請在我的 n8n 畫布上從無到有建立一個「LINE 雙向通訊與自動回覆」工作流程：
+1. 新增 Webhook 觸發器（POST /line-webhook，Using 'Respond to Webhook' Node）。
+2. 連接 Respond to Webhook 節點（回傳 {"status": "ok"}）。
+3. 同時連接 Code 節點，解析 events[0] 中的 replyToken, userId, userMessage, messageType。
+4. 連接 IF 節點，條件為 messageType 等於 "text"。
+5. 在 True 分支連接 Set 節點，組合 replyText: "您好！已收到您的訊息：「{{ $json.userMessage }}」" 並傳遞 replyToken。
+6. 最後連接 HTTP Request 節點（POST https://api.line.me/v2/bot/message/reply），使用 Header Auth 憑證，並將 replyToken 與 replyText 填入 JSON Body。
+請幫我建立所有節點並完成連線！
 ```
 </details>
 
@@ -135,24 +165,6 @@ LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** �
 | **輕用量 (免費方案)** | **NT$ 0** | **200 則** | 不可加購（當月用完即無法主動推播） | 個人開發測試、小型內部通知 |
 | **中用量** | **NT$ 800** | **3,000 則** | 不可加購 | 中小型企業、定期推播需求 |
 | **高用量** | **NT$ 1,200** | **6,000 則** | 依量計費（每則約 NT$ 0.2 起） | 大型官方帳號、高頻率行銷通知 |
-
----
-
-## 🧩 進階雙向整合工作流程樣版
-
-如果您需要將「訊息接收」與「即時回覆」整合為單一完整的雙向對話流程，我們也提供了整合型樣版：
-
-- [📥 下載雙向通訊工作流程樣版 (line_bot_workflow.json)](./line_bot_workflow.json)
-
-```mermaid
-flowchart TD
-    A["Webhook 觸發器\n(POST /line-webhook)"] --> B["Respond to Webhook\n(即時回傳 200 OK)"]
-    A --> C["Code 節點\n(解析 LINE Payload)"]
-    C --> D{"IF 條件判斷\n(是否為文字訊息?)"}
-    D -- 是 --> E["Set / AI 節點\n(產生回覆內容)"]
-    D -- 否 --> F["結束或分流其他事件\n(圖片/位置/加入好友)"]
-    E --> G["HTTP Request 節點\n(呼叫 LINE Reply API)"]
-```
 
 ---
 
