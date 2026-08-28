@@ -7,6 +7,20 @@
 
 ---
 
+### 🔗 Webhook URL 綁定設定
+
+在 n8n 匯入工作流程後，請依序完成 Webhook 網址的複製與 LINE Developers 綁定：
+
+1. **複製 Webhook URL**：
+   - 點開「LINE Webhook 觸發器」節點，複製 **Production URL**（例如：`https://<你的網域>/webhook/line-webhook`）或測試用的 **Test URL**。
+2. **貼至 LINE Developers**：
+   - 登入 LINE Developers Console，進入 **Messaging API** 分頁。
+   - 在 **Webhook URL** 貼上網址，開啟 **Use webhook** 並點擊 **Verify** 確認回傳 Success。
+
+> 📌 完整的 LINE Channel 建立與前置設定請參閱 **[📱 LINE Messaging API 設定指南](../../../line設定/README.md)**。
+
+---
+
 ### 流程架構圖
 
 ```mermaid
@@ -73,19 +87,6 @@ flowchart LR
 - **LINE 官方帳號客服監聽**：即時接收客戶提問並轉發至團隊 Telegram 或 Slack。
 - **客戶資料自動建檔**：擷取用戶傳送的姓名、電話或預約資訊，寫入 Google Sheets 或 Supabase。
 - **AI 智能客服入口**：作為對話機器人的接收起點，將 `userMessage` 送入 AI Agent 生成回覆。
-
----
-
-#### ⚙️ 設定步驟
-
-1. **取得前置設定**：請確保已依照 **[📱 LINE 設定指南](../../../line設定/README.md)** 建立好 Channel 並掃描 QR Code 加機器人為好友。
-2. **匯入工作流程**：在 n8n 介面點選 **Import from File** 匯入 [`line_webhook_trigger.json`](./line_webhook_trigger.json)。
-3. **複製 Webhook URL**：
-   - 點開「LINE Webhook 觸發器」節點，複製 **Production URL**（例如：`https://<你的網域>/webhook/line-webhook`）或測試用的 **Test URL**。
-4. **貼至 LINE Developers**：
-   - 登入 LINE Developers Console，進入 **Messaging API** 分頁。
-   - 在 **Webhook URL** 貼上網址，開啟 **Use webhook** 並點擊 **Verify** 確認回傳 Success。
-5. **發送訊息測試**：使用手機 LINE 傳送文字訊息給官方帳號，即可在 n8n 觀察到工作流程被即時觸發！
 
 ---
 
