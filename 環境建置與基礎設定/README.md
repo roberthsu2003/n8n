@@ -34,7 +34,7 @@
 
 ### 🌐 二、外網通道與安全連線
 
-#### 🌐 4. [生產級 Tunnel 安全通道方案](../tunnel/README.md)
+#### 🌐 4. [生產級 Tunnel 安全通道方案 (Cloudflare Tunnel)](../cloudflare_tunnel/README.md)
 **重點內容**：
 - 為何正式生產環境需搭配專屬網域名稱與固定 HTTPS
 - **Cloudflare Tunnel (cloudflared)** 免開放路由器連接埠之高安全部署

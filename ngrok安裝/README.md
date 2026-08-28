@@ -5,7 +5,7 @@
 > ⚠️ **重要環境區分與定位說明**：
 > - **⭐ 最佳推薦（容器整合）**：若您在 Windows 或 macOS 開發，**強烈推薦改用 [n8n + ngrok 容器化整合方案](../n8n_ngrok/README.md)**！ngrok 與 n8n 一同運行於 Docker 中，**徹底解決 Windows Defender 將本機 ngrok.exe 誤判為病毒的問題**，且支援一鍵雙啟與靜態固定網域。
 > - **⚡ 本機獨立安裝（本教學）**：於作業系統直接安裝 ngrok CLI 工具。優點是靈活，但 Windows 需注意防毒攔截問題。
-> - **🚀 正式生產環境（Production）**：若需 7x24 小時常駐運行、綁定自有固定網域且無通道數量限制，請參考專門的正式方案 👉 **[生產級安全通道與穿透方案 (Cloudflare Tunnel)](../tunnel/README.md)**。
+> - **🚀 正式生產環境（Production）**：若需 7x24 小時常駐運行、綁定自有固定網域且無通道數量限制，請參考專門的正式方案 👉 **[生產級安全通道與穿透方案 (Cloudflare Tunnel)](../cloudflare_tunnel/README.md)**。
 
 本教學採用 **ngrok** 建立安全通道（Tunnel），將本機的 `5678` 連接埠映射至公開的網際網路網址。無論是使用 **macOS**、**Windows** 或 **Raspberry Pi (Linux)** 皆能輕鬆設定。
 
