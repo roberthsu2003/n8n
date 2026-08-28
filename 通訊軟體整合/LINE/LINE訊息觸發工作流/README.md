@@ -11,12 +11,12 @@
 
 ```mermaid
 flowchart LR
-    A["📱 LINE 用戶\n(發送文字訊息)"] --> B["⚡ LINE Webhook 觸發器\n(POST /line-webhook)"]
-    B --> C["⚡ 即時回傳 200 OK\n(Respond to Webhook)"]
-    B --> D["⚙️ 解析 LINE 訊息\n(Code 節點)"]
-    D --> E{"🔀 是否為文字訊息？\n(IF 條件判斷)"}
-    E -- 是 --> F["📋 整理輸出日誌\n(Set 節點)"]
-    E -- 否 --> G["⏹️ 忽略/分流其他事件\n(圖片/加入好友等)"]
+    A["📱 LINE 用戶發送訊息"] --> B["⚡ LINE Webhook 觸發器"]
+    B --> C["⚡ 即時回傳 200 OK"]
+    B --> D["⚙️ 解析 LINE 訊息 (Code 節點)"]
+    D --> E{"是否為文字訊息？"}
+    E -->|是| F["📋 整理輸出日誌 (Set 節點)"]
+    E -->|否| G["⏹️ 忽略或分流其他事件"]
 ```
 
 ---

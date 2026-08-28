@@ -24,21 +24,21 @@
 ```mermaid
 flowchart LR
     subgraph LINE_Ecosystem["LINE 生態系"]
-        User["📱 LINE 用戶 / 群組"]
-        LinePlatform["☁️ LINE Messaging Platform"]
+        User["📱 LINE 用戶或群組"]
+        LinePlatform["☁️ LINE 訊息平台"]
     end
 
     subgraph n8n_Workflow["n8n 自動化工作流程"]
-        WebhookTrigger["⚡ Webhook Trigger (接收訊息)"]
-        ProcessNode["⚙️ 商業邏輯 / AI Agent / 資料庫"]
-        LineSendNode["📤 HTTP Request (Reply / Push API)"]
+        WebhookTrigger["⚡ Webhook Trigger 接收訊息"]
+        ProcessNode["⚙️ 商業邏輯 / AI Agent"]
+        LineSendNode["📤 HTTP Request 發送回覆或推播"]
     end
 
     User -->|1. 發送訊息| LinePlatform
     LinePlatform -->|2. Webhook 事件推播| WebhookTrigger
     WebhookTrigger --> ProcessNode
     ProcessNode --> LineSendNode
-    LineSendNode -->|3. Reply API (免費) / Push API| LinePlatform
+    LineSendNode -->|3. Reply API 或 Push API| LinePlatform
     LinePlatform -->|4. 呈現訊息| User
 ```
 
