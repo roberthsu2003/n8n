@@ -1,333 +1,191 @@
-# Cloudflare Tunnel 完整設定指南 ☁️
+# Cloudflare Tunnel 整合 Docker n8n 完整設定指南 ☁️
+
+本指南詳細說明如何使用 **Cloudflare Tunnel (`cloudflared`)** 為本機或伺服器上的 **Docker n8n** 建立安全、穩定的永久外網 HTTPS 通道。
+
+透過 Cloudflare Tunnel，您的 n8n 能以專屬自訂網域（例如 `n8n.yourdomain.com`）接收 **LINE Bot Webhook、Google / Notion OAuth 2.0 授權回呼** 以及進行遠端工作流管理，**完全無需在路由器設定通訊埠轉發 (Port Forwarding)**，享有 Cloudflare 全球 CDN 快取與 DDoS 安全防護。
+
+---
 
 ## 📋 目錄
 
 - [什麼是 Cloudflare Tunnel？](#什麼是-cloudflare-tunnel)
-- [快速開始](#快速開始)
-  - [前置需求](#前置需求)
-  - [選擇部署方式](#選擇部署方式)
-- [方式一：在 Raspberry Pi OS 上設定（推薦初學者）](#方式一在-raspberry-pi-os-上設定推薦初學者)
-  - [步驟一：設定個人網域](#步驟一設定個人網域)
-  - [步驟二：建立 Tunnel](#步驟二建立-tunnel)
-  - [步驟三：整合 DNS](#步驟三整合-dns)
-  - [步驟四：驗證與檢查](#步驟四驗證與檢查)
-- [方式二：使用 Docker 部署（進階使用者）](#方式二使用-docker-部署進階使用者)
-  - [使用 docker run 指令 -> network:host](#使用-docker-run-指令--networkhost)
-  - [使用 docker run 指令 -> network:bridge](#使用-docker-run-指令--networkbridge)
+  - [核心運作觀念](#核心運作觀念)
+  - [Tunnel vs 傳統 Port Forwarding](#tunnel-vs-傳統-port-forwarding)
+- [前置需求](#前置需求)
+- [詳細設定流程](#詳細設定流程)
+  - [第 1 階段：設定個人網域與 DNS 移轉](#第-1-階段設定個人網域與-dns-移轉)
+  - [第 2 階段：在 Cloudflare 建立 Tunnel](#第-2-階段在-cloudflare-建立-tunnel)
+  - [第 3 階段：使用 Docker 啟動 cloudflared 通道容器](#第-3-階段使用-docker-啟動-cloudflared-通道容器)
+  - [第 4 階段：設定已發佈應用程式路由 (指向 n8n)](#第-4-階段設定已發佈應用程式路由-指向-n8n)
+  - [第 5 階段：設定 n8n 環境變數與驗證連線](#第-5-階段設定-n8n-環境變數與驗證連線)
+- [⚠️ 常見問題與排錯指南](#️-常見問題與排錯指南)
 
 ---
 
 ## 什麼是 Cloudflare Tunnel？
 
-Cloudflare Tunnel 是一種能夠安全地將您的內部服務連接到 Cloudflare 全球網路的工具，而無需對外暴露公開的 IP 位址。它透過在您的伺服器上運行的輕量級代理程式 `cloudflared`，建立一個僅限對外的安全連線，讓內外部流量可以雙向傳輸。
+Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8n）連接到 Cloudflare 全球邊緣網路的工具，而**無需對外公開本機或伺服器的實體 IP 位址**。
 
-### 核心觀念
+### 核心運作觀念
 
-> **建立一個 Tunnel 通道，並在您的裝置上執行 `cloudflared` 程式來連接它。接著，設定一個公開的主機名稱 (例如 `app.yourdomain.com`)，並將其對應到您本機的服務 (例如 `http://localhost:8080`)。**
+> **在主機上透過 Docker 運行輕量級代理程式 `cloudflared`，它會主動向 Cloudflare 發起安全的加密連線（Outbound Connection）。當外部使用者或 Webhook 發送請求至您的公開網域名稱（例如 `https://n8n.yourdomain.com`）時，Cloudflare 會透過此加密通道將流量轉發給本地的 n8n 服務（`http://localhost:5678`）。**
 
 ![設定Cloudflare_Tunnel](./images/設定Cloudflare_Tunnel.png)
 
-**Tunnel vs 傳統的 Port Forwarding**
+### Tunnel vs 傳統 Port Forwarding
 
-> [Tunnel vs 傳統的port Forwarding的關念圖](./images/tunnel_portForwarding.png)
+| 比較項目 | 傳統 Port Forwarding (路由器轉發) | ☁️ Cloudflare Tunnel (推薦) |
+| :--- | :--- | :--- |
+| **路由器設定** | 需登入家用/公司路由器開啟連接埠 | **完全不需更動路由器設定** |
+| **真實 IP 暴露** | 外部可直接探測到您的真實公網 IP | **真實 IP 完全隱藏**，僅暴露 Cloudflare IP |
+| **SSL 憑證** | 需自行申請、安裝與定期續約憑證 | **自動享有 Cloudflare 免費 Edge SSL 憑證** |
+| **防火牆穿透** | 常被企業防火牆或 NAT 阻擋 | 僅需對外發起連線（Outbound），穿透力強 |
+| **DDoS 防禦** | 無（需自行承擔主機攻擊風險） | **原生享有 Cloudflare 全球 DDoS 防護** |
 
----
-
-## 快速開始
-
-### 前置需求
-
-在開始設定 Cloudflare Tunnel 之前，您需要：
-
-1. **一個個人網域**（可在 [GoDaddy](https://godaddy.com) 或其他註冊商購買）
-2. **Cloudflare 帳號**（免費版即可）
-3. **Raspberry Pi** 或已安裝 Docker 的伺服器
-4. **已運行的本機服務**（例如 Open WebUI、n8n 等）
-
-### 選擇部署方式
-
-根據您的使用情境選擇適合的部署方式：
-
-| 部署方式 | 適用對象 | 優點 |
-|---------|---------|------|
-| **Raspberry Pi OS** | 初學者、單一服務 | 設定簡單、易於理解 |
-| **Docker (docker run)** | 熟悉 Docker 的使用者 | 快速部署、易於管理 |
-| **Docker Compose** | 多服務管理、進階使用者 | 統一管理、配置清晰 |
-
-> 💡 **建議**：初學者先在 Raspberry Pi OS 上測試，熟悉流程後再使用 Docker 部署。
+![Tunnel vs 傳統的port Forwarding的觀念圖](./images/tunnel_portForwarding.png)
 
 ---
 
-## 方式一：在 Raspberry Pi OS 上設定（推薦初學者）
+## 前置需求
 
-### 步驟一：設定個人網域
+在開始設定前，請確認具備以下環境：
 
-> **核心觀念**：一旦將網域的名稱伺服器 (Nameserver) 指向 Cloudflare，DNS 的管理權限即由 Cloudflare 接管，而非原註冊商（如 GoDaddy）。
+1. **已註冊的個人頂級網域**（例如在 [GoDaddy](https://godaddy.com)、Namecheap 或 Cloudflare Registrar 購買的網域，如 `yourdomain.com`）。
+2. **Cloudflare 免費帳號**。
+3. **已安裝 Docker 並運行中的 n8n 容器**（預設監聽連接埠 `5678`）。
+
+---
+
+## 詳細設定流程
+
+### 第 1 階段：設定個人網域與 DNS 移轉
+
+> **核心觀念**：將網域註冊商的名稱伺服器 (Nameservers) 指向 Cloudflare，將網域的 DNS 解析權限交由 Cloudflare 全權託管。
 
 ![網域管轄權的轉移](./images/網域管轄權的轉移.png)
 
-#### 1. 註冊網域並更新名稱伺服器
+#### 1. 新增網站至 Cloudflare
+1. 登入 [Cloudflare Dashboard](https://dash.cloudflare.com/)。
+2. 點擊右上角「**新增站點 (Add a site)**」，輸入您的個人網域名稱（例如：`yourdomain.com`）。
+3. 選擇 **Free (免費)** 方案並繼續。
+4. Cloudflare 會掃描您現有的 DNS 記錄，確認後進入下一步。
+5. 取得 Cloudflare 提供的 **兩組專屬名稱伺服器位址**（例如 `ada.ns.cloudflare.com` 與 `bob.ns.cloudflare.com`）。
 
-1. **註冊網域**：於網域註冊商（如 [GoDaddy](https://godaddy.com)）申請一個個人網域。
-2. **新增網站至 Cloudflare**：
-   * 登入 [Cloudflare](https://cloudflare.com)
-   * 將您剛申請的網域新增為一個站點
-   * 進入該站點的 DNS 設定頁面
-   * Cloudflare 會提供兩組專屬的名稱伺服器 (Nameserver) 位址
-3. **更新名稱伺服器**：
-   * 回到 GoDaddy 的 DNS 管理頁面
-   * 找到「名稱伺服器 (Nameservers)」設定
-   * 將其從 GoDaddy 預設值更改為 Cloudflare 提供的那兩組位址
+#### 2. 在網域註冊商更換 Nameservers
+1. 回到您購買網域的註冊商（如 GoDaddy）。
+2. 進入該網域的 **DNS 管理 > 名稱伺服器 (Nameservers)** 設定。
+3. 將預設名稱伺服器更改為 **自訂名稱伺服器**，並填入剛剛從 Cloudflare 取得的兩組位址。
+4. 儲存設定（全球 DNS 生效通常需數分鐘至數小時）。
 
-#### 2. 驗證網域設定
-
-**圖形化介面 (GUI) 驗證**
-
-1. 登入 Cloudflare，檢查您網域專案的狀態是否顯示為 **`使用中 (Active)`**
-2. 導覽至專案內的 **`DNS > 記錄 (Records)`** 頁面，確認您有權限新增或編輯 DNS 記錄
-
-**命令列介面 (CLI) 驗證**
-
-若您的系統（如 Raspberry Pi）尚未安裝 DNS 查詢工具，請執行：
-
-```bash
-sudo apt update
-sudo apt install dnsutils
-```
-
-接著，查詢您網域的 NS (Name Server) 記錄：
-
-```bash
-# 使用 nslookup
-nslookup -type=NS your-domain.com
-
-# 或使用 dig
-dig NS your-domain.com
-```
-
-如果回傳的結果是 Cloudflare 提供的那兩組伺服器位址，即代表設定正確。
+#### 3. 驗證網域生效
+- 返回 Cloudflare Dashboard，當網域狀態顯示為 **`使用中 (Active)`** 時，代表 DNS 託管已成功切換！
 
 ![DNS解析流程圖](./images/DNS解析流程圖.png)
 
 ---
 
-### 步驟二：建立 Tunnel
+### 第 2 階段：在 Cloudflare 建立 Tunnel
 
-#### 1. 進入 Cloudflare Zero Trust 儀表板
-
-1. 在 Cloudflare 儀表板中，導覽至 **`Zero Trust`**
-2. 在左側選單中，選擇 **`網路 (Network) > 連接器`**
-3. 點擊 **`建立 Tunnel (Create a Tunnel)`**
-
-#### 2. 選擇通道類型
-
-* 通道類型選擇 **Cloudflared**
-
-  > Cloudflared 是 Cloudflare 提供的官方連接器，用來在本機與 Cloudflare 之間建立安全通道。
-
-#### 3. 為通道命名
-
-* 輸入通道名稱，例如：`web`、`app`、`n8n`
-* 此名稱僅用於管理與識別，不影響實際對外網址
-
-#### 4. 選擇執行環境
-
-* 依實際主機作業系統選擇，例如：**Debian**、**Ubuntu**、**Raspberry Pi OS**
-
-#### 5. 安裝 cloudflared 應用程式
-
-* 依照 Cloudflare 提供的指令，在終端機中下載並安裝 `cloudflared`
-* 安裝完成後，即可使用 `cloudflared` 指令
-
-#### 6. （建議）測試與服務安裝
-
-* 可先手動執行 Tunnel，確認可正常連線
-* 接著可將 `cloudflared` 安裝成系統服務（service），讓電腦或伺服器開機時自動啟動 Tunnel
-
-#### 7. 確認連線狀態
-
-* 回到 Dashboard 確認連線狀態
-* 若連線成功，下方 **Connectors** 區域會顯示該主機為 **已連線（Connected）**
-
-#### 8. 進入下一步
-
-* 確認無誤後，點選 **「下一步（Next）」**
+1. 在 Cloudflare Dashboard 左側選單中，點選 **`Zero Trust`** 進入控制台。
+2. 在 Zero Trust 左側選單中，導覽至 **`Networks (網路)` > `Tunnels (連接器)`**。
+3. 點擊 **`Add a tunnel (建立通道)`**。
+4. 選擇連接器類型為 **`Cloudflared`**，點選 Next。
+5. **為通道命名**：輸入識別名稱（例如：`n8n-tunnel`），點擊 **Save tunnel**。
 
 ---
 
-### 步驟三：整合 DNS
+### 第 3 階段：使用 Docker 啟動 cloudflared 通道容器
 
-此步驟的目的，是將自己的網域名稱（DNS）指向剛建立的 Tunnel。
+建立通道後，Cloudflare 會顯示各平台的安裝指令，其中包含專屬的 **Tunnel Token**。
 
-#### 1. 進入 DNS 整合設定
+#### 🚀 使用 Docker 啟動 cloudflared
 
-* 進入 **整合 DNS（Route Tunnel / Publish Application）** 步驟
+請開啟終端機，執行以下 Docker 指令啟動 `cloudflared` 容器：
 
-#### 2. 選擇應用程式類型
-
-* 選擇 **為 Web 新增已發佈的應用程式路由**
-
-  > 代表透過 Tunnel，將外部網域的請求安全地轉送到內部服務。
-
-#### 3. 設定主機名稱（Hostname）
-
-* **子網域（Subdomain）**：例如 `www`、`app`、`n8n`
-* **網域（Domain）**：選擇已加入 Cloudflare 並由其管理 DNS 的網域
-* 組合後的對外網址例如：`app.example.com`
-
-#### 4. （選擇性）設定路徑（Path）
-
-* 若只想讓特定路徑走此 Tunnel，可設定如：`/api`
-* 若整個網站或服務都使用 Tunnel，可留空
-
-#### 5. 設定服務（Service）
-
-* **類型（Type）**：通常選擇 `HTTP` 或 `HTTPS`
-* **URL**：輸入內部服務位址，例如：
-  * `http://localhost:3000`
-  * `http://127.0.0.1:5678`
-
-#### 6. （進階）其他應用程式設定
-
-* 可依需求調整逾時、HTTP Host Header、TLS 等進階選項
-* 教學或初學情境可先維持預設值
-
-#### 7. 完成設定
-
-* 點選 **「完成設定（Finish）」**
-* Cloudflare 會自動建立對應的 DNS 紀錄，並將流量導向 Tunnel
-
----
-
-### 步驟四：驗證與檢查
-
-#### 驗證設定結果
-
-1. 在瀏覽器輸入設定的網域名稱
-2. 若內部服務畫面可正常顯示，表示：
-   * DNS 設定成功
-   * Tunnel 連線成功
-   * 本機服務運作正常
-
-![the_full_journey](./images/the_full_journey.png)
-
-#### 檢查連線狀態
-
-之後，您可以在 Cloudflare 的 Tunnel 設定頁面，透過 **通道名稱** 區塊的狀態來判斷連線是否成功：
-
-* 正常連線時會顯示 **`連線`**
-* 若中斷則會顯示 **`關閉`**
-
----
-
-## 方式二：使用 Docker 部署（進階使用者）
-
-本節說明如何在 Docker 環境中設定 Cloudflare Tunnel，適用於已使用 Docker 部署服務的場景。
-
-### 使用 docker run 指令 -> network:host
-
-#### 步驟一：部署 Open WebUI 容器
-
-首先，建立 Open WebUI 服務容器：
-
-```docker
-docker run -d \
-  --network=host \
-  -v open-webui:/app/backend/data \
-  -e OLLAMA_BASE_URL=http://127.0.0.1:11434 \
-  --name open-webui \
-  --restart always \
-  ghcr.io/open-webui/open-webui:main
-```
-
-#### 步驟二：部署 Cloudflare Tunnel 容器
-
-##### ⚠️ 重要提醒
-
-**請勿直接使用 Cloudflare 官方文件建議的 Docker 指令**，否則會出現連線問題。
-
-##### 為什麼會出錯？
-
-此指令缺少以下關鍵參數，會導致連線失敗：
-
-1. **缺少 `--network=host` 參數**
-   * 容器無法正常連線到本機服務（如 `localhost:3000`）
-   * Tunnel 無法將外部請求轉送到內部服務
-
-2. **缺少 `-d` 參數**
-   * 容器以前景模式執行，終端機關閉後容器也會停止
-   * 無法在背景持續運行
-
-##### ✅ 正確的 Docker 指令
-
-使用以下指令可確保 Tunnel 正常運作：
-
-```docker
+```bash
 docker run -d \
   --name cloudflared \
   --network=host \
   --restart unless-stopped \
   cloudflare/cloudflared:latest \
-  tunnel run --token <TOKEN>
+  tunnel run --token <您的_CLOUDFLARE_TUNNEL_TOKEN>
 ```
 
-##### 指令參數說明
+> 💡 **參數重要解析**：
+> - `-d`：讓容器在後台持續運行，關閉終端機也不會中斷。
+> - `--name cloudflared`：自訂容器名稱，便於日後管理。
+> - `--network=host`：**關鍵參數**！讓 `cloudflared` 容器共享主機網路，可直接存取本地的 `localhost:5678` (n8n)。
+> - `--restart unless-stopped`：開機或 Docker 重啟時自動重新連線。
+> - `<您的_CLOUDFLARE_TUNNEL_TOKEN>`：請替換為 Cloudflare Dashboard 頁面上提供的 Token 字串。
 
-* `-d`：以後台模式（detached mode）執行容器
-* `--name cloudflared`：為容器命名，方便後續管理與操作
-* `--network=host`：使用主機網路模式，讓容器可以直接存取 `localhost` 服務
-* `--restart unless-stopped`：設定容器自動重啟策略，除非手動停止否則會自動重啟
-* `<TOKEN>`：請替換為您在 Cloudflare Dashboard 中取得的 Tunnel Token
-
-#### 步驟三：確認雲端 Cloudflare Tunnel 已發佈的應用程式路由
-
-**服務設定為：`http://localhost:8080`**
-
-![](./images/pic1.png)
+啟動後回到 Cloudflare 頁面，下方 **Connectors** 會即時顯示為 **`Connected (已連線)`** 綠色狀態，接著點擊 **Next**。
 
 ---
 
-### 使用 docker run 指令 -> network:bridge
+### 第 4 階段：設定已發佈應用程式路由 (指向 n8n)
 
-#### 步驟一：部署 Open WebUI 容器
+此步驟將您的子網域與本地執行的 Docker n8n 服務進行綁定。
 
-首先，建立 Open WebUI 服務容器：
+#### 1. 設定公開主機名稱 (Public Hostname)
+- **子網域 (Subdomain)**：填入欲對外公開的前綴，例如 `n8n`。
+- **網域 (Domain)**：下拉選擇您在 Cloudflare 託管的個人網域（例如 `yourdomain.com`）。
+- **路徑 (Path)**：留空（代表將所有路徑皆導向 n8n）。
+- 完整對外網址即為：`https://n8n.yourdomain.com`
 
-```docker
+#### 2. 設定後端服務 (Service)
+- **類型 (Type)**：選擇 **`HTTP`**。
+- **URL**：輸入本地 n8n 的通訊埠位址 **`localhost:5678`**（或 `127.0.0.1:5678`）。
+
+![設定已發佈的應用程式路由](./images/pic1.png)
+
+#### 3. 完成儲存
+- 點擊右下角 **`Save tunnel (完成設定)`**。
+- Cloudflare 會自動在 DNS 中建立一條 CNAME 記錄，將 `n8n.yourdomain.com` 的流量安全導向本機的 n8n。
+
+---
+
+### 第 5 階段：設定 n8n 環境變數與驗證連線
+
+為了讓 n8n 正確產生 Webhook 觸發網址與 OAuth 2.0 回呼網址，需將自訂網域寫入 n8n 的環境變數中。
+
+#### 1. 調整 n8n 容器環境變數
+若您使用 `docker run` 啟動 n8n，請確保帶入 `WEBHOOK_URL` 參數：
+
+```bash
 docker run -d \
-  -p 3000:8080 \
-  -v open-webui:/app/backend/data \
-  -e OLLAMA_BASE_URL=http://pi4Robert0301:11434 \
-  --name open-webui \
-  --restart always \
-  ghcr.io/open-webui/open-webui:main
-```
-
-#### 步驟二：部署 Cloudflare Tunnel 容器
-
-##### ✅ 正確的 Docker 指令
-
-使用以下指令可確保 Tunnel 正常運作：
-
-```docker
-docker run -d \
-  --name cloudflared \
-  --network=host \
+  --name n8n \
+  -p 5678:5678 \
+  -e WEBHOOK_URL=https://n8n.yourdomain.com/ \
+  -e N8N_DEFAULT_BINARY_DATA_MODE=filesystem \
+  -v n8n_data:/home/node/.n8n \
   --restart unless-stopped \
-  cloudflare/cloudflared:latest \
-  tunnel run --token <TOKEN>
+  docker.n8n.io/n8nio/n8n
 ```
 
-##### 指令參數說明
+> ⚠️ 請將 `https://n8n.yourdomain.com/` 替換為您在 Cloudflare Tunnel 設定的實際網址。
 
-* `-d`：以後台模式（detached mode）執行容器
-* `--name cloudflared`：為容器命名，方便後續管理與操作
-* `--network=host`：使用主機網路模式，讓容器可以直接存取 `localhost` 服務
-* `--restart unless-stopped`：設定容器自動重啟策略，除非手動停止否則會自動重啟
-* `<TOKEN>`：請替換為您在 Cloudflare Dashboard 中取得的 Tunnel Token
+#### 2. 驗證連線與端對端測試
+1. 打開瀏覽器，輸入網址：`https://n8n.yourdomain.com`
+2. 確認能順利開啟 n8n 登入介面，且網址列顯示安全的 **HTTPS 鎖頭** 標誌。
+3. 建立一個包含 **Webhook 節點** 的測試工作流，檢查節點內產生的「Production URL」是否已正確自動帶入 `https://n8n.yourdomain.com/webhook/...`。
 
-#### 步驟三：確認雲端 Cloudflare Tunnel 已發佈的應用程式路由
+![完整連線路徑驗證](./images/the_full_journey.png)
 
-**服務設定為：`http://localhost:3000`**
+---
 
-![](./images/pic2.png)
+## ⚠️ 常見問題與排錯指南
+
+### Q1: 瀏覽器開啟出現「502 Bad Gateway」？
+- **原因**：`cloudflared` 容器無法連線到本機的 n8n 服務。
+- **檢查重點**：
+  1. 確認 n8n 容器正在運行中，且於本機瀏覽器輸入 `http://localhost:5678` 可正常開啟。
+  2. 確認 `cloudflared` 容器啟動時有加上 `--network=host` 參數。
+  3. 在 Cloudflare Dashboard 檢查 Tunnel 的 Service URL 是否正確設定為 `HTTP` 與 `localhost:5678`。
+
+### Q2: LINE Webhook 提示驗證失敗 (SSL 憑證問題)？
+- Cloudflare Tunnel 預設提供由全球信任機構簽發的 Edge SSL 憑證，支援 LINE Developers 與 Google OAuth 嚴格的 HTTPS 檢驗。
+- 請確認 Cloudflare 的 **SSL/TLS 加密模式** 設定為 **Full** 或 **Flexible**。
+
+### Q3: 如何同時透過同一個 Tunnel 發布其他本地服務？
+- 在 Cloudflare Zero Trust 的 Tunnels 頁面點擊編輯該 Tunnel，前往 **`Public Hostname`** 標籤頁，點擊 **`Add a public hostname`**。
+- 您可以新增其他子網域（如 `api.yourdomain.com`）並對應至不同的本地 Port（如 `localhost:8000`），完全無需額外增加 Tunnel 費用或重新安裝連線程式！
