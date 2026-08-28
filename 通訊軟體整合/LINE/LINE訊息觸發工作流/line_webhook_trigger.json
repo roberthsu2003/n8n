@@ -1,5 +1,4 @@
 {
-  "name": "LINE 訊息觸發 n8n 接收範例",
   "nodes": [
     {
       "parameters": {
@@ -10,10 +9,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -300,
-        140
+        80,
+        -160
       ],
-      "id": "sticky-note-line-trigger",
+      "id": "602d8d73-853c-4eca-8cc3-c963c593a136",
       "name": "流程說明"
     },
     {
@@ -26,39 +25,39 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -200,
-        460
+        304,
+        208
       ],
-      "id": "line-webhook-trigger",
+      "id": "4580b68f-43cb-438f-90d8-778016ad6b90",
       "name": "LINE Webhook 觸發器",
       "webhookId": "line-webhook-trigger-id"
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{\"status\": \"ok\"}",
+        "responseBody": "{\"status\": \"ok\", \"message\": \"我已經收到你的訊息\"}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        80,
-        340
+        576,
+        96
       ],
-      "id": "respond-line-ok",
+      "id": "c27e7e4b-f9ac-4990-8539-e59d3bced946",
       "name": "即時回傳 200 OK"
     },
     {
       "parameters": {
-        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body || {};\nconst events = body.events || [];\n\nif (events.length === 0) {\n  return [];\n}\n\nconst event = events[0];\nconst messageType = event.message?.type || '';\nconst userMessage = event.message?.text || '';\nconst replyToken = event.replyToken || '';\nconst userId = event.source?.userId || '';\nconst groupId = event.source?.groupId || '';\nconst eventType = event.type || '';\n\nreturn [{\n  json: {\n    eventType,\n    messageType,\n    userMessage,\n    replyToken,\n    userId,\n    groupId,\n    timestamp: event.timestamp,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body || {};\nconst events = body.events || [];\n\nif (events.length === 0) {\n  return [{\n    json: {\n      status: 'no_events',\n      note: '這通常是 LINE Webhook URL 驗證請求或無訊息事件',\n      rawBody: body,\n      receivedAt: new Date().toISOString()\n    }\n  }];\n}\n\nconst event = events[0];\nconst messageType = event.message?.type || '';\nconst userMessage = event.message?.text || '';\nconst replyToken = event.replyToken || '';\nconst userId = event.source?.userId || '';\nconst groupId = event.source?.groupId || '';\nconst eventType = event.type || '';\n\nreturn [{\n  json: {\n    status: 'ok',\n    eventType,\n    messageType,\n    userMessage,\n    replyToken,\n    userId,\n    groupId,\n    timestamp: event.timestamp,\n    receivedAt: new Date().toISOString()\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        560
+        576,
+        320
       ],
-      "id": "parse-line-event",
+      "id": "29cf7e33-45d8-47d0-b7eb-42af6246da58",
       "name": "解析 LINE 訊息"
     },
     {
@@ -67,7 +66,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
@@ -87,10 +87,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        320,
-        560
+        816,
+        320
       ],
-      "id": "if-text-message",
+      "id": "d95d68d7-b659-414e-90ee-43b3d22b0e57",
       "name": "是否為文字訊息？"
     },
     {
@@ -116,10 +116,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        580,
-        480
+        1072,
+        240
       ],
-      "id": "format-output-log",
+      "id": "c22e2fe3-6371-4f03-8b41-d5c0c76090c0",
       "name": "整理輸出日誌"
     }
   ],
@@ -163,5 +163,10 @@
       ]
     }
   },
-  "pinData": {}
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
 }
