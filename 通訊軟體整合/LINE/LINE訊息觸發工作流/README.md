@@ -9,13 +9,21 @@
 
 ### 🔗 Webhook URL 綁定設定
 
-在 n8n 匯入工作流程後，請依序完成 Webhook 網址的複製與 LINE Developers 綁定：
+在 n8n 匯入工作流程後，請依序完成工作流程發布（Publish）與 Webhook 網址綁定：
 
-1. **複製 Webhook URL**：
-   - 點開「LINE Webhook 觸發器」節點，複製 **Production URL**（例如：`https://<你的網域>/webhook/line-webhook`）或測試用的 **Test URL**。
-2. **貼至 LINE Developers**：
-   - 登入 LINE Developers Console，進入 **Messaging API** 分頁。
-   - 在 **Webhook URL** 貼上網址，開啟 **Use webhook** 並點擊 **Verify** 確認回傳 Success。
+> [!IMPORTANT]
+> **必須先將工作流程設為 Published（正式啟用）！**
+> LINE Developers 的 Webhook 驗證（Verify）與真實訊息接收，**必須使用 Production URL（正式發布網址）** 且工作流程處於 **Published / Active** 狀態下才能成功回應 200 OK。
+
+1. **發布工作流程（Publish）**：
+   - 點擊 n8n 畫布右上角的 **Publish**（或將 Active 開關切換為啟用狀態）。
+2. **複製 Production Webhook URL**：
+   - 點開「LINE Webhook 觸發器」節點，切換至 **Production URL** 分頁並複製網址（格式為：`https://<你的網域>/webhook/line-webhook`）。
+3. **貼至 LINE Developers 並驗證**：
+   - 登入 [LINE Developers Console](https://developers.line.biz/console/)，進入您建立的 Channel ➔ **Messaging API** 分頁。
+   - 在 **Webhook URL** 欄位貼上剛複製的 **Production URL**。
+   - 將 **Use webhook** 切換為 **啟用（Enabled/On）**。
+   - 點擊 **Verify** 按鈕，確認出現 **`Success`** 綠色成功提示！
 
 > 📌 完整的 LINE Channel 建立與前置設定請參閱 **[📱 LINE Messaging API 設定指南](../../../line設定/README.md)**。
 
@@ -32,6 +40,12 @@ flowchart LR
     E -->|是| F["📋 整理輸出日誌 (Set 節點)"]
     E -->|否| G["⏹️ 忽略或分流其他事件"]
 ```
+
+---
+
+### 預覽圖
+
+![LINE 訊息觸發工作流程預覽](./images/pic1.png)
 
 ---
 

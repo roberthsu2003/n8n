@@ -69,10 +69,11 @@
 
 ### 2. Webhook 設定
 1. 在 **Messaging API** 分頁中找到 **Webhook settings** 區塊：
-   - **Webhook URL**：填入 n8n 的 Webhook 節點 URL（例如：`https://<your-n8n-domain>/webhook/...`）。
+   - **Webhook URL**：填入 n8n 的 Production Webhook URL（例如：`https://<your-n8n-domain>/webhook/...`）。
      > [!IMPORTANT]
-     > LINE Webhook 必須使用 **HTTPS** 協定，且需使用有效 SSL 憑證。
-   - 點擊 **Verify** 測試連線（需確保 n8n 的 Webhook 節點處於監聽或 Workflow 已啟用狀態）。
+     > - **必須先 Publish（啟用）工作流程**：LINE 點擊 Verify 或接收真實訊息時，n8n 工作流程必須處於 **Published / Active** 狀態且使用 **Production URL** 才能正常回應 200 OK。
+     > - LINE Webhook 必須使用 **HTTPS** 協定，且需使用有效 SSL 憑證。
+   - 點擊 **Verify** 測試連線，確認出現 **Success**。
    - 將 **Use webhook** 切換為 **啟用（Enabled/On）**。
 
 ### 3. LINE Official Account Manager 回應設定

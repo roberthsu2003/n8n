@@ -7,6 +7,28 @@
 
 ---
 
+### 🔗 Webhook URL 綁定設定
+
+在 n8n 匯入工作流程並綁定 Header Auth 憑證後，請依序完成工作流程發布（Publish）與 Webhook 網址綁定：
+
+> [!IMPORTANT]
+> **必須先將工作流程設為 Published（正式啟用）！**
+> LINE Developers 的 Webhook 驗證（Verify）與真實訊息接收，**必須使用 Production URL（正式發布網址）** 且工作流程處於 **Published / Active** 狀態下才能成功回應 200 OK。
+
+1. **發布工作流程（Publish）**：
+   - 點擊 n8n 畫布右上角的 **Publish**（或將 Active 開關切換為啟用狀態）。
+2. **複製 Production Webhook URL**：
+   - 點開「LINE Webhook 觸發器」節點，切換至 **Production URL** 分頁並複製網址（格式為：`https://<你的網域>/webhook/line-webhook`）。
+3. **貼至 LINE Developers 並驗證**：
+   - 登入 [LINE Developers Console](https://developers.line.biz/console/)，進入您建立的 Channel ➔ **Messaging API** 分頁。
+   - 在 **Webhook URL** 欄位貼上剛複製的 **Production URL**。
+   - 將 **Use webhook** 切換為 **啟用（Enabled/On）**。
+   - 點擊 **Verify** 按鈕，確認出現 **`Success`** 綠色成功提示！
+
+> 📌 完整的 LINE Channel 建立與前置設定請參閱 **[📱 LINE Messaging API 設定指南](../../../line設定/README.md)**。
+
+---
+
 ### 流程架構圖
 
 ```mermaid
@@ -85,16 +107,6 @@ flowchart LR
 - **LINE 智能對話機器人**：接收顧客問題並即時給予解答。
 - **關鍵字自動回覆系統**：判斷用戶輸入關鍵字（如「營業時間」、「菜單」、「地址」），回傳對應圖文。
 - **結合企業知識庫（RAG）**：將用戶問題轉送向量資料庫（如 Supabase / Pinecone）查詢後回覆。
-
----
-
-#### ⚙️ 設定步驟
-
-1. **確認前置憑證**：請確保已依照 **[📱 LINE 設定指南](../../../line設定/README.md)** 在 n8n 中建立了 `Header Auth` 憑證。
-2. **匯入工作流程**：在 n8n 介面點選 **Import from File** 匯入 [`line_bot_workflow.json`](./line_bot_workflow.json)。
-3. **綁定憑證**：點開「呼叫 LINE Reply API」節點，在 Authentication 選取您的 Header Auth 憑證。
-4. **設定 Webhook**：將 Webhook URL 填入 LINE Developers Console 的 Webhook URL 欄位並點擊 Verify。
-5. **對話測試**：開啟手機 LINE，向您的官方帳號發送任何文字訊息，機器人即會自動秒回！
 
 ---
 
