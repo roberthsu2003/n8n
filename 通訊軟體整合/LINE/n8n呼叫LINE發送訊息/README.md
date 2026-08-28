@@ -11,10 +11,10 @@
 
 ```mermaid
 flowchart LR
-    A["👆 手動執行 / ⏰ 定時排程\n(Manual / Schedule Trigger)"] --> B["📝 設定推播對象與內容\n(Edit Fields / Set 節點)"]
-    B --> C["📤 呼叫 LINE Push API\n(HTTP Request 節點 + Header Auth)"]
-    C --> D["☁️ LINE Messaging Platform\n(api.line.me/v2/bot/message/push)"]
-    D --> E["📱 LINE 用戶 / 群組\n(收到即時推播通知)"]
+    A["👆 手動執行或定時排程"] --> B["📝 設定推播對象與內容 (Set 節點)"]
+    B --> C["📤 呼叫 LINE Push API (HTTP Request)"]
+    C --> D["☁️ LINE 訊息平台 (Push 端點)"]
+    D --> E["📱 LINE 用戶或群組收到推播"]
 ```
 
 ---

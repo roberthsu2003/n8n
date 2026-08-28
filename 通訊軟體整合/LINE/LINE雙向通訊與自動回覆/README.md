@@ -11,14 +11,14 @@
 
 ```mermaid
 flowchart LR
-    A["📱 LINE 用戶\n(傳送文字訊息)"] --> B["⚡ Webhook 觸發器\n(POST /line-webhook)"]
-    B --> C["⚡ 即時回傳 200 OK\n(Respond to Webhook)"]
-    B --> D["⚙️ 解析訊息事件\n(Code 節點)"]
-    D --> E{"🔀 是否為文字訊息？\n(IF 條件判斷)"}
-    E -- 是 --> F["📝 準備回覆內容\n(Set / AI 節點)"]
-    E -- 否 --> G["⏹️ 忽略非文字事件\n(圖片/貼圖等)"]
-    F --> H["📤 呼叫 LINE Reply API\n(HTTP Request + Header Auth)"]
-    H --> I["📱 LINE 用戶\n(即時收到機器人回覆)"]
+    A["📱 LINE 用戶傳送訊息"] --> B["⚡ Webhook 觸發器"]
+    B --> C["⚡ 即時回傳 200 OK"]
+    B --> D["⚙️ 解析訊息事件 (Code 節點)"]
+    D --> E{"是否為文字訊息？"}
+    E -->|是| F["📝 準備回覆內容 (Set 或 AI 節點)"]
+    E -->|否| G["⏹️ 忽略非文字事件"]
+    F --> H["📤 呼叫 LINE Reply API (HTTP Request)"]
+    H --> I["📱 LINE 用戶收到回覆"]
 ```
 
 ---

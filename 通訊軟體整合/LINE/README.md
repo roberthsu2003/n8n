@@ -167,11 +167,3 @@ LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** �
 | **高用量** | **NT$ 1,200** | **6,000 則** | 依量計費（每則約 NT$ 0.2 起） | 大型官方帳號、高頻率行銷通知 |
 
 ---
-
-## 📚 相關資源
-
-- [📱 LINE Messaging API 設定指南（圖文完整版）](../../line設定/README.md)
-- [LINE Developers 官方文件 (Messaging API)](https://developers.line.biz/en/docs/messaging-api/)
-- [LINE Messaging API Reference](https://developers.line.biz/en/reference/messaging-api/)
-- [n8n Webhook 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
-- [Telegram 整合實作教學](../Telegram/README.md)
