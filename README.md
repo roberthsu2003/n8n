@@ -23,7 +23,7 @@
 **包含主題**：
 - ⭐ **極速推薦**：[n8n + ngrok 容器化整合安裝 (解決 Windows 防毒誤判)](./n8n_ngrok/README.md)
 - 🐳 **容器基礎**：[Docker 安裝指南](./docker安裝/README.md) ｜ [n8n 獨立容器安裝與啟動](./n8n簡介與安裝/README.md)
-- 🌐 **外網通道**：[生產級 Tunnel 安全方案](./tunnel/README.md) ｜ [ngrok 本機安裝與設定](./ngrok安裝/README.md)
+- 🌐 **外網通道**：[生產級 cloudeflare Tunnel 安全方案](./tunnel/README.md) ｜ [ngrok 本機安裝與設定](./ngrok安裝/README.md)
 - 🔐 **授權與雲端**：[OAuth 2.0 概念解析](./OAuth/README.md) ｜ [Google Cloud Platform 設定](./google_cloud設定/README.md) ｜ [LINE Messaging API 設定](./line設定/README.md)
 - 🤖 **AI 助手與模型**：[n8n MCP 協議設定指南](./n8n_mcp/README.md) ｜ [Ollama 雲端模型整合](./ollama安裝/README.md)
 - 🛡️ **維運與部署**：[n8n 資料備份與還原](./n8n的備份方式/README.md) ｜ [n8n 生產環境部署架構](./n8n的部署/README.md)
