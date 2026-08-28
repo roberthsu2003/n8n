@@ -32,8 +32,6 @@ graph TD
 ### 3. [🌐 區域網路與反向代理 (Local Network)](./local_network.md)
 * **適用情境**：企業內網或家庭網路環境中的 IP 規劃與 Nginx / Caddy 反向代理架構。
 
-### 4. [⚡ ngrok 通道設定指南](./ngrok_tunnel.md)
-* **適用情境**：快速開發與臨時除錯（免費用戶限單一通道）。
 
 ---
 
