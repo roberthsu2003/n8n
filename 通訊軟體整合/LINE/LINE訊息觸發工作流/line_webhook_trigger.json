@@ -1,0 +1,167 @@
+{
+  "name": "LINE 訊息觸發 n8n 接收範例",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📱 LINE 訊息觸發 n8n 工作流程\n\n1. **Webhook 觸發器**：接收 LINE 伺服器傳送的 Webhook 事件。\n2. **即時回傳 200 OK**：在 1 秒內回傳成功，避免 LINE 伺服器超時重複推送。\n3. **解析 LINE 訊息**：提取用戶 ID、訊息文字、ReplyToken 與事件類型。\n4. **判斷文字訊息**：分流處理文字訊息或其他事件（圖片/加入好友等）。",
+        "height": 260,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        140
+      ],
+      "id": "sticky-note-line-trigger",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        460
+      ],
+      "id": "line-webhook-trigger",
+      "name": "LINE Webhook 觸發器",
+      "webhookId": "line-webhook-trigger-id"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"ok\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        340
+      ],
+      "id": "respond-line-ok",
+      "name": "即時回傳 200 OK"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body || {};\nconst events = body.events || [];\n\nif (events.length === 0) {\n  return [];\n}\n\nconst event = events[0];\nconst messageType = event.message?.type || '';\nconst userMessage = event.message?.text || '';\nconst replyToken = event.replyToken || '';\nconst userId = event.source?.userId || '';\nconst groupId = event.source?.groupId || '';\nconst eventType = event.type || '';\n\nreturn [{\n  json: {\n    eventType,\n    messageType,\n    userMessage,\n    replyToken,\n    userId,\n    groupId,\n    timestamp: event.timestamp,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        560
+      ],
+      "id": "parse-line-event",
+      "name": "解析 LINE 訊息"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-text-message",
+              "leftValue": "={{ $json.messageType }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        320,
+        560
+      ],
+      "id": "if-text-message",
+      "name": "是否為文字訊息？"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status-assignment",
+              "name": "status",
+              "value": "處理成功",
+              "type": "string"
+            },
+            {
+              "id": "log-assignment",
+              "name": "logSummary",
+              "value": "=收到來自 {{ $json.userId }} 的訊息：「{{ $json.userMessage }}」",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        580,
+        480
+      ],
+      "id": "format-output-log",
+      "name": "整理輸出日誌"
+    }
+  ],
+  "connections": {
+    "LINE Webhook 觸發器": {
+      "main": [
+        [
+          {
+            "node": "即時回傳 200 OK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "解析 LINE 訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 LINE 訊息": {
+      "main": [
+        [
+          {
+            "node": "是否為文字訊息？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否為文字訊息？": {
+      "main": [
+        [
+          {
+            "node": "整理輸出日誌",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

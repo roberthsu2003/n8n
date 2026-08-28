@@ -1,0 +1,105 @@
+{
+  "name": "n8n 呼叫 LINE 發送推播訊息範例",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📤 n8n 呼叫 LINE Message 服務（主動推播）\n\n1. **手動觸發 (Manual Trigger)**：手動點擊執行，或可更換為 Schedule 定時觸發。\n2. **設定推播內容 (Set)**：填入目標 LINE 用戶 ID (`userId`) 與欲發送的訊息文字。\n3. **呼叫 LINE Push API (HTTP Request)**：透過 Header Auth 憑證驗證，向 LINE 發送推播通知。",
+        "height": 240,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        160
+      ],
+      "id": "sticky-note-push-message",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        460
+      ],
+      "id": "manual-trigger-push",
+      "name": "手動執行"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "target-user-id",
+              "name": "targetUserId",
+              "value": "U1234567890abcdef1234567890abcdef",
+              "type": "string"
+            },
+            {
+              "id": "notification-message",
+              "name": "pushMessage",
+              "value": "🔔【系統推播通知】\n您好！這是來自 n8n 自動化工作流程的主動推播訊息。\n目前時間：{{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        460
+      ],
+      "id": "set-push-payload",
+      "name": "設定推播對象與內容"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.targetUserId }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{ $json.pushMessage }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        460
+      ],
+      "id": "http-line-push",
+      "name": "呼叫 LINE Push API"
+    }
+  ],
+  "connections": {
+    "手動執行": {
+      "main": [
+        [
+          {
+            "node": "設定推播對象與內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "設定推播對象與內容": {
+      "main": [
+        [
+          {
+            "node": "呼叫 LINE Push API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

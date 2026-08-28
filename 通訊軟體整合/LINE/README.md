@@ -37,6 +37,19 @@ flowchart LR
 
 ---
 
+## 📚 實作範例導覽
+
+我們為您規劃了兩個獨立且聚焦的初階入門實作範例，每個範例皆附有獨立的工作流程樣版與 AI 協作 Prompt 提詞：
+
+| 範例名稱 | 核心技術 | 範例說明 | 資源連結 |
+| :--- | :--- | :--- | :--- |
+| **[範例 1：LINE 訊息觸發工作流程](./LINE訊息觸發工作流/README.md)** | Webhook 節點、Respond to Webhook、Code/Set 解析 | 學習如何監聽 LINE 訊息事件，在 1 秒內回傳 200 OK，並精準解析 `userId`、文字內容與 `replyToken`。 | [教學文檔](./LINE訊息觸發工作流/README.md) · [下載樣版](./LINE訊息觸發工作流/line_webhook_trigger.json) |
+| **[範例 2：n8n 呼叫 LINE 發送訊息](./n8n呼叫LINE發送訊息/README.md)** | HTTP Request 節點、Header Auth 憑證、Push API | 學習如何手動或排程觸發，透過 Header Auth 憑證主動推播通知至指定 LINE 用戶或群組。 | [教學文檔](./n8n呼叫LINE發送訊息/README.md) · [下載樣版](./n8n呼叫LINE發送訊息/line_push_message.json) |
+
+> 💡 **進階雙向整合**：若您需要將「訊息接收」與「即時回覆」整合為單一工作流程，可直接參考本頁下方的 [第三步：完整雙向工作流程解析](#第三步n8n-工作流程實作解析) 或下載 [`line_bot_workflow.json`](./line_bot_workflow.json)。
+
+---
+
 ## 🛠️ 第一步：LINE Developers Console 前置設定
 
 > [!TIP]
