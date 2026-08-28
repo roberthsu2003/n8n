@@ -20,10 +20,7 @@
 
 - [🛠️ 詳細設定標準流程](#️-詳細設定標準流程)
   - [第 1 階段：Google Cloud 專案建立與 API 啟用](#第-1-階段google-cloud-專案建立與-api-啟用)
-  - [第 2 階段：設定 OAuth 同意畫面與測試人員 (Google Auth Platform)](#第-2-階段設定-oauth-同意畫面與測試人員-google-auth-platform)
-  - [第 3 階段：建立 OAuth 用戶端與 n8n 雙向綁定](#第-3-階段建立-oauth-用戶端與-n8n-雙向綁定)
-  - [第 4 階段：🔄 授權驗證與登入](#第-4-階段-授權驗證與登入)
-- [⚠️ 常見錯誤與排錯重點 (必看)](#️-常見錯誤與排錯重點-必看)
+  - [第 2 階段：設定 OAuth 同意畫面與建立品牌 (Google Auth Platform)](#第-2-階段設定-oauth-同意畫面與建立品牌-google-auth-platform)
 
 ---
 
@@ -47,7 +44,7 @@
 
 ---
 
-### 第 2 階段：設定 OAuth 同意畫面與測試人員 (Google Auth Platform)
+### 第 2 階段：設定 OAuth 同意畫面與建立品牌 (Google Auth Platform)
 
 1. **進入 OAuth 同意畫面並點擊「開始」**
    - **主要方式（推薦）**：點擊左側導覽選單「**API 與服務**」>「**OAuth 同意畫面**」（系統會自動導引至 Google Auth Platform 總覽頁面）。
@@ -74,75 +71,8 @@
      4. **❹ 完成 (Finish)**：
         - 確認設定內容無誤，勾選同意相關條款後點擊「**建立 (Create)**」完成專案身分初始化！
 
-2. **設定品牌資訊與授權網域 (Brand)**
-   - 建立完成後，若需補充或確認品牌設定，可點選左側「**品牌 (Brand)**」：
-     - **授權網域 (Authorized domains)**：輸入您的 **n8n 網域名稱**（例如：`xxxx.ngrok-free.dev`，**請注意：不可包含 `https://` 或後續路徑**）。
-     - 填寫完成後點擊儲存。
+2. **建立完成後的 OAuth 總覽畫面**
+   - 點擊「建立」完成初始化後，頁面會自動返回「**OAuth 總覽**」頁面。
+   - 此時會看到「尚未針對這項專案設定 OAuth 用戶端」提示，後續可由此點擊「**建立 OAuth 用戶端**」繼續下一步。
 
-   ![品牌設定](./images/品牌.png)
-
-3. **設定目標對象與加入測試使用者 (Audience / Test Users)**
-   - 點選左側選單「**目標對象 (Audience)**」：
-     - **使用者類型**：確認已設定為「**外部 (External)**」。
-     - **測試使用者 (Test users)**：
-       > ⚠️ **重要**：請務必點擊「**+ ADD USERS**」，手動加入您登入 n8n 授權時所要使用的 **Gmail 帳號**！若未加入，後續在進行 OAuth 驗證時會出現 `403 access_denied` 錯誤。
-
-   ![目標對象設定](./images/目標對象.png)
-
----
-
-### 第 3 階段：建立 OAuth 用戶端與 n8n 雙向綁定
-
-1. **在 n8n 建立憑證並複製 Redirect URL**
-   - 登入您的 n8n 工作區，點選左側選單「**Credentials (憑證)**」> 點擊右上角「**Add credential**」。
-   - 搜尋並選擇「**Google OAuth2 API**」（或各 Google 節點專屬的 OAuth 憑證）。
-   - 在設定面板中，複製「**OAuth Redirect URL**」（格式如：`https://xxxx.ngrok-free.dev/rest/oauth2/callback`）。
-
-   ![n8n 憑證畫面](./images/n8n.png)
-
-2. **在 GCP 建立 OAuth 2.0 用戶端 ID**
-   - 回到 Google Cloud Console，點選左側「**用戶端 (Clients)**」或「**憑證 (Credentials)**」> 點擊「**+ 建立用戶端 (Create Client)**」/「**建立憑證 > OAuth 用戶端 ID**」。
-   - **應用程式類型**：選擇「**網頁應用程式 (Web application)**」。
-   - **名稱**：自訂識別名稱（例如：`n8n Client`）。
-   - **已授權的重新導向 URI (Authorized redirect URIs)**：點擊「**+ 新增 URI**」，貼上剛剛從 n8n 複製的 **OAuth Redirect URL**。
-   - 點擊「**建立**」。
-
-   ![建立用戶端](./images/用戶端.png)
-
-3. **取得 Client ID 與 Client Secret 並填回 n8n**
-   - 建立完成後，Google 會彈出視窗顯示 **用戶端 ID (Client ID)** 與 **用戶端密碼 (Client Secret)**。
-   - 複製 **用戶端 ID** 貼到 n8n 的「**Client ID**」欄位。
-   - 複製 **用戶端密碼** 貼到 n8n 的「**Client Secret**」欄位。
-
-   ![取得用戶端 ID 與密碼](./images/用戶端1.png)
-
-4. **儲存 n8n 憑證**
-   - 在 n8n 憑證面板右下角點擊「**Save**」。
-
----
-
-### 第 4 階段：🔄 授權驗證與登入
-
-1. **發起 Google 授權**
-   - 在 n8n 憑證設定面板中，點擊「**Sign in with Google**」按鈕。
-   - 系統會彈出 Google 登入視窗，請選擇您在「**測試使用者 (Test users)**」名單中所加入的 Google 帳號。
-
-2. **通過安全警告提示**
-   - 若畫面提示「**Google 尚未驗證這個應用程式 (Google hasn't verified this app)**」：
-     1. 點擊左下角的「**進階 (Advanced)**」。
-     2. 點擊「**前往「My n8n Workflow」(不安全) / Go to My n8n Workflow (unsafe)**」（此為個人/開發中專案的正常提示）。
-
-3. **同意授權並完成連線**
-   - 勾選同意存取權限並點擊「**允許 (Allow)**」/「**繼續 (Continue)**」。
-   - 視窗關閉並返回 n8n，當面板顯示「**Connection successful!**」綠色提示時，即代表已完成授權綁定！🎉
-
----
-
-## ⚠️ 常見錯誤與排錯重點 (必看)
-
-| 錯誤訊息 / 狀況 | 常見原因 | 解決方式 |
-| :--- | :--- | :--- |
-| **Error 403: access_denied** | 登入授權的 Google 帳號**未被加入**測試使用者清單。 | 前往 GCP 的 **Google Auth Platform > 目標對象 (Audience)**，在「測試使用者」中點擊「+ ADD USERS」加入該 Gmail 帳號。 |
-| **Error 400: redirect_uri_mismatch** | GCP 用戶端設定中的「已授權重新導向 URI」與 n8n 回呼網址不一致。 | 檢查 GCP OAuth 用戶端中的 Redirect URI 是否完整包含 `https://` 以及 `/rest/oauth2/callback`，且網域與當前 n8n 一致。 |
-| **Error: API not enabled / 403 Forbidden** | 流程執行時未啟用該 Google 服務的 API。 | 前往 GCP Console「**API 與服務 > 程式庫**」，搜尋並點擊「**啟用**」對應的 API（如 `Google Drive API`、`Google Sheets API`）。 |
-| **連線逾時或無法轉址 (Connection Refused)** | n8n 使用 ngrok 等內網穿透工具，連線網址已過期更新。 | 每次重啟 ngrok 取得新網域後，需同步更新 GCP 中的「授權網域」、「已授權的重新導向 URI」，以及 n8n 的 `WEBHOOK_URL` 環境變數。 |
+   ![OAuth 總覽畫面 - 建立完成](./images/OAuth總覽.png)
