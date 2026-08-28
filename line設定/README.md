@@ -45,6 +45,8 @@
 - 進入 **Basic settings** 分頁。
 - 向下滾動找到 **Channel secret**，點擊複製並妥善保存。
 
+  ![Basic settings 與 Channel secret](./images/04-basic-settings.png)
+
 ### 2. 取得 Channel Access Token (long-lived)
 - 進入 **Messaging API** 分頁。
 - 滑動至最下方找到 **Channel access token (long-lived)**。
