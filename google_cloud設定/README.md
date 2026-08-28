@@ -49,9 +49,12 @@
 
 ### 第 2 階段：設定 OAuth 同意畫面與測試人員 (Google Auth Platform)
 
-1. **進入 OAuth 同意畫面 (Google Auth Platform)**
-   - **主要方式（推薦）**：點擊左側導覽選單「**API 與服務**」>「**OAuth 同意畫面**」（系統會自動導引至 Google Auth Platform 設定流程）。
+1. **進入 OAuth 同意畫面並點擊「開始」**
+   - **主要方式（推薦）**：點擊左側導覽選單「**API 與服務**」>「**OAuth 同意畫面**」（系統會自動導引至 Google Auth Platform 總覽頁面）。
    - **輔助方式**：亦可在頂部搜尋欄輸入 **`Google Auth Platform`** 或 **`OAuth 同意畫面`** 快速進入。
+   - **點擊「開始」按鈕**：首次進入會顯示「尚未設定 Google 驗證平台」，請點擊畫面中的藍色「**開始**」按鈕，開始設定應用程式身分。
+
+   ![尚未設定 Google 驗證平台 - 點擊開始](./images/開始.png)
 
 2. **設定品牌資訊 (Brand / 同意畫面)**
    - **應用程式名稱**：輸入自訂名稱（例如：`My n8n Workflow` 或 `My n8n Automation`）。
