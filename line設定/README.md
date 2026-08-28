@@ -8,7 +8,7 @@
 1. [建立 LINE Messaging API Channel](#步驟-1建立-line-messaging-api-channel)
 2. [取得 Channel 憑證](#步驟-2取得-channel-憑證)
 3. [設定 Webhook 與加入好友/群組（接收訊息進 n8n）](#步驟-3在-line-設定-webhook-與加入好友群組接收訊息進-n8n)
-4. [在 n8n 設定 LINE 憑證](#步驟-4在-n8n-設定-credentials)
+4. [在 n8n 設定 Header Auth 憑證與發送訊息](#步驟-4在-n8n-設定-header-auth-憑證與發送訊息)
 
 ---
 
@@ -85,14 +85,67 @@
 
 ---
 
-## 步驟 4：在 n8n 設定 Credentials
+## 步驟 4：在 n8n 設定 Header Auth 憑證與發送訊息
 
-1. 開啟 n8n 管理介面，進入 **Credentials** > **Add Credential**。
-2. 搜尋並選擇 **LINE Messaging API**（或在相關節點內建立）。
-3. 填入步驟 2 取得的憑證資訊：
-   - **Channel Access Token**：貼上發行的長效 Token。
-   - **Channel Secret**：貼上 Channel Secret。
-4. 點擊 **Save** 完成儲存。
+由於 n8n 目前無內建專屬的獨立 LINE Messaging API Credential，官方 Workflow 範本與社群標準做法皆是使用 **Header Auth** 憑證搭配 **HTTP Request 節點** 呼叫 LINE API。
+
+### 1. 建立 Header Auth 憑證
+
+1. 開啟 n8n 管理介面，前往 **Credentials** > **Add Credential**。
+2. 搜尋並選擇 **Header Auth**，點擊 **Continue**。
+
+   ![新增 Header Auth 憑證](./images/06-n8n-add-header-auth.png)
+
+3. 填寫憑證資訊：
+   - **Name**（HTTP Header 名稱）：填入 `Authorization`
+   - **Value**（HTTP Header 內容）：填入 `Bearer <你的 Channel Access Token>`
+     > [!IMPORTANT]
+     > - `Bearer` 與 Token 之間必須**保留一個半形空白**。
+     > - Token 請使用步驟 2 取得的 **Channel Access Token (long-lived)**。
+   - **Allowed HTTP Request Domains**：選擇 `All`（或限定 `api.line.me`）。
+4. 點擊右上角 **Save** 完成儲存。
+
+   ![Header Auth 設定](./images/07-n8n-header-auth-settings.png)
+
+---
+
+### 2. 在 HTTP Request 節點呼叫 LINE API
+
+所有呼叫 LINE API 的 HTTP Request 節點都可以共用此 Header Auth 憑證，n8n 會自動在請求標頭帶上 `Authorization: Bearer <Token>`。
+
+#### (1) 回覆訊息（Reply Message）
+- **Method**：`POST`
+- **URL**：`https://api.line.me/v2/bot/message/reply`
+- **Authentication**：選擇 **Predefined Credential Type** > **Header Auth**（選取剛建立的憑證）
+- **Body Parameters (JSON)**：
+  ```json
+  {
+    "replyToken": "從 Webhook 接收到的 replyToken",
+    "messages": [
+      {
+        "type": "text",
+        "text": "你好！這是來自 n8n 的回覆訊息。"
+      }
+    ]
+  }
+  ```
+
+#### (2) 主動推播訊息（Push Message）
+- **Method**：`POST`
+- **URL**：`https://api.line.me/v2/bot/message/push`
+- **Authentication**：選擇 **Predefined Credential Type** > **Header Auth**
+- **Body Parameters (JSON)**：
+  ```json
+  {
+    "to": "目標用戶的 User ID 或群組 Group ID",
+    "messages": [
+      {
+        "type": "text",
+        "text": "你好！這是來自 n8n 的推播訊息。"
+      }
+    ]
+  }
+  ```
 
 ---
 
@@ -103,4 +156,5 @@
 - [ ] Webhook URL 正確填寫且支援 HTTPS。
 - [ ] LINE Developers 中的 **Use webhook** 已開啟。
 - [ ] LINE 官方帳號後台已關閉「自動回應訊息」。
-- [ ] n8n Webhook 節點成功接收到 LINE 發送的測試事件（如發送訊息給官方帳號或群組）。
+- [ ] n8n Header Auth 憑證設定為 `Name: Authorization`，`Value: Bearer <Channel Access Token>`。
+- [ ] n8n Webhook 節點成功接收訊息，且 HTTP Request 節點成功回覆/推播訊息。
