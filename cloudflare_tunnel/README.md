@@ -37,8 +37,13 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 
 在開始設定前，請確認具備以下環境：
 
-1. **已註冊的個人頂級網域**（例如在 [GoDaddy](https://godaddy.com)、Namecheap 或 Cloudflare Registrar 購買的網域，如 `yourdomain.com`）。
-2. **Cloudflare 免費帳號**。
+1. **已申請一個專屬獨立網域**：
+   - 前往網域註冊商（如 [GoDaddy](https://godaddy.com)、Namecheap 等）購買專屬個人網域（例如：`roberthsu20030301.site` 或 `yourdomain.com`）。
+   - 購買完成後即可在註冊商的控制台中看到您的網域。
+
+   ![GoDaddy 網域管理儀表板](./images/申請網域.png)
+
+2. **Cloudflare 免費帳號**（用於提供免費 Edge SSL 憑證、DNS 託管與 Tunnel 連線）。
 3. **已安裝 Docker 並運行中的 n8n 容器**（預設監聽連接埠 `5678`）。
 
 ---
@@ -47,7 +52,7 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 
 ### 第 1 階段：設定個人網域與 DNS 移轉
 
-> **核心觀念**：將網域註冊商的名稱伺服器 (Nameservers) 指向 Cloudflare，將網域的 DNS 解析權限交由 Cloudflare 全權託管。
+> **核心觀念**：將在網域商（如 GoDaddy）購買的獨立網域名稱伺服器 (Nameservers) 指向 Cloudflare，將網域的 DNS 解析權限交由 Cloudflare 全權託管。
 
 ![網域管轄權的轉移](./images/網域管轄權的轉移.png)
 
