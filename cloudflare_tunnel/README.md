@@ -104,11 +104,15 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 
 ### 第 3 階段：使用 Docker 啟動 cloudflared 通道容器
 
-建立通道後，Cloudflare 會顯示各平台的安裝指令，其中包含專屬的 **Tunnel Token**。
+1. **選取 Docker 平台並取得 Token**：
+   - 進入「**安裝並執行連接器**」頁面。
+   - 在「**選取裝置的作業系統**」下拉選單中選擇 **`Docker`**。
+   - 畫面會顯示專屬的通道權杖 (Tunnel Token，即指令中 `--token` 後方以 `eyJhIj...` 開頭的長字串)。
 
-#### 🚀 使用 Docker 啟動 cloudflared
+![Cloudflare Zero Trust - 選取 Docker 執行連接器](./images/Docker執行連接器.png)
 
-請開啟終端機，執行以下 Docker 指令啟動 `cloudflared` 容器：
+2. **在終端機中執行 Docker 指令啟動通道**：
+   > ⚠️ **重要優化提醒**：Cloudflare 網頁上提供的預設指令缺少 `-d`（背景執行）與 `--network=host`（共享本機網路存取 n8n），直接執行會佔用終端機且無法轉發 localhost。**請務必使用以下改良後的生產級指令**：
 
 ```bash
 docker run -d \
@@ -120,13 +124,15 @@ docker run -d \
 ```
 
 > 💡 **參數重要解析**：
-> - `-d`：讓容器在後台持續運行，關閉終端機也不會中斷。
-> - `--name cloudflared`：自訂容器名稱，便於日後管理。
-> - `--network=host`：**關鍵參數**！讓 `cloudflared` 容器共享主機網路，可直接存取本地的 `localhost:5678` (n8n)。
+> - `-d`：讓容器在後台持續運行，關閉終端機也不會中斷通道。
+> - `--name cloudflared`：為容器命名，便於後續管理與檢視 log。
+> - `--network=host`：**關鍵參數**！讓 `cloudflared` 容器共享主機網路，才能直接存取本機 Docker 映射的 `localhost:5678` (n8n)。
 > - `--restart unless-stopped`：開機或 Docker 重啟時自動重新連線。
-> - `<您的_CLOUDFLARE_TUNNEL_TOKEN>`：請替換為 Cloudflare Dashboard 頁面上提供的 Token 字串。
+> - `<您的_CLOUDFLARE_TUNNEL_TOKEN>`：請填入畫面上指令中的 Token 字串。
 
-啟動後回到 Cloudflare 頁面，下方 **Connectors** 會即時顯示為 **`Connected (已連線)`** 綠色狀態，接著點擊 **Next**。
+3. **確認連線狀態並進入下一步**：
+   - 執行指令後稍等數秒，網頁下方的「**連接器**」清單會自動偵測並顯示為 **`已連線 (Connected)`** 狀態。
+   - 確認連線成功後，點擊右下角藍色「**下一步**」按鈕。
 
 ---
 
