@@ -66,7 +66,9 @@ Cloudflare Tunnel 是一種能夠安全地將內部服務（如 Docker 中的 n8
 4. 輸入您在 GoDaddy 購買的個人網域名稱（例如：`roberthsu20030301.site` 或 `yourdomain.com`）。
 5. 選擇 **Free (免費)** 方案並繼續。
 6. Cloudflare 會自動掃描您現有的 DNS 記錄，確認後進入下一步。
-7. 取得 Cloudflare 提供的 **兩組專屬名稱伺服器 (Nameservers) 位址**（例如 `ada.ns.cloudflare.com` 與 `bob.ns.cloudflare.com`）。
+7. 取得 Cloudflare 提供的 **兩組專屬名稱伺服器 (Nameservers) 位址**（例如 `lochlan.ns.cloudflare.com` 與 `roxy.ns.cloudflare.com`，日後亦可在網站後台「**DNS > 設定**」中隨時查閱）。
+
+![Cloudflare 專屬名稱伺服器設定](./images/名稱伺服器.png)
 
 #### 2. 在網域註冊商更換 Nameservers
 1. 回到您購買網域的註冊商（如 GoDaddy）。
