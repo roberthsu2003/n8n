@@ -15,8 +15,17 @@
 ## 步驟 1：建立 LINE Messaging API Channel
 
 1. 前往 [LINE Developers Console](https://developers.line.biz/console/) 並以 LINE 帳號登入。
+
+   ![LINE Business ID 登入畫面](./images/01-line-login.png)
+
 2. 點擊 **Create a new provider**（若已有 Provider 亦可直接選擇）。
-3. 在 Provider 下點選 **Create a Messaging API channel**，並填寫必要欄位：
+
+   ![LINE Providers 列表](./images/02-create-provider.png)
+
+3. 在 Provider 下點選 **Create a Messaging API channel**（或點擊 `+ Create a new channel`），並填寫必要欄位：
+
+   ![建立 Messaging API Channel](./images/03-create-channel.png)
+
    - **Channel name**：機器人名稱
    - **Channel description**：機器人描述
    - **Category / Subcategory**：選擇合適的分類
