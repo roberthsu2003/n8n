@@ -124,29 +124,25 @@
 
 學習如何將 n8n 與關聯式資料庫 **PostgreSQL**、全端平台 **Supabase** 及專用無伺服器向量資料庫 **Pinecone** 整合，提供由淺至深 6 大實作範例（皆支援**完全免費、免綁信用卡**方案）：
 
-1. **[Postgres 基礎 CRUD 與資料讀寫](./雲端資料庫整合/01_Postgres基礎CRUD與資料讀寫/README.md)**：原生 SQL 語法、參數化查詢防 SQL 注入與 `RETURNING *` 技巧。
-2. **[Supabase Low-Code 節點與資料表存取](./雲端資料庫整合/02_Supabase節點與資料表存取/README.md)**：免寫 SQL，透過 REST API 進行 Low-Code 視覺化表格讀寫與條件過濾。
-3. **[電商訂單 Upsert 與跨表關聯統計報表](./雲端資料庫整合/03_電商訂單Upsert與關聯統計/README.md)**：使用 `ON CONFLICT` 防重複寫入，並執行 `LEFT JOIN ... GROUP BY` 產出消費排行榜。
-4. **[資料庫變更即時偵測與即時推播](./雲端資料庫整合/04_資料庫變更偵測與即時推播/README.md)**：定時排程監控 `pending` 新訂單，自動發送 Telegram / LINE 推播並更新狀態閉環。
-5. **[Supabase pgvector 向量知識庫與 AI 語意搜尋](./雲端資料庫整合/05_pgvector向量知識庫與AI語意搜尋/README.md)**：啟用 `pgvector` 擴充套件，打造關聯式資料庫與 RAG 向量一體化檢索。
-6. **[Pinecone 雲端向量資料庫與 AI 檢索](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md)**：免費建立 Serverless Index，體驗專用向量資料庫毫秒級高併發 RAG 檢索。
-
-- **支援資源**：一鍵建表 SQL 腳本 [`schema.sql`](./雲端資料庫整合/Supabase/schema.sql)、範例工作流程樣版 [`01_postgres_crud.json`](./雲端資料庫整合/01_Postgres基礎CRUD與資料讀寫/01_postgres_crud.json)、[`02_supabase_lowcode.json`](./雲端資料庫整合/02_Supabase節點與資料表存取/02_supabase_lowcode.json)、[`03_ecommerce_upsert_analytics.json`](./雲端資料庫整合/03_電商訂單Upsert與關聯統計/03_ecommerce_upsert_analytics.json)、[`04_db_trigger_notification.json`](./雲端資料庫整合/04_資料庫變更偵測與即時推播/04_db_trigger_notification.json)、[`05_supabase_pgvector_rag.json`](./雲端資料庫整合/05_pgvector向量知識庫與AI語意搜尋/05_supabase_pgvector_rag.json)、[`06_pinecone_vector_rag.json`](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/06_pinecone_vector_rag.json)。
+- **Postgres 基礎 CRUD 與資料讀寫**：原生 SQL 語法、參數化查詢防 SQL 注入與 `RETURNING *` 技巧
+- **Supabase Low-Code 節點與資料表存取**：免寫 SQL，透過 REST API 進行 Low-Code 視覺化表格讀寫與條件過濾
+- **電商訂單 Upsert 與跨表關聯統計報表**：使用 `ON CONFLICT` 防重複寫入，並執行 `LEFT JOIN ... GROUP BY` 產出消費排行榜
+- **資料庫變更即時偵測與即時推播**：定時排程監控 `pending` 新訂單，自動發送 Telegram / LINE 推播並更新狀態閉環
+- **Supabase pgvector 向量知識庫與 AI 語意搜尋**：啟用 `pgvector` 擴充套件，打造關聯式資料庫與 RAG 向量一體化檢索
+- **Pinecone 雲端向量資料庫與 AI 檢索**：免費建立 Serverless Index，體驗專用向量資料庫毫秒級高併發 RAG 檢索
 
 ---
 
 
-## 💻 [Code Node (JavaScript) 節點進階應用](./code_node(javascript)節點/README.md)
+## 💻 [Code Node (JavaScript) 節點進階應用](./code_node(javascript)節點/README.md)（另附 **[📖 執行機制與全域變數詳解](./code_node(javascript)節點/n8n執行機制與全域變數詳解.md)**）
 
 掌握 JavaScript Code 節點，突破 Low Code 的限制，處理複雜商業邏輯與大數據清洗，提供由淺至深 5 大實作範例：
 
-1. **[Code Node 互動式入門教學](./code_node(javascript)節點/01_CodeNode互動式基礎教學/README.md)**：6 關卡實作、逐筆 vs 整批執行模式、`this.helpers.httpRequest` 呼叫 API 與 CSV 生成。
-2. **[字串清理與日期格式標準化](./code_node(javascript)節點/02_字串清理與日期格式標準化/README.md)**：正規表達式 `.replace()`、ISO 8601 標準日期轉換、文字修剪與繁體中文語系化輸出。
-3. **[多條件分類與動態標籤](./code_node(javascript)節點/03_多條件分類與動態標籤/README.md)**：單一節點取代十幾個 IF 節點、多維度邏輯運算、動態陣列標籤與防除以零安全設計。
-4. **[陣列操作與銷售報表重組](./code_node(javascript)節點/04_陣列操作與銷售報表重組/README.md)**：動態 Object Map Group By 分組、不可變陣列排序、`.reduce()` 營收聚合與多維度日報產出。
-5. **[進階資料去重與二進位檔案生成](./code_node(javascript)節點/05_進階資料去重與二進位檔案生成/README.md)**：JavaScript `Map` 高速 $O(N)$ 去重、合併來源管道、UTF-8 BOM 防 Excel 亂碼與二進位 CSV 封裝。
-
-- **支援資源**：進階核心指南 [`n8n執行機制與全域變數詳解.md`](./code_node(javascript)節點/n8n執行機制與全域變數詳解.md)、範例工作流程樣版 [`01_code_node_basics.json`](./code_node(javascript)節點/01_CodeNode互動式基礎教學/01_code_node_basics.json)、[`02_date_format_normalization.json`](./code_node(javascript)節點/02_字串清理與日期格式標準化/02_date_format_normalization.json)、[`03_customer_classification.json`](./code_node(javascript)節點/03_多條件分類與動態標籤/03_customer_classification.json)、[`04_sales_report_aggregation.json`](./code_node(javascript)節點/04_陣列操作與銷售報表重組/04_sales_report_aggregation.json)、[`05_data_deduplication_binary_export.json`](./code_node(javascript)節點/05_進階資料去重與二進位檔案生成/05_data_deduplication_binary_export.json)。
+- **Code Node 互動式入門教學**：6 關卡實作、逐筆 vs 整批執行模式、`this.helpers.httpRequest` 呼叫 API 與 CSV 生成
+- **字串清理與日期格式標準化**：正規表達式 `.replace()`、ISO 8601 標準日期轉換、文字修剪與繁體中文語系化輸出
+- **多條件分類與動態標籤**：單一節點取代十幾個 IF 節點、多維度邏輯運算、動態陣列標籤與防除以零安全設計
+- **陣列操作與銷售報表重組**：動態 Object Map Group By 分組、不可變陣列排序、`.reduce()` 營收聚合與多維度日報產出
+- **進階資料去重與二進位檔案生成**：JavaScript `Map` 高速 $O(N)$ 去重、合併來源管道、UTF-8 BOM 防 Excel 亂碼與二進位 CSV 封裝
 
 ---
 
@@ -154,27 +150,23 @@
 
 結合 Google Apps Script (GAS) 的深度排版能力與 n8n 工作流程，使用 **Placeholder（佔位符）範本** 打造完全符合企業專屬格式的公文、報價單、合約與 PDF，提供由淺至深 5 大實作範例：
 
-1. **[GAS 基礎文字佔位符替換](./GAS整合/01_基礎文字佔位符替換/README.md)**：Google Docs 範本文字替換、正則表達式跳脫與公版複製。
-2. **[公司專屬 Logo 與品牌套版](./GAS整合/02_公司專屬Logo與品牌套版/README.md)**：動態下載企業 Logo 圖檔並內嵌、自訂統編、Slogan 與 CI/VI 規範。
-3. **[動態多列報價單與收據生成](./GAS整合/03_動態多列報價單與收據生成/README.md)**：支援不固定品項數量，動態新增表格列、計算小計、5% 營業稅與總計。
-4. **[企業合約與證書生成 PDF 與雲端歸檔](./GAS整合/04_企業合約證書生成PDF與雲端歸檔/README.md)**：自動轉換為唯讀 PDF 檔案、儲存至指定 Google Drive 資料夾並自動清理暫存檔。
-5. **[Google 表單提交 ➔ 自動生成客製 PDF ➔ Gmail 寄送](./GAS整合/05_表單提交自動生成客製PDF並寄信/README.md)**：雙向自動化閉環，表單提交即時產出公司專屬 PDF 並自動夾帶附件寄出。
-
-- **支援資源**：GAS 原始碼 [`Code.gs`](./GAS整合/01_基礎文字佔位符替換/Code.gs)、範例工作流程樣版 [`01_gas_text_placeholder.json`](./GAS整合/01_基礎文字佔位符替換/01_gas_text_placeholder.json)、[`02_gas_logo_branding.json`](./GAS整合/02_公司專屬Logo與品牌套版/02_gas_logo_branding.json)、[`03_gas_dynamic_table_invoice.json`](./GAS整合/03_動態多列報價單與收據生成/03_gas_dynamic_table_invoice.json)、[`04_gas_contract_pdf_drive.json`](./GAS整合/04_企業合約證書生成PDF與雲端歸檔/04_gas_contract_pdf_drive.json)、[`05_gas_form_trigger_email_loop.json`](./GAS整合/05_表單提交自動生成客製PDF並寄信/05_gas_form_trigger_email_loop.json)。
+- **GAS 基礎文字佔位符替換**：Google Docs 範本文字替換、正則表達式跳脫與公版複製
+- **公司專屬 Logo 與品牌套版**：動態下載企業 Logo 圖檔並內嵌、自訂統編、Slogan 與 CI/VI 規範
+- **動態多列報價單與收據生成**：支援不固定品項數量，動態新增表格列、計算小計、5% 營業稅與總計
+- **企業合約與證書生成 PDF 與雲端歸檔**：自動轉換為唯讀 PDF 檔案、儲存至指定 Google Drive 資料夾並自動清理暫存檔
+- **Google 表單提交 ➔ 自動生成客製 PDF ➔ Gmail 寄送**：雙向自動化閉環，表單提交即時產出公司專屬 PDF 並自動夾帶附件寄出
 
 ---
 
 ## 🌐 [前端網頁與 WebAPI 整合（n8n 作為後端網站）](./前端網頁與WebAPI整合/README.md)
 
-前端網頁透過 `fetch()` 呼叫 n8n Webhook，將 n8n 作為無伺服器後端網站（Backend WebAPI / BaaS），提供由淺至深 5 大實作範例（各附獨立前端介面與工作流程）：
+前端網頁透過 `fetch()` 呼叫 n8n Webhook，將 n8n 作為無伺服器後端網站（Backend WebAPI / BaaS），提供由淺至深 5 大實作範例：
 
-1. **[即時會員註冊與驗證 API](./前端網頁與WebAPI整合/01_即時會員註冊與驗證API/README.md)**：玻璃擬態註冊/登入介面、Email 格式檢查、Session Token 簽發與狀態碼回傳。
-2. **[商品型錄分頁與即時搜尋 API](./前端網頁與WebAPI整合/02_商品型錄分頁與即時搜尋API/README.md)**：RESTful GET 請求、前端輸入防抖（Debounce）、商品分類篩選與伺服器端分頁運算。
-3. **[電商購物車結帳與折扣碼計算 API](./前端網頁與WebAPI整合/03_購物車結帳與折扣碼計算API/README.md)**：後端防篡改強制定價、優惠代碼狀態機驗證、5% 稅額計算與訂單序號生成。
-4. **[檔案上傳與自動雲端託管 API](./前端網頁與WebAPI整合/04_檔案上傳與自動雲端託管API/README.md)**：拖曳上傳 (Multipart FormData)、二進位數據解析、自動儲存至 Google Drive 與公開連結回傳。
-5. **[AI 智慧客服對話視窗 API](./前端網頁與WebAPI整合/05_AI智慧客服對話視窗API/README.md)**：網站右下角浮動 AI Chat Widget、依 `sessionId` 隔離訪客對話記憶與 AI Agent 即時應答。
-
-- **支援資源**：5 套現代前端網頁原始碼（`website/index.html`）、範例工作流程樣版 [`01_auth_webapi_workflow.json`](./前端網頁與WebAPI整合/01_即時會員註冊與驗證API/01_auth_webapi_workflow.json)、[`02_catalog_search_api_workflow.json`](./前端網頁與WebAPI整合/02_商品型錄分頁與即時搜尋API/02_catalog_search_api_workflow.json)、[`03_checkout_coupon_api_workflow.json`](./前端網頁與WebAPI整合/03_購物車結帳與折扣碼計算API/03_checkout_coupon_api_workflow.json)、[`04_file_upload_api_workflow.json`](./前端網頁與WebAPI整合/04_檔案上傳與自動雲端託管API/04_file_upload_api_workflow.json)、[`05_ai_chat_widget_api_workflow.json`](./前端網頁與WebAPI整合/05_AI智慧客服對話視窗API/05_ai_chat_widget_api_workflow.json)。
+- **即時會員註冊與驗證 API**：玻璃擬態註冊/登入介面、Email 格式檢查、Session Token 簽發與狀態碼回傳
+- **商品型錄分頁與即時搜尋 API**：RESTful GET 請求、前端輸入防抖（Debounce）、商品分類篩選與伺服器端分頁運算
+- **電商購物車結帳與折扣碼計算 API**：後端防篡改強制定價、優惠代碼狀態機驗證、5% 稅額計算與訂單序號生成
+- **檔案上傳與自動雲端託管 API**：拖曳上傳 (Multipart FormData)、二進位數據解析、自動儲存至 Google Drive 與公開連結回傳
+- **AI 智慧客服對話視窗 API**：網站右下角浮動 AI Chat Widget、依 `sessionId` 隔離訪客對話記憶與 AI Agent 即時應答
 
 ---
 
