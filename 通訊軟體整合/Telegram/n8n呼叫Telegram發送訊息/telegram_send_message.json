@@ -1,0 +1,161 @@
+{
+  "name": "n8n 呼叫 Telegram 發送訊息（排程推播與格式化通知）",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ✈️ 範例 2：n8n 節點發送 Telegram 訊息\n\n1. **Schedule Trigger**：定時觸發（例如每天早上 08:30）或手動點擊執行。\n2. **Edit Fields (Set)**：設定目標 Chat ID、警報等級、報表內容與連結。\n3. **Telegram 節點**：使用 Markdown 排版並附加 Inline Keyboard 互動按鈕發送推播。",
+        "height": 230,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        140
+      ],
+      "id": "telegram-send-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        380
+      ],
+      "id": "schedule-trigger-node",
+      "name": "定時排程觸發器"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-chat-id",
+              "name": "targetChatId",
+              "value": "YOUR_CHAT_ID",
+              "type": "string"
+            },
+            {
+              "id": "set-server-name",
+              "name": "serverName",
+              "value": "PROD-APP-SERVER-01",
+              "type": "string"
+            },
+            {
+              "id": "set-status",
+              "name": "serverStatus",
+              "value": "正常運行中 (Healthy)",
+              "type": "string"
+            },
+            {
+              "id": "set-cpu",
+              "name": "cpuUsage",
+              "value": "24.5%",
+              "type": "string"
+            },
+            {
+              "id": "set-memory",
+              "name": "memoryUsage",
+              "value": "3.8 GB / 8.0 GB (47.5%)",
+              "type": "string"
+            },
+            {
+              "id": "set-disk",
+              "name": "diskUsage",
+              "value": "62.1%",
+              "type": "string"
+            },
+            {
+              "id": "set-alert-level",
+              "name": "alertLevel",
+              "value": "🟢 INFO",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        380
+      ],
+      "id": "prepare-notification-data",
+      "name": "準備推播報表資料"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.targetChatId }}",
+        "text": "=*📊 系統日常維運監控日報*\n\n等級：`{{ $json.alertLevel }}`\n主機名稱：*{{ $json.serverName }}*\n運行狀態：*{{ $json.serverStatus }}*\n\n*資源監控指標：*\n• 💻 *CPU 使用率*：`{{ $json.cpuUsage }}`\n• 🧠 *記憶體佔用*：`{{ $json.memoryUsage }}`\n• 💾 *硬碟空間*：`{{ $json.diskUsage }}`\n\n🕒 報告產生時間：_{{ $now.format('yyyy-MM-dd HH:mm:ss') }}_",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "🌐 前往監控儀表板",
+                  "url": "https://grafana.example.com"
+                },
+                {
+                  "text": "📜 查看伺服器日誌",
+                  "url": "https://logs.example.com"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "send-telegram-push-message",
+      "name": "發送 Telegram Markdown 推播訊息",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "定時排程觸發器": {
+      "main": [
+        [
+          {
+            "node": "準備推播報表資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "準備推播報表資料": {
+      "main": [
+        [
+          {
+            "node": "發送 Telegram Markdown 推播訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

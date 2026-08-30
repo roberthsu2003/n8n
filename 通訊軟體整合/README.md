@@ -50,12 +50,23 @@ flowchart LR
 
 ### 2. [✈️ Telegram Bot 整合實作](./Telegram/README.md)
 
-透過 Telegram 官方 `@BotFather` 快速建立機器人，利用 n8n 內建專屬節點輕鬆實現全自動推播與指令監聽：
+透過 Telegram 官方 `@BotFather` 快速建立機器人，利用 n8n 內建專屬節點實現由淺至深的 5 大實作範例（完全免費無推播則數上限）：
 
-- **Telegram Trigger 節點**：無需自行處理 Webhook 驗證，直接監聽聊天室訊息與 `/start` 等自訂指令。
-- **Telegram 節點**：發送富文本 Markdown、行內按鈕（Inline Keyboard）與圖片警報。
-- **完全免費無則數上限**：非常適合高頻率的伺服器監控與個人任務助理。
-- 附帶樣版：[`telegram_bot_workflow.json`](./Telegram/telegram_bot_workflow.json)
+- **[範例 1：Telegram 訊息觸發 n8n 工作流程](./Telegram/Telegram訊息觸發工作流/README.md)**
+  - 使用 Telegram Trigger 節點自動註冊 Webhook，精準解析 `chatId`、`userName` 與文字內容。
+  - 附帶樣版：[`telegram_trigger_workflow.json`](./Telegram/Telegram訊息觸發工作流/telegram_trigger_workflow.json)
+- **[範例 2：n8n 節點發送 Telegram 訊息（主動推播與格式化通知）](./Telegram/n8n呼叫Telegram發送訊息/README.md)**
+  - 排程或手動觸發，透過 Telegram 節點發送 Markdown 富文本排版與 Inline Keyboard 互動按鈕。
+  - 附帶樣版：[`telegram_send_message.json`](./Telegram/n8n呼叫Telegram發送訊息/telegram_send_message.json)
+- **[範例 3：Telegram 雙向通訊與指令自動回覆（Bot 完整對話流程）](./Telegram/Telegram雙向通訊與自動回覆/README.md)**
+  - 結合 Telegram Trigger 與 Switch 節點，實作 `/start`、`/help`、`/info` 斜線指令路由與自動應答。
+  - 附帶樣版：[`telegram_bot_interactive.json`](./Telegram/Telegram雙向通訊與自動回覆/telegram_bot_interactive.json)
+- **[範例 4：Telegram 發送照片與多媒體/文件檔案（圖文與報表自動推播）](./Telegram/Telegram發送多媒體與文件/README.md)**
+  - 支援 Send Photo（圖表/照片）與 Send Document（CSV/PDF 報表），並附加 Markdown 說明文字 (Caption)。
+  - 附帶樣版：[`telegram_send_media.json`](./Telegram/Telegram發送多媒體與文件/telegram_send_media.json)
+- **[範例 5：Telegram 整合 AI 智慧問答助理（含對話記憶）](./Telegram/Telegram整合AI智慧助理/README.md)**
+  - 串接 LangChain AI Agent 與 LLM 模型（OpenAI / Gemini / Ollama），以 `chatId` 實現多用戶 Session 獨立對話記憶。
+  - 附帶樣版：[`telegram_ai_agent.json`](./Telegram/Telegram整合AI智慧助理/telegram_ai_agent.json)
 
 ---
 

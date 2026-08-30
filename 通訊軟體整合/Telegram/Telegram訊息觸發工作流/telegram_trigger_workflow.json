@@ -1,0 +1,206 @@
+{
+  "name": "Telegram 訊息觸發工作流（接收與解析訊息）",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ✈️ 範例 1：Telegram 訊息觸發工作流程\n\n1. **Telegram Trigger**：接收使用者傳送的訊息與指令。\n2. **Edit Fields (Set)**：提取 Chat ID、發訊者姓名、文字內容與訊息類型。\n3. **IF 判斷**：檢查是否為文字訊息，進行資料結構化輸出。",
+        "height": 220,
+        "width": 380
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        140
+      ],
+      "id": "telegram-trigger-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        380
+      ],
+      "id": "telegram-trigger-node",
+      "name": "Telegram 訊息觸發器",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-chat-id",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "extract-chat-type",
+              "name": "chatType",
+              "value": "={{ $json.message.chat.type }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-user-id",
+              "name": "userId",
+              "value": "={{ $json.message.from.id }}",
+              "type": "number"
+            },
+            {
+              "id": "extract-user-name",
+              "name": "userName",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-username",
+              "name": "telegramUsername",
+              "value": "={{ $json.message.from.username || '無' }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-text",
+              "name": "userMessage",
+              "value": "={{ $json.message.text || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-date",
+              "name": "messageTimestamp",
+              "value": "={{ $json.message.date }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        380
+      ],
+      "id": "extract-telegram-fields",
+      "name": "解析 Telegram 訊息欄位"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-is-text",
+              "leftValue": "={{ $json.userMessage }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "check-message-type",
+      "name": "是否包含文字內容？"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status-success",
+              "name": "status",
+              "value": "收到文字訊息",
+              "type": "string"
+            },
+            {
+              "id": "log-summary",
+              "name": "logSummary",
+              "value": "=使用者 [{{ $json.userName }}] (Chat ID: {{ $json.chatId }}) 傳送訊息：「{{ $json.userMessage }}」",
+              "type": "string"
+            },
+            {
+              "id": "processed-at",
+              "name": "processedAt",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        620,
+        340
+      ],
+      "id": "format-text-output",
+      "name": "整理輸出日誌"
+    }
+  ],
+  "connections": {
+    "Telegram 訊息觸發器": {
+      "main": [
+        [
+          {
+            "node": "解析 Telegram 訊息欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 Telegram 訊息欄位": {
+      "main": [
+        [
+          {
+            "node": "是否包含文字內容？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否包含文字內容？": {
+      "main": [
+        [
+          {
+            "node": "整理輸出日誌",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "pinData": {}
+}

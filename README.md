@@ -106,9 +106,13 @@
   - 支援範例工作流：[`line_bot_workflow.json`](./通訊軟體整合/LINE/line_bot_workflow.json)。
 - **[✈️ Telegram 整合實作](./通訊軟體整合/Telegram/README.md)**：
   - 使用 `@BotFather` 快速建立機器人並綁定 n8n Telegram API 憑證。
-  - 使用 `Telegram Trigger` 節點即時監聽指令與聊天室訊息。
-  - 使用 `Telegram` 節點發送富文本通知、圖片與系統警報。
-  - 支援範例工作流：[`telegram_bot_workflow.json`](./通訊軟體整合/Telegram/telegram_bot_workflow.json)。
+  - 提供由淺至深 5 大實作範例（完全免費無推播則數上限）：
+    1. **Telegram 訊息觸發**：使用 `Telegram Trigger` 監聽指令與訊息，解析 `chatId` 與發訊者資訊。
+    2. **主動推播與警報通知**：使用 `Telegram` 節點發送 Markdown 富文本排版與 Inline Keyboard 按鈕。
+    3. **雙向通訊與自動回覆**：使用 `Switch` 節點實現 `/start`、`/help`、`/info` 指令分流應答。
+    4. **多媒體與文件檔案推播**：發送圖片 (`Send Photo`) 與報表檔案 (`Send Document`) 附加 Caption。
+    5. **整合 AI 智慧助理**：串接 `AI Agent` 與 LLM 模型，以 `chatId` 實現多用戶 Session 獨立對話記憶。
+  - 支援範例工作流：[`telegram_trigger_workflow.json`](./通訊軟體整合/Telegram/Telegram訊息觸發工作流/telegram_trigger_workflow.json)、[`telegram_send_message.json`](./通訊軟體整合/Telegram/n8n呼叫Telegram發送訊息/telegram_send_message.json)、[`telegram_bot_interactive.json`](./通訊軟體整合/Telegram/Telegram雙向通訊與自動回覆/telegram_bot_interactive.json)、[`telegram_send_media.json`](./通訊軟體整合/Telegram/Telegram發送多媒體與文件/telegram_send_media.json)、[`telegram_ai_agent.json`](./通訊軟體整合/Telegram/Telegram整合AI智慧助理/telegram_ai_agent.json)。
 
 ---
 

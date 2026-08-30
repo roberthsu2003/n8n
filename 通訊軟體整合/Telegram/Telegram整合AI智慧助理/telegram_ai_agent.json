@@ -1,0 +1,211 @@
+{
+  "name": "Telegram 整合 AI 智慧問答助理（含對話記憶）",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ✈️ 範例 5：Telegram 整合 AI 智慧助理\n\n1. **Telegram Trigger**：接收使用者提問。\n2. **Edit Fields (Set)**：提取 Chat ID、發訊者姓名與使用者問題。\n3. **AI Agent**：串接大型語言模型 (LLM)，並配置以 `chatId` 隔離的對話記憶 (Window Buffer Memory)。\n4. **Telegram Node**：將 AI 生成的智慧回答即時傳回 Telegram 聊天室。",
+        "height": 240,
+        "width": 430
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        120
+      ],
+      "id": "telegram-ai-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "telegram-ai-trigger",
+      "name": "Telegram 訊息觸發器",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "user-name",
+              "name": "userName",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "user-message",
+              "name": "userMessage",
+              "value": "={{ ($json.message.text || '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        60,
+        380
+      ],
+      "id": "extract-ai-input",
+      "name": "提取提問內容與聊天室 ID"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=使用者名稱：{{ $json.userName }}\n使用者提問：{{ $json.userMessage }}",
+        "options": {
+          "systemMessage": "=你是一位專業、親切且高效的 Telegram 智慧助理。請遵循以下規則：\n1. 必須一律使用「繁體中文（台灣習慣用語）」進行回覆。\n2. 回答語氣友善親切，適度使用 emoji 增加互動感。\n3. 使用清晰易讀的 Markdown 條列式排版。\n4. 若使用者詢問先前的對話內容，請參考對話歷史記憶進行連貫回答。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        300,
+        380
+      ],
+      "id": "telegram-ai-agent",
+      "name": "AI 智慧問答助理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        260,
+        600
+      ],
+      "id": "openai-chat-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionKey": "={{ $('提取提問內容與聊天室 ID').item.json.chatId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        600
+      ],
+      "id": "window-buffer-memory",
+      "name": "對話記憶 (以 Chat ID 隔離)"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('提取提問內容與聊天室 ID').item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        380
+      ],
+      "id": "send-ai-response-telegram",
+      "name": "回傳 AI 智慧回答至 Telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram 訊息觸發器": {
+      "main": [
+        [
+          {
+            "node": "提取提問內容與聊天室 ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取提問內容與聊天室 ID": {
+      "main": [
+        [
+          {
+            "node": "AI 智慧問答助理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 智慧問答助理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "對話記憶 (以 Chat ID 隔離)": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI 智慧問答助理",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 智慧問答助理": {
+      "main": [
+        [
+          {
+            "node": "回傳 AI 智慧回答至 Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
