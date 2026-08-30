@@ -170,8 +170,15 @@
 
 ---
 
-## 🌍 [n8n 的免費部署方案](./n8n的部署/README.md)
-了解如何將 n8n 部署到本機、Raspberry Pi、Oracle Cloud 等免費平台，打造 7x24 小時運行的自動化伺服器。
+## 🌍 [n8n 零預算「永久免費」雲端部署全指南](./n8n的部署/README.md)
+
+專為學生量身打造的 0 元雲端部署方案（完全排除實體硬體購買，支援 7x24 雲端永久在線）：
+
+- **Hugging Face Spaces (學生首選)**：免信用卡、2 vCPU + 16GB RAM、自帶 HTTPS 網址與 Docker 容器部署
+- **Koyeb Serverless 容器**：免信用卡、免休眠 PaaS、一鍵拉取官方映像檔與全球 CDN 邊緣加速
+- **Render 免費 Web 服務**：主流 PaaS 快速部署，搭配 UptimeRobot 免費排程防止閒置休眠
+- **Oracle Cloud (OCI) 永久免費主機**：怪物級 4 核心 ARM CPU、24GB RAM、獨立公網 IP 與 Docker 生產環境
+- **資料庫持久化架構**：連線免費 Supabase PostgreSQL，實現運算與儲存分離，工作流程永不遺失
 
 ---
 

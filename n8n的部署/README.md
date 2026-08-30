@@ -1,90 +1,78 @@
-# 部署 n8n 的「免費」資源指南
+# 🌍 學生專屬：n8n 零預算「永久免費」雲端部署全指南
 
-n8n 提供了強大的**社區版 (Community Edition)**，這意味著軟體本身是開源且免費的，只要您選擇**自託管 (Self-Hosting)**，就能免費使用核心功能。
+歡迎來到 **n8n 學生零成本雲端部署專題**！
 
----
+在學習自動化流程與建置 LINE / Telegram 聊天機器人時，最大的痛點是：**「如果電腦關機或離開本機，工作流程就停止運作了！」**
 
-## 🚀 推薦的首選方案 (Best Options)
-
-### 1. 💻 本地端部署 (Localhost targeting Desktop)
-
-最適合：**開發、測試、學習、教學錄影**。
-
-*   **資源**：利用您的桌上型電腦。
-*   **部署方式**：
-    *   **Docker Desktop (:recommend: 推薦)**：官方支援度最高，一行指令 `docker run` 即可啟動。
-    *   **npm**：透過 Node.js 快速安裝 (`npm install -g n8n`)。
-*   **✅ 優點**：
-    *   **零成本**：無需申請任何帳號或主機。
-    *   **極致效能**：現代電腦的處理速度遠勝免費雲端主機。
-    *   **隱私安全**：資料完全只存在您的電腦中。
-*   **⚠️ 缺點**：
-    *   **非 7x24 小時**：電腦關機，自動化流程即停止。
-    *   **外部連線限制**：外部服務 (Webhook) 預設無法連入。需搭配 [ngrok](https://ngrok.com) 或 [Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/) 進行內網穿透。
-
-### 2. 🏠 家用伺服器 (Home Server targeting Raspberry Pi)
-
-最適合：**長期運用、個人自動化助理、智能家居整合**。
-
-*   **資源**：Raspberry Pi (樹莓派) 系列。
-*   **部署方式**：
-    *   **Docker (:recommend: 推薦)**：支援 ARM64 架構，部署穩定且易於升級。
-*   **✅ 優點**：
-    *   **7x24 小時待命**：低功耗，全天候運作您的自動化腳本。
-    *   **資料掌控權**：所有數據皆保留在家中，不經過第三方雲端。
-*   **⚠️ 缺點與解法**：
-    *   **外部連線**：需解決外網連入問題（Public IP）。
-        *   *傳統解法*：設定 DDNS (動態域名) + Router Port Forwarding。
-        *   *:bulb: 現代解法*：直接使用 **ngrok** 或 **Cloudflare Tunnel**，無需更動路由器設定即可安全連線。
-    *   **硬體效能**：受限於板載 RAM/CPU，處理大量並發任務時可能較慢。
+本指南專為**預算為 $0 的學生與自學者**量身打造，**徹底排除需要額外購買實體硬體（如樹莓派 Raspberry Pi）的方案**，精選出全球主流的**四大免費雲端主機與 PaaS 容器平台**，讓您不必花一毛錢，即可將 n8n 架設在雲端伺服器上，享有 7x24 小時不間斷的自動化服務與專屬 HTTPS Webhook 網址！
 
 ---
 
-## ☁️ 雲端「永久免費」方案 (Always Free Cloud Tiers)
+## 🧭 學生免費雲端部署選型決策樹
 
-如果您需要公開 IP 且不想維護硬體，可考慮雲端方案，但需注意限制。
-
-### 3. ☁️ Oracle Cloud (OCI) - Always Free VM
-
-目前公認**最慷慨**的免費方案。
-
-*   **資源**：Oracle Cloud Infrastructure 提供的 ARM Ampere A1 Compute。
-*   **規格**：最高可達 4 OCPU, 24GB RAM (視區域庫存而定)。
-*   **✅ 優點**：
-    *   **企業級效能**：資源給得非常大方，甚至勝過許多付費 VPS。
-    *   **固定公網 IP**：Webhook 設定最直覺方便。
-*   **⚠️ 缺點**：
-    *   **設定門檻高**：需具備 Linux、SSH key、VCN (虛擬網路)、防火牆設定等知識。
-    *   **帳號審核**：註冊時信用卡驗證較嚴格，部分區域資源可能缺貨。
-
-### 4. 🚀 平台即服務 (PaaS) - Render / Hugging Face
-
-最適合：**短期 Demo、輕量級測試、公開展示**。
-
-*   **資源**：Render Free Tier 或 Hugging Face Spaces (Docker)。
-*   **✅ 優點**：
-    *   **部署簡單**：通常連動 GitHub 即可自動部署。
-    *   **SSL 憑證**：自動處理 HTTPS。
-*   **⛔️ 致命限制 (Critical Warnings)**：
-    *   **休眠機制 (Spin Down)**：閒置 (如 15 分鐘) 後會自動休眠。喚醒需要時間，極易導致 Webhook 請求逾時 (Timeout)。
-    *   **❌ 資料遺失 (Data Persistence)**：這是最嚴重的問題。免費容器通常使用 **Ephemeral Filesystem (暫存檔案系統)**。
-        *   **後果**：當服務重啟、休眠喚醒或重新部署時，**所有建立的工作流 (Workflows) 和帳號設定都會被清空歸零**。
-        *   **解法**：必須自行串接外部資料庫 (如外掛 PostgreSQL)，但這會大幅增加免費部署的複雜度。
+```mermaid
+flowchart TD
+    Start["🎯 開始選擇免費雲端部署方案"] --> Q1{"💳 您手邊有可供驗證身分的信用卡/簽帳金融卡嗎？"}
+    
+    Q1 -->|"❌ 完全沒有信用卡 (純學生)"| NoCard{"想要大記憶體還是最快一鍵部署？"}
+    NoCard -->|"⭐ 想要 16GB 大記憶體 (最推薦)"| Opt1["🤗 方案 1：Hugging Face Spaces<br>(免信用卡 · 16GB RAM · 50GB 空間 · 永久在線)"]
+    NoCard -->|"🚀 想要一鍵拉取 Docker 映像檔"| Opt2["⚡ 方案 2：Koyeb Serverless<br>(免信用卡 · 免休眠 · 全球 CDN)"]
+    
+    Q1 -->|"✅ 有信用卡 (僅驗證 0 元不扣款)"| HasCard{"您熟悉 Linux 終端機指令嗎？"}
+    HasCard -->|"⭐ 熟悉 Linux / 想要獨立主機"| Opt4["☁️ 方案 4：Oracle Cloud (OCI)<br>(怪物級 4 OCPU · 24GB RAM · 獨立公網 IP)"]
+    HasCard -->|"🌱 偏好簡單網頁點擊部署"| Opt3["🎨 方案 3：Render Web Service<br>(搭配 UptimeRobot 防休眠)"]
+```
 
 ---
 
-## 📊 綜合比較表
+## 📊 四大免費雲端部署方案評比
 
-| 方案 | 適合情境 | 7x24 運作 | 外部連線難易 | 資料保存 |
+| 比較項目 | 🤗 方案 1：Hugging Face Spaces | ⚡ 方案 2：Koyeb Serverless | 🎨 方案 3：Render Web Service | ☁️ 方案 4：Oracle Cloud (OCI) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Desktop (Local)** | 學習、測試 | ❌ (關機即停) | 需穿透 (ngrok) | ✅ 本機硬碟 |
-| **Raspberry Pi** | 個人長期使用 | ✅ 穩定 | 需穿透或設定 | ✅ 本機 SD 卡/SSD |
-| **Oracle Cloud** | 進階用戶、高效能 | ✅ 穩定 | ⭐ 容易 (Public IP) | ✅ 雲端硬碟 |
-| **Render / PaaS** | 臨時 Demo | ❌ 會休眠 | ⚠️ 易逾時 | ❌ **重啟即消失** |
+| **信用卡需求** | 🟢 **完全不需要** | 🟢 **完全不需要** | 🟢 **完全不需要** | 🟡 需要（僅驗證不扣款） |
+| **每月費用** | **NT$ 0 (永久免費)** | **NT$ 0 (永久免費)** | **NT$ 0 (永久免費)** | **NT$ 0 (永久免費)** |
+| **硬體規格** | **2 vCPU / 16GB RAM** | 0.1 vCPU / 512MB RAM | 0.1 vCPU / 512MB RAM | **4 OCPU / 24GB RAM** |
+| **休眠機制** | 🟢 **永久在線不休眠** | 🟢 **永久在線不休眠** | 🟡 15分無連線休眠（需Ping） | 🟢 **永久在線不休眠** |
+| **公網網址** | 專屬 HTTPS 網址 | 專屬 HTTPS 網址 | 專屬 HTTPS 網址 | 專屬固定 Public IP |
+| **資料持久化** | 外部 Supabase DB | 外部 Supabase DB | 外部 Supabase DB | 本地 PostgreSQL 容器 |
+| **教學連結** | **[👉 查看詳細部署步驟](./01_HuggingFace_免信用卡Docker部署.md)** | **[👉 查看詳細部署步驟](./02_Koyeb_雲端容器免休眠部署.md)** | **[👉 查看詳細部署步驟](./03_Render_雲端Web服務部署.md)** | **[👉 查看詳細部署步驟](./04_OracleCloud_永久免費VPS架設.md)** |
 
 ---
 
-## 💡 給您的建議
+## 📚 各方案詳細教學導覽
 
-1.  **初學者 / 課程錄製**：直接使用 **本機電腦 (`docker run`)**。搭配 ngrok 解決偶爾需要的外部連線，這是阻力最小的路徑。
-2.  **個人助理 / 自動化**：將 **Raspberry Pi** 架設起來，使用 Docker + Cloudflare Tunnel。這能兼顧免費、隱私與 7x24 小時運作的需求。
+### 1. [🤗 方案 1：Hugging Face Spaces 免費雲端部署（學生首選）](./01_HuggingFace_免信用卡Docker部署.md)
+- **特色**：免綁信用卡，免費分配 2 vCPU + 16GB RAM，自帶 HTTPS 網址，搭配 Supabase 免費資料庫儲存工作流。
+- **適合**：全體學生、希望 0 門檻擁有大記憶體雲端主機的開發者。
+
+### 2. [⚡ 方案 2：Koyeb Serverless 容器雲端部署（免休眠 PaaS）](./02_Koyeb_雲端容器免休眠部署.md)
+- **特色**：免綁信用卡，直接輸入 `docker.io/n8nio/n8n:latest` 一鍵部署，內建全球邊緣 CDN。
+- **適合**：希望 3 分鐘內透過網頁點擊快速完成上線的初學者。
+
+### 3. [🎨 方案 3：Render 免費 Web 服務部署（搭配防休眠排程）](./03_Render_雲端Web服務部署.md)
+- **特色**：支援 GitHub 倉庫連動或 Docker Image 部署，搭配免費 UptimeRobot 定時探測防止容器進入睡眠。
+- **適合**：熟悉主流 PaaS 操作介面的使用者。
+
+### 4. [☁️ 方案 4：Oracle Cloud (OCI) 永久免費雲端 VPS 主機（旗艦 24GB 方案）](./04_OracleCloud_永久免費VPS架設.md)
+- **特色**：全球最慷慨的雲端運算資源，4 核心 ARM CPU、24GB RAM、200GB SSD 與獨立公網 IP，完整 Docker 操控權。
+- **適合**：手邊有卡可供身分驗證、希望建立企業級全功能自動化與 AI 本地模型伺服器的進階學生。
+
+---
+
+## 🗄️ 核心技術：如何讓免費雲端主機「資料永不遺失」？
+
+多數免費雲端容器（如 Hugging Face、Koyeb、Render）具備暫存特性（重新建置或重啟時容器內檔案會重置）。
+
+因此，我們採用業界標準的 **「計算與儲存分離」** 架構：
+1. **運算引擎（n8n）**：跑在免費雲端容器上（處理 Webhook 與流程運算）。
+2. **資料庫儲存**：連線至前面章節學過的 **[Supabase 免費雲端 PostgreSQL](../雲端資料庫整合/Supabase/README.md)**。
+
+```mermaid
+flowchart LR
+    A["☁️ 免費雲端容器 (Hugging Face / Koyeb / Render)"] -->|"環境變數 DB_TYPE=postgresdb"| B["🐘 Supabase 免費 PostgreSQL"]
+    B --> C["📦 工作流程 (Workflows) 永久保存"]
+    B --> D["📊 執行紀錄 (Executions) 永久保存"]
+    B --> E["🔑 憑證設定 (Credentials) 永久保存"]
+```
+
+只要設定好資料庫連線環境變數，無論雲端容器如何重新部署或重啟，**您的所有工作流程與設定都將 100% 完好無損！**
