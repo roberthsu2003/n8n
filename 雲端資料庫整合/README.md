@@ -1,8 +1,8 @@
-# 🗄️ 雲端資料庫整合（PostgreSQL & Supabase 實戰）
+# 🗄️ 雲端資料庫與向量資料庫整合（PostgreSQL, Supabase & Pinecone 實戰）
 
-歡迎來到 **n8n 雲端資料庫整合教學**！在現代企業自動化系統中，資料庫是用來**持久化儲存業務數據**、**維護工單狀態機**、**跨系統資料同步**以及**為 AI 提供私有向量知識庫（RAG / Vector Store）**的核心基礎設施。
+歡迎來到 **n8n 雲端資料庫與向量資料庫整合教學**！在現代企業自動化系統中，資料庫是用來**持久化儲存業務數據**、**維護工單狀態機**、**跨系統資料同步**以及**為 AI 提供私有向量知識庫（RAG / Vector Store）**的核心基礎設施。
 
-本章節以全球最受歡迎的開源關聯式資料庫 **PostgreSQL** 為核心，並以最適合教學與快速上手的雲端託管平台 **Supabase** 作為主要實作環境，帶領您由淺至深掌握資料庫操作技巧。
+本章節涵蓋全球最受歡迎的開源關聯式資料庫 **PostgreSQL**、雲端全端資料庫平台 **Supabase**，以及業界標準的免費用量無伺服器向量資料庫 **Pinecone**，帶領您由淺至深掌握資料庫操作與 AI 知識庫檢索技術。
 
 > 💡 **AI 協作時代學習法**：在完成基礎節點設定並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製各範例中的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt 提詞，由 AI 助理替您在畫布上全自動建構與擴充進階邏輯！
 
@@ -10,11 +10,12 @@
 
 ## 📌 前置準備與連線設定
 
-在開始實作以下範例前，請先完成 Supabase 專案建立與連線憑證設定：
+在開始實作以下範例前，請先完成資料庫專案建立與連線憑證設定（皆為**完全免費、免綁信用卡**方案）：
 
 > 🔑 **完整設定指南**：
-> - [🐘 Supabase 註冊、OAuth 與連線參數設定指南](./Supabase/README.md)
-> - [📜 一鍵建表 SQL 腳本 (schema.sql)](./Supabase/schema.sql)（包含客戶表、訂單表與 pgvector 向量表）
+> 1. [🐘 Supabase 註冊、OAuth 與連線參數設定指南](./Supabase/README.md)
+> 2. [📜 Supabase 一鍵建表 SQL 腳本 (schema.sql)](./Supabase/schema.sql)（包含客戶表、訂單表與 pgvector 向量表）
+> 3. [🌲 Pinecone 免費 Starter 方案與 Serverless 索引建立指南](./06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
 
 ---
 
@@ -31,30 +32,34 @@ flowchart TD
     subgraph n8n_Core["n8n 自動化流程引擎"]
         PostgresNode["🐘 Postgres 節點 (原生 SQL / 連線池)"]
         SupabaseNode["⚡ Supabase 節點 (REST API Low-Code)"]
-        VectorNode["🧠 Supabase Vector Store (AI 向量檢索)"]
+        SupabaseVector["🧠 Supabase pgvector (關聯式向量知識庫)"]
+        PineconeVector["🌲 Pinecone Vector Store (專用向量資料庫)"]
     end
 
-    subgraph Supabase_Cloud["Supabase 雲端 PostgreSQL"]
-        CustomersTable[("👥 customers (客戶表)")]
-        OrdersTable[("📦 orders (訂單表 - JSONB)")]
-        VectorTable[("📚 documents (pgvector 向量知識庫)")]
+    subgraph Cloud_Databases["雲端資料庫儲存層"]
+        CustomersTable[("👥 Supabase: customers (客戶表)")]
+        OrdersTable[("📦 Supabase: orders (訂單表 - JSONB)")]
+        SupabaseVectorTable[("📚 Supabase: documents (pgvector)")]
+        PineconeIndex[("🌲 Pinecone: Serverless Index (向量庫)")]
     end
 
     Webform --> SupabaseNode
     Timer --> PostgresNode
-    Chat --> VectorNode
+    Chat --> SupabaseVector
+    Chat --> PineconeVector
 
     PostgresNode <--> CustomersTable
     PostgresNode <--> OrdersTable
     SupabaseNode <--> CustomersTable
-    VectorNode <--> VectorTable
+    SupabaseVector <--> SupabaseVectorTable
+    PineconeVector <--> PineconeIndex
 ```
 
 ---
 
 ## 📚 實作範例導覽（由淺至深）
 
-本教學規劃了五個循序漸進、兼具理論與實務價值的實作範例：
+本教學規劃了六個循序漸進、兼具理論與實務價值的實作範例：
 
 ---
 
@@ -212,23 +217,47 @@ flowchart TD
 
 ---
 
-## 🏆 為什麼教學選擇 PostgreSQL 與 Supabase？
+### 6. [範例 6：Pinecone 雲端向量資料庫與 AI 檢索（免費 Serverless 向量資料庫）](./06_Pinecone雲端向量資料庫與AI檢索/README.md)
 
-1. **業界標準與高相容性**：PostgreSQL 是目前全球最受推崇的開源關聯式資料庫，支援強型別、JSONB 結構化/半結構化混合資料，以及完善的 ACID 交易特性。
-2. **免費用量最友善**：Supabase 提供永久免費專案，內含 500MB 資料庫儲存空間與 50,000 月活躍用戶，足夠教學與中小型專案使用。
-3. **直覺的視覺化介面**：Supabase 內建類似 Airtable/Excel 的 Table Editor，初學者在 n8n 寫入資料後可立即在網頁上看到成果。
-4. **一站式支援 AI 向量（pgvector）**：無需額外付費或架設專用向量資料庫，直接在 Supabase 開啟 `pgvector` 即可實現 RAG 知識庫檢索。
+**難度**：進階 🔴 ｜ **核心技術**：Pinecone Serverless + AI Agent (RAG)
+
+使用業界最熱門的專用雲端向量資料庫 **Pinecone**（免費 Starter 方案），建立 Serverless 向量索引，體驗毫秒級高併發向量檢索與零維護成本的 RAG 智慧問答。
+
+**學習重點**：
+- Pinecone 永久免費 Starter 方案（免綁信用卡）設定
+- 建立 Serverless Index（維度匹配：OpenAI 1536 維 / Gemini 768 維）
+- Pinecone Vector Store 節點與 API 憑證串接
+- 專用向量庫 vs 關聯式資料庫（pgvector）的架構選型考量
+
+- **附帶樣版**：[`06_pinecone_vector_rag.json`](./06_Pinecone雲端向量資料庫與AI檢索/06_pinecone_vector_rag.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 結合 Google Drive 同步，當雲端硬碟有新 PDF 上傳時，自動向量化寫入 Pinecone。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我建立一個「Google Drive 自動向量化寫入 Pinecone」工作流程：
+1. 起點使用 Google Drive Trigger（監聽指定資料夾的新增檔案事件）。
+2. 串接 Extract from File 節點讀取 PDF 文字內容。
+3. 串接 Recursive Character Text Splitter 進行文字切塊（Chunk Size: 500, Overlap: 50）。
+4. 透過 OpenAI Embeddings 轉換向量，並使用 Pinecone Vector Store 寫入 n8n-rag-knowledge 索引中。
+請幫我配置好相關節點與連線！
+```
+</details>
 
 ---
 
-## 📊 常見免費雲端 PostgreSQL 服務評估
+## 📊 資料庫與向量檢索方案評估比較
 
-| 雲端服務 | 推薦等級 | 免費用量特點 | 核心優勢 | 適用場景 |
-| :--- | :---: | :--- | :--- | :--- |
-| **Supabase** (推薦首選) | ⭐⭐⭐⭐⭐ | 500 MB 儲存空間、無休眠限制 | 內建 Table Editor、REST API、Auth 與 **pgvector** | **教學示範、全端專案、AI RAG 應用** |
-| **Neon** | ⭐⭐⭐⭐ | 0.5 GiB 儲存、支援分支 (Branching) | Serverless 秒級啟動、支援資料庫 Git 分支版本控制 | 團隊協作、CI/CD 測試、現代雲原生開發 |
-| **Aiven** | ⭐⭐⭐ | 免費試用方案 | 提供多雲 (AWS/GCP/Azure) 託管 | 企業多雲容災備份測試 |
-| **Render** | ⭐⭐⭐ | 免費 1 GB（注意：免費 DB 每月有運行時數限制） | 適合與 Render 上的 Web 服務一鍵綁定 | 與 Node.js / Python 容器一起部署 |
+| 評估維度 | 🐘 Supabase (PostgreSQL) | 🌲 Pinecone (Serverless) |
+| :--- | :--- | :--- |
+| **資料庫類型** | 關聯式資料庫 + pgvector 擴充 | 專用向量資料庫 (Vector-Native) |
+| **免費方案額度** | 500 MB 儲存空間、50,000 月活躍用戶 | 1 個 Index、2 GB 儲存、每月免費查詢額度 |
+| **信用卡綁定** | **完全無需信用卡** | **完全無需信用卡** |
+| **核心優勢** | 單一資料庫搞定「業務表 + 訂單 + 向量」 | 毫秒級高併發檢索、Serverless 零運維 |
+| **適用場景** | 全端自動化、電商 CRM、中小企業一站式方案 | 大規模知識庫、專業 AI 搜尋、高併發 RAG 應用 |
 
 ---
 
@@ -243,8 +272,9 @@ flowchart TD
 3. 電商訂單 Upsert 與跨表統計 ➔ 掌握 ON CONFLICT 防重複與多表 JOIN 聚合
 4. 資料庫變更偵測與推播 ➔ 掌握定時輪詢監控與通訊軟體通知閉環
 
-[旗艦 AI 應用]
-5. Supabase pgvector 向量知識庫 ➔ 掌握 AI Agent 向量化與 RAG 私有知識庫檢索
+[旗艦 AI 向量庫]
+5. Supabase pgvector 向量知識庫 ➔ 掌握 PostgreSQL 一庫多用與 RAG 檢索
+6. Pinecone 雲端向量資料庫 ➔ 掌握專用 Serverless 向量資料庫架構
 ```
 
 ---
@@ -252,8 +282,8 @@ flowchart TD
 ## 📚 相關資源
 
 - [Supabase 官方連線設定指南](./Supabase/README.md)
-- [Supabase 官方網站](https://supabase.com/)
+- [Pinecone 免費建立與設定教學](./06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
 - [PostgreSQL 官方 SQL 手冊](https://www.postgresql.org/docs/)
-- [pgvector 官方 GitHub](https://github.com/pgvector/pgvector)
+- [Pinecone 官方網站](https://www.pinecone.io/)
 - [🤖 整合 LLM 模型的 AI Agent 教學](../AI_Agent/README.md)
 - [💬 通訊軟體整合 (LINE & Telegram)](../通訊軟體整合/README.md)

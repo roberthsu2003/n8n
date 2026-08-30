@@ -1,0 +1,208 @@
+{
+  "name": "Pinecone 雲端向量資料庫與 AI 檢索 (RAG)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🌲 範例 6：Pinecone 雲端向量資料庫與 AI 檢索\n\n1. **🆓 永久免費 Starter 方案**：免綁信用卡，建立 Serverless 向量索引。\n2. **Chat Trigger**：提供智慧對話視窗。\n3. **AI Agent**：結合 Pinecone 向量檢索工具的智慧核心。\n4. **Pinecone Vector Store**：連接雲端專用向量資料庫（毫秒級向量搜尋）。\n5. **Embeddings 模型**：支援 OpenAI (1536維) 或免費 Google Gemini (768維)。",
+        "height": 280,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        100
+      ],
+      "id": "pinecone-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -200,
+        400
+      ],
+      "id": "chat-trigger-pinecone",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一位專業的雲端知識庫顧問。請使用繁體中文回答使用者問題，回答必須嚴格依據從 Pinecone 向量資料庫中檢索到的文件內容。若知識庫查無相關資料，請禮貌告知「目前知識庫中查無此相關資料」。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        100,
+        400
+      ],
+      "id": "pinecone-rag-agent",
+      "name": "Pinecone RAG 智慧問答代理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        640
+      ],
+      "id": "pinecone-openai-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        100,
+        640
+      ],
+      "id": "pinecone-memory",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "name": "pinecone_knowledge_base",
+        "description": "當使用者詢問企業產品說明、規格手冊、服務條款或技術文件時呼叫此 Pinecone 向量知識庫檢索工具。"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1,
+      "position": [
+        340,
+        640
+      ],
+      "id": "pinecone-tool-vector-store",
+      "name": "Pinecone 知識庫檢索工具"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-rag-knowledge",
+          "mode": "list",
+          "cachedResultName": "n8n-rag-knowledge"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.1,
+      "position": [
+        340,
+        840
+      ],
+      "id": "pinecone-vector-store",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "YOUR_PINECONE_CREDENTIAL_ID",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-small"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        340,
+        1040
+      ],
+      "id": "pinecone-embeddings",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Pinecone RAG 智慧問答代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Pinecone RAG 智慧問答代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Pinecone RAG 智慧問答代理",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone 知識庫檢索工具": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pinecone RAG 智慧問答代理",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Pinecone 知識庫檢索工具",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

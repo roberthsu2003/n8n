@@ -120,17 +120,18 @@
 
 ---
 
-## 🗄️ [雲端資料庫整合 (PostgreSQL & Supabase)](./雲端資料庫整合/README.md)（另附 **[🐘 Supabase 設定與連線參數指南](./雲端資料庫整合/Supabase/README.md)**）
+## 🗄️ [雲端資料庫與向量資料庫整合 (PostgreSQL, Supabase & Pinecone)](./雲端資料庫整合/README.md)（另附 **[🐘 Supabase 設定指南](./雲端資料庫整合/Supabase/README.md)**）
 
-學習如何將 n8n 與業界標準關聯式資料庫 **PostgreSQL** 及最受歡迎的雲端平台 **Supabase** 整合，提供由淺至深 5 大實作範例：
+學習如何將 n8n 與關聯式資料庫 **PostgreSQL**、全端平台 **Supabase** 及專用無伺服器向量資料庫 **Pinecone** 整合，提供由淺至深 6 大實作範例（皆支援**完全免費、免綁信用卡**方案）：
 
 1. **[Postgres 基礎 CRUD 與資料讀寫](./雲端資料庫整合/01_Postgres基礎CRUD與資料讀寫/README.md)**：原生 SQL 語法、參數化查詢防 SQL 注入與 `RETURNING *` 技巧。
 2. **[Supabase Low-Code 節點與資料表存取](./雲端資料庫整合/02_Supabase節點與資料表存取/README.md)**：免寫 SQL，透過 REST API 進行 Low-Code 視覺化表格讀寫與條件過濾。
 3. **[電商訂單 Upsert 與跨表關聯統計報表](./雲端資料庫整合/03_電商訂單Upsert與關聯統計/README.md)**：使用 `ON CONFLICT` 防重複寫入，並執行 `LEFT JOIN ... GROUP BY` 產出消費排行榜。
 4. **[資料庫變更即時偵測與即時推播](./雲端資料庫整合/04_資料庫變更偵測與即時推播/README.md)**：定時排程監控 `pending` 新訂單，自動發送 Telegram / LINE 推播並更新狀態閉環。
-5. **[Supabase pgvector 向量知識庫與 AI 語意搜尋](./雲端資料庫整合/05_pgvector向量知識庫與AI語意搜尋/README.md)**：啟用 `pgvector` 擴充套件，打造 AI Agent RAG 向量知識庫檢索系統。
+5. **[Supabase pgvector 向量知識庫與 AI 語意搜尋](./雲端資料庫整合/05_pgvector向量知識庫與AI語意搜尋/README.md)**：啟用 `pgvector` 擴充套件，打造關聯式資料庫與 RAG 向量一體化檢索。
+6. **[Pinecone 雲端向量資料庫與 AI 檢索](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md)**：免費建立 Serverless Index，體驗專用向量資料庫毫秒級高併發 RAG 檢索。
 
-- **支援資源**：一鍵建表 SQL 腳本 [`schema.sql`](./雲端資料庫整合/Supabase/schema.sql)、範例工作流程樣版 [`01_postgres_crud.json`](./雲端資料庫整合/01_Postgres基礎CRUD與資料讀寫/01_postgres_crud.json)、[`02_supabase_lowcode.json`](./雲端資料庫整合/02_Supabase節點與資料表存取/02_supabase_lowcode.json)、[`03_ecommerce_upsert_analytics.json`](./雲端資料庫整合/03_電商訂單Upsert與關聯統計/03_ecommerce_upsert_analytics.json)、[`04_db_trigger_notification.json`](./雲端資料庫整合/04_資料庫變更偵測與即時推播/04_db_trigger_notification.json)、[`05_supabase_pgvector_rag.json`](./雲端資料庫整合/05_pgvector向量知識庫與AI語意搜尋/05_supabase_pgvector_rag.json)。
+- **支援資源**：一鍵建表 SQL 腳本 [`schema.sql`](./雲端資料庫整合/Supabase/schema.sql)、範例工作流程樣版 [`01_postgres_crud.json`](./雲端資料庫整合/01_Postgres基礎CRUD與資料讀寫/01_postgres_crud.json)、[`02_supabase_lowcode.json`](./雲端資料庫整合/02_Supabase節點與資料表存取/02_supabase_lowcode.json)、[`03_ecommerce_upsert_analytics.json`](./雲端資料庫整合/03_電商訂單Upsert與關聯統計/03_ecommerce_upsert_analytics.json)、[`04_db_trigger_notification.json`](./雲端資料庫整合/04_資料庫變更偵測與即時推播/04_db_trigger_notification.json)、[`05_supabase_pgvector_rag.json`](./雲端資料庫整合/05_pgvector向量知識庫與AI語意搜尋/05_supabase_pgvector_rag.json)、[`06_pinecone_vector_rag.json`](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/06_pinecone_vector_rag.json)。
 
 ---
 
