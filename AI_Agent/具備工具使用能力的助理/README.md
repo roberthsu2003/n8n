@@ -1,30 +1,42 @@
-# 具備工具使用能力的助理
+# 整合 LLM 模型的 AI Agent
+## 範例 5：具備工作流呼叫能力的 AI 萬能助理（Call Workflow Tool）
 
-## 📚 學習目標
+### 📚 工作流程說明
 
-讓 AI 能夠執行實際操作，學習如何建立一個具備工具使用能力的 AI 助理。
+讓 AI 不僅僅是聊天，更能實際執行各類業務運算與呼叫子工作流！本範例展示如何建立一個具備多樣工具呼叫能力的萬能 AI 助理：
+- 自主分析用戶提問，判斷是否調用工具
+- 使用 **Calculator Tool** 精準運算複雜數學公式
+- 使用 **HTTP Request Tool** 即時查詢全球即時匯率
+- 使用 **Call n8n Workflow Tool** 觸發其他 n8n 工作流完成跨流程任務
 
-## 🎯 難度等級
+---
 
-**難度**: ⭐⭐☆ (中級)  
-**階段**: 階段二：中階應用
+### 流程架構圖
 
-## 📋 工作流程說明
+```mermaid
+flowchart LR
+    A["💬 用戶提問 (Chat Trigger)"] --> B["🤖 AI Agent (Tools Agent)"]
+    C["🧠 語言模型 (OpenAI / Gemini / Ollama)"] --> B
+    D["💾 Window Buffer Memory"] --> B
+    
+    B --> E1["🧮 數學計算機 (Calculator Tool)"]
+    B --> E2["💱 即時匯率查詢 (HTTP Tool)"]
+    B --> E3["⚡ 觸發子工作流 (Call Workflow Tool)"]
+    
+    E1 --> B
+    E2 --> B
+    E3 --> B
+    
+    B --> F["💬 回覆精準運算結果"]
+```
 
-這個範例展示如何建立一個能夠使用工具的 AI 助理，能夠：
-- 理解用戶需求並決定使用哪個工具
-- 執行計算、API 呼叫等實際操作
-- 整合多個工具完成複雜任務
-- 提供工具執行的結果
+---
 
-## 🔧 使用節點
+### 工作流程樣版下載
 
-- **Chat Trigger** - 對話入口
-- **AI Agent (Tools Agent)** - 具備工具使用能力的 AI Agent
-- **OpenAI Chat Model** - 語言模型
-- **Calculator Tool** - 計算工具
-- **Call n8n Workflow Tool** - 呼叫其他 workflow
-- **HTTP Request Tool** - 自訂工具（API 呼叫）
+- [📥 具備工具使用能力的助理工作流程樣版 (ai_tools_assistant.json)](./ai_tools_assistant.json)
+
+---
 
 ## 🎓 教學重點
 

@@ -1,41 +1,31 @@
-# 台北市 youbike 站點資訊查詢
+# 整合 LLM 模型的 AI Agent
+## 範例 2：臺北市 YouBike 2.0 即時站點查詢助理（單一工具呼叫）
 
-## 工作流名稱
+### 📚 工作流程說明
 
-台北市youbike站點資訊查詢
+在具備基本對話概念後，學習如何讓 AI Agent 具備**單一工具使用能力**。本範例以台北市交通局 YouBike 客服（助理「帥氣的小犬」）為情境，當使用者詢問某捷運站周邊是否還有可借車輛時，AI 會主動調用 **HTTP Request Tool** 向臺北市政府開放資料 API 即時拉取最新站點數據，並以親切的繁體中文回答！
 
-## 📚 學習目標
+---
 
-在具備基本對話概念後，學習如何讓 AI Agent 使用**單一工具**查詢台北市 YouBike 即時站點資訊。本工作流預設使用 **Google Gemini**（`gemini-3-flash-preview`），並保留 **Ollama Chat Model** 節點可改接本地模型；聊天介面為台北市交通局 YouBike 服務中心，助理名稱為「帥氣的小犬」。
+### 流程架構圖
 
-## 🎯 難度等級
+```mermaid
+flowchart LR
+    A["💬 用戶詢問「捷運公館站還有車嗎？」"] --> B["🤖 AI Agent (YouBike 智慧助理)"]
+    C["🧠 語言模型 (Gemini / Ollama / OpenAI)"] --> B
+    D["💾 Simple Memory (對話記憶)"] --> B
+    B -->|"1. 觸發查詢"| E["🚲 台北市 YouBike 即時 API (HTTP Tool)"]
+    E -->|"2. 回傳即時站點 JSON"| B
+    B -->|"3. 解析並組織成自然語言"| F["💬 親切回覆可借車輛與空位數"]
+```
 
-**難度**: ⭐☆☆ (初級)
+---
 
-## 📋 工作流程說明
+### 工作流程樣版下載
 
-本工作流實作一個**政府交通局 YouBike 客服**情境的 AI 助理，能夠：
+- [📥 台北市 YouBike 站點資訊查詢工作流程樣版 (台北市youbike站點資訊查詢.json)](./台北市youbike站點資訊查詢.json)
 
-- 從聊天介面接收使用者問題（台北市交通局／youbike服務中心）
-- 依系統提示扮演友善、專業的 youbike 客服人員
-- 在需要站點即時資料時，呼叫 **台北市youbike即時資訊**（HTTP Request Tool）取得台北市 YouBike API 資料
-- 使用 Simple Memory 維持對話脈絡
-- 回覆簡潔、以繁體中文為主，並可於無法處理時引導至機關聯絡人
-
-**與純對話範例的差異**：本範例引入**一個工具**（台北市 YouBike 即時 API），讓 AI 能根據使用者問題主動呼叫並解讀即時資料後回答。
-
-## 🔧 使用節點
-
-- **When chat message received**（Chat Trigger）— 對話入口；標題「台北市交通局」、副標「youbike服務中心」、助理「帥氣的小犬」、歡迎訊息「您好:\n這是台北市youbike服務中心」
-- **AI Agent** — 依 System Message 扮演 youbike 客服，決定是否呼叫工具
-- **Google Gemini Chat Model** — 預設連接的 LLM（`gemini-3-flash-preview`）
-- **Ollama Chat Model** — 選用，可改接本地模型（如 `gpt-oss:20b-cloud`）
-- **Simple Memory** — 對話記憶（contextWindowLength 可調）
-- **台北市youbike即時資訊**（HTTP Request Tool）— 呼叫台北市 YouBike 即時 API：`https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json`，工具描述為「專門取得台北市youbike即時資訊的API」
-
-## 📥 工作流下載
-
-[台北市youbike站點資訊查詢](./台北市youbike站點資訊查詢.json)
+---
 
 ## ⚙️ 設定與使用要點
 

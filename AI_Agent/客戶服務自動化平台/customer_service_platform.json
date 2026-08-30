@@ -1,0 +1,153 @@
+{
+  "name": "企業級客戶服務自動化平台",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🏢 範例 8：企業級客戶服務自動化平台\n\n1. **多渠道 Webhook 接入**：接收來自官網、LINE、Telegram 或電子郵件的進線諮詢。\n2. **AI Agent + RAG 知識庫**：自動檢索產品規格與服務規章，進行擬真智能應答。\n3. **意圖與滿意度分流**：\n   - 一般諮詢：AI 直接即時回覆。\n   - 複雜投訴 / 要求轉人工：自動建立緊急工單並推播主管。\n4. **資料庫持久化存檔**：將問答歷程與工單編號寫入 Google Sheets 或 Supabase。",
+        "height": 280,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        80
+      ],
+      "id": "cs-platform-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "omnichannel-cs",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        400
+      ],
+      "id": "webhook-omnichannel",
+      "name": "多渠道客服 Webhook",
+      "webhookId": "omnichannel-cs-endpoint"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=使用者資訊：\n用戶 ID：{{ $json.body.user_id || 'U12345' }}\n進線渠道：{{ $json.body.channel || '網頁官網' }}\n訊息內容：{{ $json.body.message || '請問你們的退換貨政策是幾天內？如果商品拆封了還能退嗎？' }}\n\n請以專業親切的客服身份回答使用者，並務必輸出標準 JSON 格式（不要包含 markdown 代碼標籤）：\n{\n  \"reply\": \"親切專業的繁體中文回覆內容\",\n  \"intent\": \"一般產品諮詢 / 售後退換貨 / 系統故障報修 / 投訴抱怨\",\n  \"escalate_to_human\": false,\n  \"summary\": \"20字以內的諮詢重點摘要\"\n}",
+        "options": {
+          "systemMessage": "你是一家優質品牌的企業級智慧客服系統。請提供精準、富同理心且結構清晰的解答。若使用者語氣極度憤怒或明確要求真人客服，請將 escalate_to_human 設為 true。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        400
+      ],
+      "id": "cs-platform-agent",
+      "name": "全渠道客服智慧代理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        640
+      ],
+      "id": "cs-openai-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 AI 回應結構\nconst rawOutput = $input.first().json.output || '';\nlet parsed = {};\ntry {\n  const clean = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(clean);\n} catch (e) {\n  parsed = {\n    reply: rawOutput,\n    intent: '一般產品諮詢',\n    escalate_to_human: false,\n    summary: 'AI 回覆'\n  };\n}\n\nconst body = $('多渠道客服 Webhook').item.json.body || {};\n\nreturn [{\n  json: {\n    ticket_id: 'TKT-' + Date.now(),\n    user_id: body.user_id || 'U12345',\n    channel: body.channel || '網頁官網',\n    user_message: body.message || '',\n    ai_reply: parsed.reply,\n    intent: parsed.intent,\n    escalate_to_human: parsed.escalate_to_human === true,\n    summary: parsed.summary,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        400
+      ],
+      "id": "cs-parse-json",
+      "name": "組裝工單與回應資料"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  status: 'success',\n  ticket_id: $json.ticket_id,\n  reply: $json.ai_reply,\n  escalated: $json.escalate_to_human\n}) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        400
+      ],
+      "id": "cs-respond-webhook",
+      "name": "即時回傳客服訊息"
+    }
+  ],
+  "connections": {
+    "多渠道客服 Webhook": {
+      "main": [
+        [
+          {
+            "node": "全渠道客服智慧代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "全渠道客服智慧代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "全渠道客服智慧代理": {
+      "main": [
+        [
+          {
+            "node": "組裝工單與回應資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "組裝工單與回應資料": {
+      "main": [
+        [
+          {
+            "node": "即時回傳客服訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

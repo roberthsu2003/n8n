@@ -1,0 +1,220 @@
+{
+  "name": "Gmail 客服郵件智慧分類與自動歸檔系統",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📧 範例 6：Gmail 客服郵件智慧分類與自動歸檔系統\n\n1. **Webhook / 郵件接收**：模擬接收進線客戶 Email（寄件者、主旨、內文）。\n2. **AI Agent 語義分類**：自動分析郵件類別（投訴/詢價/技術/合作）、急迫度與 30 字重點摘要。\n3. **Switch 條件分流**：若為「緊急投訴」，立即推播 Telegram / LINE 警報。\n4. **Google Sheets 歸檔**：將分析結果自動追加至工單總表。",
+        "height": 260,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        100
+      ],
+      "id": "email-classifier-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "email-incoming",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        380
+      ],
+      "id": "webhook-incoming-email",
+      "name": "接收客服郵件 Webhook",
+      "webhookId": "email-incoming-endpoint"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=請分析以下客戶郵件：\n寄件者：{{ $json.body.sender || 'client@example.com' }}\n主旨：{{ $json.body.subject || '產品無法登入，系統一直報錯' }}\n內文：{{ $json.body.body || '從今天早上開始我們整個團隊都無法登入後台，出現 Error 500，請盡快協助處理，這嚴重影響我們的業務運作！' }}\n\n請務必輸出標準 JSON 格式（不要包含 markdown 標籤），格式如下：\n{\n  \"category\": \"系統故障 / 業務詢價 / 一般諮詢 / 退款客訴 / 垃圾郵件\",\n  \"urgency\": \"高 / 中 / 低\",\n  \"sentiment\": \"負面 / 中立 / 正面\",\n  \"summary\": \"30字以內的精簡核心摘要\",\n  \"suggested_action\": \"建議後續處理行動方針\"\n}",
+        "options": {
+          "systemMessage": "你是一位企業客服工單智能分流專家。請客觀嚴謹地評估郵件的類別、急迫度與情感傾向，並輸出合法標準 JSON 物件。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        380
+      ],
+      "id": "ai-email-classifier-agent",
+      "name": "AI 郵件意圖與急迫度分類代理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        600
+      ],
+      "id": "email-openai-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 AI 輸出的 JSON 字串\nconst rawOutput = $input.first().json.output || '';\nlet parsed = {};\ntry {\n  const clean = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();\n  parsed = JSON.parse(clean);\n} catch (e) {\n  parsed = {\n    category: '一般諮詢',\n    urgency: '中',\n    sentiment: '中立',\n    summary: 'AI 解析異常',\n    suggested_action: '轉人工客服確認'\n  };\n}\n\nconst rawBody = $('接收客服郵件 Webhook').item.json.body || {};\n\nreturn [{\n  json: {\n    sender: rawBody.sender || 'client@example.com',\n    subject: rawBody.subject || '無主旨',\n    category: parsed.category,\n    urgency: parsed.urgency,\n    sentiment: parsed.sentiment,\n    summary: parsed.summary,\n    suggested_action: parsed.suggested_action,\n    is_urgent: parsed.urgency === '高',\n    received_at: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "parse-classifier-json",
+      "name": "解析與組裝結構化資料"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-high-urgency",
+              "leftValue": "={{ $json.is_urgent }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        620,
+        380
+      ],
+      "id": "check-high-urgency",
+      "name": "是否為高急迫度？"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "客服郵件分類總表",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        480
+      ],
+      "id": "append-sheets-record",
+      "name": "Google Sheets 記錄工單",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "接收客服郵件 Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI 郵件意圖與急迫度分類代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 郵件意圖與急迫度分類代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 郵件意圖與急迫度分類代理": {
+      "main": [
+        [
+          {
+            "node": "解析與組裝結構化資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析與組裝結構化資料": {
+      "main": [
+        [
+          {
+            "node": "是否為高急迫度？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否為高急迫度？": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets 記錄工單",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets 記錄工單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

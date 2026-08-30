@@ -1,0 +1,166 @@
+{
+  "name": "具備工具使用能力的 AI 助理",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛠️ 範例 5：具備工具使用能力的 AI 萬能助理\n\n1. **Chat Trigger**：提供互動式聊天介面。\n2. **AI Agent (Tools Agent)**：自主判斷使用者意圖，決定是否呼叫工具。\n3. **Calculator Tool**：精確執行複雜數學公式與運算。\n4. **HTTP Request Tool**：查詢外部即時匯率或天氣。\n5. **Call Workflow Tool**：觸發 n8n 內部其他工作流程（如發送通知或查詢資料庫）。",
+        "height": 270,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        100
+      ],
+      "id": "tools-agent-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -200,
+        380
+      ],
+      "id": "chat-trigger-tools",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一位功能強大的智慧助理。你可以使用計算機工具來進行精確數學運算，也可以使用 HTTP 工具查詢資料。請根據使用者問題自主決定是否使用工具，並以親切有禮的繁體中文回答。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        380
+      ],
+      "id": "tools-ai-agent",
+      "name": "AI 萬能工具代理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        600
+      ],
+      "id": "tools-openai-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        600
+      ],
+      "id": "tools-window-memory",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        240,
+        600
+      ],
+      "id": "calculator-tool",
+      "name": "數學計算機工具"
+    },
+    {
+      "parameters": {
+        "name": "exchange_rate_lookup",
+        "description": "當使用者詢問貨幣匯率（如美金 USD 對台幣 TWD）時使用此工具查詢即時匯率。",
+        "method": "GET",
+        "url": "https://open.er-api.com/v6/latest/USD"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        600
+      ],
+      "id": "http-exchange-tool",
+      "name": "即時匯率查詢工具"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI 萬能工具代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 萬能工具代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI 萬能工具代理",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "數學計算機工具": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI 萬能工具代理",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "即時匯率查詢工具": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI 萬能工具代理",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

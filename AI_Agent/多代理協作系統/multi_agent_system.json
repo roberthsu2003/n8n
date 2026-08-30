@@ -1,0 +1,187 @@
+{
+  "name": "多代理人協作系統（Multi-Agent 團隊）",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 👥 範例 7：多代理人協作系統（Multi-Agent 團隊）\n\n1. **Chat Trigger**：接收使用者的複雜綜合任務（如：產品發表行銷企劃）。\n2. **主管代理（Supervisor Agent）**：負責分析任務、拆解子步驟，並指揮底下的專家 Agent。\n3. **研究員 Agent Tool**：專門負責市場調研、競爭對手優劣勢分析與資料整理。\n4. **文案撰寫員 Agent Tool**：專門依據調研數據撰寫吸引人的社群行銷與宣傳文案。\n5. **最終彙整輸出**：由主管 Agent 將專家結果組織為結構化企劃案回覆給用戶。",
+        "height": 280,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        80
+      ],
+      "id": "multi-agent-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -200,
+        400
+      ],
+      "id": "chat-trigger-multi-agent",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一位頂尖的企劃專案經理（Supervisor Agent）。當收到使用者的企劃需求時，你需要將任務拆解，並指揮研究員與文案師完成各自的專業部分，最後將兩者的成果整合成一份架構完整、專業度極高的繁體中文企劃報表。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        80,
+        400
+      ],
+      "id": "supervisor-agent",
+      "name": "專案主管代理 (Supervisor)"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        640
+      ],
+      "id": "supervisor-openai-model",
+      "name": "主管 OpenAI 模型",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        640
+      ],
+      "id": "supervisor-memory",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "name": "market_research_specialist",
+        "description": "市場與產品調研專家。當需要分析目標客群、競爭對手特點或市場趨勢時呼叫此工具。",
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": []
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        260,
+        640
+      ],
+      "id": "research-agent-tool",
+      "name": "市場調研專家 (Agent Tool)"
+    },
+    {
+      "parameters": {
+        "name": "copywriting_specialist",
+        "description": "行銷文案與社群傳播專家。當需要撰寫吸睛標題、社群貼文或宣傳腳本時呼叫此工具。",
+        "workflowId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": []
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        460,
+        640
+      ],
+      "id": "copywriter-agent-tool",
+      "name": "行銷文案專家 (Agent Tool)"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "專案主管代理 (Supervisor)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "主管 OpenAI 模型": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "專案主管代理 (Supervisor)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "專案主管代理 (Supervisor)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "市場調研專家 (Agent Tool)": {
+      "ai_tool": [
+        [
+          {
+            "node": "專案主管代理 (Supervisor)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "行銷文案專家 (Agent Tool)": {
+      "ai_tool": [
+        [
+          {
+            "node": "專案主管代理 (Supervisor)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

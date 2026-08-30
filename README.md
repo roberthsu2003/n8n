@@ -79,23 +79,21 @@
 ---
 
 
-## 🤖 整合 LLM 模型的 AI Agent
+## 🤖 [整合 LLM 模型的 AI Agent](./AI_Agent/README.md)
 
-學習如何將 Ollama、OpenAI、Claude、Gemini 等大型語言模型與 **RAG（檢索增強生成）** 整合到 n8n 工作流中，建立由淺至深的智能化自動化系統。
+學習如何將 Ollama（本地零成本）、Google Gemini、OpenAI GPT、Claude 等大型語言模型與 **RAG 向量知識庫** 整合到 n8n 中，提供由淺至深 8 大實作範例：
 
-- **主入口**：[整合 LLM 的 AI Agent](./AI_Agent/README.md)
-- **RAG 實作**（本章節內）：[整合 RAG 的實作](./AI_Agent/RAG智能問答系統/README.md) — 依文件問答、向量儲存由淺至深，含範例大綱與預留項目。
-
-**由淺至深學習路徑**：
-
-1. **智能客服聊天機器人** — 純對話、System Prompt、對話記憶
-2. **天氣和新聞查詢（使用 Ollama）** — 工具使用、HTTP / RSS、$fromAI()
-3. **RAG 入門體驗** — 記憶體儲存、精簡版文件問答；完整路徑見 [整合 RAG 的實作](./AI_Agent/RAG智能問答系統/README.md)
-4. **具備工具使用能力的助理** — 進階工具、雲端 API
-5. **郵件智能分類系統** — 業務自動化、分類與流程
-6. **多代理協作系統** — 多代理、任務分工
-7. **客戶服務自動化平台** — 端到端、知識庫與多渠道
-8. **AI Agent 監控與優化** — 監控、評估、安全與優化
+- **階段一：基礎對話與工具呼叫**
+  1. **智能客服聊天機器人**：純對話、System Prompt、Window Buffer Memory 對話記憶
+  2. **臺北市 YouBike 2.0 即時查詢**：單一工具調用，串接台北市政府開放資料 API
+  3. **多工具天氣與新聞助理**：多工具自主選擇，使用 `$fromAI()` 動態生成查詢參數
+- **階段二：RAG 知識庫與工作流自動化**
+  4. **企業私有知識庫 RAG 問答系統**：向量資料庫檢索（In-Memory / Supabase），杜絕模型幻覺
+  5. **具備工作流呼叫能力的 AI 萬能助理**：掛載 Calculator Tool 與 Call n8n Workflow Tool
+  6. **Gmail 客服郵件智慧分類與歸檔**：結構化 JSON 輸出、高急迫告警分流與 Google Sheets 記錄
+- **階段三：多代理協同與企業級平台**
+  7. **多代理人協作團隊 (Multi-Agent)**：Supervisor 主管代理拆解任務，指揮「調研」與「文案」專家
+  8. **端到端客戶服務自動化平台**：全渠道 Webhook 接入、RAG 檢索、意圖判斷與真人客服升級
 
 ---
 
