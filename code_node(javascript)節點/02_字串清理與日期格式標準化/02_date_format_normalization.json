@@ -1,0 +1,101 @@
+{
+  "name": "字串清理與日期格式標準化",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📅 範例 2：字串清理與日期格式標準化\n\n1. **多來源日期清理**：將 `2026/08/30` 或 `30-08-2026` 統一轉換為 ISO 標準格式 `2026-08-30`。\n2. **字串清理**：清除多餘頭尾空白 `.trim()` 與大小寫標準化。\n3. **在地化格式**：使用 `Intl.DateTimeFormat` 或 `toLocaleDateString` 輸出繁體中文民國曆與年月日格式。",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "date-clean-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-date-trigger",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "customer_name",
+              "value": "  王小明 (VIP)  ",
+              "type": "string"
+            },
+            {
+              "name": "order_date",
+              "value": "2026/08/30",
+              "type": "string"
+            },
+            {
+              "name": "amount",
+              "value": "1500",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "mock-order-data",
+      "name": "模擬未清理訂單資料"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst outputItems = [];\n\nfor (const item of items) {\n  const rawName = item.json.customer_name || '';\n  const rawDate = item.json.order_date || '';\n  \n  // 1. 字串清理\n  const cleanName = rawName.trim().replace(/\\s*\\(VIP\\)/g, '');\n  \n  // 2. 正規表達式替換日期符號\n  const isoDate = rawDate.replace(/\\//g, '-');\n  const dateObj = new Date(isoDate);\n  \n  // 3. 繁體中文語系格式化\n  const twDate = dateObj.toLocaleDateString('zh-TW', {\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit'\n  });\n  \n  outputItems.push({\n    json: {\n      customer_name_original: rawName,\n      customer_name_clean: cleanName,\n      amount: Number(item.json.amount) || 0,\n      order_date_original: rawDate,\n      order_date_iso: isoDate,\n      formatted_date_tw: twDate\n    }\n  });\n}\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        380
+      ],
+      "id": "code-date-clean",
+      "name": "字串清理與日期標準化 (Code)"
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "模擬未清理訂單資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬未清理訂單資料": {
+      "main": [
+        [
+          {
+            "node": "字串清理與日期標準化 (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

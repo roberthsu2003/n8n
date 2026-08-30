@@ -1,0 +1,91 @@
+{
+  "name": "陣列操作與銷售報表重組",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📊 範例 4：陣列操作與銷售報表重組\n\n1. **動態 Group By 分組**：依區域 (Region) 與類別 (Category) 動態歸納交易紀錄。\n2. **陣列不可變排序**：使用 `[...transactions].sort()` 找出銷售最高與最低訂單。\n3. **多維度聚合報表**：計算總銷售額、平均客單價與每日銷售明細，產出高階管理日報。",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "sales-report-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-sales-trigger",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "transactions",
+              "value": "=[{\"product\":\"AI 智慧客服主機\",\"category\":\"AI產品\",\"amount\":35000,\"date\":\"2026-08-01\",\"region\":\"北區\"},{\"product\":\"無線滑鼠\",\"category\":\"周邊硬體\",\"amount\":500,\"date\":\"2026-08-01\",\"region\":\"北區\"},{\"product\":\"機械鍵盤\",\"category\":\"周邊硬體\",\"amount\":1200,\"date\":\"2026-08-02\",\"region\":\"南區\"},{\"product\":\"4K 專業螢幕\",\"category\":\"周邊硬體\",\"amount\":8000,\"date\":\"2026-08-02\",\"region\":\"北區\"},{\"product\":\"人體工學辦公椅\",\"category\":\"辦公傢俱\",\"amount\":4500,\"date\":\"2026-08-01\",\"region\":\"中區\"}]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "set-raw-transactions",
+      "name": "原始交易資料"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst transactions = typeof item.json.transactions === 'string' \n  ? JSON.parse(item.json.transactions) \n  : item.json.transactions;\n\n// 1. 按區域分組統計\nconst regionStats = {};\ntransactions.forEach(t => {\n  if (!regionStats[t.region]) {\n    regionStats[t.region] = {\n      region: t.region,\n      total_amount: 0,\n      transaction_count: 0,\n      products: []\n    };\n  }\n  regionStats[t.region].total_amount += t.amount;\n  regionStats[t.region].transaction_count += 1;\n  regionStats[t.region].products.push(t.product);\n});\n\n// 2. 依金額降冪排序找出冠軍與墊底\nconst sorted = [...transactions].sort((a, b) => b.amount - a.amount);\nconst topDeal = sorted[0];\nconst lowestDeal = sorted[sorted.length - 1];\n\n// 3. 全局指標計算\nconst totalRevenue = transactions.reduce((sum, t) => sum + t.amount, 0);\nconst avgOrderValue = Math.round(totalRevenue / transactions.length);\n\nreturn [{\n  json: {\n    report_date: new Date().toISOString().split('T')[0],\n    summary: {\n      total_transactions: transactions.length,\n      total_revenue: totalRevenue,\n      avg_order_value: avgOrderValue\n    },\n    regional_breakdown: Object.values(regionStats).map(r => ({\n      region: r.region,\n      total: r.total_amount,\n      count: r.transaction_count,\n      avg: Math.round(r.total_amount / r.transaction_count),\n      products: r.products.join(', ')\n    })),\n    highlights: {\n      top_deal: topDeal,\n      lowest_deal: lowestDeal\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        380
+      ],
+      "id": "code-sales-report",
+      "name": "銷售報表多維度聚合 (Code)"
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "原始交易資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "原始交易資料": {
+      "main": [
+        [
+          {
+            "node": "銷售報表多維度聚合 (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

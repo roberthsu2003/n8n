@@ -1,0 +1,111 @@
+{
+  "name": "多條件分類與動態標籤",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 👥 範例 3：多條件分類與動態標籤\n\n1. **替代多層 IF 節點**：在單一 Code 節點內整合消費金額、訂單次數與流失天數多維度判斷。\n2. **動態標籤陣列**：使用 `.push()` 依業務規則動態附加「高價值客戶」、「高單價」或「流失風險」。\n3. **防除以零安全運算**：使用三元運算子計算平均客單價，避免 `NaN` 或錯誤。",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "customer-tag-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-customer-trigger",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "customer_id",
+              "value": "C001",
+              "type": "string"
+            },
+            {
+              "name": "customer_name",
+              "value": "陳大華",
+              "type": "string"
+            },
+            {
+              "name": "total_orders",
+              "value": 25,
+              "type": "number"
+            },
+            {
+              "name": "total_amount",
+              "value": 150000,
+              "type": "number"
+            },
+            {
+              "name": "days_since_last_order",
+              "value": 10,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "set-customer-raw",
+      "name": "客戶消費資料"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  let customerLevel = '一般會員';\n  let tags = [];\n  let discount = 0;\n  \n  // 1. 根據訂單數與金額評級\n  if (data.total_amount >= 100000 && data.total_orders >= 20) {\n    customerLevel = 'VIP 尊榮會員';\n    discount = 15;\n    tags.push('高價值客戶');\n  } else if (data.total_amount >= 50000 || data.total_orders >= 10) {\n    customerLevel = '黃金會員';\n    discount = 10;\n    tags.push('重要客戶');\n  } else if (data.total_orders >= 5) {\n    customerLevel = '銀牌會員';\n    discount = 5;\n    tags.push('活躍客戶');\n  }\n  \n  // 2. 根據最後下單天數評估活躍度\n  if (data.days_since_last_order <= 7) {\n    tags.push('高度活躍');\n  } else if (data.days_since_last_order <= 30) {\n    tags.push('活躍');\n  } else if (data.days_since_last_order <= 90) {\n    tags.push('需關注');\n  } else {\n    tags.push('流失風險');\n  }\n  \n  // 3. 安全計算平均客單價 (防除以零)\n  const avgOrderAmount = data.total_orders > 0 \n    ? Math.round(data.total_amount / data.total_orders) \n    : 0;\n  \n  if (avgOrderAmount >= 5000) {\n    tags.push('高客單價');\n  }\n  \n  results.push({\n    json: {\n      customer_id: data.customer_id,\n      customer_name: data.customer_name,\n      level: customerLevel,\n      discount_rate: `${discount}%`,\n      tags: tags,\n      tags_string: tags.join(', '),\n      avg_order_amount: avgOrderAmount,\n      analysis_date: new Date().toISOString().split('T')[0]\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        380
+      ],
+      "id": "code-customer-classify",
+      "name": "客戶分級與動態標籤 (Code)"
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "客戶消費資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "客戶消費資料": {
+      "main": [
+        [
+          {
+            "node": "客戶分級與動態標籤 (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

@@ -1,0 +1,91 @@
+{
+  "name": "進階資料去重與二進位檔案生成",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🧹 範例 5：進階資料去重與二進位 CSV 生成\n\n1. **多來源資料合併去重**：使用 JavaScript `Map` 依據 `email` 唯一鍵高效去重（保留最新一筆並合併標籤）。\n2. **動態 CSV 字串組裝**：處理含逗號與引號的字串逸出。\n3. **二進位檔案生成**：使用 `this.helpers.prepareBinaryData` 封裝為標準 CSV 二進位檔案供後續節點下載或 Email 寄送。",
+        "height": 270,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "dedup-binary-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-dedup-trigger",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "name": "rawContacts",
+              "value": "=[{\"name\":\"王小明\",\"email\":\"ming@example.com\",\"phone\":\"0912-111-222\",\"source\":\"FB廣告\",\"date\":\"2026-08-01\"},{\"name\":\"王小明\",\"email\":\"MING@example.com\",\"phone\":\"0912-111-222\",\"source\":\"官網填單\",\"date\":\"2026-08-05\"},{\"name\":\"李美麗\",\"email\":\"mary@example.com\",\"phone\":\"0922-333-444\",\"source\":\"LINE\",\"date\":\"2026-08-02\"},{\"name\":\"張大同\",\"email\":\"david@example.com\",\"phone\":\"0933-555-666\",\"source\":\"現場活動\",\"date\":\"2026-08-03\"},{\"name\":\"李美麗 (新手機)\",\"email\":\"mary@example.com\",\"phone\":\"0988-999-000\",\"source\":\"客服進線\",\"date\":\"2026-08-06\"}]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "set-duplicate-contacts",
+      "name": "含重複名單的原始資料"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst rawContacts = typeof item.json.rawContacts === 'string' \n  ? JSON.parse(item.json.rawContacts) \n  : item.json.rawContacts;\n\n// 1. 使用 Map 依據 Email (小寫化) 去重並合併來源\nconst contactMap = new Map();\n\nfor (const contact of rawContacts) {\n  const normalizedEmail = (contact.email || '').trim().toLowerCase();\n  if (!normalizedEmail) continue;\n\n  if (contactMap.has(normalizedEmail)) {\n    // 已存在：保留最新資料並合併來源渠道\n    const existing = contactMap.get(normalizedEmail);\n    const sources = new Set(existing.sources);\n    sources.add(contact.source);\n    \n    contactMap.set(normalizedEmail, {\n      ...existing,\n      name: contact.name, // 更新為最新姓名\n      phone: contact.phone || existing.phone,\n      latestDate: contact.date > existing.latestDate ? contact.date : existing.latestDate,\n      sources: Array.from(sources)\n    });\n  } else {\n    // 首次出現\n    contactMap.set(normalizedEmail, {\n      name: contact.name,\n      email: normalizedEmail,\n      phone: contact.phone,\n      latestDate: contact.date,\n      sources: [contact.source]\n    });\n  }\n}\n\nconst cleanContacts = Array.from(contactMap.values());\n\n// 2. 組裝 CSV 內容 (含 UTF-8 BOM 防 Excel 亂碼)\nlet csvContent = \"\\uFEFF姓名,電子郵件,電話,最近互動日期,所有來源渠道\\n\";\n\nfor (const c of cleanContacts) {\n  const sourcesStr = `\"${c.sources.join('; ')}\"`;\n  csvContent += `\"${c.name}\",\"${c.email}\",\"${c.phone}\",\"${c.latestDate}\",${sourcesStr}\\n`;\n}\n\n// 3. 封裝為二進位檔案\nconst binaryData = await this.helpers.prepareBinaryData(\n  Buffer.from(csvContent, 'utf-8'),\n  'clean_contacts_export.csv',\n  'text/csv'\n);\n\nreturn [{\n  json: {\n    originalCount: rawContacts.length,\n    cleanCount: cleanContacts.length,\n    removedDuplicates: rawContacts.length - cleanContacts.length,\n    contacts: cleanContacts\n  },\n  binary: {\n    data: binaryData\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        380
+      ],
+      "id": "code-dedup-binary",
+      "name": "Map 去重與生成 CSV Binary (Code)"
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "含重複名單的原始資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "含重複名單的原始資料": {
+      "main": [
+        [
+          {
+            "node": "Map 去重與生成 CSV Binary (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

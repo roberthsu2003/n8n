@@ -1,0 +1,176 @@
+{
+  "name": "Code Node 互動式基礎教學",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "38ce3db6-ce1d-4091-9645-39e674ad1782",
+              "name": "users",
+              "type": "array",
+              "value": "=[{\"firstName\":\"Alice\",\"lastName\":\"Smith\",\"birthDate\":\"1990-05-15\"},{\"firstName\":\"Bob\",\"lastName\":\"Jones\",\"birthDate\":\"1985-11-22\"},{\"firstName\":\"Charlie\",\"lastName\":\"Brown\",\"birthDate\":\"2001-02-10\"}, {\"firstName\":\"Alex\",\"lastName\":\"Garcia\",\"birthDate\":\"1995-07-30\"}]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sample-data-node",
+      "name": "1. Sample Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2220,
+        620
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "users",
+        "options": {}
+      },
+      "id": "split-users-node",
+      "name": "2. Split Out Users",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -2000,
+        620
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 逐筆處理模式 (runOnceForEachItem)\nconst user = $input.item.json;\nconst fullName = `${user.firstName} ${user.lastName}`;\n\nconst birthDate = new Date(user.birthDate);\nconst ageDiffMs = Date.now() - birthDate.getTime();\nconst ageDate = new Date(ageDiffMs);\nconst age = Math.abs(ageDate.getUTCFullYear() - 1970);\n\nreturn {\n  ...user,\n  fullName: fullName,\n  age: age\n};"
+      },
+      "id": "process-each-user-node",
+      "name": "3. Process Each User",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1680,
+        620
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 呼叫外部 API (this.helpers.httpRequest)\nconst user = $input.item.json;\nconst url = `https://api.genderize.io?name=${user.firstName}`;\nconst response = await this.helpers.httpRequest({ url: url, json: true });\n\nreturn {\n  ...user,\n  gender: response.gender || 'unknown',\n  genderProbability: response.probability || 0\n};"
+      },
+      "id": "fetch-external-data-node",
+      "name": "4. Fetch External Data (Advanced)",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1280,
+        620
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// 整批處理模式 (runOnceForAllItems)\nconst allUsers = $items();\nconst totalAge = allUsers.reduce((sum, item) => sum + item.json.age, 0);\nconst userCount = allUsers.length;\nconst averageAge = totalAge / userCount;\n\nreturn [\n  {\n    json: {\n      totalUsers: userCount,\n      averageAge: parseFloat(averageAge.toFixed(2))\n    }\n  }\n];"
+      },
+      "id": "calc-average-age-node",
+      "name": "5. Calculate Average Age",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -880,
+        620
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "// 產生二進位 CSV 檔案\nconst allUsers = $(\"4. Fetch External Data (Advanced)\").all();\nlet csvContent = \"FullName,Age,GenderGuess,ProcessedBy\\n\";\n\nfor (const item of allUsers) {\n  const user = item.json;\n  csvContent += `\"${user.fullName}\",${user.age},${user.gender},n8n\\n`;\n}\n\nconst binaryData = await this.helpers.prepareBinaryData(Buffer.from(csvContent), 'user_report.csv');\n\nreturn [\n  {\n    json: {\n      reportGenerated: new Date().toISOString(),\n      userCount: allUsers.length\n    },\n    binary: {\n      'report': binaryData\n    }\n  }\n];"
+      },
+      "id": "create-binary-file-node",
+      "name": "6. Create a Binary File (Expert)",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -480,
+        620
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "id": "manual-start-tutorial",
+      "name": "Start Tutorial",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -2500,
+        620
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Start Tutorial": {
+      "main": [
+        [
+          {
+            "node": "1. Sample Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Sample Data": {
+      "main": [
+        [
+          {
+            "node": "2. Split Out Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Split Out Users": {
+      "main": [
+        [
+          {
+            "node": "3. Process Each User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Process Each User": {
+      "main": [
+        [
+          {
+            "node": "4. Fetch External Data (Advanced)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Fetch External Data (Advanced)": {
+      "main": [
+        [
+          {
+            "node": "5. Calculate Average Age",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5. Calculate Average Age": {
+      "main": [
+        [
+          {
+            "node": "6. Create a Binary File (Expert)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

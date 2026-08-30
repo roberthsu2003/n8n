@@ -1,448 +1,263 @@
-# n8n Low Code 平台中為什麼仍需要學習 Node.js Code
+# 💻 Code Node (JavaScript) 節點進階應用實戰
 
-## 課程說明
+歡迎來到 **n8n Code Node (JavaScript) 進階教學**！
 
-雖然 n8n 是一個 Low Code 平台,提供了視覺化的節點來建立工作流程,但在某些情況下,使用 Node.js Code 可以讓您:
-- ✅ 處理複雜的資料轉換邏輯
-- ✅ 實現多條件判斷和分類
-- ✅ 進行陣列、物件的進階操作
-- ✅ 撰寫可重複使用的邏輯
-- ✅ 提升工作流程的效率和可讀性
+雖然 n8n 是領先的 Low Code / No Code 自動化平台，提供了大量開箱即用的視覺化節點，但在面對真實企業場景時，**JavaScript Code 節點**是您突破限制、處理複雜業務邏輯的終極武器：
+
+- ✅ **複雜資料清洗與轉換**：靈活處理非結構化文字、正規表達式與多重日期格式。
+- ✅ **多條件智慧決策**：以單一節點取代由十幾個 IF/Switch 組成的繁瑣龐大流程。
+- ✅ **陣列塑形與多維度聚合**：實現 Group By 分組、排序（Sort）、累加（Reduce）與報表重組。
+- ✅ **去重與二進位檔案生成**：使用高效 `Map`/`Set` 去重，並動態打包生成 CSV/PDF 二進位附件。
+
+> 💡 **AI 協作時代學習法**：在完成基礎節點設定並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製各範例中的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt 提詞，由 AI 助理替您在畫布上全自動建構與擴充進階 JavaScript 程式碼！
 
 ---
 
-## 🔑 n8n Code Node 重要變數
+## 🔑 n8n Code Node 核心變數與執行機制
 
-> [適合程式設計師角度的說明](n8n執行機制與全域變數詳解.md)
+> 📖 **進階技術文檔**：[n8n 執行機制與全域變數詳解](./n8n執行機制與全域變數詳解.md)
 
+### 1. 輸入資料變數
+| 變數名稱 | 適用模式 | 說明 |
+| :--- | :--- | :--- |
+| **`$input.item.json`** / **`$json`** | 逐筆模式 (`runOnceForEachItem`) | 取得當前處理項目的 JSON 物件 |
+| **`$input.all()`** / **`$items()`** | 整批模式 (`runOnceForAllItems`) | 取得上游節點傳入的所有項目陣列 |
+| **`$input.first()`** / **`$input.last()`** | 整批模式 (`runOnceForAllItems`) | 取得第一個或最後一個項目 |
+| **`this.helpers.httpRequest`** | 異步 Helper | 在程式碼中直接發送 HTTP 請求（需加 `await`） |
+| **`this.helpers.prepareBinaryData`**| 異步 Helper | 將 Buffer/文字封裝為 n8n 二進位檔案（需加 `await`） |
 
-### 上一個節點傳入的資料結構
-
-n8n 節點之間傳遞的資料是**項目陣列**，每個項目都包含 `json` 和 `binary` 兩個屬性：
-
+### 2. 輸出格式標準規範
 ```javascript
-// 上一個節點傳入的完整資料結構
-[
-  {
-    json: {
-      customer_name: "王小明",
-      order_date: "2024/03/15",
-      amount: 1500
-    },
-    binary: {}  // 若有檔案資料，會存放在這裡
-  },
-  {
-    json: {
-      customer_name: "李大華",
-      order_date: "2024/03/16",
-      amount: 2300
-    },
-    binary: {}
-  },
-  {
-    json: {
-      customer_name: "張美玲",
-      order_date: "2024/03/17",
-      amount: 1800
-    },
-    binary: {}
-  }
-]
-```
-
-**資料結構說明**：
-- 📦 **外層是陣列**：包含多個項目（items）
-- 📋 **每個項目是物件**：具有 `json` 和 `binary` 兩個屬性
-- 💾 **json 屬性**：存放實際的業務資料（如客戶資訊、訂單資料等）
-- 📎 **binary 屬性**：存放二進位資料（如圖片、PDF 等檔案）
-
----
-
-### 輸入資料變數
-```javascript
-$input.all()      // 取得所有輸入項目的陣列
-$input.first()    // 取得第一個項目
-$input.last()     // 取得最後一個項目
-$input.item       // 取得當前處理的項目
-item.json         // 該項目的 JSON 資料
-item.binary       // 該項目的二進位資料(檔案)
-```
-
-### 快捷變數
-```javascript
-$json             // 等同於 $input.item.json
-$binary           // 等同於 $input.item.binary
-```
-
-### 其他有用變數
-```javascript
-$node             // 當前節點的資訊
-$workflow         // Workflow 的資訊
-$execution        // 執行的資訊
-```
-
-### 輸出格式
-```javascript
-// 單一項目
-return { json: {...} }
-
-// 多個項目
-return [
-  { json: {...} },
-  { json: {...} }
-]
-```
-
----
-
-## 實作範例導覽
-
-本教學提供三個完整的實作範例，從初級到進階，幫助您循序漸進掌握 Code Node：
-
-### [⭐ 必修範例：基礎教學](./code_node基礎教學/README.md)
-**難度**: 初級 | **學習時間**: 20-30 分鐘
-
-學習如何使用正規表達式和 JavaScript Date 物件處理日期格式轉換。
-
----
-
-### [⭐ 範例一：將日期格式標準化](./將日期格式標準化/README.md)
-**難度**: 初級 | **學習時間**: 20-30 分鐘
-
-學習如何使用正規表達式和 JavaScript Date 物件處理日期格式轉換。
-
-**⚠️ 重點注意**：
-- 理解 `$input.all()` 和 `item.json` 的使用方式
-- 掌握 `.replace(/\//g, '-')` 正規表達式的全域替換
-- 學會建構正確的 Code Node 輸出格式 `{ json: {...} }`
-
----
-
-### [⭐⭐ 範例二：根據多個條件分類資料](./根據多個條件分類資料/README.md)
-**難度**: 中級 | **學習時間**: 40-60 分鐘
-
-實作複雜的客戶分級邏輯，包含多重條件判斷與動態標籤生成。
-
-**⚠️ 重點注意**：
-- 使用 `&&` (AND) 和 `||` (OR) 組合多個條件
-- 使用陣列 `.push()` 動態建立標籤列表
-- **避免除以零**：使用三元運算子 `data.total_orders > 0 ? ... : 0`
-- 使用 `.join(', ')` 將陣列轉為字串輸出
-
----
-
-### [⭐⭐⭐ 範例三：陣列操作與資料重組](./陣列操作與資料重組/README.md)
-**難度**: 進階 | **學習時間**: 60-90 分鐘
-
-將扁平化交易資料重組為多維度統計報表，展示進階陣列與物件操作技巧。
-
-**⚠️ 重點注意**：
-- **動態物件分組**：使用 `if (!obj[key])` 檢查鍵是否存在
-- **複製陣列再排序**：使用 `[...array]` 避免修改原始資料
-- 理解 `Object.values()` 將物件轉為陣列的用途
-- 掌握 `.reduce()` 累加計算和 `.forEach()` 遍歷的差異
-- 學會建構巢狀的 JSON 報表結構
-
----
-
-## ⚡ 通用注意事項
-
-在所有範例中，請特別注意以下幾點：
-
-1. **輸出格式必須正確**
-   ```javascript
-   // ✅ 正確：使用 json 屬性包裝
-   return { json: { name: "測試" } }
-   
-   // ❌ 錯誤：直接回傳物件
-   return { name: "測試" }
-   ```
-
-2. **處理空值或未定義的資料**
-   ```javascript
-   // ✅ 安全做法
-   const value = item.json.field || '預設值';
-   const count = data.items?.length || 0;
-   ```
-
-3. **使用 console.log() 除錯**
-   ```javascript
-   console.log('當前資料:', item.json);  // 會顯示在 n8n 執行記錄中
-   ```
-
-4. **避免修改原始陣列**
-   ```javascript
-   // ✅ 正確：先複製再排序
-   const sorted = [...array].sort();
-   
-   // ❌ 錯誤：直接修改原陣列
-   const sorted = array.sort();
-   ```
-
----
-
-## �📚 範例一:簡單資料轉換(日期格式標準化)
-
-### 使用場景
-當您收到的日期格式是 `2024/03/15`,但需要轉換成標準的 ISO 格式 `2024-03-15`
-
-### 為什麼需要 Code?
-- ❌ n8n 的 Set Node 無法做字串替換
-- ❌ 沒有內建的日期格式轉換節點可處理多種格式
-- ✅ 使用 Code 可以靈活處理各種日期格式
-
-### 程式碼重點
-```javascript
-const items = $input.all();
-const outputItems = [];
-
-for (const item of items) {
-  const orderDate = item.json.order_date;
-  
-  // 字串替換:將 / 替換成 -
-  const isoDate = orderDate.replace(/\//g, '-');
-  
-  // 使用 JavaScript 內建的日期物件格式化
-  const formattedDate = new Date(isoDate).toLocaleDateString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  });
-  
-  outputItems.push({
-    json: {
-      customer_name: item.json.customer_name,
-      amount: item.json.amount,
-      order_date_original: orderDate,
-      order_date_iso: isoDate,
-      formatted_date: formattedDate
-    }
-  });
-}
-
-return outputItems;
-```
-
-### 學習重點
-1. 使用 `$input.all()` 取得所有輸入資料
-2. 使用迴圈處理每一個項目
-3. 字串操作:`.replace()` 方法
-4. JavaScript 日期物件的使用
-5. 建構輸出陣列的格式
-
----
-
-## 📚 範例二:中等複雜度(客戶分級與標籤)
-
-### 使用場景
-根據客戶的訂單數量、消費金額、最後訂單時間等多個條件,自動分級並貼上標籤
-
-### 為什麼需要 Code?
-- ❌ IF Node 只能處理簡單的單一條件判斷
-- ❌ 需要多個 IF Node 串接,工作流程會變得複雜且難以維護
-- ❌ 無法動態生成標籤陣列
-- ✅ 使用 Code 可以在一個節點內完成所有邏輯
-
-### 程式碼重點
-```javascript
-const items = $input.all();
-const results = [];
-
-for (const item of items) {
-  const data = item.json;
-  
-  let customerLevel = '';
-  let tags = [];
-  let discount = 0;
-  
-  // 多重條件判斷
-  if (data.total_amount >= 100000 && data.total_orders >= 20) {
-    customerLevel = 'VIP';
-    discount = 15;
-    tags.push('高價值客戶');
-  } else if (data.total_amount >= 50000 || data.total_orders >= 10) {
-    customerLevel = '黃金會員';
-    discount = 10;
-    tags.push('重要客戶');
-  } else if (data.total_orders >= 5) {
-    customerLevel = '銀牌會員';
-    discount = 5;
-    tags.push('活躍客戶');
-  } else {
-    customerLevel = '一般會員';
-    discount = 0;
-  }
-  
-  // 根據活躍度添加標籤
-  if (data.days_since_last_order <= 7) {
-    tags.push('高度活躍');
-  } else if (data.days_since_last_order <= 30) {
-    tags.push('活躍');
-  } else if (data.days_since_last_order <= 90) {
-    tags.push('需關注');
-  } else {
-    tags.push('流失風險');
-  }
-  
-  // 計算平均訂單金額
-  const avgOrderAmount = data.total_orders > 0 
-    ? Math.round(data.total_amount / data.total_orders) 
-    : 0;
-  
-  if (avgOrderAmount >= 5000) {
-    tags.push('高單價客戶');
-  }
-  
-  results.push({
-    json: {
-      customer_id: data.customer_id,
-      customer_name: data.customer_name,
-      level: customerLevel,
-      discount_rate: discount,
-      tags: tags.join(', '),
-      avg_order_amount: avgOrderAmount
-    }
-  });
-}
-
-return results;
-```
-
-### 學習重點
-1. 複雜的 if-else 邏輯判斷
-2. 使用陣列 `.push()` 動態添加標籤
-3. 使用 `.join()` 將陣列轉換為字串
-4. 計算平均值並處理除以零的情況
-5. 組合多個條件進行判斷(`&&` 和 `||` 運算子)
-
----
-
-## 📚 範例三:進階(銷售報表資料重組)
-
-### 使用場景
-將多筆交易記錄,重新組織成按區域、類別、日期分組的統計報表
-
-### 為什麼需要 Code?
-- ❌ n8n 內建的 Aggregate Node 功能有限,無法做複雜分組
-- ❌ 需要同時產生多種統計維度(區域、類別、日期)
-- ❌ 需要計算最大值、最小值、平均值等多種指標
-- ✅ 使用 Code 可以一次完成所有資料重組和統計
-
-### 程式碼重點
-```javascript
-const item = $input.first();
-const transactions = JSON.parse(item.json.transactions);
-
-// 1. 按區域統計
-const regionStats = {};
-transactions.forEach(t => {
-  if (!regionStats[t.region]) {
-    regionStats[t.region] = {
-      region: t.region,
-      total_amount: 0,
-      transaction_count: 0,
-      products: []
-    };
-  }
-  regionStats[t.region].total_amount += t.amount;
-  regionStats[t.region].transaction_count += 1;
-  regionStats[t.region].products.push(t.product);
-});
-
-// 2. 按類別統計
-const categoryStats = {};
-transactions.forEach(t => {
-  if (!categoryStats[t.category]) {
-    categoryStats[t.category] = {
-      category: t.category,
-      total_amount: 0,
-      items: []
-    };
-  }
-  categoryStats[t.category].total_amount += t.amount;
-  categoryStats[t.category].items.push({
-    product: t.product,
-    amount: t.amount
-  });
-});
-
-// 計算平均值
-Object.values(categoryStats).forEach(cat => {
-  cat.avg_amount = Math.round(cat.total_amount / cat.items.length);
-});
-
-// 3. 找出最高和最低金額
-const sortedTransactions = [...transactions].sort((a, b) => b.amount - a.amount);
-const topTransaction = sortedTransactions[0];
-const lowestTransaction = sortedTransactions[sortedTransactions.length - 1];
-
-// 4. 按日期分組
-const dailyStats = {};
-transactions.forEach(t => {
-  if (!dailyStats[t.date]) {
-    dailyStats[t.date] = {
-      date: t.date,
-      daily_total: 0,
-      transaction_count: 0
-    };
-  }
-  dailyStats[t.date].daily_total += t.amount;
-  dailyStats[t.date].transaction_count += 1;
-});
-
-// 組合報表
+// ✅ 逐筆模式輸出格式 (回傳單一物件)
 return {
-  json: {
-    summary: {
-      total_transactions: transactions.length,
-      total_amount: transactions.reduce((sum, t) => sum + t.amount, 0)
-    },
-    by_region: Object.values(regionStats),
-    by_category: Object.values(categoryStats),
-    daily_breakdown: Object.values(dailyStats),
-    highlights: {
-      highest_transaction: topTransaction,
-      lowest_transaction: lowestTransaction
-    }
-  }
+  ...$input.item.json,
+  newField: 'value'
 };
+
+// ✅ 整批模式輸出格式 (回傳陣列包覆 json 物件)
+return [
+  {
+    json: {
+      result: 'success',
+      totalCount: 100
+    },
+    binary: {} // 若有二進位檔案放在這裡
+  }
+];
 ```
 
-### 學習重點
-1. 使用物件作為動態鍵值對來分組資料
-2. `.forEach()` 遍歷陣列
-3. `.reduce()` 計算總和
-4. `.sort()` 排序陣列
-5. `Object.values()` 將物件轉換為陣列
-6. 展開運算子 `[...array]` 複製陣列
-7. 巢狀資料結構的建立和操作
+---
+
+## 🧭 Code 節點資料處理核心架構
+
+```mermaid
+flowchart LR
+    A["📥 上游傳入資料 (Items Array)"] --> B{"⚙️ 選擇執行模式"}
+    
+    B -->|"runOnceForEachItem (逐筆處理)"| C["🔄 遍歷單筆項目 ($input.item.json)"]
+    B -->|"runOnceForAllItems (整批聚合)"| D["📊 全局聚合運算 ($input.all())"]
+    
+    C --> E["🧹 字串清理 / 正則替換 / 年齡計算"]
+    D --> F["📈 Group By 分組 / 排序 / Map 高速去重"]
+    
+    E --> G["📤 輸出結構化資料 { json: {...} }"]
+    F --> H["📦 封裝 CSV/二進位檔案 ($binary)"]
+```
 
 ---
 
-## 💡 總結:何時應該使用 Code Node?
+## 📚 實作範例導覽（由淺至深）
 
-### ✅ 應該使用 Code 的情況
-1. **複雜條件判斷**:需要多個 if-else 或巢狀條件
-2. **陣列操作**:過濾、映射、分組、排序
-3. **資料重組**:將扁平資料轉換為巢狀結構,或反之
-4. **字串處理**:格式化、替換、拆分、組合
-5. **數學計算**:統計、平均、累加、百分比
-6. **動態邏輯**:根據資料動態決定處理方式
-
-### ❌ 不需要使用 Code 的情況
-1. **簡單的資料設定**:使用 Set Node 即可
-2. **基本的條件分流**:使用 IF Node 或 Switch Node
-3. **HTTP 請求**:使用 HTTP Request Node
-4. **資料庫操作**:使用對應的資料庫 Node
+本教學規劃了五個由淺至深的實戰範例，帶您從初階語法步入高階大數據處理：
 
 ---
 
-## 🎯 給學生的建議
+### 1. [範例 1：Code Node 互動式入門教學（兩種執行模式與內建 Helper）](./01_CodeNode互動式基礎教學/README.md)
 
-1. **先理解 Low Code 的限制**:當您發現需要很多節點才能完成一個簡單邏輯時,考慮使用 Code
-2. **學習 JavaScript 基礎**:變數、迴圈、條件、陣列、物件操作
-3. **善用 console.log()**:在開發時用來除錯
-4. **參考官方文件**:n8n 提供很多 Code 範例
-5. **逐步進階**:從簡單的資料轉換開始,慢慢學習更複雜的操作
+**難度**：入門 🟢 ｜ **核心技術**：`runOnceForEachItem` vs `runOnceForAllItems` + API 請求 + CSV 生成
 
-記住:Low Code 是為了提高效率,但 Code 是為了提供彈性。兩者結合,才能發揮 n8n 的最大價值!
+包含 6 個關卡的完整實作，帶您體驗逐筆模式、整批聚合、使用 `this.helpers.httpRequest` 呼叫外部 API，以及使用 `this.helpers.prepareBinaryData` 生成 CSV 檔案。
+
+**學習重點**：
+- `$input.item.json` 與 `$items()` 的使用時機
+- JavaScript 異步運算（`async / await`）
+- 內建 Helper 函數的強大功能
+
+- **附帶資源**：[`01_code_node_basics.json`](./01_CodeNode互動式基礎教學/01_code_node_basics.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 在關卡 5 加入中位數 (Median) 與最大/最小年齡統計。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在「5. Calculate Average Age」節點中擴充統計指標：
+1. 計算所有使用者的最大年齡 (maxAge) 與最小年齡 (minAge)。
+2. 將年齡陣列排序後計算年齡中位數 (medianAge)。
+3. 在輸出 JSON 中同時包含 totalUsers, averageAge, maxAge, minAge, medianAge。
+請提供修改後的 Code 節點 JavaScript 程式碼！
+```
+</details>
+
+---
+
+### 2. [範例 2：字串清理與日期格式標準化（正規表達式與 ISO 轉換）](./02_字串清理與日期格式標準化/README.md)
+
+**難度**：初級 🟢 ｜ **核心技術**：`.replace(/\//g, '-')` + `.trim()` + `toLocaleDateString('zh-TW')`
+
+多來源資料清理必備！將不同來源的日期統一轉換為 ISO 8601 標準格式（`YYYY-MM-DD`），並清除姓名中的空格與雜訊標籤。
+
+**學習重點**：
+- 正則表達式在資料清洗中的實用技巧
+- JavaScript `Date` 物件與語系化格式轉換
+- 建立標準 Code Node 輸出格式
+
+- **附帶資源**：[`02_date_format_normalization.json`](./02_字串清理與日期格式標準化/02_date_format_normalization.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 增加時間戳記（Timestamp）與星期幾（如「星期日」）的計算。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在「日期格式標準化」Code 節點中擴充日期資訊：
+1. 取得日期對應的 Unix Timestamp（毫秒數）。
+2. 計算該日期是「星期幾」（例如：星期一、星期日）。
+3. 計算該日期距離今天相差了幾天 (diffDays)。
+請提供修改後的 Code 節點程式碼！
+```
+</details>
+
+---
+
+### 3. [範例 3：多條件分類與動態標籤（替代複雜 IF 節點）](./03_多條件分類與動態標籤/README.md)
+
+**難度**：中級 🟡 ｜ **核心技術**：多重條件判斷 + 動態標籤陣列 + 除以零防禦設計
+
+以單一節點取代十幾個 IF 節點！同時根據訂單數、累積消費金額、最後下單天數等維度，為客戶動態評級並自動貼上多重標籤。
+
+**學習重點**：
+- 邏輯運算元（`&&`, `||`）的多條件組合
+- 動態陣列操作（`.push()`, `.join()`）
+- 安全運算（三元運算子避免除以零）
+
+- **附帶資源**：[`03_customer_classification.json`](./03_多條件分類與動態標籤/03_customer_classification.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 增加「客戶健康度評分 (Health Score: 0~100)」演算法。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在「客戶分級邏輯」Code 節點中加入健康度評分 (0-100 分) 運算：
+1. 訂單數權重 40%（超過 20 筆滿分）。
+2. 消費金額權重 40%（超過 10 萬元滿分）。
+3. 活躍天數權重 20%（7 天內滿分，超過 90 天 0 分）。
+4. 在輸出 JSON 中新增 health_score 與 score_level ('極佳' | '良好' | '危險')。
+請提供修改後的 Code 節點程式碼！
+```
+</details>
+
+---
+
+### 4. [範例 4：陣列操作與銷售報表重組（Group By 分組與多維度聚合）](./04_陣列操作與銷售報表重組/README.md)
+
+**難度**：中高級 🟡 ｜ **核心技術**：動態 Object Map 分組 + `[...arr].sort()` + `.reduce()` 聚合
+
+商業智慧報表利器！將扁平的多筆交易流水帳重新按區域與產品類別進行 Group By 分組，並計算總營收、平均客單價與找出銷售冠軍。
+
+**學習重點**：
+- 物件映射（Object Dictionary）分組技巧
+- 陣列不可變性（避免直接修改原陣列）
+- 巢狀 JSON 報表結構塑形
+
+- **附帶資源**：[`04_sales_report_aggregation.json`](./04_陣列操作與銷售報表重組/04_sales_report_aggregation.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 將聚合後的報表自動格式化為 Slack / Telegram Markdown 表格字串。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在「銷售報表聚合」Code 節點中加入 Markdown 排版輸出：
+1. 依據 regional_breakdown 產出美觀的 Markdown 表格（欄位：區域、總銷售額、訂單數、平均客單價）。
+2. 在 highlights 中加上 🏆 冠軍訂單商品與金額。
+3. 輸出一個 markdown_summary 字串欄位，方便後續直接發送給通訊軟體。
+請提供修改後的 Code 節點程式碼！
+```
+</details>
+
+---
+
+### 5. [範例 5：進階資料去重與二進位檔案生成（Map 去重與 UTF-8 CSV 封裝）](./05_進階資料去重與二進位檔案生成/README.md)
+
+**難度**：進階旗艦 🔴 ｜ **核心技術**：JavaScript `Map` 去重 + `\uFEFF` BOM 標記 + `prepareBinaryData`
+
+大數據清洗旗艦範例！從多來源匯入潛在客戶名單，使用 `Map` 依 Email 高速 $O(N)$ 去重、合併來源管道，並動態組裝成防止 Excel 亂碼的 CSV 二進位檔案。
+
+**學習重點**：
+- `Map` 與 `Set` 在大數據去重中的極致效能
+- Windows Excel UTF-8 BOM（`\uFEFF`）防亂碼機制
+- `this.helpers.prepareBinaryData` 二進位管道封裝
+
+- **附帶資源**：[`05_data_deduplication_binary_export.json`](./05_進階資料去重與二進位檔案生成/05_data_deduplication_binary_export.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 在去重後自動將 CSV 檔案作為附件，透過 Gmail 寄送給行銷團隊。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在「資料去重與 CSV 生成」流程後方串接 Email 自動寄送：
+1. 串接 Gmail 節點，發送主題為「【清洗報告】今日行銷名單已完成去重」的郵件。
+2. 內文附上去重統計（原始筆數、清洗後筆數、剔除重複筆數）。
+3. 將 Code 節點產出的 clean_contacts_export.csv 作為附件寄出。
+請幫我配置好 Gmail 節點與連線！
+```
+</details>
+
+---
+
+## ⚡ 撰寫 JavaScript Code Node 的黃金守則
+
+1. **永遠遵循標準回傳結構**：
+   - 逐筆模式：`return { ...$input.item.json, field: value }`
+   - 整批模式：`return [{ json: { ... } }]`
+2. **防禦性程式設計（Defensive Programming）**：
+   - 存取深層屬性使用 Optional Chaining（如 `item.json.user?.address?.city || '未填寫'`）。
+   - 數值除法務必檢查分母大於 0。
+3. **避免修改輸入原陣列**：
+   - 排序時使用 `[...array].sort()` 進行拷貝。
+4. **善用 `console.log()` 除錯**：
+   - 在 Code 節點中印出的日誌會直接顯示在 n8n 畫布的 Executions 執行面板中。
+
+---
+
+## 🎯 學習路徑建議
+
+```
+[初階打底]
+1. Code Node 互動式入門教學 ➔ 掌握兩種執行模式與 API 呼叫
+2. 字串清理與日期格式標準化 ➔ 掌握正規表達式與 ISO 轉換
+
+[中階業務實戰]
+3. 多條件分類與動態標籤 ➔ 取代複雜 IF 節點，實現多維度決策
+4. 陣列操作與銷售報表重組 ➔ 掌握 Group By 分組與多維度統計
+
+[高階檔案處理]
+5. 進階資料去重與二進位檔案生成 ➔ 掌握 Map 去重與 CSV 檔案封裝
+```
+
+---
+
+## 📚 相關資源
+
+- [n8n 官方 Code Node 文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.code/)
+- [🗄️ 雲端資料庫整合 (PostgreSQL, Supabase & Pinecone)](../雲端資料庫整合/README.md)
+- [🌐 前端網頁與 WebAPI 整合](../前端網頁與WebAPI整合/README.md)
+- [📜 Google Apps Script (GAS) 整合實作](../GAS整合/README.md)

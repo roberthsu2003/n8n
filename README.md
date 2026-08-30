@@ -136,9 +136,17 @@
 ---
 
 
-## 💻 [Code Node (JavaScript) 進階應用](./code_node(javascript)節點/README.md)
+## 💻 [Code Node (JavaScript) 節點進階應用](./code_node(javascript)節點/README.md)
 
-掌握 Node.js Code 節點，突破 Low Code 的限制。學習如何處理複雜的資料轉換、多重條件判斷與陣列重組，讓您的工作流程更靈活高效。
+掌握 JavaScript Code 節點，突破 Low Code 的限制，處理複雜商業邏輯與大數據清洗，提供由淺至深 5 大實作範例：
+
+1. **[Code Node 互動式入門教學](./code_node(javascript)節點/01_CodeNode互動式基礎教學/README.md)**：6 關卡實作、逐筆 vs 整批執行模式、`this.helpers.httpRequest` 呼叫 API 與 CSV 生成。
+2. **[字串清理與日期格式標準化](./code_node(javascript)節點/02_字串清理與日期格式標準化/README.md)**：正規表達式 `.replace()`、ISO 8601 標準日期轉換、文字修剪與繁體中文語系化輸出。
+3. **[多條件分類與動態標籤](./code_node(javascript)節點/03_多條件分類與動態標籤/README.md)**：單一節點取代十幾個 IF 節點、多維度邏輯運算、動態陣列標籤與防除以零安全設計。
+4. **[陣列操作與銷售報表重組](./code_node(javascript)節點/04_陣列操作與銷售報表重組/README.md)**：動態 Object Map Group By 分組、不可變陣列排序、`.reduce()` 營收聚合與多維度日報產出。
+5. **[進階資料去重與二進位檔案生成](./code_node(javascript)節點/05_進階資料去重與二進位檔案生成/README.md)**：JavaScript `Map` 高速 $O(N)$ 去重、合併來源管道、UTF-8 BOM 防 Excel 亂碼與二進位 CSV 封裝。
+
+- **支援資源**：進階核心指南 [`n8n執行機制與全域變數詳解.md`](./code_node(javascript)節點/n8n執行機制與全域變數詳解.md)、範例工作流程樣版 [`01_code_node_basics.json`](./code_node(javascript)節點/01_CodeNode互動式基礎教學/01_code_node_basics.json)、[`02_date_format_normalization.json`](./code_node(javascript)節點/02_字串清理與日期格式標準化/02_date_format_normalization.json)、[`03_customer_classification.json`](./code_node(javascript)節點/03_多條件分類與動態標籤/03_customer_classification.json)、[`04_sales_report_aggregation.json`](./code_node(javascript)節點/04_陣列操作與銷售報表重組/04_sales_report_aggregation.json)、[`05_data_deduplication_binary_export.json`](./code_node(javascript)節點/05_進階資料去重與二進位檔案生成/05_data_deduplication_binary_export.json)。
 
 ---
 
