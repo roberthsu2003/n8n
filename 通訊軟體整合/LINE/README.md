@@ -1,6 +1,6 @@
 # 📱 LINE Messaging API 整合實作
 
-歡迎來到 LINE Messaging API 與 n8n 整合教學！本章節帶您深入了解如何將 LINE 官方帳號與 n8n 工作流程串接，實現「**接收 LINE 訊息觸發 n8n**」與「**n8n 呼叫 LINE 發送/回覆訊息**」的完整雙向通訊自動化。
+歡迎來到 LINE Messaging API 與 n8n 整合教學！LINE 是台灣與亞洲地區最普及的即時通訊平台。本章節帶您由淺至深掌握如何將 LINE 官方帳號與 n8n 串接，從最基礎的「**接收 LINE 訊息 Webhook 觸發**」、「**主動推播 Push API**」、「**雙向免費回覆 Reply API**」，進階到「**Flex Message 圖文卡片**」與「**AI 智慧客服助理**」的完整自動化閉環。
 
 > 💡 **AI 協作時代學習法**：在完成基礎節點設定並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製各範例中的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt 提詞，由 AI 助理替您在畫布上全自動建構工作流程與串接 LLM 對話模型！
 
@@ -30,7 +30,7 @@ flowchart LR
 
     subgraph n8n_Workflow["n8n 自動化工作流程"]
         WebhookTrigger["⚡ Webhook Trigger 接收訊息"]
-        ProcessNode["⚙️ 商業邏輯 / AI Agent"]
+        ProcessNode["⚙️ 商業邏輯 / Switch 路由 / AI Agent"]
         LineSendNode["📤 HTTP Request 發送回覆或推播"]
     end
 
@@ -38,15 +38,15 @@ flowchart LR
     LinePlatform -->|2. Webhook 事件推播| WebhookTrigger
     WebhookTrigger --> ProcessNode
     ProcessNode --> LineSendNode
-    LineSendNode -->|3. Reply API 或 Push API| LinePlatform
-    LinePlatform -->|4. 呈現訊息| User
+    LineSendNode -->|3. Reply API (免費) 或 Push API| LinePlatform
+    LinePlatform -->|4. 呈現訊息 / Flex 卡片| User
 ```
 
 ---
 
-## 📚 實作範例導覽
+## 📚 實作範例導覽（由淺至深）
 
-本教學規劃了三個循序漸進的實作範例，從單向觸發、主動推播到完整的雙向自動回覆對話閉環：
+本教學規劃了五個循序漸進的實作範例，從單向觸發、主動推播、雙向閉環、視覺化卡片到結合 LLM 的 AI 智慧客服：
 
 ---
 
@@ -59,6 +59,8 @@ flowchart LR
 - 使用 Respond to Webhook 節點即時回傳 200 OK，防止重試風暴
 - 使用 Code / Set 節點解析 `userId`、`userMessage`、`replyToken`
 - 使用 IF 條件節點分流文字訊息與其他事件
+
+- **附帶樣版**：[`line_webhook_trigger.json`](./LINE訊息觸發工作流/line_webhook_trigger.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -92,6 +94,8 @@ flowchart LR
 - 使用 HTTP Request 節點調用 `https://api.line.me/v2/bot/message/push`
 - 正確綁定 Header Auth 憑證 (`Authorization: Bearer <Token>`)
 
+- **附帶樣版**：[`line_push_message.json`](./n8n呼叫LINE發送訊息/line_push_message.json)
+
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
@@ -113,20 +117,22 @@ flowchart LR
 
 ### 3. [範例 3：LINE 雙向通訊與自動回覆（Bot 完整對話流程）](./LINE雙向通訊與自動回覆/README.md)
 
-整合「**接收訊息 (Webhook)**」與「**免費即時回覆 (Reply API)**」，建構完整的 LINE Bot 雙向通訊閉環，亦可無縫接入 AI Agent 升級為智慧客服！
+整合「**接收訊息 (Webhook)**」與「**免費即時回覆 (Reply API)**」，建構完整的 LINE Bot 雙向通訊閉環。
 
 **學習重點**：
 - 完整雙向通訊架構：接收 Webhook ➔ 解析 ➔ 條件分流 ➔ 呼叫 Reply API
 - 使用 `replyToken` 在 1 分鐘內免費被動回覆（完全不計入 LINE 訊息費用額度）
 - 透過 Header Auth 憑證安全授權 LINE Messaging API
-- 無縫串接 AI Agent (LLM) 與對話記憶 (Memory) 打造智能客服
+- 建立關鍵字判斷與自動應答機制
+
+- **附帶樣版**：[`line_bot_workflow.json`](./LINE雙向通訊與自動回覆/line_bot_workflow.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-> 💡 **任務目標**：透過 MCP 連線，讓 AI 自動在畫布上建構出完整的雙向自動回覆工作流程，或升級為 AI 智慧問答客服。
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 自動在畫布上建構出完整的雙向自動回覆工作流程。
 
-**可直接複製給 AI 的 Prompt 提詞（建立雙向工作流）**：
+**可直接複製給 AI 的 Prompt 提詞**：
 ```text
 請在我的 n8n 畫布上從無到有建立一個「LINE 雙向通訊與自動回覆」工作流程：
 1. 新增 Webhook 觸發器（POST /line-webhook，Using 'Respond to Webhook' Node）。
@@ -135,6 +141,68 @@ flowchart LR
 4. 連接 IF 節點，條件為 messageType 等於 "text"。
 5. 在 True 分支連接 Set 節點，組合 replyText: "您好！已收到您的訊息：「{{ $json.userMessage }}」" 並傳遞 replyToken。
 6. 最後連接 HTTP Request 節點（POST https://api.line.me/v2/bot/message/reply），使用 Header Auth 憑證，並將 replyToken 與 replyText 填入 JSON Body。
+請幫我建立所有節點並完成連線！
+```
+</details>
+
+---
+
+### 4. [範例 4：LINE Flex Message 互動圖文卡片設計（進階 JSON 視覺化訊息）](./LINEFlexMessage圖文卡片/README.md)
+
+學習如何使用 LINE Flex Message 技術發送具備 Hero 封面圖、價格標籤、刪除線原價與互動導購按鈕的 Bubble 圖文卡片。
+
+**學習重點**：
+- 掌握 LINE Flex Message JSON 結構（Header, Hero, Body, Footer）
+- 運用 LINE Flex Message Simulator 設計高質感 UI 卡片
+- 替換動態變數（商品標題、特惠價、圖片網址、導購連結）
+- 支援 Reply API（免費）與 Push API 多種發送場景
+
+- **附帶樣版**：[`line_flex_message.json`](./LINEFlexMessage圖文卡片/line_flex_message.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 建立當收到關鍵字「特惠」或「目錄」時，自動回傳 Flex Message 互動商品卡片的工作流程。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在 n8n 建立一個「LINE 關鍵字觸發 Flex Message 商品卡片」工作流程：
+1. Webhook 節點接收 LINE 訊息並即時回應 200 OK。
+2. Code 節點解析 replyToken, userId, userMessage。
+3. IF 節點判斷 userMessage 是否包含 "特惠" 或 "推薦"。
+4. 在 True 分支串接 HTTP Request 節點呼叫 LINE Reply API（POST https://api.line.me/v2/bot/message/reply）：
+   - 使用 Header Auth 憑證。
+   - 發送 type: "flex" 的 Bubble 卡片（包含商品封面圖、商品名稱、特惠價格 NT$3,990 與「立即搶購」按鈕）。
+請幫我配置好完整 JSON Body 與連線！
+```
+</details>
+
+---
+
+### 5. [範例 5：LINE 整合 AI 智慧客服助理（含對話記憶與免費回覆）](./LINE整合AI智慧助理/README.md)
+
+將 LINE 官方帳號升級為具備上下文記憶的 AI 智能客服！串接 LLM 模型（OpenAI / Gemini / Ollama），以 `userId` 隔離對話記憶，並利用 Reply API 免費回傳。
+
+**學習重點**：
+- 整合 n8n LangChain AI Agent 節點架構
+- 串接大語言模型（OpenAI GPT-4o-mini / Google Gemini / 本地 Ollama）
+- 使用 Window Buffer Memory 並以 `userId` 作為 Session Key 實現多用戶記憶隔離
+- 結合 LINE Reply API 實現永久免費、無則數上限的 AI 智慧客服對話
+
+- **附帶樣版**：[`line_ai_agent.json`](./LINE整合AI智慧助理/line_ai_agent.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：為 LINE AI 客服掛載內部產品 FAQ 或知識庫 Tool，打造專屬品牌智慧客服。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在目前的「LINE AI 客服工作流程」中加入知識庫檢索能力：
+1. 保持 Webhook 接收、即時 200 OK、Session Key 設為 userId 的記憶設定。
+2. 在 AI Agent 節點掛載 Vector Store Tool（或 Google Sheets FAQ 查詢工具）。
+3. 調整 System Prompt：「你是一位專業的 LINE 官方客服代表，請根據檢索到的知識庫內容，使用繁體中文親切且精準地回答客戶提問。」
+4. 推論完成後由 HTTP Request 節點透過 Reply API 免費送回給使用者。
 請幫我建立所有節點並完成連線！
 ```
 </details>
@@ -167,3 +235,11 @@ LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** �
 | **高用量** | **NT$ 1,200** | **6,000 則** | 依量計費（每則約 NT$ 0.2 起） | 大型官方帳號、高頻率行銷通知 |
 
 ---
+
+## 📚 相關資源
+
+- [LINE Messaging API 官方文件](https://developers.line.biz/en/docs/messaging-api/)
+- [LINE Flex Message Simulator 官方設計工具](https://developers.line.biz/console/fx/)
+- [📱 LINE 圖文前置與憑證設定指南](../../line設定/README.md)
+- [✈️ Telegram 整合實作教學](../Telegram/README.md)
+- [💬 通訊軟體整合總覽](../README.md)

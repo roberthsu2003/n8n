@@ -1,0 +1,141 @@
+{
+  "name": "LINE Flex Message 互動圖文卡片發送工作流",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📱 範例 4：LINE Flex Message 互動圖文卡片\n\n1. **Manual / Schedule Trigger**：觸發執行流程。\n2. **Edit Fields (Set)**：設定商品資訊、價格、圖片 URL 與導購連結。\n3. **HTTP Request**：使用 Header Auth 憑證呼叫 LINE Push/Reply API 發送高質感 Flex Message Bubble 卡片。",
+        "height": 240,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        120
+      ],
+      "id": "line-flex-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        380
+      ],
+      "id": "manual-flex-trigger",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "target-user-id",
+              "name": "targetUserId",
+              "value": "YOUR_LINE_USER_ID",
+              "type": "string"
+            },
+            {
+              "id": "card-title",
+              "name": "cardTitle",
+              "value": "極致降噪無線藍牙耳機 Pro",
+              "type": "string"
+            },
+            {
+              "id": "card-subtitle",
+              "name": "cardSubtitle",
+              "value": "限時特惠 85 折 · 限量現貨",
+              "type": "string"
+            },
+            {
+              "id": "card-price",
+              "name": "cardPrice",
+              "value": "NT$ 3,990",
+              "type": "string"
+            },
+            {
+              "id": "card-original-price",
+              "name": "originalPrice",
+              "value": "NT$ 4,690",
+              "type": "string"
+            },
+            {
+              "id": "image-url",
+              "name": "imageUrl",
+              "value": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800",
+              "type": "string"
+            },
+            {
+              "id": "action-url",
+              "name": "actionUrl",
+              "value": "https://n8n.io",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        380
+      ],
+      "id": "prepare-flex-payload",
+      "name": "準備商品卡片資料"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.targetUserId }}\",\n  \"messages\": [\n    {\n      \"type\": \"flex\",\n      \"altText\": \"🎉 您的專屬優惠商品推薦：{{ $json.cardTitle }}\",\n      \"contents\": {\n        \"type\": \"bubble\",\n        \"hero\": {\n          \"type\": \"image\",\n          \"url\": \"{{ $json.imageUrl }}\",\n          \"size\": \"full\",\n          \"aspectRatio\": \"20:13\",\n          \"aspectMode\": \"cover\",\n          \"action\": {\n            \"type\": \"uri\",\n            \"uri\": \"{{ $json.actionUrl }}\"\n          }\n        },\n        \"body\": {\n          \"type\": \"box\",\n          \"layout\": \"vertical\",\n          \"contents\": [\n            {\n              \"type\": \"text\",\n              \"text\": \"{{ $json.cardTitle }}\",\n              \"weight\": \"bold\",\n              \"size\": \"xl\"\n            },\n            {\n              \"type\": \"text\",\n              \"text\": \"{{ $json.cardSubtitle }}\",\n              \"size\": \"sm\",\n              \"color\": \"#999999\",\n              \"margin\": \"md\"\n            },\n            {\n              \"type\": \"box\",\n              \"layout\": \"baseline\",\n              \"margin\": \"lg\",\n              \"contents\": [\n                {\n                  \"type\": \"text\",\n                  \"text\": \"{{ $json.cardPrice }}\",\n                  \"weight\": \"bold\",\n                  \"size\": \"xxl\",\n                  \"color\": \"#FF334B\",\n                  \"flex\": 0\n                },\n                {\n                  \"type\": \"text\",\n                  \"text\": \"{{ $json.originalPrice }}\",\n                  \"size\": \"sm\",\n                  \"color\": \"#aaaaaa\",\n                  \"margin\": \"md\",\n                  \"decoration\": \"line-through\",\n                  \"flex\": 0\n                }\n              ]\n            }\n          ]\n        },\n        \"footer\": {\n          \"type\": \"box\",\n          \"layout\": \"vertical\",\n          \"spacing\": \"sm\",\n          \"contents\": [\n            {\n              \"type\": \"button\",\n              \"style\": \"primary\",\n              \"height\": \"sm\",\n              \"color\": \"#06C755\",\n              \"action\": {\n                \"type\": \"uri\",\n                \"label\": \"🛍️ 立即前往搶購\",\n                \"uri\": \"{{ $json.actionUrl }}\"\n              }\n            }\n          ],\n          \"flex\": 0\n        }\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "send-line-flex-message",
+      "name": "發送 LINE Flex Message",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_LINE_HEADER_AUTH_ID",
+          "name": "LINE Messaging API Header Auth"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "準備商品卡片資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "準備商品卡片資料": {
+      "main": [
+        [
+          {
+            "node": "發送 LINE Flex Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

@@ -101,9 +101,13 @@
 學習如何將 n8n 與主流即時通訊軟體（LINE 與 Telegram）進行雙向串接，實現事件觸發與智慧助理自動化：
 
 - **[📱 LINE 整合實作](./通訊軟體整合/LINE/README.md)**（另附 **[📱 圖文前置與憑證設定指南](./line設定/README.md)**）：
-  - **LINE 訊息觸發 n8n 工作流**：設定 Webhook 接收用戶傳送的文字、圖片或加入好友事件，即時啟動自動化流程。
-  - **n8n 節點呼叫 LINE Message 服務**：透過 HTTP Request 節點調用 LINE Messaging API，實現免費即時回覆 (`Reply Message`) 與主動推播通知 (`Push Message`)。
-  - 支援範例工作流：[`line_bot_workflow.json`](./通訊軟體整合/LINE/line_bot_workflow.json)。
+  - 提供由淺至深 5 大實作範例（支援免費 Reply API 與 Flex 圖文卡片）：
+    1. **LINE 訊息接收與 Webhook 觸發**：設定 Webhook 接收用戶傳送事件，即時回傳 200 OK 並解析關鍵欄位。
+    2. **主動推播與排程通知**：透過 HTTP Request 節點調用 LINE Push API，發送定時營運日報。
+    3. **雙向通訊與關鍵字自動回覆**：使用 `replyToken` 在 1 分鐘內免費即時回覆訊息（完全不扣推播額度）。
+    4. **Flex Message 互動圖文卡片**：使用 JSON 結構打造具備封面圖、價格與導購按鈕的高質感 Bubble 卡片。
+    5. **整合 AI 智慧客服助理**：串接 `AI Agent` 與 LLM 模型，以 `userId` 隔離對話記憶並免費回傳。
+  - 支援範例工作流：[`line_webhook_trigger.json`](./通訊軟體整合/LINE/LINE訊息觸發工作流/line_webhook_trigger.json)、[`line_push_message.json`](./通訊軟體整合/LINE/n8n呼叫LINE發送訊息/line_push_message.json)、[`line_bot_workflow.json`](./通訊軟體整合/LINE/LINE雙向通訊與自動回覆/line_bot_workflow.json)、[`line_flex_message.json`](./通訊軟體整合/LINE/LINEFlexMessage圖文卡片/line_flex_message.json)、[`line_ai_agent.json`](./通訊軟體整合/LINE/LINE整合AI智慧助理/line_ai_agent.json)。
 - **[✈️ Telegram 整合實作](./通訊軟體整合/Telegram/README.md)**：
   - 使用 `@BotFather` 快速建立機器人並綁定 n8n Telegram API 憑證。
   - 提供由淺至深 5 大實作範例（完全免費無推播則數上限）：

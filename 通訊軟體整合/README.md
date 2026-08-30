@@ -34,7 +34,7 @@ flowchart LR
 
 ### 1. [📱 LINE Messaging API 整合實作](./LINE/README.md)
 
-提供從 LINE Developers 設定到三大實作範例的完整指南（另附 **[📱 圖文前置與憑證設定指南](../line設定/README.md)**）：
+提供從 LINE Developers 設定到由淺至深的 5 大實作範例（另附 **[📱 圖文前置與憑證設定指南](../line設定/README.md)**）：
 
 - **[範例 1：LINE 訊息觸發 n8n 工作流程](./LINE/LINE訊息觸發工作流/README.md)**
   - 使用 Webhook 節點接收訊息事件，即時回傳 200 OK，並精準解析 `userId`、文字內容與 `replyToken`。
@@ -45,6 +45,12 @@ flowchart LR
 - **[範例 3：LINE 雙向通訊與自動回覆（Bot 完整對話流程）](./LINE/LINE雙向通訊與自動回覆/README.md)**
   - 整合 Webhook 接收與 Reply API 免費回覆，建構完整的客服機器人閉環。
   - 附帶樣版：[`line_bot_workflow.json`](./LINE/LINE雙向通訊與自動回覆/line_bot_workflow.json)
+- **[範例 4：LINE Flex Message 互動圖文卡片設計](./LINE/LINEFlexMessage圖文卡片/README.md)**
+  - 使用 JSON 結構設計高質感 Bubble 卡片，發送具備封面圖、價格與導購按鈕的商品/活動通知。
+  - 附帶樣版：[`line_flex_message.json`](./LINE/LINEFlexMessage圖文卡片/line_flex_message.json)
+- **[範例 5：LINE 整合 AI 智慧客服助理（含對話記憶）](./LINE/LINE整合AI智慧助理/README.md)**
+  - 串接 LangChain AI Agent 與 LLM 模型，以 `userId` 隔離對話歷史，並透過 Reply API 免費回傳。
+  - 附帶樣版：[`line_ai_agent.json`](./LINE/LINE整合AI智慧助理/line_ai_agent.json)
 
 ---
 
