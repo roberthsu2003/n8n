@@ -5,11 +5,22 @@
 
 這個工作流程示範如何透過 Webhook 接收外部系統上傳的實體檔案（如 `multipart/form-data` 格式的 CSV 檔案）。n8n 接收到二進位檔案後，利用 Extract from File 節點解析其內部資料列，並由 Code 節點統計筆數並抽取前幾筆範例，最後即時回傳處理狀態與摘要給上傳者。
 
+### 流程架構圖
+
+```mermaid
+flowchart LR
+    A["📁 用戶上傳 CSV 實體檔案"] --> B["⚡ 檔案上傳 Webhook (multipart/form-data)"]
+    B --> C["📄 解析 CSV 內容 (Extract from File)"]
+    C --> D["📊 生成處理摘要 (Code 節點)"]
+    D --> E["📤 回傳解析結果 (Respond to Webhook)"]
+    E --> F["💻 客戶端收到統計報表 JSON"]
+```
+
 ---
 
-### 📥 工作流程圖下載
+### 工作流程樣版下載
 
-[檔案上傳與自動處理.json](./檔案上傳與自動處理.json)
+- [📥 檔案上傳與自動處理工作流程樣版 (檔案上傳與自動處理.json)](./檔案上傳與自動處理.json)
 
 ---
 

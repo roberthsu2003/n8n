@@ -1,0 +1,117 @@
+{
+  "name": "Webhook 範例 1：GET 請求與瀏覽器即時問候",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔗 範例 1：GET 請求與瀏覽器即時問候\n\n1. **Webhook 觸發器**：設定為 GET 方法，Path 為 `hello`。\n2. **Edit Fields (Set)**：從 `$json.query` 中取得網址傳入的 `name` 參數。\n3. **Respond to Webhook**：將個人化歡迎訊息以 JSON 格式即時回傳至瀏覽器畫面。",
+        "height": 220,
+        "width": 380
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        140
+      ],
+      "id": "get-hello-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "path": "hello",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        380
+      ],
+      "id": "get-webhook-trigger",
+      "name": "接收 GET Webhook 請求",
+      "webhookId": "hello-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "query-name",
+              "name": "userName",
+              "value": "={{ $json.query.name || '親愛的朋友' }}",
+              "type": "string"
+            },
+            {
+              "id": "welcome-msg",
+              "name": "welcomeMessage",
+              "value": "=👋 哈囉 {{ $json.query.name || '親愛的朋友' }}！恭喜您成功觸發第一個 n8n Webhook！",
+              "type": "string"
+            },
+            {
+              "id": "server-time",
+              "name": "serverTime",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "client-ip",
+              "name": "clientIp",
+              "value": "={{ $json.headers['x-forwarded-for'] || $json.headers['host'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        380
+      ],
+      "id": "prepare-greeting-response",
+      "name": "整理問候資料"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"success\",\n  \"message\": \"{{ $json.welcomeMessage }}\",\n  \"visitor\": \"{{ $json.userName }}\",\n  \"server_time\": \"{{ $json.serverTime }}\",\n  \"client_ip\": \"{{ $json.clientIp }}\",\n  \"tip\": \"🎉 您可以直接在網址列修改 ?name=您的名字 來測試不同的問候！\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        380
+      ],
+      "id": "respond-to-browser",
+      "name": "即時回傳 JSON 結果"
+    }
+  ],
+  "connections": {
+    "接收 GET Webhook 請求": {
+      "main": [
+        [
+          {
+            "node": "整理問候資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理問候資料": {
+      "main": [
+        [
+          {
+            "node": "即時回傳 JSON 結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

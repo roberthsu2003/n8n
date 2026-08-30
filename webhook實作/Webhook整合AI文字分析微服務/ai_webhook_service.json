@@ -1,0 +1,193 @@
+{
+  "name": "Webhook 範例 6：Webhook 整合 AI 文字分析微服務",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🤖 範例 6：Webhook 整合 AI 文字分析微服務\n\n1. **Webhook 觸發器**：接收外部傳入的顧客評論或留言（POST `/ai-sentiment`）。\n2. **AI Agent / LLM 核心**：自動進行情緒評估（正面/負面/中立）、提煉重點關鍵字與建議回信。\n3. **Respond to Webhook**：將 AI 結構化分析結果以 JSON 格式即時回傳給外部呼叫端。",
+        "height": 240,
+        "width": 430
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        120
+      ],
+      "id": "ai-webhook-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-sentiment",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        380
+      ],
+      "id": "ai-webhook-trigger",
+      "name": "接收評論 Webhook",
+      "webhookId": "ai-sentiment-endpoint"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "customer-name",
+              "name": "customerName",
+              "value": "={{ $json.body.customer_name || '一般顧客' }}",
+              "type": "string"
+            },
+            {
+              "id": "feedback-text",
+              "name": "feedbackText",
+              "value": "={{ $json.body.feedback || $json.body.text || '產品品質非常好，出貨速度也超快，客服很有耐心！' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        380
+      ],
+      "id": "extract-feedback-payload",
+      "name": "提取評論內容"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=請分析以下顧客反饋：\n顧客姓名：{{ $json.customerName }}\n反饋內容：{{ $json.feedbackText }}\n\n請務必輸出純 JSON 格式（不要包含 markdown code block 標記），格式如下：\n{\n  \"sentiment\": \"正面 / 負面 / 中立\",\n  \"sentiment_score\": 1到5的整數,\n  \"summary\": \"25字以內的核心問題或讚賞摘要\",\n  \"urgency\": \"高 / 中 / 低\",\n  \"suggested_reply\": \"建議客服回覆顧客的繁體中文親切內容\"\n}",
+        "options": {
+          "systemMessage": "你是一位專業的電商顧客滿意度分析專家。請客觀評估顧客反饋的情緒傾向與急迫度，並產生具體可執行的回覆建議。輸出必須為標準合法 JSON 物件。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        360,
+        380
+      ],
+      "id": "ai-sentiment-agent",
+      "name": "AI 情感與語義分析代理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        360,
+        600
+      ],
+      "id": "ai-openai-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 整理 AI 回傳結果並確保為 JSON 物件\nconst rawOutput = $input.first().json.output || '';\nlet parsedAi = {};\ntry {\n  const cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '').trim();\n  parsedAi = JSON.parse(cleanJson);\n} catch (e) {\n  parsedAi = {\n    raw_output: rawOutput,\n    sentiment: '未知',\n    summary: 'AI 回傳非標準 JSON 格式'\n  };\n}\n\nconst inputData = $('提取評論內容').item.json;\n\nreturn [{\n  json: {\n    status: 'success',\n    customer_name: inputData.customerName,\n    original_feedback: inputData.feedbackText,\n    analysis: parsedAi,\n    analyzed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        380
+      ],
+      "id": "format-ai-response",
+      "name": "解析與組裝結構化結果"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        380
+      ],
+      "id": "respond-ai-result",
+      "name": "即時回傳 AI 分析報表"
+    }
+  ],
+  "connections": {
+    "接收評論 Webhook": {
+      "main": [
+        [
+          {
+            "node": "提取評論內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取評論內容": {
+      "main": [
+        [
+          {
+            "node": "AI 情感與語義分析代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 情感與語義分析代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 情感與語義分析代理": {
+      "main": [
+        [
+          {
+            "node": "解析與組裝結構化結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析與組裝結構化結果": {
+      "main": [
+        [
+          {
+            "node": "即時回傳 AI 分析報表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

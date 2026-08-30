@@ -1,6 +1,6 @@
-# 整合 Webhook 的實作
+# 🔗 整合 Webhook 的實作
 
-Webhook 是現代自動化系統的核心技術之一，它允許外部應用程式透過 HTTP 請求來即時觸發 n8n 工作流程。透過 Webhook，您可以將 n8n 當作自訂的 API 伺服器，接收表單提交、金流付款通知、IoT 感測器訊號或第三方系統事件。
+Webhook 是現代自動化系統的核心樞紐技術，它允許外部應用程式（如前端網頁、電商金流、GitHub、IoT 裝置或其他雲端服務）透過 HTTP 請求來即時觸發 n8n 工作流程。透過 Webhook，您可以將 n8n 當作自己的**專屬 API 伺服器**，實現零延遲的事件驅動自動化。
 
 > 💡 **AI 協作時代學習法**：在學習完基礎節點操作並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製每個範例下方的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt，交由 AI 助理替您在畫布上全自動建構與擴充進階邏輯！
 
@@ -8,34 +8,103 @@ Webhook 是現代自動化系統的核心技術之一，它允許外部應用程
 
 ## 📚 什麼是 Webhook？
 
-Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概念：
+Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的機制：
+
 - **傳統 API 輪詢（Pull）**：您的應用程式必須每隔幾秒主動發送請求「拉取」是否有新資料，耗費網路頻寬且有延遲。
-- **Webhook 推播（Push）**：當外部事件發生時（如使用者提交表單、收到訊息、完成結帳），外部服務會自動發送 HTTP 請求「推送」資料到您的 n8n 端點，實現真正的零延遲即時自動化。
+- **Webhook 即時推播（Push）**：當外部事件發生時（如用戶提交表單、購物車結帳、檔案上傳、收到客訴），外部服務會自動發送 HTTP 請求「推送」資料到您的 n8n 端點，實現真正的零延遲即時自動化。
 
 ---
 
-## 📚 實作範例導覽
+## 🧭 Webhook 核心架構
 
-本教學提供四個循序漸進的實作範例，從基礎的 POST 請求解析、電商訂單計算，到二進位檔案上傳與生產級安全分流驗證：
+```mermaid
+flowchart LR
+    subgraph Client_Side["外部客戶端 / 前端應用"]
+        Browser["🌐 瀏覽器網址 (GET)"]
+        WebForm["📝 網頁表單 (POST)"]
+        Ecom["🛒 電商購物車 (JSON)"]
+        FileUpload["📁 檔案上傳 (Multipart)"]
+        ThirdParty["🛡️ 第三方服務 (API Key)"]
+    end
+
+    subgraph n8n_Gateway["n8n Webhook 自動化引擎"]
+        WebhookNode["⚡ Webhook 觸發器 (HTTP Endpoint)"]
+        AuthCheck["🔐 安全驗證 (Headers / Token)"]
+        DataProcess["⚙️ 資料運算 / 檔案解析 / AI Agent"]
+        RespondNode["📤 Respond to Webhook (即時回應)"]
+    end
+
+    Browser -->|GET 查詢| WebhookNode
+    WebForm -->|POST 表單| WebhookNode
+    Ecom -->|POST 訂單 JSON| WebhookNode
+    FileUpload -->|POST 二進位檔案| WebhookNode
+    ThirdParty -->|POST 安全事件| WebhookNode
+
+    WebhookNode --> AuthCheck
+    AuthCheck --> DataProcess
+    DataProcess --> RespondNode
+    RespondNode -->|JSON / HTML 回應結果| Client_Side
+```
 
 ---
 
-### 1. [範例一：自動化問候系統](./自動化問候系統/README.md)
-**難度**: 初級 | **學習時間**: 30-40 分鐘
+## 📚 實作範例導覽（由淺至深）
 
-透過 Webhook 接收外部 POST 請求，驗證使用者資料並回傳個人化問候訊息。
+本教學規劃了六個循序漸進、讓學生動手超有感的實作範例，從瀏覽器網址列直接測試、互動式網頁表單，到電商運算、實體檔案上傳、生產級安全閘道以及 AI 微服務 API：
+
+---
+
+### 1. [範例 1：GET 請求與瀏覽器即時問候（零門檻快速入門）](./GET請求與瀏覽器即時問候/README.md)
+
+**難度**：入門級 🟢 ｜ **亮點**：免安裝任何工具，瀏覽器輸入網址即可立即看到 JSON 回應！
+
+學習如何使用 Webhook 接收 GET 請求，解析網址上的查詢參數（Query Parameters）並即時回傳個人化歡迎訊息。
 
 **學習重點**：
-- Webhook 觸發器的基礎設定與 HTTP Method (POST)
-- 理解 Webhook 接收的資料結構（`$json.body`）
-- IF 節點的條件判斷（檢查姓名是否存在）
-- Set 節點的資料處理與欄位整理
-- Respond to Webhook 節點的 JSON 回應
+- Webhook 觸發器的 GET 方法設定
+- 解析網址查詢參數：`{{ $json.query.name }}`
+- 使用 Set 節點組裝伺服器時間與 Client IP
+- 使用 Respond to Webhook 節點即時回傳 JSON
+
+- **附帶樣版**：[`get_hello_workflow.json`](./GET請求與瀏覽器即時問候/get_hello_workflow.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-> 💡 **任務目標**：透過 MCP 連線，讓 AI 擴充自動化問候系統，自動依據時間（早安/午安/晚安）與性別動態生成富有溫度的客製化問候語。
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 擴充此流程，依據傳入的城市名稱自動查詢並回傳當地天氣問候。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在目前的「GET 請求與即時問候」工作流程中進行延伸升級：
+1. 保持 Webhook 觸發器（GET /hello），允許接收 city 參數（如 ?name=小明&city=taipei）。
+2. 在「整理問候資料」後串接一個 HTTP Request 節點，呼叫公開天氣 API 取得該城市的即時氣溫與天氣狀態。
+3. 將問候訊息擴充為：「哈囉 {{ $json.userName }}！目前 {{ $json.cityName }} 的天氣是 {{ $json.weather }}，氣溫 {{ $json.temp }}°C，祝您有美好的一天！」。
+4. 最後透過 Respond to Webhook 回傳完整的 JSON 資料。
+請幫我配置相關節點與表達式！
+```
+</details>
+
+---
+
+### 2. [範例 2：互動式網頁表單與個人化問候系統（POST 與前端互動串接）](./自動化問候系統/README.md)
+
+**難度**：初級 🟢 ｜ **亮點**：附帶完整 HTML5/CSS3 網頁介面，點擊按鈕即時體驗動態反饋！
+
+透過 Webhook 接收前端網頁表單提交的 POST 請求，驗證使用者資料並回傳結構化問候卡片。
+
+**學習重點**：
+- Webhook 接收 POST 請求與 JSON Body（`{{ $json.body.name }}`）
+- IF 節點的條件判斷（檢查姓名是否存在）
+- Set 節點分別設定成功問候與錯誤提示訊息
+- 前端網頁 fetch API 與 n8n Webhook 串接
+
+- **附帶樣版**：[`教學範例_自動化問候系統.json`](./自動化問候系統/教學範例_自動化問候系統.json)
+- **網頁原始碼**：[website/ 前端介面原始碼](./自動化問候系統/website/)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 依據當前伺服器時間（早安/午安/晚安）與性別動態生成客製化問候語。
 
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
@@ -54,16 +123,19 @@ Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概
 
 ---
 
-### 2. [範例二：即時訂單接收與計算](./即時訂單接收與計算/README.md)
-**難度**: 初中級 | **學習時間**: 35-45 分鐘
+### 3. [範例 3：電商購物車即時結帳與計算（JSON 陣列與電子收據）](./即時訂單接收與計算/README.md)
 
-模擬購物車結帳事件，接收包含多筆商品的 JSON 訂單，由 Code 節點自動計算金額、VIP 折扣與免運門檻並回傳電子收據。
+**難度**：初中級 🟡 ｜ **亮點**：模擬電商結帳！自動運算 VIP 9 折、滿千免運並產出電子收據！
+
+模擬購物車結帳事件，接收包含多筆商品的 JSON 訂單，由 Code 節點自動計算小計、折扣與運費並即時回傳收據。
 
 **學習重點**：
 - 接收巢狀 JSON 結構（含品項清單陣列 `items`）
-- 使用 JavaScript Code 節點進行商業運算（單項小計、全單總計、折扣、運費）
-- 動態產生自訂訂單編號與時間戳記
+- 使用 JavaScript Code 節點進行商業運算（單項小計、全單總計、VIP 折扣、滿額免運）
+- 動態產生自訂訂單編號（`ORD-1718000000000`）與時間戳記
 - 即時回傳標準 JSON 訂單確認收據
+
+- **附帶樣版**：[`即時訂單接收與計算.json`](./即時訂單接收與計算/即時訂單接收與計算.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -83,21 +155,24 @@ Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概
 
 ---
 
-### 3. [範例三：檔案上傳與自動處理](./檔案上傳與自動處理/README.md)
-**難度**: 中級 | **學習時間**: 40-50 分鐘
+### 4. [範例 4：檔案上傳與自動解析處理（二進位檔案與 CSV 資料統計）](./檔案上傳與自動處理/README.md)
+
+**難度**：中級 🟡 ｜ **亮點**：上傳實體 CSV 檔案，n8n 自動解析並生成統計摘要報表！
 
 學習如何透過 Webhook 接收外部上傳的實體二進位檔案（`multipart/form-data`），並自動解析檔案內容。
 
 **學習重點**：
 - Webhook 接收二進位檔案資料 (Binary Property `data`)
 - 使用 Extract from File 節點自動將上傳的 CSV 轉為 JSON
-- 統計資料筆數與生成資料預覽摘要
+- 統計資料總列數與抽取前 3 筆資料預覽
 - 使用 curl 命令列工具進行檔案上傳測試
+
+- **附帶樣版**：[`檔案上傳與自動處理.json`](./檔案上傳與自動處理/檔案上傳與自動處理.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-> 💡 **任務目標**：透過 MCP 連線，讓 AI 為上傳的 CSV 資料自動寫入 DataTable，若發現異常資料自動發送警示。
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 為上傳的 CSV 資料自動批次寫入 DataTable，若發現異常資料自動發送警示。
 
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
@@ -111,8 +186,9 @@ Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概
 
 ---
 
-### 4. [範例四：多事件分流與安全驗證](./多事件分流與安全驗證/README.md)
-**難度**: 中高級 | **學習時間**: 45-60 分鐘
+### 5. [範例 5：API 金鑰安全驗證與多事件分流（生產級安全閘道）](./多事件分流與安全驗證/README.md)
+
+**難度**：中高級 🟠 ｜ **亮點**：建立具備 Header API Key 認證與 Switch 多路分流的生產級 API Gateway！
 
 建立具備生產級安全認證與多事件路由的 Webhook API，支援 Header Token 檢查與 Switch 分流。
 
@@ -121,6 +197,8 @@ Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概
 - 驗證失敗時直接回傳 `401 Unauthorized` 狀態碼阻斷
 - 使用 Switch 節點根據 `event_type` 進行多路事件分流（新會員註冊、訂單付款、未知事件）
 - 多分支處理後匯流至統一的 Respond to Webhook
+
+- **附帶樣版**：[`多事件分流與安全驗證.json`](./多事件分流與安全驗證/多事件分流與安全驗證.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -139,6 +217,38 @@ Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概
 
 ---
 
+### 6. [範例 6：Webhook 整合 AI 智慧分析微服務（打造專屬 AI API）](./Webhook整合AI文字分析微服務/README.md)
+
+**難度**：高級 🔴 ｜ **亮點**：將 n8n 封裝為自訂 AI 微服務 API，自動評估情緒、產出摘要與客服回信建議！
+
+將 n8n 打造為對外公開的 AI 分析 API。外部系統傳入顧客留言，AI 自動評估情緒、評分、摘要與建議回信，並以結構化 JSON 即時回傳。
+
+**學習重點**：
+- Webhook 與 LangChain AI Agent 深度整合架構
+- 引導 LLM 輸出精準合法的結構化 JSON 物件
+- 使用 JavaScript Code 節點進行防禦性資料清洗與容錯
+- 打造企業級客服負評即時預警與智慧回覆微服務
+
+- **附帶樣版**：[`ai_webhook_service.json`](./Webhook整合AI文字分析微服務/ai_webhook_service.json)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：透過 MCP 連線，當 AI 分析結果為「負面且緊急度為高」時，自動推播警報至主管 LINE 或 Telegram 群組。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我在目前的「Webhook 整合 AI 文字分析」工作流程中加入高風險警報推播：
+1. 在「解析與組裝結構化結果」節點後，接續一個 IF 條件節點。
+2. 判斷條件：analysis.sentiment === "負面" 且 analysis.urgency === "高"。
+3. 在 True 分支連接 Telegram 節點（或 LINE Push 節點），發送緊急通知：「🚨 收到來自 {{ $json.customer_name }} 的高風險客訴！摘要：{{ $json.analysis.summary }}，請立即處理！」。
+4. 無論是否觸發警報，最後皆連接至 Respond to Webhook 正常回傳 200 JSON 給呼叫端。
+請幫我建立相關節點與條件連線！
+```
+</details>
+
+---
+
 ## 🔧 Webhook 核心觀念與設定重點
 
 ### 1. Test URL vs Production URL
@@ -146,23 +256,20 @@ Webhook 是一種「反向 API (Reverse API)」或「事件驅動推播」的概
 * **Production URL (`/webhook/...`)**：必須將右上角切換為 **Active（已啟用）** 才會 7x24 常駐監聽外部請求。
 
 ### 2. 資料存取路徑差異
-* **POST / PUT Body 資料**：資料會包裝在 `body` 物件內，表達式需寫為 `{{ $json.body.欄位名稱 }}`。
-* **GET 查詢參數**：參數會包裝在 `query` 物件內，表達式需寫為 `{{ $json.query.參數名稱 }}`。
+* **GET 查詢參數**：參數包裝在 `query` 物件內，表達式為 `{{ $json.query.參數名稱 }}`。
+* **POST / PUT Body 資料**：資料包裝在 `body` 物件內，表達式為 `{{ $json.body.欄位名稱 }}`。
 * **Headers 請求標頭**：標頭存在於 `headers` 物件內，例如 `{{ $json.headers['x-api-key'] }}`。
 
 ### 3. Response Mode（回應模式）
 * **On received (預設)**：接收到請求立刻回傳 200 OK，後續節點非同步執行（適合耗時較長的背景任務）。
-* **Using 'Respond to Webhook' Node**：等待流程處理完畢後，由 Respond to Webhook 節點回傳運算結果與指定狀態碼（適合即時查詢與 API 回應）。
+* **Using 'Respond to Webhook' Node**：等待流程處理完畢後，由 Respond to Webhook 節點回傳運算結果與指定狀態碼（適合即時查詢、收據產出與 API 微服務）。
 
 ---
 
 ## 📚 相關資源
 
 - [n8n 官方 Webhook 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
-- [n8n 簡介與安裝](../n8n簡介與安裝/README.md)（含 ngrok 固定網址設定）
-- [AI 協作指南與 MCP 連線教學](../AI協作/README.md)
+- [n8n + ngrok 外網通道設定教學](../n8n_ngrok/README.md)
+- [📱 LINE Messaging API 整合教學](../通訊軟體整合/LINE/README.md)
+- [✈️ Telegram Bot 整合教學](../通訊軟體整合/Telegram/README.md)
 - [HTTP 請求方法與狀態碼 (MDN)](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Methods)
-
----
-
-**🎓 完成這些範例後，您將具備建立企業級 API 與事件驅動自動化系統的核心能力！**

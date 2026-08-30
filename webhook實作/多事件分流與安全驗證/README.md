@@ -8,11 +8,29 @@
 2. **Switch 事件多路分流**：根據 Payload 中的 `event_type`（如 `user_signup`、`order_paid` 或未知事件），分派到不同的處理分支。
 3. **統一回應格式**：各分支處理完畢後，由統一的 Respond to Webhook 節點回傳標準 JSON 回應。
 
+### 流程架構圖
+
+```mermaid
+flowchart TD
+    A["🛡️ 外部請求發送至 /webhook/secure-events"] --> B["⚡ 安全事件 Webhook 觸發器"]
+    B --> C{"🔐 驗證 Header x-api-key"}
+    C -->|"❌ 金鑰無效"| D1["🚫 回傳 401 Unauthorized"]
+    C -->|"✅ 金鑰正確"| D2["🔀 Switch 事件多路路由器"]
+    
+    D2 -->|"user_signup 分支"| E1["📝 處理新會員註冊"]
+    D2 -->|"order_paid 分支"| E2["💳 處理訂單付款成功"]
+    D2 -->|"未知事件 (Fallback)"| E3["❓ 記錄未定義事件"]
+    
+    E1 --> F["📤 統一回傳處理結果 (200 OK)"]
+    E2 --> F
+    E3 --> F
+```
+
 ---
 
-### 📥 工作流程圖下載
+### 工作流程樣版下載
 
-[多事件分流與安全驗證.json](./多事件分流與安全驗證.json)
+- [📥 多事件分流與安全驗證工作流程樣版 (多事件分流與安全驗證.json)](./多事件分流與安全驗證.json)
 
 ---
 
