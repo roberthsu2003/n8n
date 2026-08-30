@@ -77,37 +77,55 @@
 - LINE Official Account Manager 回應模式與自動回應設定
 - 在 n8n 建立 LINE 憑證與測試驗證流程
 
+#### ✈️ 10. [Telegram Bot 申請與前置設定指南](../通訊軟體整合/Telegram/README.md#️-前置設定指南)
+**重點內容**：
+- 向官方 `@BotFather` 發送 `/newbot` 取得專屬 Bot Token
+- 設定 `/setprivacy` (Disable) 確保機器人在群組能正常接收訊息
+- 取得管理員個人與群組 `chatId` 用於警報推播
+- 在 n8n 建立 Telegram 憑證與測試連線
+
 ---
 
-### 🤖 四、AI 智慧代理與本機/雲端模型
+### 🗄️ 四、雲端資料庫與向量資料庫平台註冊
 
-#### ⚙️ 10. [n8n MCP (Model Context Protocol) 設定指南](../n8n_mcp/README.md)
+#### 🐘 11. [Supabase 雲端資料庫註冊與連線指南 (免信用卡)](../雲端資料庫整合/Supabase/README.md)
+**重點內容**：
+- Supabase 官方帳號註冊（完全免信用卡）
+- 建立免費 PostgreSQL 專案與設定資料庫密碼
+- 取得 Session Pooler IPv4 連線主機與 Port 6543
+- 在 n8n 中配置 Postgres / Supabase 憑證與 SSL 連線
+
+#### 🌲 12. [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](../雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
+**重點內容**：
+- Pinecone 官方免費帳號註冊（Serverless Starter Plan，免信用卡）
+- 取得 API Key 與環境主機位置
+- 建立維度為 1536（支援 OpenAI `text-embedding-3-small`）的 Serverless 向量索引
+- 在 n8n 中串接 Pinecone Vector Store 節點進行 AI 語意檢索
+
+---
+
+### 🤖 五、AI 智慧代理與本機/雲端模型
+
+#### ⚙️ 13. [n8n MCP (Model Context Protocol) 設定指南](../n8n_mcp/README.md)
 **重點內容**：
 - 將 n8n 工作流轉變為 AI 助手的全功能工具箱（Tools）
 - **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連
 - **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理
 - **Google Antigravity 專案協作**：Gemini 智慧代理深度整合與 Bearer Token 設定
 
-#### 🦙 11. [Ollama 安裝與 Gemma 4 雲端模型整合](../ollama安裝/README.md)
+#### 🦙 14. [Ollama 安裝與 Gemma 4 雲端模型整合](../ollama安裝/README.md)
 **重點內容**：
-- Windows、macOS 與 **Raspberry Pi (Linux 一行指令 systemd override)** 安裝指南
+- Windows、macOS 與 Linux 安裝指南
 - 登入 Ollama 帳號並建立 API Key
 - 使用 **`gemma4:cloud`** 雲端模型（免顯卡、不佔本地記憶體）
 - Docker 容器內部連線與 n8n Ollama Chat Model 憑證設定
 
 ---
 
-### 🛡️ 五、系統維運、備份與正式部署
+### 🛡️ 六、系統維運與備份
 
-#### 💾 12. [n8n 的備份方式](../n8n的備份方式/README.md)
+#### 💾 15. [n8n 的備份方式](../n8n的備份方式/README.md)
 **重點內容**：
 - Docker Volume 手動備份與匯出工作流 JSON
 - 透過 n8n 內建排程工作流實現全自動定時備份
 - 資料庫與憑證之異地備份與災害復原流程
-
-#### 🚢 13. [n8n 的生產環境部署](../n8n的部署/README.md)
-**重點內容**：
-- Docker Compose 多容器編排設定（搭配 PostgreSQL 資料庫）
-- 搭配 Reverse Proxy (Nginx / Traefik / Cloudflare) 與 HTTPS 憑證
-- 資源限制、重啟原則 (restart policies) 與日誌輪替管理
-- 正式營運等級之高可用性與安全性最佳實踐

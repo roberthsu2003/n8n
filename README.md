@@ -16,22 +16,18 @@
 
 ---
 
-## 🛠️ [環境建置與基礎設定](./環境建置與基礎設定/README.md)
+## 🛠️ [環境建置與第三方網站註冊設定](./環境建置與基礎設定/README.md)
 
-提供從容器引擎、安全通道、n8n 部署到 AI / MCP / Cloud 授權的完整基礎建設教學，詳見 **[👉 進入環境建置與基礎設定總覽](./環境建置與基礎設定/README.md)**。
+本課程各章節實作所需之**雲端服務、第三方平台註冊、API 憑證與基礎設施**完整前置設定指南（詳見 **[👉 進入環境建置與基礎設定總覽](./環境建置與基礎設定/README.md)**）：
 
-**包含主題**：
-- 🐳 **容器基礎**：[Docker 安裝指南](./docker安裝/README.md) ｜ [n8n 獨立容器安裝與啟動](./n8n簡介與安裝/README.md)
-
-- 🌐 **外網通道**：[開發級 ngrok 本機安裝與設定](./ngrok安裝/README.md) |  [生產級 Cloudflare Tunnel 安全方案](./cloudflare_tunnel/README.md) 
-
+- 🐳 **容器與本機安裝**：[Docker 安裝指南](./docker安裝/README.md) ｜ [n8n 獨立容器安裝與啟動](./n8n簡介與安裝/README.md)
+- 🌐 **外網通道平台註冊**：[ngrok 帳號註冊與 AuthToken 設定](./ngrok安裝/README.md) ｜ [Cloudflare 帳號註冊與 Tunnel 安全通道](./cloudflare_tunnel/README.md)
 - ⭐ **一鍵容器化整合推薦**：[n8n + ngrok 雙容器方案 (開發測試/解決防毒誤判)](./n8n_ngrok/README.md) ｜ [n8n + Cloudflare 雙容器方案 (自訂網域生產級)](./n8n_cloudflare/README.md)
-
-- 🔐 **授權與雲端**：[OAuth 2.0 概念解析](./OAuth/README.md) ｜ [Google Cloud Platform 設定](./google_cloud設定/README.md) ｜ [LINE Messaging API 設定](./line設定/README.md)
-
-- 🤖 **AI 助手與模型**：[n8n MCP 協議設定指南](./n8n_mcp/README.md) ｜ [Ollama 雲端模型整合](./ollama安裝/README.md)
-
-- 🛡️ **維運與部署**：[n8n 資料備份與還原](./n8n的備份方式/README.md) ｜ [n8n 生產環境部署架構](./n8n的部署/README.md)
+- 💬 **通訊軟體開發者註冊**：[LINE Developers 註冊與 Messaging API 設定](./line設定/README.md) ｜ [Telegram BotFather 機器人申請與憑證設定](./通訊軟體整合/Telegram/README.md#️-前置設定指南)
+- ☁️ **Google 雲端平台註冊**：[Google Cloud Platform (GCP) 專案建立與 API 啟用](./google_cloud設定/README.md) ｜ [OAuth 2.0 開放授權概念解析](./OAuth/README.md)
+- 🗄️ **雲端資料庫平台註冊**：[Supabase 雲端資料庫註冊與連線設定 (免信用卡)](./雲端資料庫整合/Supabase/README.md) ｜ [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
+- 🤖 **AI 助手與模型註冊**：[n8n MCP 協議設定 (Claude / OpenAI / Gemini)](./n8n_mcp/README.md) ｜ [Ollama 官方雲端模型整合與 API Key](./ollama安裝/README.md)
+- 🛡️ **資料維運與備份**：[n8n 資料備份與還原指南](./n8n的備份方式/README.md)
 
 ---
 
@@ -134,7 +130,7 @@
 ---
 
 
-## 💻 [Code Node (JavaScript) 節點進階應用](./code_node(javascript)節點/README.md)（另附 **[📖 執行機制與全域變數詳解](./code_node(javascript)節點/n8n執行機制與全域變數詳解.md)**）
+## 💻 [Code Node (JavaScript) 節點進階應用](./code_node%28javascript%29節點/README.md)（另附 **[📖 執行機制與全域變數詳解](./code_node%28javascript%29節點/n8n執行機制與全域變數詳解.md)**）
 
 掌握 JavaScript Code 節點，突破 Low Code 的限制，處理複雜商業邏輯與大數據清洗，提供由淺至深 5 大實作範例：
 
