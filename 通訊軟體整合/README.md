@@ -56,7 +56,7 @@ flowchart LR
 
 ### 2. [✈️ Telegram Bot 整合實作](./Telegram/README.md)
 
-透過 Telegram 官方 `@BotFather` 快速建立機器人，利用 n8n 內建專屬節點實現由淺至深的 5 大實作範例（完全免費無推播則數上限）：
+提供從 @BotFather 機器人建立到由淺至深的 5 大實作範例（完全免費無推播上限，另附 **[✈️ 前置與憑證設定指南](./Telegram/README.md#️-前置設定指南)**）：
 
 - **[範例 1：Telegram 訊息觸發 n8n 工作流程](./Telegram/Telegram訊息觸發工作流/README.md)**
   - 使用 Telegram Trigger 節點自動註冊 Webhook，精準解析 `chatId`、`userName` 與文字內容。

@@ -109,9 +109,8 @@
     4. **Flex Message 互動圖文卡片**：使用 JSON 結構打造具備封面圖、價格與導購按鈕的高質感 Bubble 卡片。
     5. **整合 AI 智慧客服助理**：串接 `AI Agent` 與 LLM 模型，以 `userId` 隔離對話記憶並免費回傳。
   - 支援範例工作流：[`line_webhook_trigger.json`](./通訊軟體整合/LINE/LINE訊息觸發工作流/line_webhook_trigger.json)、[`line_push_message.json`](./通訊軟體整合/LINE/n8n呼叫LINE發送訊息/line_push_message.json)、[`line_bot_workflow.json`](./通訊軟體整合/LINE/LINE雙向通訊與自動回覆/line_bot_workflow.json)、[`line_flex_message.json`](./通訊軟體整合/LINE/LINEFlexMessage圖文卡片/line_flex_message.json)、[`line_ai_agent.json`](./通訊軟體整合/LINE/LINE整合AI智慧助理/line_ai_agent.json)。
-- **[✈️ Telegram 整合實作](./通訊軟體整合/Telegram/README.md)**：
-  - 使用 `@BotFather` 快速建立機器人並綁定 n8n Telegram API 憑證。
-  - 提供由淺至深 5 大實作範例（完全免費無推播則數上限）：
+- **[✈️ Telegram 整合實作](./通訊軟體整合/Telegram/README.md)**（另附 **[✈️ 前置與憑證設定指南](./通訊軟體整合/Telegram/README.md#️-前置設定指南)**）：
+  - 提供由淺至深的 5 大實作範例（完全免費無推播則數上限）：
     1. **Telegram 訊息觸發**：使用 `Telegram Trigger` 監聽指令與訊息，解析 `chatId` 與發訊者資訊。
     2. **主動推播與警報通知**：使用 `Telegram` 節點發送 Markdown 富文本排版與 Inline Keyboard 按鈕。
     3. **雙向通訊與自動回覆**：使用 `Switch` 節點實現 `/start`、`/help`、`/info` 指令分流應答。
