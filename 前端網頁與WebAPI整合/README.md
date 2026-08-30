@@ -223,11 +223,3 @@ flowchart LR
 5. AI 智慧客服對話視窗 API ➔ 掌握前端浮動 Widget 與 AI Agent 語意串接
 ```
 
----
-
-## 📚 相關資源
-
-- [Webhook 基礎實作教學](../webhook實作/README.md)
-- [🗄️ 雲端資料庫整合 (PostgreSQL, Supabase & Pinecone)](../雲端資料庫整合/README.md)
-- [🤖 整合 LLM 模型的 AI Agent 教學](../AI_Agent/README.md)
-- [💬 通訊軟體整合 (LINE & Telegram)](../通訊軟體整合/README.md)

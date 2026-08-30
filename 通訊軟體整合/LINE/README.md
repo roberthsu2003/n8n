@@ -234,12 +234,3 @@ LINE 官方帳號對於訊息計費的核心邏輯區分為 **Reply (回覆)** �
 | **中用量** | **NT$ 800** | **3,000 則** | 不可加購 | 中小型企業、定期推播需求 |
 | **高用量** | **NT$ 1,200** | **6,000 則** | 依量計費（每則約 NT$ 0.2 起） | 大型官方帳號、高頻率行銷通知 |
 
----
-
-## 📚 相關資源
-
-- [LINE Messaging API 官方文件](https://developers.line.biz/en/docs/messaging-api/)
-- [LINE Flex Message Simulator 官方設計工具](https://developers.line.biz/console/fx/)
-- [📱 LINE 圖文前置與憑證設定指南](../../line設定/README.md)
-- [✈️ Telegram 整合實作教學](../Telegram/README.md)
-- [💬 通訊軟體整合總覽](../README.md)

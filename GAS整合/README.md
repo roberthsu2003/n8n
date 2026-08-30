@@ -221,13 +221,3 @@ n8n 與 GAS 的整合透過 **Web App API** 與 **Webhook** 進行雙向通訊�
 4. 企業合約生成 PDF 與歸檔 ➔ 掌握 PDF 轉檔與暫存垃圾清理
 5. 表單提交 ➔ PDF ➔ Gmail 閉環 ➔ 掌握雙向事件驅動與客戶交付
 ```
-
----
-
-## 📚 相關資源
-
-- [Google Workspace API 服務教學](../Google_Cloud_api服務/README.md)
-- [Google Apps Script 官方文檔](https://developers.google.com/apps-script)
-- [DocumentApp 官方 API 手冊](https://developers.google.com/apps-script/reference/document/document-app)
-- [Webhook 實作由淺至深教學](../webhook實作/README.md)
-- [💬 通訊軟體整合 (LINE & Telegram)](../通訊軟體整合/README.md)

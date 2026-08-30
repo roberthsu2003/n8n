@@ -277,13 +277,3 @@ flowchart TD
 6. Pinecone 雲端向量資料庫 ➔ 掌握專用 Serverless 向量資料庫架構
 ```
 
----
-
-## 📚 相關資源
-
-- [Supabase 官方連線設定指南](./Supabase/README.md)
-- [Pinecone 免費建立與設定教學](./06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
-- [PostgreSQL 官方 SQL 手冊](https://www.postgresql.org/docs/)
-- [Pinecone 官方網站](https://www.pinecone.io/)
-- [🤖 整合 LLM 模型的 AI Agent 教學](../AI_Agent/README.md)
-- [💬 通訊軟體整合 (LINE & Telegram)](../通訊軟體整合/README.md)

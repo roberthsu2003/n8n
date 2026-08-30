@@ -93,12 +93,3 @@ flowchart LR
 請直接幫我更新工作流程節點！
 ```
 </details>
-
----
-
-## 📚 相關資源
-
-- [Google Cloud API 憑證設定指南](../../google_cloud設定/README.md)
-- [n8n Google Docs 節點官方文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googledocs/)
-- [n8n Google Drive 節點官方文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googledrive/)
-- [n8n Gmail 節點官方文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.gmail/)

@@ -402,26 +402,6 @@ System Prompt 決定了 AI Agent 的角色和行為。範例：
 👤 如果你無法回答問題，我該怎麼辦？
 🤖 （應該提供客服電話和聯絡人資訊）
 ```
-
-## 📚 相關資源
-
-### 官方文件
-- [n8n AI Agent 文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.agent/)
-- [n8n LangChain 整合](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain/)
-
-### API 申請與文件
-- [OpenRouter 官網](https://openrouter.ai/) - 取得免費 API Key
-- [OpenRouter 模型列表](https://openrouter.ai/models) - 查看所有可用模型
-- [OpenRouter API 文件](https://openrouter.ai/docs)
-- [Google Gemini API 文件](https://ai.google.dev/docs) - Gemini 使用指南
-- [Google AI Studio](https://makersuite.google.com/app/apikey) - 取得 Gemini API Key
-
-### 延伸學習
-- [Prompt Engineering 指南](https://www.promptingguide.ai/zh) - 學習如何寫好的 System Prompt
-- [LangChain 文件](https://js.langchain.com/docs/) - 了解 AI Agent 背後的技術
-
----
-
 ## 💰 成本比較
 
 | 服務 | 免費額度 | 付費方案 | 適用對象 |
@@ -434,5 +414,3 @@ System Prompt 決定了 AI Agent 的角色和行為。範例：
 **本範例使用完全免費的方案，非常適合學習和教學！** 🎓
 
 ---
-
-

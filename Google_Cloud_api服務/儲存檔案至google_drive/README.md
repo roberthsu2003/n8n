@@ -301,20 +301,6 @@ return {
 - 可設定為公開、特定人員或組織內共享
 - 或直接在 Google Drive 網頁介面修改權限
 
----
-
-## 🎓 相關資源
-
-- [n8n HTTP Request 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest/)
-- [n8n Extract from File 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.extractfromfile/)
-- [n8n Convert to File 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.converttofile/)
-- [n8n Google Drive 節點文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googledrive/)
-- [Google Drive API 文件](https://developers.google.com/drive/api/v3/about-sdk)
-- [Google Cloud Console](https://console.cloud.google.com/)
-- [臺北市資料大平台](https://data.taipei/)
-
----
-
 ## 🔐 安全性提醒
 
 ### **保護您的認證資訊**

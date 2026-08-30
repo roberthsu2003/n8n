@@ -264,12 +264,3 @@ flowchart LR
 * **On received (預設)**：接收到請求立刻回傳 200 OK，後續節點非同步執行（適合耗時較長的背景任務）。
 * **Using 'Respond to Webhook' Node**：等待流程處理完畢後，由 Respond to Webhook 節點回傳運算結果與指定狀態碼（適合即時查詢、收據產出與 API 微服務）。
 
----
-
-## 📚 相關資源
-
-- [n8n 官方 Webhook 節點文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/)
-- [n8n + ngrok 外網通道設定教學](../n8n_ngrok/README.md)
-- [📱 LINE Messaging API 整合教學](../通訊軟體整合/LINE/README.md)
-- [✈️ Telegram Bot 整合教學](../通訊軟體整合/Telegram/README.md)
-- [HTTP 請求方法與狀態碼 (MDN)](https://developer.mozilla.org/zh-TW/docs/Web/HTTP/Methods)

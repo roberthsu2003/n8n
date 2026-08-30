@@ -320,13 +320,3 @@ flowchart LR
 8. Google 試算表整合 AI 智慧客服 ➔ 掌握 AI + Google Workspace 完整自動化閉環
 ```
 
----
-
-## 📚 相關資源
-
-- [Google Cloud 設定指南](../google_cloud設定/README.md)
-- [OAuth 2.0 概念解析](../OAuth/README.md)
-- [Google Cloud Console 官方入口](https://console.cloud.google.com/)
-- [n8n 官方 Google 節點文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googledrive/)
-- [📱 LINE Messaging API 整合教學](../通訊軟體整合/LINE/README.md)
-- [✈️ Telegram Bot 整合教學](../通訊軟體整合/Telegram/README.md)

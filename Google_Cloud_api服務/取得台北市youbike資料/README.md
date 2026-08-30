@@ -175,24 +175,3 @@ flowchart TD
 
 ### **Q3: 如何讓這個流程每天自動定期執行？**
 **A**: 將 `When clicking ‘Execute workflow’` 節點刪除，替換為 `Schedule Trigger` 節點，設定重複週期的執行時間（例如每小時或每 30 分鐘執行一次）。
-
----
-
-## 🎓 相關資源
-
-- [臺北市 YouBike2.0 即時資訊 API](https://data.taipei/dataset/detail?id=c6bc70b5-9b7b-496f-a98b-a0440e8b8e63)
-- [n8n Google Drive 節點文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googledrive/)
-- [n8n Google Sheets 節點文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.googlesheets/)
-- [n8n Luxon 日期時間處理語法](https://docs.n8n.io/code/cookbook/luxon/)
-
----
-
-**難度**: ⭐⭐⭐ (進階)  
-**適用對象**: 需要處理動態檔案建立、條件分支、多 API 整合與即時數據分析的使用者  
-**預計學習時間**: 45-60 分鐘  
-
-**範例亮點**:
-- 🚲 實戰開放資料 API (YouBike 2.0 即時 API)
-- 🧠 智慧檔案管理邏輯（自動判斷今日試算表是否存在）
-- ⏱️ 動態檔案與工作表命名（日期 `yyyy-MM-DD` 與時間 `HH-mm-ss`）
-- ⚡ 高效 n8n 資料流設計（Aggregate 打包避免重複 API 請求）

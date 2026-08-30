@@ -243,12 +243,3 @@ _斜體文字_
 ```整段代碼區塊```
 ```
 
----
-
-## 📚 相關資源
-
-- [n8n 官方 Telegram 節點文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.telegram/)
-- [Telegram Bot API 官方開發者文件](https://core.telegram.org/bots/api)
-- [Telegram @BotFather 官方機器人入口](https://t.me/BotFather)
-- [📱 LINE 整合實作教學](../LINE/README.md)
-- [💬 通訊軟體整合總覽](../README.md)

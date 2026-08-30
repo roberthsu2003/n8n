@@ -538,26 +538,6 @@ scp backup.sql.gz user@new-machine:/tmp/
 gunzip -c /tmp/backup.sql.gz | psql -U postgres n8n_rag_db
 ```
 
----
-
-## 🎓 學習資源
-
-### **PostgreSQL 學習**
-- [PostgreSQL 官方文件](https://www.postgresql.org/docs/)
-- [PostgreSQL 教學](https://www.postgresqltutorial.com/)
-- [SQL 語法參考](https://www.postgresql.org/docs/current/sql.html)
-
-### **PGVector 學習**
-- [PGVector GitHub](https://github.com/pgvector/pgvector)
-- [PGVector 文件](https://github.com/pgvector/pgvector#usage)
-- [向量搜尋最佳實踐](https://github.com/pgvector/pgvector#best-practices)
-
-### **n8n 整合**
-- [n8n PGVector 節點文件](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.vectorstorepgvector/)
-- [n8n RAG 指南](https://docs.n8n.io/advanced-ai/rag-in-n8n/)
-
----
-
 ## ✅ 完成檢查清單
 
 ### **安裝設定**

@@ -253,11 +253,3 @@ flowchart LR
 5. 進階資料去重與二進位檔案生成 ➔ 掌握 Map 去重與 CSV 檔案封裝
 ```
 
----
-
-## 📚 相關資源
-
-- [n8n 官方 Code Node 文件](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.code/)
-- [🗄️ 雲端資料庫整合 (PostgreSQL, Supabase & Pinecone)](../雲端資料庫整合/README.md)
-- [🌐 前端網頁與 WebAPI 整合](../前端網頁與WebAPI整合/README.md)
-- [📜 Google Apps Script (GAS) 整合實作](../GAS整合/README.md)

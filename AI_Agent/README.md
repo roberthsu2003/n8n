@@ -334,13 +334,3 @@ flowchart LR
 8. 客戶服務自動化平台 ➔ 掌握端到端全渠道企業級架構
 ```
 
----
-
-## 📚 相關資源
-
-- [Ollama 本地安裝與設定指南](./Ollama安裝與設定.md)
-- [RAG 智能問答系統完整教學](./RAG智能問答系統/README.md)
-- [📱 LINE Messaging API 整合教學](../通訊軟體整合/LINE/README.md)
-- [✈️ Telegram Bot 整合教學](../通訊軟體整合/Telegram/README.md)
-- [🗄️ Supabase 向量資料庫整合教學](../雲端資料庫整合/Supabase/README.md)
-- [n8n 官方 LangChain AI 節點文件](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.agent/)

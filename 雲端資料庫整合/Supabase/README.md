@@ -180,11 +180,3 @@ Supabase 內建的 `pgvector` 擴充套件，能將文本轉化為 1536 維度�
 | **password authentication failed** | 資料庫密碼錯誤或含有未跳脫的特殊符號 | 前往 Supabase -> Project Settings -> Database 重設密碼後重新填入。 |
 | **column does not exist** | SQL 欄位名稱大小寫問題 | PostgreSQL 預設會將欄位轉為小寫，若欄位在 Supabase 建立時帶有雙引號（如 `"userId"`），SQL 需使用雙引號包裹。 |
 
----
-
-## 📚 相關資源
-
-- [Supabase 官方文件](https://supabase.com/docs)
-- [n8n Postgres 節點官方文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.postgres/)
-- [n8n Supabase 節點官方文件](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.supabase/)
-- [PostgreSQL 官方 SQL 語法手冊](https://www.postgresql.org/docs/)
