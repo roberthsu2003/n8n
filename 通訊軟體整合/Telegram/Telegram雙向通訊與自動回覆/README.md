@@ -13,12 +13,12 @@
 flowchart TD
     A["👤 用戶在 Telegram 發送訊息或指令"] --> B["⚡ Telegram 訊息觸發器"]
     B --> C["⚙️ 提取對話參數 (Set 節點)"]
-    C --> D{"🔀 指令與文字路由器 (Switch 節點)"}
+    C --> D["🔀 指令與文字路由器 (Switch 節點)"]
     
-    D -->|匹配 /start| E1["📤 回覆 Start 指令 (含 Inline 按鈕選單)"]
-    D -->|匹配 /help| E2["📤 回覆 Help 指令 (說明手冊)"]
-    D -->|匹配 /info| E3["📤 回覆 Info 指令 (系統運行資訊)"]
-    D -->|其他一般文字 (Fallback)| E4["📤 回覆一般文字訊息 (引述與提示)"]
+    D -->|"匹配 /start 指令"| E1["📤 回覆 Start 指令 (含 Inline 按鈕選單)"]
+    D -->|"匹配 /help 指令"| E2["📤 回覆 Help 指令 (說明手冊)"]
+    D -->|"匹配 /info 指令"| E3["📤 回覆 Info 指令 (系統運行資訊)"]
+    D -->|"其他一般文字 (Fallback)"| E4["📤 回覆一般文字訊息 (引述與提示)"]
     
     E1 --> F["📱 Telegram 聊天室即時顯示回覆"]
     E2 --> F

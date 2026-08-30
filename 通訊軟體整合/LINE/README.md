@@ -38,7 +38,7 @@ flowchart LR
     LinePlatform -->|2. Webhook 事件推播| WebhookTrigger
     WebhookTrigger --> ProcessNode
     ProcessNode --> LineSendNode
-    LineSendNode -->|3. Reply API (免費) 或 Push API| LinePlatform
+    LineSendNode -->|"3. Reply API (免費) 或 Push API"| LinePlatform
     LinePlatform -->|4. 呈現訊息 / Flex 卡片| User
 ```
 
