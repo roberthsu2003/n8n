@@ -1,0 +1,122 @@
+{
+  "name": "公司專屬 Logo 與品牌套版",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🏢 範例 2：公司專屬 Logo 與品牌自訂套版\n\n1. **企業 Logo 圖片置換**：將文件中的 `{{COMPANY_LOGO}}` 動態置換為企業高解析度 Logo 圖片。\n2. **自訂品牌格式**：套入公司名稱、統編、地址、品牌標語 (Slogan) 與專屬聯絡資訊。\n3. **品牌一體化**：產出具備企業 CI/VI 規範的正式官方公文/備忘錄。",
+        "height": 260,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "gas-logo-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-trigger-gas-2",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "companyName",
+              "value": "極客數位創新科技股份有限公司"
+            },
+            {
+              "name": "taxId",
+              "value": "88889999"
+            },
+            {
+              "name": "logoUrl",
+              "value": "https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png"
+            },
+            {
+              "name": "slogan",
+              "value": "AI 驅動無限可能，自動化重塑企業未來"
+            },
+            {
+              "name": "address",
+              "value": "台北市信義區信義路五段 7 號 88 樓"
+            },
+            {
+              "name": "contactEmail",
+              "value": "service@geek-innovation.example.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "set-branding-data",
+      "name": "準備企業品牌資料與 Logo"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/YOUR_GAS_WEB_APP_ID/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"templateId\": \"YOUR_BRANDED_DOC_TEMPLATE_ID\",\n  \"folderId\": \"YOUR_GOOGLE_DRIVE_FOLDER_ID\",\n  \"companyName\": \"{{ $json.companyName }}\",\n  \"taxId\": \"{{ $json.taxId }}\",\n  \"logoUrl\": \"{{ $json.logoUrl }}\",\n  \"slogan\": \"{{ $json.slogan }}\",\n  \"address\": \"{{ $json.address }}\",\n  \"contactEmail\": \"{{ $json.contactEmail }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "http-call-gas-logo",
+      "name": "呼叫 GAS 替換 Logo 與品牌版面",
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "準備企業品牌資料與 Logo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "準備企業品牌資料與 Logo": {
+      "main": [
+        [
+          {
+            "node": "呼叫 GAS 替換 Logo 與品牌版面",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

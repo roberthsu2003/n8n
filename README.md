@@ -142,8 +142,19 @@
 
 ---
 
-## 📜 [Google Apps Script (GAS) 整合](./GAS整合/README.md)
-結合 Google Apps Script 的自訂函數與 n8n 工作流，打造更強大的 Google 工作區自動化。
+## 📜 [Google Apps Script (GAS) 整合實作](./GAS整合/README.md)
+
+結合 Google Apps Script (GAS) 的深度排版能力與 n8n 工作流程，使用 **Placeholder（佔位符）範本** 打造完全符合企業專屬格式的公文、報價單、合約與 PDF，提供由淺至深 5 大實作範例：
+
+1. **[GAS 基礎文字佔位符替換](./GAS整合/01_基礎文字佔位符替換/README.md)**：Google Docs 範本文字替換、正則表達式跳脫與公版複製。
+2. **[公司專屬 Logo 與品牌套版](./GAS整合/02_公司專屬Logo與品牌套版/README.md)**：動態下載企業 Logo 圖檔並內嵌、自訂統編、Slogan 與 CI/VI 規範。
+3. **[動態多列報價單與收據生成](./GAS整合/03_動態多列報價單與收據生成/README.md)**：支援不固定品項數量，動態新增表格列、計算小計、5% 營業稅與總計。
+4. **[企業合約與證書生成 PDF 與雲端歸檔](./GAS整合/04_企業合約證書生成PDF與雲端歸檔/README.md)**：自動轉換為唯讀 PDF 檔案、儲存至指定 Google Drive 資料夾並自動清理暫存檔。
+5. **[Google 表單提交 ➔ 自動生成客製 PDF ➔ Gmail 寄送](./GAS整合/05_表單提交自動生成客製PDF並寄信/README.md)**：雙向自動化閉環，表單提交即時產出公司專屬 PDF 並自動夾帶附件寄出。
+
+- **支援資源**：GAS 原始碼 [`Code.gs`](./GAS整合/01_基礎文字佔位符替換/Code.gs)、範例工作流程樣版 [`01_gas_text_placeholder.json`](./GAS整合/01_基礎文字佔位符替換/01_gas_text_placeholder.json)、[`02_gas_logo_branding.json`](./GAS整合/02_公司專屬Logo與品牌套版/02_gas_logo_branding.json)、[`03_gas_dynamic_table_invoice.json`](./GAS整合/03_動態多列報價單與收據生成/03_gas_dynamic_table_invoice.json)、[`04_gas_contract_pdf_drive.json`](./GAS整合/04_企業合約證書生成PDF與雲端歸檔/04_gas_contract_pdf_drive.json)、[`05_gas_form_trigger_email_loop.json`](./GAS整合/05_表單提交自動生成客製PDF並寄信/05_gas_form_trigger_email_loop.json)。
+
+---
 
 ## ⚡ [FastAPI 整合](./FastAPI整合/)
 建立自訂 Python API 服務，讓 n8n 能夠呼叫您自己的資料處理邏輯和機器學習模型。

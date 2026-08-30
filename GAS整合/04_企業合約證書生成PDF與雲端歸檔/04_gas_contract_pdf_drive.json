@@ -1,0 +1,130 @@
+{
+  "name": "企業合約與證書生成 PDF 與雲端歸檔",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📜 範例 4：企業合約/證書生成 PDF 與雲端歸檔\n\n1. **正式合約套版**：替換合約甲方、乙方、統編、金額與合約有效期限。\n2. **GAS 轉存唯讀 PDF**：將 Google Doc 自動編譯為不可竄改的 PDF 檔案。\n3. **Drive 自動歸檔**：儲存至企業雲端硬碟指定資料夾，並刪除暫存文件保持硬碟乾淨。\n4. **回傳檔案連結**：n8n 取得 PDF 下載連結與預覽網址。",
+        "height": 270,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "gas-pdf-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-trigger-gas-4",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "contractNo",
+              "value": "CTR-2026-8899"
+            },
+            {
+              "name": "partyA",
+              "value": "極客數位創新科技股份有限公司"
+            },
+            {
+              "name": "partyATaxId",
+              "value": "88889999"
+            },
+            {
+              "name": "partyB",
+              "value": "宏達智聯系統整合股份有限公司"
+            },
+            {
+              "name": "partyBTaxId",
+              "value": "77665544"
+            },
+            {
+              "name": "effectiveDate",
+              "value": "2026-09-01"
+            },
+            {
+              "name": "expiryDate",
+              "value": "2027-08-31"
+            },
+            {
+              "name": "contractAmount",
+              "value": "$360,000"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "set-contract-payload",
+      "name": "準備合約甲乙方資料"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/YOUR_GAS_WEB_APP_ID/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"templateId\": \"YOUR_CONTRACT_DOC_TEMPLATE_ID\",\n  \"folderId\": \"YOUR_GOOGLE_DRIVE_FOLDER_ID\",\n  \"contractNo\": \"{{ $json.contractNo }}\",\n  \"partyA\": \"{{ $json.partyA }}\",\n  \"partyATaxId\": \"{{ $json.partyATaxId }}\",\n  \"partyB\": \"{{ $json.partyB }}\",\n  \"partyBTaxId\": \"{{ $json.partyBTaxId }}\",\n  \"effectiveDate\": \"{{ $json.effectiveDate }}\",\n  \"expiryDate\": \"{{ $json.expiryDate }}\",\n  \"contractAmount\": \"{{ $json.contractAmount }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "http-call-gas-contract-pdf",
+      "name": "呼叫 GAS 產出合約 PDF",
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "準備合約甲乙方資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "準備合約甲乙方資料": {
+      "main": [
+        [
+          {
+            "node": "呼叫 GAS 產出合約 PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

@@ -1,0 +1,142 @@
+{
+  "name": "Google 表單提交自動生成客製 PDF 並寄信",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📧 範例 5：Google 表單 ➔ 客製 PDF ➔ Gmail 自動寄發全自動閉環\n\n1. **表單提交觸發**：客戶填寫 Google 表單，GAS `onFormSubmit` 即時傳送資料至 n8n Webhook。\n2. **GAS 套版與轉 PDF**：呼叫 GAS 替換公司 Logo、自訂版面與客戶填寫內容，生成專屬 PDF。\n3. **下載 PDF 附件**：透過 HTTP Request 取得生成的 PDF 二進位檔案。\n4. **Gmail 自動寄發**：自動寄送客製化確認信與 PDF 附件給客戶，完成無人化自動化閉環！",
+        "height": 280,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        100
+      ],
+      "id": "gas-loop-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "google-form-submission",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        400
+      ],
+      "id": "webhook-google-form",
+      "name": "接收 Google Form 提交",
+      "webhookId": "google-form-endpoint"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/YOUR_GAS_WEB_APP_ID/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"templateId\": \"YOUR_CONFIRMATION_DOC_TEMPLATE_ID\",\n  \"folderId\": \"YOUR_GOOGLE_DRIVE_FOLDER_ID\",\n  \"customerName\": \"{{ $json.body.customerName || '王大明' }}\",\n  \"customerEmail\": \"{{ $json.body.customerEmail || 'ming@example.com' }}\",\n  \"servicePlan\": \"{{ $json.body.servicePlan || '企業旗艦自動化方案' }}\",\n  \"notes\": \"{{ $json.body.notes || '需支援 LINE 官方帳號與 Supabase 整合' }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        60,
+        400
+      ],
+      "id": "http-generate-custom-pdf",
+      "name": "呼叫 GAS 生成公司專屬 PDF",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.downloadUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        400
+      ],
+      "id": "http-download-pdf-binary",
+      "name": "下載 PDF 二進位檔案",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('接收 Google Form 提交').item.json.body.customerEmail || 'test@example.com' }}",
+        "subject": "=【確認函】感謝您預約 {{ $('接收 Google Form 提交').item.json.body.servicePlan || '企業服務' }} - 附專屬確認單",
+        "message": "=親愛的 {{ $('接收 Google Form 提交').item.json.body.customerName || '貴賓' }} 您好：\n\n感謝您填寫我們的服務預約表單！\n附件為您的專屬客製化預約確認單 (PDF)，請查收。\n\n極客數位創新科技 敬上",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        580,
+        400
+      ],
+      "id": "gmail-send-pdf-attachment",
+      "name": "Gmail 自動寄發 PDF 附件",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "接收 Google Form 提交": {
+      "main": [
+        [
+          {
+            "node": "呼叫 GAS 生成公司專屬 PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "呼叫 GAS 生成公司專屬 PDF": {
+      "main": [
+        [
+          {
+            "node": "下載 PDF 二進位檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下載 PDF 二進位檔案": {
+      "main": [
+        [
+          {
+            "node": "Gmail 自動寄發 PDF 附件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

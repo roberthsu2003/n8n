@@ -1,0 +1,94 @@
+{
+  "name": "GAS 動態多列報價單與收據生成",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📊 範例 3：動態多列報價單與收據生成\n\n1. **動態表格擴充**：支援任意數量的商品項目（1筆或100筆皆可自動新增列）。\n2. **自動計算金額**：自動計算品項小計、5% 營業稅與總計金額。\n3. **企業請款規格**：完美呈現符合公司財務規範的正式估價單與收據。",
+        "height": 260,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "gas-invoice-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-trigger-gas-3",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "jsCode": "const quotationNo = 'QUO-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);\nconst clientName = '卓越數位行銷有限公司';\nconst clientTaxId = '12345678';\n\n// 動態商品清單\nconst items = [\n  { name: 'n8n 企業版私有化部署服務', qty: 1, price: 45000 },\n  { name: 'LINE / Telegram 雙向通訊機器人客製模組', qty: 2, price: 18000 },\n  { name: 'AI 向量知識庫 (RAG) 企業規章串接', qty: 1, price: 25000 },\n  { name: '年度 7x24 小時專屬技術維護保固', qty: 1, price: 12000 }\n];\n\n// 計算小計與總額\nlet subtotal = 0;\nconst formattedItems = items.map(item => {\n  const itemTotal = item.qty * item.price;\n  subtotal += itemTotal;\n  return {\n    name: item.name,\n    qty: item.qty,\n    price: '$' + item.price.toLocaleString(),\n    subtotal: '$' + itemTotal.toLocaleString()\n  };\n});\n\nconst tax = Math.round(subtotal * 0.05);\nconst grandTotal = subtotal + tax;\n\nreturn [{\n  json: {\n    quotationNo,\n    clientName,\n    clientTaxId,\n    date: new Date().toISOString().split('T')[0],\n    items: formattedItems,\n    subtotal: '$' + subtotal.toLocaleString(),\n    tax: '$' + tax.toLocaleString(),\n    grandTotal: '$' + grandTotal.toLocaleString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        380
+      ],
+      "id": "code-calculate-invoice",
+      "name": "計算報價單品項與金額"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/YOUR_GAS_WEB_APP_ID/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"templateId\": \"YOUR_INVOICE_DOC_TEMPLATE_ID\",\n  \"folderId\": \"YOUR_GOOGLE_DRIVE_FOLDER_ID\",\n  \"quotationNo\": \"{{ $json.quotationNo }}\",\n  \"clientName\": \"{{ $json.clientName }}\",\n  \"clientTaxId\": \"{{ $json.clientTaxId }}\",\n  \"date\": \"{{ $json.date }}\",\n  \"items\": {{ JSON.stringify($json.items) }},\n  \"subtotal\": \"{{ $json.subtotal }}\",\n  \"tax\": \"{{ $json.tax }}\",\n  \"grandTotal\": \"{{ $json.grandTotal }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        360,
+        380
+      ],
+      "id": "http-call-gas-invoice",
+      "name": "呼叫 GAS 動態產生多列報價單",
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "計算報價單品項與金額",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "計算報價單品項與金額": {
+      "main": [
+        [
+          {
+            "node": "呼叫 GAS 動態產生多列報價單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

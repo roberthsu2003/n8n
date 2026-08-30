@@ -1,0 +1,114 @@
+{
+  "name": "GAS 基礎文字佔位符替換",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📜 範例 1：GAS 基礎文字佔位符替換\n\n1. **範本設計**：在 Google Docs 建立含有 `{{CUSTOMER_NAME}}`、`{{COMPANY_NAME}}`、`{{DATE}}` 的文件範本。\n2. **n8n 發送資料**：透過 HTTP Request 節點將客戶資料以 JSON 傳送至 GAS Web App。\n3. **GAS 自動複製與替換**：自動複製公版範本、替換佔位符文字並回傳新文件網址。",
+        "height": 260,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "gas-text-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-trigger-gas-1",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "customerName",
+              "value": "陳大明"
+            },
+            {
+              "name": "companyName",
+              "value": "未來科技股份有限公司"
+            },
+            {
+              "name": "projectTitle",
+              "value": "n8n 企業自動化系統導入專案"
+            },
+            {
+              "name": "date",
+              "value": "={{ $now.format('yyyy-MM-dd') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        380
+      ],
+      "id": "set-customer-data",
+      "name": "準備套版資料"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://script.google.com/macros/s/YOUR_GAS_WEB_APP_ID/exec",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"templateId\": \"YOUR_GOOGLE_DOC_TEMPLATE_ID\",\n  \"folderId\": \"YOUR_GOOGLE_DRIVE_FOLDER_ID\",\n  \"customerName\": \"{{ $json.customerName }}\",\n  \"companyName\": \"{{ $json.companyName }}\",\n  \"projectTitle\": \"{{ $json.projectTitle }}\",\n  \"date\": \"{{ $json.date }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        340,
+        380
+      ],
+      "id": "http-call-gas-webapp",
+      "name": "呼叫 GAS Web App 套版",
+      "credentials": {}
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "準備套版資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "準備套版資料": {
+      "main": [
+        [
+          {
+            "node": "呼叫 GAS Web App 套版",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
