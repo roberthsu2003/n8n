@@ -1,0 +1,143 @@
+{
+  "name": "資料庫變更即時偵測與 Telegram 即時推播",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔔 範例 4：資料庫變更偵測與即時推播\n\n1. **定時排程巡檢 (Schedule)**：每分鐘定時檢查 `orders` 表是否有 `status = 'pending'` 的新進訂單。\n2. **取得待處理訂單**：撈取未處理訂單明細與客戶資訊。\n3. **即時發送警報推播**：透過 Telegram 節點發送富文本通知給營運團隊。\n4. **回寫處理狀態**：將訂單狀態更新為 `processing`，避免重複發送通知。",
+        "height": 270,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "db-notification-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "schedule-check-orders",
+      "name": "每分鐘檢查新訂單"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT o.id, o.order_number, o.total_amount, o.status, c.name AS customer_name, c.phone\nFROM public.orders o\nJOIN public.customers c ON o.customer_id = c.id\nWHERE o.status = 'pending'\nLIMIT 10;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        100,
+        380
+      ],
+      "id": "postgres-get-pending-orders",
+      "name": "1. 查詢 pending 待處理訂單",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🔔 *【新訂單即時通知】*\n━━━━━━━━━━━━━━\n📦 *訂單編號*：`{{ $json.order_number }}`\n👤 *訂購客戶*：{{ $json.customer_name }} ({{ $json.phone }})\n💰 *應付金額*：*${{ $json.total_amount }}*\n🕒 *偵測時間*：{{ $now.format('yyyy-MM-dd HH:mm:ss') }}\n━━━━━━━━━━━━━━\n系統已自動切換為處理中狀態！",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        380,
+        380
+      ],
+      "id": "telegram-send-order-alert",
+      "name": "2. Telegram 發送新訂單推播",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.orders\nSET status = 'processing'\nWHERE id = $1\nRETURNING id, order_number, status;",
+        "options": {
+          "queryParams": "={{ $json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        640,
+        380
+      ],
+      "id": "postgres-update-order-status",
+      "name": "3. 更新狀態為 processing",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "每分鐘檢查新訂單": {
+      "main": [
+        [
+          {
+            "node": "1. 查詢 pending 待處理訂單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. 查詢 pending 待處理訂單": {
+      "main": [
+        [
+          {
+            "node": "2. Telegram 發送新訂單推播",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Telegram 發送新訂單推播": {
+      "main": [
+        [
+          {
+            "node": "3. 更新狀態為 processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

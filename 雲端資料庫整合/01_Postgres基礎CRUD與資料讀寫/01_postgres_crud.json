@@ -1,0 +1,126 @@
+{
+  "name": "Postgres 基礎 CRUD 與資料讀寫",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🐘 範例 1：Postgres 基礎 CRUD 實作\n\n1. **新增客戶 (Create)**：使用參數化查詢 `$1, $2, $3` 安全寫入資料並防範 SQL 注入。\n2. **查詢列表 (Read)**：撈取最新的客戶清單與詳細資訊。\n3. **修改等級 (Update)**：將指定 Email 的會員升級為 VIP 等級。\n4. **刪除資料 (Delete)**：刪除測試客戶資料並回傳刪除紀錄。",
+        "height": 270,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "postgres-crud-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-trigger-crud",
+      "name": "手動觸發測試"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.customers (name, email, phone, vip_level)\nVALUES ($1, $2, $3, $4)\nRETURNING *;",
+        "options": {
+          "queryParams": "={{ ['陳大明', 'ming_test@example.com', '0912-888-999', 'Gold'].join(',') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        100,
+        260
+      ],
+      "id": "postgres-insert",
+      "name": "1. 新增客戶 (INSERT)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name, email, phone, vip_level, created_at\nFROM public.customers\nORDER BY id DESC\nLIMIT 5;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        100,
+        460
+      ],
+      "id": "postgres-select",
+      "name": "2. 查詢最新客戶 (SELECT)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE public.customers\nSET vip_level = 'Diamond', updated_at = NOW()\nWHERE email = 'ming_test@example.com'\nRETURNING *;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        380,
+        260
+      ],
+      "id": "postgres-update",
+      "name": "3. 升級 VIP 等級 (UPDATE)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "手動觸發測試": {
+      "main": [
+        [
+          {
+            "node": "1. 新增客戶 (INSERT)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "2. 查詢最新客戶 (SELECT)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. 新增客戶 (INSERT)": {
+      "main": [
+        [
+          {
+            "node": "3. 升級 VIP 等級 (UPDATE)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

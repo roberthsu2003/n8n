@@ -1,0 +1,133 @@
+{
+  "name": "Supabase Low-Code 節點與資料表存取",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ⚡ 範例 2：Supabase Low-Code 節點存取\n\n1. **免寫 SQL**：透過 Supabase REST API 直接在 n8n 視覺化選擇資料表與欄位。\n2. **自動寫入 (Create Row)**：接收表單資料，自動新增至 `customers` 表。\n3. **條件過濾查詢 (Get Many Rows)**：撈取所有 VIP 等級為 `Gold` 的尊榮客戶清單。\n4. **零摩擦整合**：適合前端 Webhook 與無程式碼業務流程。",
+        "height": 260,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "supabase-lowcode-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "register-customer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "webhook-register-customer",
+      "name": "接收會員註冊 Webhook",
+      "webhookId": "register-customer-endpoint"
+    },
+    {
+      "parameters": {
+        "tableId": "customers",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.body.name || '張美華' }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.body.email || 'hua_' + Date.now() + '@example.com' }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.body.phone || '0988-123-456' }}"
+            },
+            {
+              "fieldId": "vip_level",
+              "fieldValue": "={{ $json.body.vip_level || 'Gold' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        100,
+        380
+      ],
+      "id": "supabase-create-row",
+      "name": "Supabase 寫入客戶",
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+          "name": "Supabase API account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "customers",
+        "returnAll": false,
+        "limit": 10,
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "vip_level",
+              "condition": "eq",
+              "keyValue": "Gold"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        360,
+        380
+      ],
+      "id": "supabase-get-gold-vips",
+      "name": "Supabase 查詢 Gold VIP 清單",
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_CREDENTIAL_ID",
+          "name": "Supabase API account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "接收會員註冊 Webhook": {
+      "main": [
+        [
+          {
+            "node": "Supabase 寫入客戶",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase 寫入客戶": {
+      "main": [
+        [
+          {
+            "node": "Supabase 查詢 Gold VIP 清單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

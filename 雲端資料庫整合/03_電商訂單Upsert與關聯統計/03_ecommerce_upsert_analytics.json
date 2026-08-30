@@ -1,0 +1,94 @@
+{
+  "name": "電商訂單 Upsert 與跨表關聯統計報表",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📊 範例 3：電商訂單 Upsert 與跨表關聯統計\n\n1. **Upsert 客戶資料 (ON CONFLICT)**：若 Email 已存在則自動更新電話與等級，否則新增（防重複寫入）。\n2. **新增關聯訂單**：使用 `customer_id` 外鍵關聯寫入 `orders` 表（含 JSONB 商品清單）。\n3. **跨表 JOIN 與統計運算**：執行 `LEFT JOIN` 與 `GROUP BY`，即時產出「客戶消費總額與訂單數排行報表」。",
+        "height": 270,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "upsert-analytics-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "manual-trigger-analytics",
+      "name": "手動觸發運算"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO public.customers (name, email, phone, vip_level)\nVALUES ($1, $2, $3, $4)\nON CONFLICT (email) \nDO UPDATE SET \n    phone = EXCLUDED.phone,\n    vip_level = EXCLUDED.vip_level,\n    updated_at = NOW()\nRETURNING *;",
+        "options": {
+          "queryParams": "={{ ['李美麗', 'mary@example.com', '0922-999-888', 'Diamond'].join(',') }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        100,
+        280
+      ],
+      "id": "postgres-upsert-customer",
+      "name": "1. Upsert 客戶 (ON CONFLICT)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    c.id AS customer_id,\n    c.name AS customer_name,\n    c.email,\n    c.vip_level,\n    COUNT(o.id) AS total_orders,\n    COALESCE(SUM(o.total_amount), 0.00) AS total_spent_amount\nFROM public.customers c\nLEFT JOIN public.orders o ON c.id = o.customer_id\nGROUP BY c.id, c.name, c.email, c.vip_level\nORDER BY total_spent_amount DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        380,
+        380
+      ],
+      "id": "postgres-cross-table-join",
+      "name": "2. 跨表統計報表 (JOIN & GROUP BY)",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_POSTGRES_CREDENTIAL_ID",
+          "name": "Supabase Postgres account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "手動觸發運算": {
+      "main": [
+        [
+          {
+            "node": "1. Upsert 客戶 (ON CONFLICT)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "2. 跨表統計報表 (JOIN & GROUP BY)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
