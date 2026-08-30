@@ -156,8 +156,19 @@
 
 ---
 
-## ⚡ [FastAPI 整合](./FastAPI整合/)
-建立自訂 Python API 服務，讓 n8n 能夠呼叫您自己的資料處理邏輯和機器學習模型。
+## 🌐 [前端網頁與 WebAPI 整合（n8n 作為後端網站）](./前端網頁與WebAPI整合/README.md)
+
+前端網頁透過 `fetch()` 呼叫 n8n Webhook，將 n8n 作為無伺服器後端網站（Backend WebAPI / BaaS），提供由淺至深 5 大實作範例（各附獨立前端介面與工作流程）：
+
+1. **[即時會員註冊與驗證 API](./前端網頁與WebAPI整合/01_即時會員註冊與驗證API/README.md)**：玻璃擬態註冊/登入介面、Email 格式檢查、Session Token 簽發與狀態碼回傳。
+2. **[商品型錄分頁與即時搜尋 API](./前端網頁與WebAPI整合/02_商品型錄分頁與即時搜尋API/README.md)**：RESTful GET 請求、前端輸入防抖（Debounce）、商品分類篩選與伺服器端分頁運算。
+3. **[電商購物車結帳與折扣碼計算 API](./前端網頁與WebAPI整合/03_購物車結帳與折扣碼計算API/README.md)**：後端防篡改強制定價、優惠代碼狀態機驗證、5% 稅額計算與訂單序號生成。
+4. **[檔案上傳與自動雲端託管 API](./前端網頁與WebAPI整合/04_檔案上傳與自動雲端託管API/README.md)**：拖曳上傳 (Multipart FormData)、二進位數據解析、自動儲存至 Google Drive 與公開連結回傳。
+5. **[AI 智慧客服對話視窗 API](./前端網頁與WebAPI整合/05_AI智慧客服對話視窗API/README.md)**：網站右下角浮動 AI Chat Widget、依 `sessionId` 隔離訪客對話記憶與 AI Agent 即時應答。
+
+- **支援資源**：5 套現代前端網頁原始碼（`website/index.html`）、範例工作流程樣版 [`01_auth_webapi_workflow.json`](./前端網頁與WebAPI整合/01_即時會員註冊與驗證API/01_auth_webapi_workflow.json)、[`02_catalog_search_api_workflow.json`](./前端網頁與WebAPI整合/02_商品型錄分頁與即時搜尋API/02_catalog_search_api_workflow.json)、[`03_checkout_coupon_api_workflow.json`](./前端網頁與WebAPI整合/03_購物車結帳與折扣碼計算API/03_checkout_coupon_api_workflow.json)、[`04_file_upload_api_workflow.json`](./前端網頁與WebAPI整合/04_檔案上傳與自動雲端託管API/04_file_upload_api_workflow.json)、[`05_ai_chat_widget_api_workflow.json`](./前端網頁與WebAPI整合/05_AI智慧客服對話視窗API/05_ai_chat_widget_api_workflow.json)。
+
+---
 
 ## 🌍 [n8n 的免費部署方案](./n8n的部署/README.md)
 了解如何將 n8n 部署到本機、Raspberry Pi、Oracle Cloud 等免費平台，打造 7x24 小時運行的自動化伺服器。

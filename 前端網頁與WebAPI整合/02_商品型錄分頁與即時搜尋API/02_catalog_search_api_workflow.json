@@ -1,0 +1,106 @@
+{
+  "name": "商品型錄分頁與即時搜尋 WebAPI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔍 範例 2：商品型錄分頁與即時搜尋 WebAPI (GET)\n\n1. **GET Webhook**：接收前端傳入的 Query 參數（`search`, `category`, `page`, `limit`）。\n2. **伺服器端過濾與分頁**：依關鍵字與分類篩選商品，並進行動態切片（Slice）與分頁元數據運算。\n3. **即時回應 (Respond to Webhook)**：回傳商品陣列與分頁資訊給前端動態渲染。",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "catalog-api-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "catalog-search",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "webhook-catalog-get",
+      "name": "接收 GET 搜尋與分頁請求",
+      "webhookId": "catalog-search-endpoint"
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = $json.query || {};\nconst search = (query.search || '').trim().toLowerCase();\nconst category = (query.category || 'all').toLowerCase();\nconst page = Math.max(1, parseInt(query.page) || 1);\nconst limit = Math.max(1, parseInt(query.limit) || 6);\n\n// 模擬商品資料庫清單\nconst allProducts = [\n  { id: 1, name: 'AI 智慧客服機器人模組', category: 'ai', price: 18000, stock: 99, description: '支援 OpenAI / Gemini 與上下文對話記憶，一鍵串接 LINE 與 Telegram。' },\n  { id: 2, name: 'Supabase 向量知識庫 (RAG) 整合包', category: 'database', price: 25000, stock: 50, description: '結合 pgvector 實現私有文件語意檢索，提供零幻覺精準問答。' },\n  { id: 3, name: 'Google Workspace 企業自動化套件', category: 'automation', price: 12000, stock: 120, description: '自動同步 Gmail、Google 試算表與 Google 雲端硬碟檔案。' },\n  { id: 4, name: '電商訂單自動分流與發票通知', category: 'automation', price: 15000, stock: 80, description: '即時接收 Webhook 訂單、計算 5% 稅金並推播通知至營運群組。' },\n  { id: 5, name: 'Pinecone 雲端向量資料庫高併發模組', category: 'database', price: 28000, stock: 35, description: 'Serverless 專用向量庫架構，支援毫秒級高併發語意比對。' },\n  { id: 6, name: '多代理 (Multi-Agent) 協作系統', category: 'ai', price: 36000, stock: 20, description: '研究、審稿與報告產出多代理自主協同運作工作流。' },\n  { id: 7, name: 'Postgres 資料庫定時輪詢與監控', category: 'database', price: 9900, stock: 200, description: '自動監控 pending 待處理數據，即時回寫 processing 狀態閉環。' },\n  { id: 8, name: 'PDF 合約證書動態套版引擎 (GAS)', category: 'automation', price: 16000, stock: 65, description: 'Google Docs 佔位符動態替換，自動轉存唯讀 PDF 與 Drive 歸檔。' }\n];\n\n// 1. 分類與關鍵字篩選\nlet filtered = allProducts.filter(item => {\n  const matchCategory = (category === 'all') || (item.category === category);\n  const matchSearch = (!search) || \n    item.name.toLowerCase().includes(search) || \n    item.description.toLowerCase().includes(search);\n  return matchCategory && matchSearch;\n});\n\n// 2. 伺服器端分頁計算\nconst totalItems = filtered.length;\nconst totalPages = Math.ceil(totalItems / limit) || 1;\nconst startIndex = (page - 1) * limit;\nconst paginatedItems = filtered.slice(startIndex, startIndex + limit);\n\nreturn [{\n  json: {\n    statusCode: 200,\n    response: {\n      success: true,\n      data: paginatedItems,\n      pagination: {\n        page: page,\n        limit: limit,\n        totalItems: totalItems,\n        totalPages: totalPages\n      }\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        380
+      ],
+      "id": "code-filter-paginate",
+      "name": "篩選搜尋與分頁運算"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        380
+      ],
+      "id": "respond-catalog-data",
+      "name": "回傳商品資料給前端"
+    }
+  ],
+  "connections": {
+    "接收 GET 搜尋與分頁請求": {
+      "main": [
+        [
+          {
+            "node": "篩選搜尋與分頁運算",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "篩選搜尋與分頁運算": {
+      "main": [
+        [
+          {
+            "node": "回傳商品資料給前端",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

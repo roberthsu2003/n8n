@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>檔案上傳與雲端託管 (n8n WebAPI 後端)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --bg: #0d0f1d;
+      --card-bg: rgba(26, 23, 50, 0.75);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #2e1065 0%, #0d0f1d 80%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: #c4b5fd;
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .config-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: rgba(13, 15, 29, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .dropzone {
+      border: 2px dashed rgba(139, 92, 246, 0.4);
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      background: rgba(139, 92, 246, 0.05);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: rgba(139, 92, 246, 0.15);
+    }
+
+    .drop-icon {
+      font-size: 44px;
+      margin-bottom: 12px;
+      color: #a78bfa;
+    }
+
+    .drop-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .drop-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .file-preview {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(13, 15, 29, 0.6);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .file-icon {
+      font-size: 28px;
+    }
+
+    .file-details {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .file-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-upload {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-upload:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-upload:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 100px;
+      margin-top: 14px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width 0.3s;
+    }
+
+    .result-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-box.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo-badge">⚡ n8n WebAPI (Multipart 檔案上傳)</div>
+      <h1>雲端檔案自動託管中心</h1>
+      <p>拖曳檔案即時上傳至 n8n 並自動歸檔 Google Drive</p>
+    </div>
+
+    <!-- Webhook URL 設定 -->
+    <div class="config-group">
+      <label for="webhookUrl">上傳 API 端點 (POST Multipart)</label>
+      <input type="text" id="webhookUrl" value="http://localhost:5678/webhook/upload-api" placeholder="n8n Webhook URL">
+    </div>
+
+    <!-- 拖曳上傳區 -->
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-icon">☁️</div>
+      <div class="drop-title">點擊或拖曳檔案至此處上傳</div>
+      <div class="drop-hint">支援 PNG, JPG, PDF, CSV, ZIP (最大 25MB)</div>
+    </div>
+    <input type="file" id="fileInput" onchange="handleFileSelect(this.files)">
+
+    <!-- 檔案預覽 -->
+    <div id="filePreview" class="file-preview" style="display: none;">
+      <div class="file-icon">📄</div>
+      <div class="file-details">
+        <div class="file-name" id="previewName">filename.pdf</div>
+        <div class="file-size" id="previewSize">1.2 MB</div>
+      </div>
+      <button class="btn-upload" style="width: auto; padding: 6px 12px; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="clearFile()">✕</button>
+    </div>
+
+    <button class="btn-upload" id="uploadBtn" onclick="uploadFile()" disabled>開始上傳至雲端</button>
+
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div id="resultBox" class="result-box"></div>
+  </div>
+
+  <script>
+    let selectedFile = null;
+    const dropzone = document.getElementById('dropzone');
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropzone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFileSelect(files);
+    });
+
+    function handleFileSelect(files) {
+      if (!files || files.length === 0) return;
+      selectedFile = files[0];
+
+      document.getElementById('previewName').innerText = selectedFile.name;
+      document.getElementById('previewSize').innerText = (selectedFile.size / 1024 / 1024).toFixed(2) + ' MB';
+      document.getElementById('filePreview').style.display = 'flex';
+      document.getElementById('uploadBtn').disabled = false;
+      document.getElementById('resultBox').style.display = 'none';
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('filePreview').style.display = 'none';
+      document.getElementById('uploadBtn').disabled = true;
+    }
+
+    async function uploadFile() {
+      if (!selectedFile) return;
+
+      const webhookUrl = document.getElementById('webhookUrl').value.trim();
+      const uploadBtn = document.getElementById('uploadBtn');
+      const progressBar = document.getElementById('progressBar');
+      const progressFill = document.getElementById('progressFill');
+      const resultBox = document.getElementById('resultBox');
+
+      uploadBtn.disabled = true;
+      uploadBtn.innerText = '檔案上傳與雲端處理中...';
+      progressBar.style.display = 'block';
+      progressFill.style.width = '60%';
+      resultBox.style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('uploader', '前端使用者');
+
+      try {
+        const res = await fetch(webhookUrl, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+        progressFill.style.width = '100%';
+
+        if (res.ok && data.success) {
+          resultBox.className = 'result-box success';
+          resultBox.innerHTML = `
+            <strong>🎉 ${data.message}</strong><br>
+            📄 <strong>檔案名稱</strong>: ${data.fileName}<br>
+            📦 <strong>檔案大小</strong>: ${data.fileSize}<br>
+            🔗 <strong>雲端硬碟連結</strong>: <a href="${data.fileUrl}" target="_blank" style="color: #a78bfa; text-decoration: underline;">點擊檢視檔案</a>
+          `;
+        } else {
+          resultBox.className = 'result-box';
+          resultBox.style.display = 'block';
+          resultBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          resultBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          resultBox.style.color = '#fca5a5';
+          resultBox.innerHTML = `❌ 上傳失敗：${data.message || '未知錯誤'}`;
+        }
+      } catch (err) {
+        resultBox.className = 'result-box';
+        resultBox.style.display = 'block';
+        resultBox.style.background = 'rgba(239, 68, 68, 0.15)';
+        resultBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+        resultBox.style.color = '#fca5a5';
+        resultBox.innerHTML = `⚠️ 連線失敗：${err.message}`;
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerText = '開始上傳至雲端';
+        setTimeout(() => { progressBar.style.display = 'none'; progressFill.style.width = '0%'; }, 1000);
+      }
+    }
+  </script>
+</body>
+</html>

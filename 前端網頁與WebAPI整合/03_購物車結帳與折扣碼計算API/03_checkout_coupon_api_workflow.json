@@ -1,0 +1,106 @@
+{
+  "name": "購物車結帳與折扣碼計算 WebAPI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛒 範例 3：購物車結帳與折扣碼計算 WebAPI (POST)\n\n1. **防止前端篡改價格**：後端嚴格依據 Product ID 查詢真實價格，而非信任前端傳入的金額。\n2. **折扣碼動態驗證**：支援折抵比例 (12% off) 或固定金額折扣。\n3. **結帳收據生成**：計算 5% 營業稅與最終應付總金額，產生正式訂單編號並回傳。",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "checkout-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "checkout-api",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "webhook-checkout-post",
+      "name": "接收前端結帳請求 (POST)",
+      "webhookId": "checkout-api-endpoint"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || {};\nconst customer = body.customer || {};\nconst items = body.items || [];\nconst couponCode = (body.couponCode || '').trim().toUpperCase();\n\nif (!customer.name || !customer.email) {\n  return [{\n    json: {\n      statusCode: 400,\n      response: { success: false, message: '請填寫完整的訂購人姓名與電子信箱！' }\n    }\n  }];\n}\n\nif (!items || items.length === 0) {\n  return [{\n    json: {\n      statusCode: 400,\n      response: { success: false, message: '購物車內無有效商品！' }\n    }\n  }];\n}\n\n// 後端真實價格對應表 (防前端金額竄改)\nconst priceBook = {\n  'prod_1': { name: 'n8n 企業自動化私有化部署', price: 45000 },\n  'prod_2': { name: 'AI 向量知識庫 (RAG) 模組', price: 25000 }\n};\n\nlet subtotal = 0;\nconst verifiedItems = [];\n\nfor (const item of items) {\n  const product = priceBook[item.id];\n  if (product && item.qty > 0) {\n    const itemTotal = product.price * item.qty;\n    subtotal += itemTotal;\n    verifiedItems.push({\n      id: item.id,\n      name: product.name,\n      unitPrice: product.price,\n      qty: item.qty,\n      subtotal: itemTotal\n    });\n  }\n}\n\n// 優惠代碼折扣計算\nlet discountAmount = 0;\nlet discountReason = '無套用優惠券';\n\nif (couponCode === 'VIP88') {\n  discountAmount = Math.round(subtotal * 0.12); // 88 折 (折抵 12%)\n  discountReason = 'VIP 尊榮 88 折優惠 (省下 12%)';\n} else if (couponCode === 'SAVE500') {\n  discountAmount = 500;\n  discountReason = '滿額折抵現折 $500 元';\n} else if (couponCode === 'WELCOME') {\n  discountAmount = 200;\n  discountReason = '新會員迎賓折抵 $200 元';\n} else if (couponCode !== '') {\n  discountReason = '無效或已過期的優惠代碼';\n}\n\nconst discountedSubtotal = Math.max(0, subtotal - discountAmount);\nconst tax = Math.round(discountedSubtotal * 0.05);\nconst grandTotal = discountedSubtotal + tax;\nconst orderNumber = 'ORD-' + new Date().getFullYear() + '-' + Math.floor(100000 + Math.random() * 900000);\n\nreturn [{\n  json: {\n    statusCode: 200,\n    response: {\n      success: true,\n      message: '訂單已成功建立並完成結帳！',\n      orderNumber: orderNumber,\n      customer: customer,\n      receipt: {\n        subtotal: subtotal,\n        discountAmount: discountAmount,\n        discountReason: discountReason,\n        discountedSubtotal: discountedSubtotal,\n        tax: tax,\n        grandTotal: grandTotal,\n        items: verifiedItems\n      }\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        380
+      ],
+      "id": "code-process-checkout",
+      "name": "防篡改驗證與折扣計算"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        380
+      ],
+      "id": "respond-checkout-receipt",
+      "name": "回傳結帳收據與訂單編號"
+    }
+  ],
+  "connections": {
+    "接收前端結帳請求 (POST)": {
+      "main": [
+        [
+          {
+            "node": "防篡改驗證與折扣計算",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "防篡改驗證與折扣計算": {
+      "main": [
+        [
+          {
+            "node": "回傳結帳收據與訂單編號",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

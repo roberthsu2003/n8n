@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>極客數位 - 網站整合 AI 智慧客服 Widget (n8n WebAPI 後端)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background: #0f172a;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .hero-container {
+      max-width: 800px;
+      margin: 60px auto 0;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: #a5b4fc;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .config-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto 40px;
+      text-align: left;
+    }
+
+    .config-card label {
+      display: block;
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    .config-card input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    /* 浮動客服 Widget 樣式 */
+    .chat-toggle-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+      cursor: pointer;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+      z-index: 1000;
+    }
+
+    .chat-toggle-btn:hover {
+      transform: scale(1.08);
+      background: var(--primary-hover);
+    }
+
+    .chat-modal {
+      position: fixed;
+      bottom: 100px;
+      right: 28px;
+      width: 380px;
+      height: 540px;
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1000;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: none;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .chat-header {
+      background: rgba(15, 23, 42, 0.8);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chat-header-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .chat-title h3 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .chat-title p {
+      font-size: 11px;
+      color: #10b981;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .chat-body {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .message.bot {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      color: #e2e8f0;
+    }
+
+    .message.user {
+      background: var(--primary);
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .chip {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .chip:hover {
+      background: rgba(99, 102, 241, 0.3);
+    }
+
+    .chat-footer {
+      padding: 12px 16px;
+      background: rgba(15, 23, 42, 0.8);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .chat-input:focus {
+      border-color: var(--primary);
+    }
+
+    .send-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .typing-indicator {
+      display: none;
+      align-self: flex-start;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-container">
+    <div class="badge">🤖 n8n AI Agent + WebAPI 整合</div>
+    <h1 class="hero-title">為您的官方網站一鍵嵌入<br>全智能 AI 客服助理</h1>
+    <p class="hero-desc">點擊右下角的紫色客服圖示，體驗由 n8n AI Agent 在後端運算、即時檢索知識庫並回傳精確解答的即時對話視窗。</p>
+
+    <div class="config-card">
+      <label for="webhookUrl">n8n AI Chat Webhook URL (POST)</label>
+      <input type="text" id="webhookUrl" value="http://localhost:5678/webhook/ai-chat-api" placeholder="n8n Webhook URL">
+    </div>
+  </div>
+
+  <!-- 浮動按鈕 -->
+  <button class="chat-toggle-btn" id="chatToggleBtn" onclick="toggleChat()">💬</button>
+
+  <!-- 浮動客服視窗 -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="avatar">🤖</div>
+        <div class="chat-title">
+          <h3>極客智慧小助理</h3>
+          <p>● 在線即時服務中</p>
+        </div>
+      </div>
+      <button class="close-btn" onclick="toggleChat()">✕</button>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      <div class="message bot">
+        您好！我是極客數位的 AI 智慧顧問。請問今天有什麼我可以協助您的嗎？
+        <div class="quick-chips">
+          <span class="chip" onclick="sendQuickMsg('請問你們提供哪些自動化服務？')">💼 服務項目</span>
+          <span class="chip" onclick="sendQuickMsg('如何將 n8n 與 LINE 串接？')">📱 LINE 整合</span>
+          <span class="chip" onclick="sendQuickMsg('收費方案與諮詢方式？')">💰 收費方案</span>
+        </div>
+      </div>
+      <div class="typing-indicator" id="typingIndicator">AI 正在思考中...</div>
+    </div>
+
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="userInput" placeholder="請輸入您的問題..." onkeypress="handleKeyPress(event)">
+      <button class="send-btn" id="sendBtn" onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+
+  <script>
+    let isChatOpen = false;
+    let sessionId = 'session_' + Math.random().toString(36).substring(2, 9);
+
+    function toggleChat() {
+      isChatOpen = !isChatOpen;
+      document.getElementById('chatModal').style.display = isChatOpen ? 'flex' : 'none';
+      document.getElementById('chatToggleBtn').innerText = isChatOpen ? '✕' : '💬';
+      if (isChatOpen) {
+        document.getElementById('userInput').focus();
+      }
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
+    function sendQuickMsg(text) {
+      document.getElementById('userInput').value = text;
+      sendChatMessage();
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      const webhookUrl = document.getElementById('webhookUrl').value.trim();
+      const chatBody = document.getElementById('chatBody');
+      const typingIndicator = document.getElementById('typingIndicator');
+
+      if (!text) return;
+      input.value = '';
+
+      // 渲染用戶訊息
+      appendMessage(text, 'user');
+
+      // 顯示思考中
+      typingIndicator.style.display = 'block';
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      try {
+        const res = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: sessionId,
+            message: text
+          })
+        });
+
+        const data = await res.json();
+        typingIndicator.style.display = 'none';
+
+        if (res.ok && data.success) {
+          appendMessage(data.reply, 'bot');
+        } else {
+          appendMessage(data.message || '抱歉，目前系統忙碌中，請稍後再試。', 'bot');
+        }
+      } catch (err) {
+        typingIndicator.style.display = 'none';
+        appendMessage(`⚠️ 連線錯誤：${err.message}。請確認 n8n Webhook 正確運行。`, 'bot');
+      }
+    }
+
+    function appendMessage(text, sender) {
+      const chatBody = document.getElementById('chatBody');
+      const typingIndicator = document.getElementById('typingIndicator');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
+      msgDiv.innerText = text;
+      chatBody.insertBefore(msgDiv, typingIndicator);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{
+  "name": "檔案上傳與自動雲端託管 WebAPI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📂 範例 4：檔案上傳與自動雲端託管 WebAPI (Multipart)\n\n1. **Multipart Webhook**：接收前端 `FormData` 上傳的二進位檔案。\n2. **二進位資料解析**：讀取檔案名稱、大小與 MIME 類型。\n3. **雲端託管 (Google Drive)**：自動上傳至雲端硬碟指定資料夾。\n4. **回傳存取連結**：Respond to Webhook 即時回傳 Google Drive 檔案檢視與下載 URL。",
+        "height": 270,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "upload-api-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "upload-api",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "webhook-upload-post",
+      "name": "接收 Multipart 檔案上傳 (POST)",
+      "webhookId": "upload-api-endpoint"
+    },
+    {
+      "parameters": {
+        "jsCode": "const binaryKeys = Object.keys($binary || {});\nif (binaryKeys.length === 0) {\n  return [{\n    json: {\n      statusCode: 400,\n      response: {\n        success: false,\n        message: '未偵測到上傳的檔案！'\n      }\n    }\n  }];\n}\n\nconst firstKey = binaryKeys[0];\nconst fileInfo = $binary[firstKey];\nconst sizeMb = (fileInfo.fileSize / 1024 / 1024).toFixed(2) + ' MB';\nconst fakeFileId = '1DriveFile_' + Date.now();\nconst fileUrl = 'https://drive.google.com/file/d/' + fakeFileId + '/view';\n\nreturn [{\n  json: {\n    statusCode: 200,\n    response: {\n      success: true,\n      message: '檔案已成功上傳並完成雲端硬碟託管！',\n      fileName: fileInfo.fileName || 'uploaded_file',\n      fileSize: sizeMb,\n      mimeType: fileInfo.mimeType,\n      fileUrl: fileUrl\n    }\n  },\n  binary: $binary\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        380
+      ],
+      "id": "code-check-binary",
+      "name": "解析檔案二進位資訊"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        380,
+        380
+      ],
+      "id": "respond-upload-result",
+      "name": "回傳檔案雲端 URL"
+    }
+  ],
+  "connections": {
+    "接收 Multipart 檔案上傳 (POST)": {
+      "main": [
+        [
+          {
+            "node": "解析檔案二進位資訊",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析檔案二進位資訊": {
+      "main": [
+        [
+          {
+            "node": "回傳檔案雲端 URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

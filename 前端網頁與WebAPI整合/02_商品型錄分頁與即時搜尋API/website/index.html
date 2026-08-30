@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品型錄與即時搜尋 (n8n WebAPI 後端)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --bg: #0b0f19;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 10% 20%, #1e1b4b 0%, #0b0f19 90%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: #93c5fd;
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .config-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .config-card input {
+      flex: 1;
+      background: rgba(11, 15, 25, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 24px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px 12px 40px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .categories {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cat-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .cat-btn.active, .cat-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .product-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      transition: transform 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .product-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
+
+    .product-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .product-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .product-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 14px;
+    }
+
+    .price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .stock {
+      font-size: 12px;
+      color: #10b981;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 60px;
+      color: var(--text-muted);
+      font-size: 15px;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo-badge">⚡ n8n WebAPI (GET / Query Params)</div>
+      <h1>商品型錄與即時搜尋中心</h1>
+      <p>即時關鍵字防抖搜尋、分類篩選與伺服器端分頁運算</p>
+    </div>
+
+    <!-- Webhook URL 設定 -->
+    <div class="config-card">
+      <span style="font-size: 13px; color: var(--text-muted); white-space: nowrap;">API 端點：</span>
+      <input type="text" id="webhookUrl" value="http://localhost:5678/webhook/catalog-search" placeholder="n8n Webhook URL">
+      <button class="cat-btn active" onclick="loadProducts()">重新載入</button>
+    </div>
+
+    <!-- 搜尋與分類控制列 -->
+    <div class="controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="輸入關鍵字即時搜尋商品 (例如: n8n, 機器人, 向量)..." oninput="handleSearchInput()">
+      </div>
+
+      <div class="categories">
+        <button class="cat-btn active" onclick="filterCategory('all', this)">全部商品</button>
+        <button class="cat-btn" onclick="filterCategory('ai', this)">🤖 AI Agent</button>
+        <button class="cat-btn" onclick="filterCategory('automation', this)">⚡ 自動化流程</button>
+        <button class="cat-btn" onclick="filterCategory('database', this)">🗄️ 雲端資料庫</button>
+      </div>
+    </div>
+
+    <!-- 商品網格 -->
+    <div id="productGrid" class="product-grid">
+      <div class="loading-state">載入商品中...</div>
+    </div>
+
+    <!-- 分頁控制 -->
+    <div class="pagination" id="paginationControls">
+      <button class="page-btn" id="prevBtn" onclick="changePage(-1)">上一頁</button>
+      <span class="page-info" id="pageInfo">第 1 頁 / 共 1 頁</span>
+      <button class="page-btn" id="nextBtn" onclick="changePage(1)">下一頁</button>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    let currentCategory = 'all';
+    let searchQuery = '';
+    let debounceTimer = null;
+
+    function handleSearchInput() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        searchQuery = document.getElementById('searchInput').value.trim();
+        currentPage = 1;
+        loadProducts();
+      }, 300); // 300ms 防抖
+    }
+
+    function filterCategory(cat, el) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      currentPage = 1;
+      loadProducts();
+    }
+
+    function changePage(delta) {
+      currentPage += delta;
+      loadProducts();
+    }
+
+    async function loadProducts() {
+      const webhookUrl = document.getElementById('webhookUrl').value.trim();
+      const grid = document.getElementById('productGrid');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const pageInfo = document.getElementById('pageInfo');
+
+      grid.innerHTML = '<div class="loading-state">正在向 n8n WebAPI 檢索資料...</div>';
+
+      try {
+        const queryParams = new URLSearchParams({
+          search: searchQuery,
+          category: currentCategory,
+          page: currentPage,
+          limit: 6
+        });
+
+        const res = await fetch(`${webhookUrl}?${queryParams.toString()}`);
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          const items = data.data || [];
+          const p = data.pagination || { page: 1, totalPages: 1, totalItems: items.length };
+
+          if (items.length === 0) {
+            grid.innerHTML = '<div class="loading-state">查無符合條件的商品。</div>';
+          } else {
+            grid.innerHTML = items.map(item => `
+              <div class="product-card">
+                <div>
+                  <span class="product-badge">${item.category}</span>
+                  <h3 class="product-title">${item.name}</h3>
+                  <p class="product-desc">${item.description}</p>
+                </div>
+                <div class="product-footer">
+                  <span class="price">$${Number(item.price).toLocaleString()}</span>
+                  <span class="stock">庫存充足 (${item.stock} 件)</span>
+                </div>
+              </div>
+            `).join('');
+          }
+
+          pageInfo.innerText = `第 ${p.page} 頁 / 共 ${p.totalPages || 1} 頁 (共 ${p.totalItems || 0} 筆)`;
+          prevBtn.disabled = p.page <= 1;
+          nextBtn.disabled = p.page >= p.totalPages;
+        } else {
+          grid.innerHTML = `<div class="loading-state" style="color: #ef4444;">❌ 取得資料失敗：${data.message || '未知錯誤'}</div>`;
+        }
+      } catch (err) {
+        grid.innerHTML = `<div class="loading-state" style="color: #ef4444;">⚠️ 連線失敗：${err.message}<br><small>請確認 n8n Webhook 正在監聽 GET /catalog-search</small></div>`;
+      }
+    }
+
+    // 初始化載入
+    window.onload = loadProducts;
+  </script>
+</body>
+</html>

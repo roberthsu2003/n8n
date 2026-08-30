@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購物車結帳與折扣碼計算 (n8n WebAPI 後端)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --bg: #090d16;
+      --card-bg: rgba(22, 27, 46, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 80% 20%, #064e3b 0%, #090d16 80%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: #6ee7b7;
+      margin-bottom: 12px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .config-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .config-card input {
+      flex: 1;
+      background: rgba(9, 13, 22, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .checkout-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .item-info h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .item-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .qty-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .coupon-box {
+      display: flex;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .coupon-box input {
+      flex: 1;
+      background: rgba(9, 13, 22, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      text-transform: uppercase;
+    }
+
+    .coupon-btn {
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .coupon-btn:hover {
+      background: rgba(56, 189, 248, 0.3);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+    }
+
+    .summary-row.total {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .discount-val {
+      color: #10b981;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="email"], input[type="tel"] {
+      width: 100%;
+      background: rgba(9, 13, 22, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .btn-checkout {
+      width: 100%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all 0.2s;
+    }
+
+    .btn-checkout:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-checkout:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result-card {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-card.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo-badge">⚡ n8n WebAPI (POST 結帳防篡改)</div>
+      <h1>極客數位購物車結帳</h1>
+      <p>即時驗證折扣代碼、防篡改金額計算與訂單成立 API</p>
+    </div>
+
+    <!-- Webhook URL 設定 -->
+    <div class="config-card">
+      <span style="font-size: 13px; color: var(--text-muted); white-space: nowrap;">結帳 API 端點：</span>
+      <input type="text" id="webhookUrl" value="http://localhost:5678/webhook/checkout-api" placeholder="n8n Webhook URL">
+    </div>
+
+    <div class="checkout-grid">
+      <!-- 購物車清單 -->
+      <div class="card">
+        <div class="card-title">🛒 購買項目明細</div>
+        
+        <div class="cart-item">
+          <div class="item-info">
+            <h4>n8n 企業自動化私有化部署</h4>
+            <p>單價: $45,000</p>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateQty(0, -1)">-</button>
+            <span id="qty-0">1</span>
+            <button class="qty-btn" onclick="updateQty(0, 1)">+</button>
+          </div>
+        </div>
+
+        <div class="cart-item">
+          <div class="item-info">
+            <h4>AI 向量知識庫 (RAG) 模組</h4>
+            <p>單價: $25,000</p>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateQty(1, -1)">-</button>
+            <span id="qty-1">1</span>
+            <button class="qty-btn" onclick="updateQty(1, 1)">+</button>
+          </div>
+        </div>
+
+        <!-- 折扣碼區塊 -->
+        <div class="coupon-box">
+          <input type="text" id="couponInput" placeholder="輸入優惠券代碼 (試試 VIP88 或 SAVE500)" value="VIP88">
+        </div>
+
+        <div class="summary-row">
+          <span>項目小計</span>
+          <span id="subtotalText">$70,000</span>
+        </div>
+        <div class="summary-row">
+          <span>優惠折抵 (後端計算)</span>
+          <span id="discountText" class="discount-val">待結帳計算</span>
+        </div>
+        <div class="summary-row">
+          <span>營業稅 (5%)</span>
+          <span id="taxText">$3,500</span>
+        </div>
+        <div class="summary-row total">
+          <span>預估應付金額</span>
+          <span id="totalText" style="color: #38bdf8;">$73,500</span>
+        </div>
+      </div>
+
+      <!-- 訂購人資料與結帳 -->
+      <div class="card">
+        <div class="card-title">👤 訂購人與發票資訊</div>
+        <form id="checkoutForm" onsubmit="handleCheckout(event)">
+          <div class="form-group">
+            <label for="custName">訂購人姓名</label>
+            <input type="text" id="custName" value="張偉明" required>
+          </div>
+          <div class="form-group">
+            <label for="custEmail">電子信箱 (接收訂單通知)</label>
+            <input type="email" id="custEmail" value="ming@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="custPhone">聯絡手機</label>
+            <input type="tel" id="custPhone" value="0912-345-678" required>
+          </div>
+
+          <button type="submit" class="btn-checkout" id="submitBtn">立即確認送出訂單</button>
+        </form>
+
+        <div id="resultBox" class="result-card"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      { id: 'prod_1', name: 'n8n 企業自動化私有化部署', price: 45000, qty: 1 },
+      { id: 'prod_2', name: 'AI 向量知識庫 (RAG) 模組', price: 25000, qty: 1 }
+    ];
+
+    function updateQty(index, delta) {
+      products[index].qty = Math.max(0, products[index].qty + delta);
+      document.getElementById(`qty-${index}`).innerText = products[index].qty;
+      calculateLocalSummary();
+    }
+
+    function calculateLocalSummary() {
+      let subtotal = 0;
+      products.forEach(p => { subtotal += p.price * p.qty; });
+      const tax = Math.round(subtotal * 0.05);
+      const total = subtotal + tax;
+
+      document.getElementById('subtotalText').innerText = `$${subtotal.toLocaleString()}`;
+      document.getElementById('taxText').innerText = `$${tax.toLocaleString()}`;
+      document.getElementById('totalText').innerText = `$${total.toLocaleString()}`;
+    }
+
+    async function handleCheckout(e) {
+      e.preventDefault();
+      const webhookUrl = document.getElementById('webhookUrl').value.trim();
+      const couponCode = document.getElementById('couponInput').value.trim();
+      const submitBtn = document.getElementById('submitBtn');
+      const resultBox = document.getElementById('resultBox');
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = '後端驗證與結帳中...';
+      resultBox.style.display = 'none';
+
+      const orderPayload = {
+        customer: {
+          name: document.getElementById('custName').value.trim(),
+          email: document.getElementById('custEmail').value.trim(),
+          phone: document.getElementById('custPhone').value.trim()
+        },
+        items: products.filter(p => p.qty > 0).map(p => ({
+          id: p.id,
+          qty: p.qty
+        })),
+        couponCode: couponCode
+      };
+
+      try {
+        const res = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          resultBox.className = 'result-card success';
+          resultBox.innerHTML = `
+            <strong>🎉 ${data.message}</strong><br>
+            📦 <strong>訂單編號</strong>: <code>${data.orderNumber}</code><br>
+            🎟️ <strong>優惠折抵</strong>: -$${data.receipt.discountAmount.toLocaleString()} (${data.receipt.discountReason})<br>
+            💰 <strong>實付總額</strong>: <strong>$${data.receipt.grandTotal.toLocaleString()}</strong><br>
+            ✉️ 系統已自動將發票收據寄送至您的信箱！
+          `;
+          document.getElementById('discountText').innerText = `-$${data.receipt.discountAmount.toLocaleString()}`;
+          document.getElementById('totalText').innerText = `$${data.receipt.grandTotal.toLocaleString()}`;
+        } else {
+          resultBox.className = 'result-card';
+          resultBox.style.display = 'block';
+          resultBox.style.background = 'rgba(239, 68, 68, 0.15)';
+          resultBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+          resultBox.style.color = '#fca5a5';
+          resultBox.innerHTML = `❌ 結帳失敗：${data.message || '請檢查訂單資訊'}`;
+        }
+      } catch (err) {
+        resultBox.className = 'result-card';
+        resultBox.style.display = 'block';
+        resultBox.style.background = 'rgba(239, 68, 68, 0.15)';
+        resultBox.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+        resultBox.style.color = '#fca5a5';
+        resultBox.innerHTML = `⚠️ 連線錯誤：${err.message}`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = '立即確認送出訂單';
+      }
+    }
+  </script>
+</body>
+</html>

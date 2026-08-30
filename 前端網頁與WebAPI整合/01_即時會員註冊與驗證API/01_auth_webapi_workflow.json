@@ -1,0 +1,106 @@
+{
+  "name": "即時會員註冊與驗證 WebAPI",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🌐 範例 1：即時會員註冊與驗證 WebAPI\n\n1. **Webhook 端點**：接收前端網頁發送的 `POST /auth-api` 請求。\n2. **伺服器端邏輯驗證**：檢查 Email 格式、密碼長度與註冊/登入動作。\n3. **精確回傳 (Respond to Webhook)**：成功時回傳 200 OK 與 Session Token，驗證失敗回傳 400 Bad Request。",
+        "height": 260,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "id": "auth-api-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "auth-api",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        380
+      ],
+      "id": "webhook-auth-api",
+      "name": "接收前端 Auth 請求 (POST)",
+      "webhookId": "auth-api-endpoint"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body || {};\nconst action = body.action || 'login';\nconst email = (body.email || '').trim().toLowerCase();\nconst password = body.password || '';\nconst name = body.name || (email.split('@')[0]);\n\n// 1. 基本資料驗證\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!email || !emailRegex.test(email)) {\n  return [{\n    json: {\n      statusCode: 400,\n      response: {\n        success: false,\n        message: '請輸入有效的電子信箱格式！'\n      }\n    }\n  }];\n}\n\nif (!password || password.length < 6) {\n  return [{\n    json: {\n      statusCode: 400,\n      response: {\n        success: false,\n        message: '密碼長度必須至少為 6 個字元！'\n      }\n    }\n  }];\n}\n\n// 2. 模擬成功產生 Token\nconst token = 'jwt_' + Buffer.from(email + ':' + Date.now()).toString('base64');\n\nif (action === 'register') {\n  return [{\n    json: {\n      statusCode: 200,\n      response: {\n        success: true,\n        message: '會員註冊成功！歡迎加入極客數位。',\n        token: token,\n        user: {\n          name: name,\n          email: email,\n          vipLevel: 'Standard'\n        }\n      }\n    }\n  }];\n} else {\n  return [{\n    json: {\n      statusCode: 200,\n      response: {\n        success: true,\n        message: '登入成功！歡迎回來。',\n        token: token,\n        user: {\n          name: name,\n          email: email,\n          vipLevel: 'Gold'\n        }\n      }\n    }\n  }];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        380
+      ],
+      "id": "code-validate-auth",
+      "name": "伺服器端驗證與 Token 生成"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.response) }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        380
+      ],
+      "id": "respond-to-frontend",
+      "name": "即時回傳 JSON 給前端網頁"
+    }
+  ],
+  "connections": {
+    "接收前端 Auth 請求 (POST)": {
+      "main": [
+        [
+          {
+            "node": "伺服器端驗證與 Token 生成",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "伺服器端驗證與 Token 生成": {
+      "main": [
+        [
+          {
+            "node": "即時回傳 JSON 給前端網頁",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
