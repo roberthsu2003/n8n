@@ -63,18 +63,18 @@
 
 ---
 
-## 🔗 [整合 Google 服務](./Google_Cloud_api服務/README.md)
+## 🔗 [整合 Google 服務（Google Workspace 自動化）](./Google_Cloud_api服務/README.md)
 
-提供 Google Drive、Gmail、Google Sheets、Google Docs 與 Google 表單等服務的整合實作範例。
+深度整合 Google Drive、Gmail、Google Sheets、Google Docs 與 Google 表單，提供由淺至深 8 大實作範例：
 
-**包含範例**：
-- 儲存檔案至 Google Drive：學習 Google Drive API 整合與檔案上傳
-- 自動寄送 Gmail：掌握排程觸發與郵件發送
-- 寄送一則笑話：進階的多 API 串接技巧
-- 學生體驗回饋問卷範本：完整的表單處理自動化流程
-- 訂便當系統：表單觸發器與 Google Sheets 資料寫入
-- 取得台北市 YouBike 資料：動態檔案搜尋、條件分支與進階 Sheets 歸檔
-- **動態文件生成與 PDF 自動化**：使用 Google Docs `{{placeholder}}` 佔位符範本替換、自動轉存 PDF 並透過 Gmail 寄出附件
+- **自動備份檔案至 Google Drive**：下載開放資料 CSV，轉換 Excel 並自動上傳至雲端硬碟備份
+- **每日早晨 AI 晨報與 Gmail 自動發信**：排程觸發取得每日金句，排版 HTML 晨報並透過 Gmail 發送
+- **多來源 API 整合與幽默笑話電子報**：並行請求名言與笑話 API，合併資料並寄送雙語電子報
+- **辦公室線上訂便當與 Google Sheets 自動歸檔**：線上網頁表單訂餐，自動計算金額並逐筆追加寫入試算表
+- **學生體驗回饋問卷與滿意度自動告警通知**：監聽 Google 表單回覆，低分客訴即時告警、高分寄送感謝信
+- **臺北市 YouBike 2.0 站點監控與動態試算表歸檔**：空車警戒過濾，智慧搜尋雲端硬碟並動態建立分頁
+- **Google Docs 範本動態替換與 PDF 結業證書自動發信**：Docs 範本 `{{placeholder}}` 批次文字替換，匯出 PDF 附件自動寄出
+- **Google 試算表整合 AI 智慧客服與自動郵件回覆**：試算表登記新諮詢，AI 自動撰寫專業回信並寄出，回填處理狀態
 
 ---
 

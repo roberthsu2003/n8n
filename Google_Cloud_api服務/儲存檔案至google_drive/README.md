@@ -1,20 +1,29 @@
-# Google Cloud API 服務
-## 儲存檔案至 Google Drive
+# 整合 Google 服務
+## 範例 1：自動備份檔案至 Google Drive
 
 ### 📚 工作流程說明
 
-這個 n8n 工作流程示範如何從網路下載 CSV 檔案、轉換為 Excel 格式，並自動上傳到 Google Drive 指定的資料夾。這是一個完整的檔案處理和雲端儲存自動化流程，展示了如何整合多個服務來完成資料處理任務。
+這個 n8n 工作流程示範如何從政府開放資料平台下載 CSV 檔案、轉換為 Excel 格式，並自動上傳至 Google Drive 指定的資料夾。這是一個完整的檔案處理和雲端儲存自動化流程，展示了如何整合多個服務來完成資料處理任務。
 
-**資料來源**：臺北市就業服務處求職求才職缺資訊  
-**儲存位置**：Google Drive (My Drive/n8n 資料夾)
+---
+
+### 流程架構圖
+
+```mermaid
+flowchart LR
+    A["▶️ 手動觸發 / 定時排程"] --> B["⬇️ 下載開放資料 CSV (HTTP Request)"]
+    B --> C["📥 解析 CSV 資料 (Extract from File)"]
+    C --> D["📊 轉換為 Excel 格式 (Convert to File)"]
+    D --> E["📁 上傳至 Google Drive 指定資料夾"]
+```
+
+---
 
 ### 工作流程樣版下載
 
-[儲存檔案至googe_drive.json](./儲存檔案至googe_drive.json)
+- [📥 儲存檔案至 Google Drive 工作流程樣版 (儲存檔案至googe_drive.json)](./儲存檔案至googe_drive.json)
 
-### 預覽圖
-
-![儲存檔案至Google Drive](./images/儲存檔案至google_drive.png)
+---
 
 ---
 

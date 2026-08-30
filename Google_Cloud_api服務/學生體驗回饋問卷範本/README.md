@@ -1,18 +1,30 @@
-# Google_Cloud_api服務
-## 學生體驗回饋問卷範本
+# 整合 Google 服務
+## 範例 5：學生體驗回饋問卷與滿意度自動告警通知
 
 ### 📚 工作流程說明
 
-這個工作流程展示了如何自動處理學生體驗回饋問卷。當學生填寫 Google Form 問卷後，資料會自動寫入 Google Sheet。n8n 會監控該 Google Sheet，當偵測到新的回饋且「建議」欄位有內容時，會自動透過 Gmail 發送通知給相關人員。
+這個工作流程展示了如何自動處理學生體驗回饋問卷。當學生填寫 Google Form 問卷後，資料會自動寫入 Google 試算表。n8n 會監控該 Google Sheet，當偵測到新的回饋且「建議」或滿意度需要追蹤時，會自動透過 Gmail 發送通知與關懷郵件。
 
+---
 
-### 影片和template
+### 流程架構圖
 
-[學生體驗回饋問卷範本-json檔](./google表單_google_sheet_學生體驗回饋問卷範本.json)
+```mermaid
+flowchart LR
+    A["📝 填寫 Google Form 問卷"] --> B["📊 資料寫入 Google Sheet"]
+    B --> C["⚡ Google Sheets Trigger (監聽新回覆)"]
+    C --> D{"🔍 檢查是否包含建議或低分 (IF 節點)"}
+    D -->|"是"| E["✉️ Gmail (發送主管改善告警信)"]
+    D -->|"否"| F["⏹️ 略過無需通知"]
+```
 
-#### 🔄 工作流程圖
+---
 
-![](./images/學生體驗回饋問卷範本.png)
+### 工作流程樣版下載
+
+- [📥 學生體驗回饋問卷範本工作流程樣版 (google表單_google_sheet_學生體驗回饋問卷範本.json)](./google表單_google_sheet_學生體驗回饋問卷範本.json)
+
+---
 
 
 

@@ -1,19 +1,30 @@
-# Google_Cloud_api服務
-## 寄送一則笑話
+# 整合 Google 服務
+## 範例 3：多來源 API 整合與幽默笑話電子報
 
 ### 📚 工作流程說明
 
-這個 n8n 工作流程會在排程觸發後依序呼叫兩個外部 API：先取得勵志引言，再取得單句程式笑話。透過 Set 節點整合兩筆資料後，最後由 Gmail 節點寄送一封包含作者、類別與笑話內容的郵件，讓收件人每天收到一則輕鬆的笑話。
+這個 n8n 工作流程會在排程觸發後呼叫多個外部 API：取得勵志引言與程式笑話，透過 Set / Code 節點整合兩筆資料後，最後由 Gmail 節點寄送一封包含作者、類別與笑話內容的電子報，讓收件人每天收到輕鬆有趣的內容。
 
-### 影片和template
+---
 
-[youtube](https://www.youtube.com/watch?v=LdE0KnhRtsY&t=5s)
+### 流程架構圖
 
-[寄送一個笑話-樣板json檔](./寄送一個笑話.json)
+```mermaid
+flowchart LR
+    A["⏰ 定時排程觸發 (Schedule Trigger)"] --> B["🌐 取得引言 (Quotes API)"]
+    B --> C["😄 取得笑話 (Joke API)"]
+    C --> D["📝 合併資料與美化排版 (Set 節點)"]
+    D --> E["✉️ Gmail (寄出幽默電子報)"]
+```
 
-### 預覽圖
+---
 
-![](./images/pic3.png)
+### 工作流程樣版下載
+
+- [📥 寄送一個笑話工作流程樣版 (寄送一個笑話.json)](./寄送一個笑話.json)
+- 📺 [YouTube 參考教學影片](https://www.youtube.com/watch?v=LdE0KnhRtsY&t=5s)
+
+---
 
 
 

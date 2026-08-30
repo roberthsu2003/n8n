@@ -1,19 +1,29 @@
-# Google_Cloud_api服務
-## 寄送Gmail
+# 整合 Google 服務
+## 範例 2：每日早晨 AI 晨報與 Gmail 自動發信
 
 ### 📚 工作流程說明
 
-這個 n8n 工作流程示範如何自動從網際網路上的 API 取得隨機引言（Quote），並透過 Gmail 自動寄送給指定的收件人。工作流程會在每天指定的時間自動執行，讓您每天都能收到勵志引言。
+這個 n8n 工作流程示範如何自動從網際網路上的 API 取得隨機引言（Quote），並透過 Gmail 自動寄送給指定的收件人。工作流程會在每天指定的時間自動執行，讓您每天都能收到勵志引言與晨報通知。
 
-### 影片和template
+---
 
-[youtube](https://www.youtube.com/watch?v=5CBUXMO_L2Y&t=5s)
+### 流程架構圖
 
-[自動寄送gmail-樣版json檔](./自動寄送gmail.json)
+```mermaid
+flowchart LR
+    A["⏰ 定時排程觸發 (Schedule Trigger)"] --> B["🌐 抓取每日名言 (HTTP Request)"]
+    B --> C["📝 格式化 HTML 晨報郵件 (Set 節點)"]
+    C --> D["✉️ Gmail (自動寄出晨報)"]
+```
 
-### 預覽圖
+---
 
-![](./images/pic2.png)
+### 工作流程樣版下載
+
+- [📥 自動寄送 Gmail 工作流程樣版 (自動寄送gmail.json)](./自動寄送gmail.json)
+- 📺 [YouTube 參考教學影片](https://www.youtube.com/watch?v=5CBUXMO_L2Y&t=5s)
+
+---
 
 
 

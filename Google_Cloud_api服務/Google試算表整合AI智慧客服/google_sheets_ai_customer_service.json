@@ -1,0 +1,264 @@
+{
+  "name": "Google 試算表整合 AI 智慧客服與自動郵件回覆",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🤖 範例 8：Google 試算表整合 AI 智慧客服\n\n1. **Google Sheets 觸發/讀取**：偵測新登記的客戶諮詢（姓名、信箱、問題）。\n2. **AI Agent 核心**：自動分析問題意圖，生成專業親切的繁體中文回信草稿。\n3. **Gmail 發送**：自動寄送客製化回覆郵件給顧客。\n4. **Google Sheets 更新**：回填「已由 AI 回覆」狀態與回信紀錄。",
+        "height": 250,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        120
+      ],
+      "id": "sheets-ai-note",
+      "name": "流程說明"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "客戶諮詢登記表",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        380
+      ],
+      "id": "sheets-new-row-trigger",
+      "name": "Google Sheets 新增諮詢觸發器",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-name",
+              "name": "customerName",
+              "value": "={{ $json['顧客姓名'] || $json.name || '親愛的顧客' }}",
+              "type": "string"
+            },
+            {
+              "id": "set-email",
+              "name": "customerEmail",
+              "value": "={{ $json['電子信箱'] || $json.email || 'customer@example.com' }}",
+              "type": "string"
+            },
+            {
+              "id": "set-subject",
+              "name": "inquirySubject",
+              "value": "={{ $json['諮詢主題'] || $json.subject || '產品使用諮詢' }}",
+              "type": "string"
+            },
+            {
+              "id": "set-content",
+              "name": "inquiryContent",
+              "value": "={{ $json['問題內容'] || $json.message || '請問貴公司的企業自動化培訓方案如何計費？有提供線上遠端教學嗎？' }}",
+              "type": "string"
+            },
+            {
+              "id": "set-row-number",
+              "name": "rowNumber",
+              "value": "={{ $json.row_number }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        100,
+        380
+      ],
+      "id": "extract-inquiry-fields",
+      "name": "提取諮詢資料"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=顧客姓名：{{ $json.customerName }}\n諮詢主題：{{ $json.inquirySubject }}\n諮詢問題：{{ $json.inquiryContent }}\n\n請以繁體中文撰寫一封親切、專業且條理分明的客服回覆 Email：\n1. 開頭尊稱顧客（如：{{ $json.customerName }} 您好）。\n2. 針對問題給予清晰、具建設性的專業解答與指引。\n3. 結尾附帶客服簽名檔（n8n 自動化客服團隊）。",
+        "options": {
+          "systemMessage": "你是一位專業的 Google Workspace 智慧客服專家。請使用流暢優雅的台灣繁體中文撰寫郵件回覆，排版需結構化，適度使用條列式重點。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        360,
+        380
+      ],
+      "id": "ai-customer-service-agent",
+      "name": "AI 智慧客服代理"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        360,
+        600
+      ],
+      "id": "sheets-ai-openai-model",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('提取諮詢資料').item.json.customerEmail }}",
+        "subject": "=【客服回覆】Re: {{ $('提取諮詢資料').item.json.inquirySubject }}",
+        "emailType": "html",
+        "message": "=<div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n<p>{{ $json.output.replace(/\\n/g, '<br>') }}</p>\n<hr style=\"border: none; border-top: 1px solid #eee; margin: 20px 0;\">\n<p style=\"font-size: 12px; color: #888;\">此郵件由 n8n AI 智慧客服系統自動產生並寄出。</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        380
+      ],
+      "id": "send-gmail-reply",
+      "name": "Gmail 自動寄出回信",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SPREADSHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "客戶諮詢登記表",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "處理狀態": "已由 AI 回覆",
+            "AI回信摘要": "={{ $('AI 智慧客服代理').item.json.output.substring(0, 100) }}...",
+            "回覆時間": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        380
+      ],
+      "id": "update-sheet-status",
+      "name": "Google Sheets 回填處理狀態",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Google Sheets 新增諮詢觸發器": {
+      "main": [
+        [
+          {
+            "node": "提取諮詢資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取諮詢資料": {
+      "main": [
+        [
+          {
+            "node": "AI 智慧客服代理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 智慧客服代理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 智慧客服代理": {
+      "main": [
+        [
+          {
+            "node": "Gmail 自動寄出回信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail 自動寄出回信": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets 回填處理狀態",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
