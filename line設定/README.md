@@ -118,16 +118,26 @@
 
 ### 2. 在 HTTP Request 節點呼叫 LINE API
 
+> [!IMPORTANT]
+> **觀念釐清：Webhook 回應 200 OK vs 回覆使用者訊息**
+> - **Webhook 回傳 200 OK**：僅代表 n8n「已成功收到事件，請 LINE 伺服器不要重複發送」，**並不會**在 LINE 對話視窗中顯示任何內容給使用者。
+> - **回覆使用者訊息**：必須在後續流程中透過 **HTTP Request 節點** 呼叫 LINE Messaging API（Reply 或 Push）來發送訊息。
+> 
+> **標準對話工作流程**：
+> `LINE Webhook (接收訊息)` ➔ `即時回傳 200 OK` ➔ `解析訊息 / AI 或業務邏輯處理` ➔ `HTTP Request 呼叫 LINE Reply API`
+
 所有呼叫 LINE API 的 HTTP Request 節點都可以共用此 Header Auth 憑證，n8n 會自動在請求標頭帶上 `Authorization: Bearer <Token>`。
 
 #### (1) 回覆訊息（Reply Message）
+用於回應使用者觸發的事件（需使用 Webhook 傳入的 `replyToken`）。
+
 - **Method**：`POST`
 - **URL**：`https://api.line.me/v2/bot/message/reply`
 - **Authentication**：選擇 **Predefined Credential Type** > **Header Auth**（選取剛建立的憑證）
 - **Body Parameters (JSON)**：
   ```json
   {
-    "replyToken": "從 Webhook 接收到的 replyToken",
+    "replyToken": "從 Webhook 接收到的 replyToken (如 {{ $json.body.events[0].replyToken }})",
     "messages": [
       {
         "type": "text",
@@ -136,6 +146,11 @@
     ]
   }
   ```
+
+> [!WARNING]
+> **`replyToken` 重要限制：**
+> 1. **單次有效**：每個 `replyToken` 只能使用一次，回覆後立即失效。
+> 2. **時效限制**：必須在 LINE 規定的有效時間內（約 1 分鐘內）發送回覆，逾時會失敗。若為長時間運行的任務，建議改用下方的 **Push Message**。
 
 #### (2) 主動推播訊息（Push Message）
 - **Method**：`POST`
