@@ -104,28 +104,44 @@
 
 ---
 
-### 🤖 五、AI 智慧代理與本機/雲端模型
+### 🛡️ 五、系統維運與備份
 
-#### ⚙️ 13. [n8n MCP (Model Context Protocol) 設定指南](../n8n_mcp/README.md)
+#### 💾 13. [n8n 的備份方式](../n8n的備份方式/README.md)
+**重點內容**：
+- Docker Volume 手動備份與匯出工作流 JSON
+- 透過 n8n 內建排程工作流實現全自動定時備份
+- 資料庫與憑證之異地備份與災害復原流程
+
+---
+
+### 🤖 六、AI 智慧代理與本機/雲端模型
+
+#### ⚙️ 14. [n8n MCP (Model Context Protocol) 設定指南](../n8n_mcp/README.md)
 **重點內容**：
 - 將 n8n 工作流轉變為 AI 助手的全功能工具箱（Tools）
 - **Claude.ai 官方 Connector**：免寫程式碼、瀏覽器 OAuth 一鍵授權直連
 - **OpenCode 橋樑連線**：支援 ChatGPT / OpenAI 帳號登入與全域 CLI 管理
 - **Google Antigravity 專案協作**：Gemini 智慧代理深度整合與 Bearer Token 設定
 
-#### 🦙 14. [Ollama 安裝與 Gemma 4 雲端模型整合](../ollama安裝/README.md)
+#### 🦙 15. [Ollama 安裝與 Gemma 4 雲端模型整合](../ollama安裝/README.md)
 **重點內容**：
 - Windows、macOS 與 Linux 安裝指南
 - 登入 Ollama 帳號並建立 API Key
 - 使用 **`gemma4:cloud`** 雲端模型（免顯卡、不佔本地記憶體）
 - Docker 容器內部連線與 n8n Ollama Chat Model 憑證設定
 
----
-
-### 🛡️ 六、系統維運與備份
-
-#### 💾 15. [n8n 的備份方式](../n8n的備份方式/README.md)
+#### 🟢 16. [NVIDIA NIM 微服務整合指南 (政府資安合規/歐美模型)](../nvidia_nim/README.md)
 **重點內容**：
-- Docker Volume 手動備份與匯出工作流 JSON
-- 透過 n8n 內建排程工作流實現全自動定時備份
-- 資料庫與憑證之異地備份與災害復原流程
+- 公務機關資安合規：排除陸資模型，全數採用歐美頂級模型
+- NVIDIA API Catalog 註冊與 1,000 免費 Credits / Free Endpoints 獲取
+- 推薦精選模型：Nemotron-3.5-Lightning-30B、Muse-Glimmer-30B、Nemotron-3-Ultra-550B、Laguna-XS-2.1
+- n8n 透過 OpenAI Chat Model 節點與自訂 Base URL 串接
+
+#### 🌐 17. [OpenRouter 多模型聚合平台整合 (資安合規與多模型調用)](../openrouter/README.md)
+**重點內容**：
+- 單一 OpenAI 相容端點調用 Meta Llama 3.3、Google Gemini 2.0、Mistral Large 等歐美模型
+- 落實 Zero Data Retention (ZDR 零數據留存) 隱私保護與白名單供應商過濾
+- 免費/低成本模型快速切換（如 Llama-3.3-70B:free）
+- n8n OpenAI Chat Model 節點憑證與 Base URL 設定
+
+
