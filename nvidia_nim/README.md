@@ -118,14 +118,20 @@
 
 NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用內建的 **OpenAI Chat Model** 或 **OpenAI Node** 即可直接連線！
 
-### 步驟一：建立 OpenAI Credential 憑證
+### 步驟一：建立 OpenAI Credential 憑證（填入 Base URL）
 
 1. 開啟 n8n 管理後台，點擊左側導覽列的 **Credentials** ➔ **Add Credential**。
-2. 搜尋並選擇 **OpenAI API**。
+2. 搜尋並選擇 **OpenAI API**（或 OpenAI account）。
 3. 填入以下連線資訊：
    - **Credential Name**：`NVIDIA NIM API`（自訂便於識別的名稱）
    - **API Key**：貼上以 `nvapi-...` 開頭的 NVIDIA API Key。
+   - **Base URL（關鍵設定）**：在下方 **Base URL** 欄位填入：
+     ```text
+     https://integrate.api.nvidia.com/v1
+     ```
 4. 點擊 **Save** 儲存憑證。
+   - 若設定正確，上方會出現綠色提示 **`Connection tested successfully`**（連線測試成功）！
+   - 💡 **好處**：直接在憑證中設定 Base URL，之後在工作流程中使用 **OpenAI Chat Model** 節點時，模型選單切換至 **`From list`** 就會自動動態載入所有 NVIDIA 模型清單！
 
 ---
 
@@ -134,13 +140,16 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
 1. 在工作流程中新增 **AI Agent** 或 **Basic LLM Chain** 節點。
 2. 在 Model 連接端點點擊 `+` 號，搜尋並新增 **OpenAI Chat Model** 節點。
 3. 節點參數配置如下：
-   - **Credential for OpenAI**：選擇剛剛建立的 `NVIDIA NIM API`。
-   - **Model**：選擇 `Custom Model Name`，手動輸入模型 ID（例如 `nvidia/nemotron-3.5-lightning-30b-a3b` 或 `meta/llama-3.3-70b-instruct`）。
-   - **Base URL (重要)**：展開下方 **Options** ➔ 勾選 **Base URL**，輸入：
+   - **Credential**：選擇剛剛建立的 `NVIDIA NIM API`（或已填入 `nvapi-...` 的 OpenAI 憑證）。
+   - **Model（選擇 From list）**：
+     - 左側下拉選單請切換為 **`From list`**。
+     - 右側模型選單中即可直接搜尋或選擇想要的模型（例如 **`nvidia/nemotron-3.5-lightning-30b-a3b`** 或 **`meta/llama-3.3-70b-instruct`**）。
+   - **Base URL (關鍵設定)**：展開下方 **Options** ➔ 點擊 **Add Option** ➔ 勾選 **Base URL**，輸入：
      ```text
      https://integrate.api.nvidia.com/v1
      ```
-   - **Temperature**：建議設定為 `0.2` ~ `0.7`（公文處理與格式轉換建議 `0.2`，創意生成建議 `0.7`）。
+   - **Maximum Number of Tokens**：可選設定（建議 `1024` ~ `2048`）。
+   - **Sampling Temperature**：建議設定為 `0.5`（公文處理與格式轉換建議 `0.2`，創意生成建議 `0.7`）。
 
 > [!TIP]
 > **⏳ 課堂實作提醒：Free Endpoint 回應速度較慢，請耐心等待！**  

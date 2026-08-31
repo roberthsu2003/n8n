@@ -65,14 +65,19 @@
 
 OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **OpenAI Chat Model** 節點並設定自訂 Base URL 即可直接連線。
 
-### 步驟一：建立 OpenAI Credential 憑證
+### 步驟一：建立 OpenAI Credential 憑證（填入 Base URL）
 
 1. 開啟 n8n 管理後台，點選左側 **Credentials** ➔ **Add Credential**。
-2. 搜尋並選取 **OpenAI API**。
+2. 搜尋並選取 **OpenAI API**（或 OpenAI account）。
 3. 填入設定：
-   - **Credential Name**：`OpenRouter API`
+   - **Credential Name**：`OpenRouter API`（自訂便於識別的名稱）
    - **API Key**：貼上以 `sk-or-v1-...` 開頭的 OpenRouter API Key。
+   - **Base URL（關鍵設定）**：在下方 **Base URL** 欄位填入：
+     ```text
+     https://openrouter.ai/api/v1
+     ```
 4. 點擊 **Save** 完成儲存。
+   - 上方會自動進行連線測試並顯示綠色 **`Connection tested successfully`**！
 
 ---
 
@@ -81,13 +86,15 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 1. 在工作流中新增 **AI Agent**、**AI Chat** 或 **Basic LLM Chain** 節點。
 2. 在 Model 輸入點點擊 `+` 號，新增 **OpenAI Chat Model** 節點。
 3. 節點參數配置如下：
-   - **Credential for OpenAI**：選擇剛剛建立的 `OpenRouter API`。
-   - **Model**：選擇 `Custom Model Name`，輸入完整的 Model ID（例如 `meta-llama/llama-3.3-70b-instruct` 或 `google/gemini-2.0-flash-001`）。
-   - **Base URL (關鍵設定)**：展開下方 **Options** ➔ 勾選 **Base URL**，輸入：
+   - **Credential**：選擇剛剛建立的 `OpenRouter API`。
+   - **Model（選擇 From list）**：
+     - 左側下拉選單請切換為 **`From list`**。
+     - 右側模型選單中可直接搜尋或選擇模型（例如 **`meta-llama/llama-3.3-70b-instruct`** 或 **`google/gemini-2.0-flash-001`**）。
+   - **Base URL (關鍵設定)**：展開下方 **Options** ➔ 點擊 **Add Option** ➔ 勾選 **Base URL**，輸入：
      ```text
      https://openrouter.ai/api/v1
      ```
-   - **Temperature**：公務分析與法規諮詢建議設為 `0.2`；一般問答建議設為 `0.7`。
+   - **Sampling Temperature**：公務分析與法規諮詢建議設為 `0.2`；一般問答建議設為 `0.7`。
 
 ### 🚀 一鍵複製測試工作流 (Workflow JSON)
 
