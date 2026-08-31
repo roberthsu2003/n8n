@@ -190,7 +190,7 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
 
 ```json
 {
-  "name": "NVIDIA NIM 測試工作流",
+  "name": "NVIDIA-NIM-Test-Workflow",
   "nodes": [
     {
       "parameters": {
@@ -311,4 +311,11 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
   1. 請學員測試時**保持耐心等待 5 ~ 15 秒**，看到右上方旋轉動畫代表正在生成中。
   2. 請勿因暫時未回傳而連續點擊多次，否則容易堆疊排隊時間或達到 40 RPM 上限。
   3. 若追求極致秒回，課堂上亦可同時搭配 [OpenRouter](./../openrouter/README.md) 的極速輕量模型（如 `google/gemini-2.0-flash-001` 或 `meta-llama/llama-3.3-70b-instruct`）進行交叉對比體驗！
+
+### Q5：出現 `Cannot convert argument to a ByteString because the character at index...` 錯誤？
+- **原因**：n8n 底層的 LangChain / Node.js `fetch` 在發送 API 請求時，會將 **工作流程名稱（Workflow Name）** 放入 HTTP Header。由於 Header 只接受 ASCII（0~255），若 **工作流程名稱中包含中文（如「測試」的「測」字 Unicode 為 28204 > 255）**，就會引發此 ByteString 轉換錯誤。
+- **解決方式**：
+  1. 點擊 n8n 左上角的工作流程名稱，改為 **純英文或數字**（例如改為 `NVIDIA-NIM-Test` 或 `My-AI-Agent`）。
+  2. 點擊右上角 **Save** 儲存後重新執行測試即可！
+
 

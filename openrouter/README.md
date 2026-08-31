@@ -130,7 +130,7 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 
 ```json
 {
-  "name": "OpenRouter 測試工作流",
+  "name": "OpenRouter-Test-Workflow",
   "nodes": [
     {
       "parameters": {
@@ -240,3 +240,9 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 
 ### Q3：模型名稱格式如何確認？
 - **解決方式**：請直接至 [OpenRouter Models 瀏覽頁面](https://openrouter.ai/models) 搜尋模型，點擊右上角複製正確的完整 Model ID（例如 `mistralai/mistral-large-2411`，包含團隊前綴斜線）。
+
+### Q4：出現 `Cannot convert argument to a ByteString because the character at index...` 錯誤？
+- **原因**：n8n 底層的 LangChain / Node.js `fetch` 在向 API 發送請求時，會自動將 **工作流程名稱（Workflow Name）** 放入 HTTP Request Header 中。由於 HTTP Header 規範僅接受 ASCII 字元（編碼 0~255），若您的 **工作流程名稱包含中文（例如「測試」的「測」Unicode 為 28204 > 255）**，就會引發此 ByteString 轉換錯誤。
+- **解決方式**：
+  1. 點擊 n8n 左上角的工作流程名稱，將其重新命名為 **純英文或數字**（例如改為 `OpenRouter-Test` 或 `My-AI-Workflow`）。
+  2. 點擊右上角 **Save** 儲存工作流程後再次執行測試，即可完美解決！

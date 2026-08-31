@@ -1,5 +1,5 @@
 {
-  "name": "NVIDIA NIM 測試工作流",
+  "name": "NVIDIA-NIM-Test-Workflow",
   "nodes": [
     {
       "parameters": {
