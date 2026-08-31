@@ -21,10 +21,11 @@
 
 - [1. 適合政府機關之非中國推薦模型清單](#1-適合政府機關之非中國推薦模型清單)
 - [2. 註冊 OpenRouter 帳號與取得 API Key](#2-註冊-openrouter-帳號與取得-api-key)
-- [3. 在 n8n 中串接 OpenRouter](#3-在-n8n-中串接-openrouter)
-  - [步驟一：建立 OpenAI Credential 憑證](#步驟一建立-openai-credential-憑證)
+- [3. API 終端機連線驗證 (cURL)](#3-api-終端機連線驗證-curl)
+- [4. 在 n8n 中串接 OpenRouter](#4-在-n8n-中串接-openrouter)
+  - [步驟一：建立 OpenAI Credential 憑證（填入 Base URL）](#步驟一建立-openai-credential-憑證填入-base-url)
   - [步驟二：在工作流中配置 OpenAI Chat Model 節點](#步驟二在工作流中配置-openai-chat-model-節點)
-- [4. API 終端機連線驗證 (cURL)](#4-api-終端機連線驗證-curl)
+  - [一鍵複製測試工作流 (Workflow JSON)](#-一鍵複製測試工作流-workflow-json)
 - [5. 常見問題與排錯指南 (FAQ)](#5-常見問題與排錯指南-faq)
 
 ---
@@ -61,7 +62,31 @@
 
 ---
 
-## 3. 在 n8n 中串接 OpenRouter
+## 3. API 終端機連線驗證 (cURL)
+
+在終端機中執行以下指令，快速測試 OpenRouter 連線與模型回覆（請替換 `YOUR_OPENROUTER_API_KEY`）：
+
+```bash
+curl -X POST "https://openrouter.ai/api/v1/chat/completions" \
+  -H "Authorization: Bearer YOUR_OPENROUTER_API_KEY" \
+  -H "HTTP-Referer: https://n8n.io" \
+  -H "X-Title: n8n Workflow" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "meta-llama/llama-3.3-70b-instruct",
+    "messages": [
+      {
+        "role": "user",
+        "content": "請以繁體中文說明公務機關導入自動化工作流的三大效益。"
+      }
+    ],
+    "temperature": 0.3
+  }'
+```
+
+---
+
+## 4. 在 n8n 中串接 OpenRouter
 
 OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **OpenAI Chat Model** 節點並設定自訂 Base URL 即可直接連線。
 
@@ -201,30 +226,6 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 ```
 
 </details>
-
----
-
-## 4. API 終端機連線驗證 (cURL)
-
-在終端機中執行以下指令，快速測試 OpenRouter 連線與模型回覆（請替換 `YOUR_OPENROUTER_API_KEY`）：
-
-```bash
-curl -X POST "https://openrouter.ai/api/v1/chat/completions" \
-  -H "Authorization: Bearer YOUR_OPENROUTER_API_KEY" \
-  -H "HTTP-Referer: https://n8n.io" \
-  -H "X-Title: n8n Workflow" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "meta-llama/llama-3.3-70b-instruct",
-    "messages": [
-      {
-        "role": "user",
-        "content": "請以繁體中文說明公務機關導入自動化工作流的三大效益。"
-      }
-    ],
-    "temperature": 0.3
-  }'
-```
 
 ---
 

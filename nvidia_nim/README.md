@@ -25,10 +25,11 @@
   - [沒複製到或忘記 API Key 該怎麼辦？（官方標準解法）](#-沒複製到或忘記-api-key-該怎麼辦官方標準解法)
   - [什麼是 RPM（API Rate Limit 速率限制）？](#️-什麼是-rpmapi-rate-limit-速率限制)
 - [2. 適合政府機關之非中國推薦模型清單](#2-適合政府機關之非中國推薦模型清單)
-- [3. 在 n8n 中串接 NVIDIA NIM 模型](#3-在-n8n-中串接-nvidia-nim-模型)
-  - [步驟一：建立 OpenAI Credential 憑證](#步驟一建立-openai-credential-憑證)
+- [3. API 終端機連線驗證 (cURL)](#3-api-終端機連線驗證-curl)
+- [4. 在 n8n 中串接 NVIDIA NIM 模型](#4-在-n8n-中串接-nvidia-nim-模型)
+  - [步驟一：建立 OpenAI Credential 憑證（填入 Base URL）](#步驟一建立-openai-credential-憑證填入-base-url)
   - [步驟二：在工作流中加入 OpenAI Chat Model 節點](#步驟二在工作流中加入-openai-chat-model-節點)
-- [4. API 終端機連線驗證 (cURL)](#4-api-終端機連線驗證-curl)
+  - [一鍵複製測試工作流 (Workflow JSON)](#-一鍵複製測試工作流-workflow-json)
 - [5. 常見問題與排錯指南 (FAQ)](#5-常見問題與排錯指南-faq)
 
 ---
@@ -114,7 +115,30 @@
 
 ---
 
-## 3. 在 n8n 中串接 NVIDIA NIM 模型
+## 3. API 終端機連線驗證 (cURL)
+
+在進入 n8n 設定前，建議先在終端機中快速驗證您的 NVIDIA API Key 與模型是否能正常連線（請將 `YOUR_NVIDIA_API_KEY` 替換為您的金鑰）：
+
+```bash
+curl -X POST "https://integrate.api.nvidia.com/v1/chat/completions" \
+  -H "Authorization: Bearer YOUR_NVIDIA_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "請用繁體中文以公務簡報風格介紹你自己。"
+      }
+    ],
+    "temperature": 0.5,
+    "max_tokens": 512
+  }'
+```
+
+---
+
+## 4. 在 n8n 中串接 NVIDIA NIM 模型
 
 NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用內建的 **OpenAI Chat Model** 或 **OpenAI Node** 即可直接連線！
 
@@ -264,27 +288,6 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
 </details>
 
 ---
-
-## 4. API 終端機連線驗證 (cURL)
-
-若要在本機終端機快速驗證 NVIDIA NIM API Key 與模型是否正常運作，可複製並執行以下指令（請將 `YOUR_NVIDIA_API_KEY` 替換為您的金鑰）：
-
-```bash
-curl -X POST "https://integrate.api.nvidia.com/v1/chat/completions" \
-  -H "Authorization: Bearer YOUR_NVIDIA_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
-    "messages": [
-      {
-        "role": "user",
-        "content": "請用繁體中文以公務簡報風格介紹你自己。"
-      }
-    ],
-    "temperature": 0.5,
-    "max_tokens": 512
-  }'
-```
 
 ---
 
