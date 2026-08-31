@@ -142,6 +142,12 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
      ```
    - **Temperature**：建議設定為 `0.2` ~ `0.7`（公文處理與格式轉換建議 `0.2`，創意生成建議 `0.7`）。
 
+> [!TIP]
+> **⏳ 課堂實作提醒：Free Endpoint 回應速度較慢，請耐心等待！**  
+> 由於 [build.nvidia.com](https://build.nvidia.com/) 上的 **Free Endpoints** 為全球公用的共享雲端推論叢集，尖峰時段會有排隊佇列與首字生成延遲（TTFT），在 n8n 點擊 **Test step** 或執行工作流時：
+> - 節點通常需要 **5 ~ 15 秒（甚至更久）** 的運算與回傳時間，此屬正常現象。
+> - ⚠️ **請提醒學員「耐心等待節點轉圈完成」，切勿因等待而連續狂按測試或重複送出**，以免塞車或觸發 40 RPM 速率限制！
+
 ```mermaid
 graph LR
     User([使用者輸入 / Webhook]) --> Agent[n8n AI Agent 節點]
@@ -188,3 +194,11 @@ curl -X POST "https://integrate.api.nvidia.com/v1/chat/completions" \
 ### Q3：n8n 提示連線超時 (Timeout) 或無法解析網址？
 - **原因**：Base URL 未設定正確。
 - **排查方式**：請確認 Base URL 為 `https://integrate.api.nvidia.com/v1`（結尾包含 `/v1`，且末尾不要有斜線 `/`）。
+
+### Q4：為什麼模型在 n8n 中執行時轉圈圈很久，回應速度比較慢？
+- **原因**：Free Endpoints 是 NVIDIA 官方免費提供的全球共享算力池，並運行 30B ~ 70B 甚至更大體量的巨型模型，遇到熱門時段或冷啟動時，伺服器需要排隊調度 GPU。
+- **建議做法**：
+  1. 請學員測試時**保持耐心等待 5 ~ 15 秒**，看到右上方旋轉動畫代表正在生成中。
+  2. 請勿因暫時未回傳而連續點擊多次，否則容易堆疊排隊時間或達到 40 RPM 上限。
+  3. 若追求極致秒回，課堂上亦可同時搭配 [OpenRouter](./../openrouter/README.md) 的極速輕量模型（如 `google/gemini-2.0-flash-001` 或 `meta-llama/llama-3.3-70b-instruct`）進行交叉對比體驗！
+
