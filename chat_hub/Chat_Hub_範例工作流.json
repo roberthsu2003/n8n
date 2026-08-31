@@ -1,0 +1,102 @@
+{
+  "name": "Chat-Hub-Assistant-Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 💬 n8n Chat Hub 整合工作流\n\n**本工作流特點：**\n1. 已開啟 **Make Available in n8n Chat Hub**。\n2. 已設定 **Agent Name（公務智慧助理）** 與 **Streaming 串流輸出**。\n3. 支援切換 OpenAI / OpenRouter / NVIDIA NIM / Gemini 等各類模型！\n\n> 💡 **發布步驟**：設定完成後，將右上角開關切換為 **Active（啟用）**，即可在左側 **Workflow agents** 中看見專屬助理！",
+        "height": 260,
+        "width": 400,
+        "color": 7
+      },
+      "id": "hub-guide-note",
+      "name": "📋 使用說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        1100
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "availableInChat": true,
+        "agentName": "公務智慧助理",
+        "agentDescription": "具備結構化分析與公文草擬能力的智慧助手",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        1200,
+        1390
+      ],
+      "id": "hub-chat-trigger",
+      "name": "When chat message received"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "你是一個專業的公務智慧助理，請以繁體中文親切、專業、結構化地回答使用者的問題。",
+        "options": {
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1440,
+        1390
+      ],
+      "id": "hub-ai-agent",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "meta-llama/llama-3.3-70b-instruct",
+          "mode": "id"
+        },
+        "options": {
+          "maxTokens": 1024,
+          "temperature": 0.5
+        }
+      },
+      "id": "hub-openai-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1440,
+        1600
+      ],
+      "typeVersion": 1.2
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

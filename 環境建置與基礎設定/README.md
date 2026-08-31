@@ -144,4 +144,12 @@
 - 免費/低成本模型快速切換（如 Llama-3.3-70B:free）
 - n8n OpenAI Chat Model 節點憑證與 Base URL 設定
 
+#### 💬 18. [n8n Chat Hub 企業級對話中心建置與發布 (最新功能)](../chat_hub/README.md)
+**重點內容**：
+- 企業與公務機關專屬 ChatGPT-like 獨立對話中心導覽
+- `When chat message received` (Chat Trigger v1.4+) 發布設定與 Agent 命名、圖示及推薦引導詞
+- `AI Agent` 串流即時打字輸出 (`Enable Streaming`) 配置
+- 權限隔離管理：指派 **Chat User** 角色，讓同仁僅使用聊天介面，確保工作流程與 API Key 安全
+
+
 
