@@ -64,7 +64,7 @@
         "nodeCredentialType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"to\": \"{{ $json.targetUserId }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{ $json.pushMessage }}\"\n    }\n  ]\n}",
+        "jsonBody": "={{ JSON.stringify({\n  \"to\": $json.targetUserId,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $json.pushMessage\n    }\n  ]\n}) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",

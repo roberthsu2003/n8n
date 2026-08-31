@@ -46,17 +46,17 @@ flowchart LR
      - **URL**：`https://api.line.me/v2/bot/message/push`
      - **Authentication**：選擇 `Predefined Credential Type` -> `Header Auth`（使用在 [LINE 設定指南](../../../line設定/README.md#步驟-4在-n8n-設定-header-auth-憑證與發送訊息) 中建立的 `Authorization` 憑證）。
      - **Send Body**：開啟並選擇 `JSON`
-     - **JSON Body**：
-       ```json
-       {
-         "to": "={{ $json.targetUserId }}",
-         "messages": [
+     - **JSON Body**（切換為 **Expression（fx）模式** 填入）：
+       ```javascript
+       ={{ JSON.stringify({
+         to: $json.targetUserId,
+         messages: [
            {
-             "type": "text",
-             "text": "={{ $json.pushMessage }}"
+             type: "text",
+             text: $json.pushMessage
            }
          ]
-       }
+       }) }}
        ```
 
 ---
