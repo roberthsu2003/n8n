@@ -133,7 +133,7 @@
 #### 🟢 16. [NVIDIA NIM 微服務整合指南 (政府資安合規/歐美模型)](../nvidia_nim/README.md)
 **重點內容**：
 - 公務機關資安合規：排除陸資模型，全數採用歐美頂級模型
-- NVIDIA API Catalog 註冊與 1,000 免費 Credits / Free Endpoints 獲取
+- NVIDIA API Catalog 註冊與 Free Endpoints (40 RPM 免費額度) 獲取
 - 推薦精選模型：Nemotron-3.5-Lightning-30B、Muse-Glimmer-30B、Nemotron-3-Ultra-550B、Laguna-XS-2.1
 - n8n 透過 OpenAI Chat Model 節點與自訂 Base URL 串接
 

@@ -1,6 +1,6 @@
 # NVIDIA NIM (Inference Microservice) 整合與設定指南 🟢
 
-**NVIDIA NIM**（NVIDIA 推論微服務）是 NVIDIA 官方提供的企業級 AI 推論平台，整合了全球領先的開源與專有大型語言模型（LLM）。透過 [NVIDIA API Catalog (build.nvidia.com)](https://build.nvidia.com/)，開發者與政府機構可以在註冊後獲得**免費推論額度（Free API Credits / Free Endpoints）**，並透過標準 **OpenAI 相容 API** 格式，將頂級歐美 AI 模型無縫串接至 n8n 自動化流程中。
+**NVIDIA NIM**（NVIDIA 推論微服務）是 NVIDIA 官方提供的企業級 AI 推論平台，整合了全球領先的開源與專有大型語言模型（LLM）。透過 [NVIDIA Models Catalog (build.nvidia.com/models)](https://build.nvidia.com/models)，開發者與政府機構可以在註冊後獲得**免費推論額度（Free API Credits / Free Endpoints）**，並透過標準 **OpenAI 相容 API** 格式，將頂級歐美 AI 模型無縫串接至 n8n 自動化流程中。
 
 ---
 
@@ -19,7 +19,9 @@
 
 ## 📋 目錄
 
-- [1. 註冊 NVIDIA 帳號與取得 API Key](#1-註冊-nvidia-帳號與取得-api-key)
+- [1. 註冊 NVIDIA 帳號與取得 API Key 🔑](#1-註冊-nvidia-帳號與取得-api-key-)
+  - [如何手動前往「API Keys」管理頁面？](#-如何手動前往api-keys管理頁面)
+  - [什麼是 RPM（API Rate Limit 速率限制）？](#️-什麼是-rpmapi-rate-limit-速率限制)
 - [2. 適合政府機關之非中國推薦模型清單](#2-適合政府機關之非中國推薦模型清單)
 - [3. 在 n8n 中串接 NVIDIA NIM 模型](#3-在-n8n-中串接-nvidia-nim-模型)
   - [步驟一：建立 OpenAI Credential 憑證](#步驟一建立-openai-credential-憑證)
@@ -29,18 +31,52 @@
 
 ---
 
-## 1. 註冊 NVIDIA 帳號與取得 API Key
+## 1. 註冊 NVIDIA 帳號與取得 API Key 🔑
 
-1. **前往官網**：進入 [NVIDIA API Catalog (build.nvidia.com)](https://build.nvidia.com/)。
+1. **前往官網模型庫**：進入 [NVIDIA Models 目錄 (https://build.nvidia.com/models)](https://build.nvidia.com/models)。
 2. **登入 / 註冊**：點擊右上角 **Sign In / Join**，可使用公務 Email 或 Google / GitHub 帳號註冊登入。
-3. **進入模型體驗區**：任選一個模型（例如 [nemotron-3.5-lightning-30b-a3b](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b)）。
-4. **生成 API Key**：
+3. **篩選免費模型 (Free Endpoints)**：
+   - 進入頁面後，請在**左側邊欄（Left Sidebar）篩選選單中勾選「Free Endpoints」**。
+   - 系統會自動過濾出所有由 NVIDIA 官方雲端免費託管、可直接取得 API Key 即時調用的模型。
+4. **進入模型體驗區**：從篩選結果中點選任一推薦模型（例如 [nemotron-3.5-lightning-30b-a3b](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b)）。
+5. **生成 API Key**：
    - 點擊頁面上的 **Get API Key** 或 **Generate Key** 按鈕。
    - 系統將生成以 `nvapi-` 開頭的專屬 API Key。
-   - 複製並安全妥善保存該金鑰（關閉視窗後金鑰無法再次完整檢視）。
+   - 複製並安全妥善保存該金鑰。
 
+### 📌 如何手動前往「API Keys」管理頁面？
+若在按下 **Generate Key** 之後不小心關閉彈跳視窗，或者日後需要建立新金鑰或檢視現有憑證，請依以下步驟手動進入管理頁面：
+1. 點擊頁面**右上角的個人頭像／姓名縮寫圖示**（例如右上角的圓形綠色頭像）。
+2. 在下拉選單中點選 **`🔑 API Keys`**。
+3. 即可進入 API Keys 管理中心（`View and manage the API Keys`），在此處可查看所有金鑰清單（包含 Key ID、Key Name、Key Value、到期日 Expiration 與 Active 啟用狀態），亦可隨時新增或撤銷金鑰。
+
+---
+
+### ⏱️ 什麼是 RPM（API Rate Limit 速率限制）？
+
+在右上角個人選單中，您會看到系統標註 **`Your API Rate Limit: Up to 40 rpm`**：
+
+#### 1. RPM 定義
+- **RPM** 為 **Requests Per Minute**（**每分鐘請求次數**）的縮寫。
+- **40 RPM 的含意**：代表您的帳號每 **60 秒內最多可向 NVIDIA API 發出 40 次請求**。
+- 若短時間內發送請求過於頻繁（例如 1 分鐘內超過 40 次），NVIDIA 伺服器將會回傳 `HTTP 429 (Too Many Requests)` 速率限制錯誤。
+
+#### 2. 常見 AI 速率限制名詞比較
+| 限制指標 | 英文全名 | 中文定義 | 說明與公務應用情境 |
+| :--- | :--- | :--- | :--- |
+| **RPM** | Requests Per Minute | **每分鐘請求數** | 控制呼叫次數頻率（NVIDIA 免費層提供 **40 RPM**，對話與單筆公文處理非常充裕）。 |
+| **TPM** | Tokens Per Minute | **每分鐘 Token 數** | 控制每分鐘處理的文字字元/Token 總量，防止超長文件瞬間塞爆伺服器。 |
+| **RPD** | Requests Per Day | **每日請求數** | 單日累計允許呼叫的總次數上限。 |
+
+#### 3. 在 n8n 自動化流程中的實戰建議
 > [!TIP]
-> NVIDIA 官方提供新註冊用戶 **1,000 Credits 免費試用額度**，並提供大量 Free Endpoints，足夠公務機關或教學課堂進行完整測試與日常工作流自動化。
+> - **一般即時互動（LINE / Webhook / Chatbot）**：民眾或同仁單筆發問頻率通常不高，40 RPM 完全綽綽有餘。
+> - **批次處理大量資料（Batch Loop）**：若工作流需從 Google Sheets 或資料庫一次讀取上百筆公文並透過迴圈逐筆進行 AI 分析，請務必在 Loop 迴圈節點之間加入 **Wait 節點**（例如暫停 `1.5 ~ 2 秒`），以確保平穩在 40 RPM 之內安全運行！
+
+> [!NOTE]
+> **NVIDIA 官方最新免費政策說明**：  
+> NVIDIA 目前已將過去的「1,000 Credits 點數扣抵制」全面升級改版為 **「Rate-Limit（速率限制）免費試用模式」**。  
+> 現在系統**不再扣除點數**，也不會顯示剩餘點數餘額；只要呼叫頻率維持在您的帳號速率限制內（如右上角顯示的 **`Up to 40 rpm`**），即可持續免費調用 API Catalog 上的所有支援模型進行開發、測試與教學！
 
 ---
 
