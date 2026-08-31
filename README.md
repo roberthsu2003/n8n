@@ -26,7 +26,7 @@
 - 💬 **通訊軟體開發者註冊**：[LINE Developers 註冊與 Messaging API 設定](./line設定/README.md) ｜ [Telegram BotFather 機器人申請與憑證設定](./通訊軟體整合/Telegram/README.md#️-前置設定指南)
 - ☁️ **Google 雲端平台註冊**：[Google Cloud Platform (GCP) 專案建立與 API 啟用](./google_cloud設定/README.md) ｜ [OAuth 2.0 開放授權概念解析](./OAuth/README.md)
 - 🗄️ **雲端資料庫平台註冊**：[Supabase 雲端資料庫註冊與連線設定 (免信用卡)](./雲端資料庫整合/Supabase/README.md) ｜ [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
-- 🤖 **AI 助手與模型註冊**： [NVIDIA NIM 微服務模型串接](./nvidia_nim/README.md) ｜ [OpenRouter 多模型聚合平台 (資安合規)](./openrouter/README.md) [n8n MCP 協議設定 (Claude / OpenAI / Gemini)](./n8n_mcp/README.md) ｜ [Ollama 官方雲端模型整合](./ollama安裝/README.md) 
+- 🤖 **AI 助手與模型註冊**： [NVIDIA NIM 微服務模型串接](./nvidia_nim/README.md) ｜ [OpenRouter 多模型聚合平台 (資安合規)](./openrouter/README.md) |  [n8n MCP 協議設定 (Claude / OpenAI / Gemini)](./n8n_mcp/README.md) ｜ [Ollama 官方雲端模型整合](./ollama安裝/README.md) 
 - 🛡️ **資料維運與備份**：[n8n 資料備份與還原指南](./n8n的備份方式/README.md)
 
 ---
