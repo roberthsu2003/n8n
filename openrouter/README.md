@@ -89,15 +89,111 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
      ```
    - **Temperature**：公務分析與法規諮詢建議設為 `0.2`；一般問答建議設為 `0.7`。
 
-```mermaid
-graph LR
-    Input([公務數據 / LINE / Webhook]) --> Agent[n8n AI Agent 節點]
-    Agent --> Model[OpenAI Chat Model 節點]
-    Model -.->|Base URL: https://openrouter.ai/api/v1| OR[OpenRouter Gateway]
-    OR --> LLM1[Meta Llama 3.3]
-    OR --> LLM2[Google Gemini 2.0]
-    OR --> LLM3[Mistral Large]
+### 🚀 一鍵複製測試工作流 (Workflow JSON)
+
+學員可直接點擊下載 **[👉 下載 OpenRouter_測試工作流.json](./OpenRouter_測試工作流.json)**，或**展開複製下方 JSON 程式碼**，回到 n8n 畫布空白處按下 `Ctrl + V` (Windows) 或 `Cmd + V` (Mac) 即可一鍵貼上完整測試工作流！
+
+<details>
+<summary><b>點此展開 / 複製完整工作流程 JSON 程式碼 📋</b></summary>
+
+```json
+{
+  "name": "OpenRouter 測試工作流",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🌐 OpenRouter 快速測試指南\n\n**如何測試：**\n1. 點擊下方 **OpenAI Chat Model** 節點\n2. 選擇你的 **OpenRouter API** 憑證（填入 `sk-or-v1-...`）\n3. 點擊 **Chat Trigger (聊天觸發)** 節點上的 **「Chat」** 按鈕發送訊息測試！\n\n> 💡 **模型推薦**：預設採用開源旗艦 `meta-llama/llama-3.3-70b-instruct`。",
+        "height": 260,
+        "width": 380,
+        "color": 7
+      },
+      "id": "openrouter-guide-note",
+      "name": "📋 使用說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -200,
+        -100
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "openrouter-chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -200,
+        200
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一個專業的公務智慧助理，請以繁體中文親切、專業、結構化地回答使用者的問題。"
+        }
+      },
+      "id": "openrouter-ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        60,
+        200
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-3.3-70b-instruct",
+        "options": {
+          "baseURL": "https://openrouter.ai/api/v1",
+          "temperature": 0.5,
+          "maxTokens": 1024
+        }
+      },
+      "id": "openrouter-openai-model",
+      "name": "OpenAI Chat Model (OpenRouter)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        60,
+        420
+      ],
+      "typeVersion": 1.2
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model (OpenRouter)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
 ```
+
+</details>
 
 ---
 

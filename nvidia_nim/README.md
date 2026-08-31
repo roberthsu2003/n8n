@@ -148,13 +148,111 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
 > - 節點通常需要 **5 ~ 15 秒（甚至更久）** 的運算與回傳時間，此屬正常現象。
 > - ⚠️ **請提醒學員「耐心等待節點轉圈完成」，切勿因等待而連續狂按測試或重複送出**，以免塞車或觸發 40 RPM 速率限制！
 
-```mermaid
-graph LR
-    User([使用者輸入 / Webhook]) --> Agent[n8n AI Agent 節點]
-    Agent --> Model[OpenAI Chat Model 節點]
-    Model -.->|Base URL: https://integrate.api.nvidia.com/v1| NIM[NVIDIA NIM Cloud]
-    Agent --> Tools[n8n Tools / Code / DB]
+### 🚀 一鍵複製測試工作流 (Workflow JSON)
+
+學員無須從頭拉節點，可直接點擊下載 **[👉 下載 NVIDIA_NIM_測試工作流.json](./NVIDIA_NIM_測試工作流.json)**，或**複製下方完整的 JSON 程式碼**，回到 n8n 畫布空白處按下鍵盤 `Ctrl + V` (Windows) 或 `Cmd + V` (Mac) 即可一鍵貼上完整工作流程！
+
+<details>
+<summary><b>點此展開 / 複製完整工作流程 JSON 程式碼 📋</b></summary>
+
+```json
+{
+  "name": "NVIDIA NIM 測試工作流",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🟢 NVIDIA NIM 快速測試指南\n\n**如何測試：**\n1. 點擊下方 **OpenAI Chat Model** 節點\n2. 選擇你的 **NVIDIA NIM API** 憑證（填入 `nvapi-...`）\n3. 點擊 **Chat Trigger (聊天觸發)** 節點上的 **「Chat」** 按鈕發送訊息測試！\n\n> 💡 **提醒**：Free Endpoint 首次回應通常需等待 **5 ~ 15 秒**，請耐心等待結果！",
+        "height": 260,
+        "width": 380,
+        "color": 7
+      },
+      "id": "nim-guide-note",
+      "name": "📋 使用說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -200,
+        -100
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "nim-chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        -200,
+        200
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一個專業的公務智慧助手，請以繁體中文親切、專業、結構化地回答使用者的問題。"
+        }
+      },
+      "id": "nim-ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        60,
+        200
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+        "options": {
+          "baseURL": "https://integrate.api.nvidia.com/v1",
+          "temperature": 0.5,
+          "maxTokens": 1024
+        }
+      },
+      "id": "nim-openai-model",
+      "name": "OpenAI Chat Model (NVIDIA NIM)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        60,
+        420
+      ],
+      "typeVersion": 1.2
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model (NVIDIA NIM)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
 ```
+
+</details>
 
 ---
 
