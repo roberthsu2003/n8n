@@ -90,6 +90,12 @@
 
 由於 n8n 目前無內建專屬的獨立 LINE Messaging API Credential，官方 Workflow 範本與社群標準做法皆是使用 **Header Auth** 憑證搭配 **HTTP Request 節點** 呼叫 LINE API。
 
+> [!NOTE]
+> **什麼是 Header Auth 憑證？**
+> Header Auth（標頭驗證）是 n8n 提供的一種**通用型憑證機制**。當透過 HTTP Request 節點呼叫第三方 API 時，n8n 會自動在 HTTP 請求的 **Header（標頭）** 中附加指定的鍵值對（例如 `Authorization: Bearer <Token>`）。
+> - **安全性（Security）**：Token 集中加密儲存於憑證庫中，不會以明文形式暴露在 Workflow 節點內，匯出或分享工作流程時不會洩漏敏感資訊。
+> - **好維護與重用性（Reusability）**：多個呼叫 LINE API 的節點可共用同一組憑證；未來若更新 Token，只需在憑證中心修改一次，所有節點立即同步生效。
+
 ### 1. 建立 Header Auth 憑證
 
 1. 開啟 n8n 管理介面，前往 **Credentials** > **Add Credential**。
