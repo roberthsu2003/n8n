@@ -79,6 +79,65 @@ flowchart LR
      - `messageType`：訊息類型（如 `text`、`image`、`sticker` 等）。
      - `eventType`：事件類型（如 `message`、`follow`、`unfollow` 等）。
 
+   <details>
+   <summary>🔍 <b>查看 Code 節點完整程式碼與逐行解析</b></summary>
+
+   ```javascript
+   // 解析 LINE Webhook Payload
+   const body = $input.first().json.body || {};
+   const events = body.events || [];
+
+   if (events.length === 0) {
+     return [{
+       json: {
+         status: 'no_events',
+         note: '這通常是 LINE Webhook URL 驗證請求或無訊息事件',
+         rawBody: body,
+         receivedAt: new Date().toISOString()
+       }
+     }];
+   }
+
+   const event = events[0];
+   const messageType = event.message?.type || '';
+   const userMessage = event.message?.text || '';
+   const replyToken = event.replyToken || '';
+   const userId = event.source?.userId || '';
+   const groupId = event.source?.groupId || '';
+   const eventType = event.type || '';
+
+   return [{
+     json: {
+       status: 'ok',
+       eventType,
+       messageType,
+       userMessage,
+       replyToken,
+       userId,
+       groupId,
+       timestamp: event.timestamp,
+       receivedAt: new Date().toISOString()
+     }
+   }];
+   ```
+
+   #### 逐段解析說明：
+   1. **取得 Webhook Payload 與 Events 陣列**：
+      - `$input.first().json.body || {}`：從 Webhook 節點取得傳入的請求 Body，預設為 `{}` 避免未定義錯誤。
+      - `body.events || []`：LINE 發送的所有事件（訊息、加好友等）皆包裝在 `events` 陣列中。
+   2. **防呆與邊界情況處理（Verify 驗證請求）**：
+      - 當在 LINE Developers Console 點擊 **Verify** 測試連線時，LINE 只會送出空陣列 `events: []`。
+      - 透過 `if (events.length === 0)` 攔截並回傳 `status: 'no_events'`，避免後續存取空資料時拋出錯誤導致流程中斷。
+   3. **安全提取關鍵欄位（使用 Optional Chaining `?.`）**：
+      - `event.message?.text`：安全取得使用者傳送的文字內容。
+      - `event.replyToken`：提取用於回覆訊息的單次有效權杖。
+      - `event.source?.userId` / `groupId`：取得使用者個人 ID 或群組 ID，方便後續識別用戶或推播。
+      - `event.message?.type` 與 `event.type`：用於判斷訊息型態（文字、圖片、貼圖等）與事件型態（訊息、加好友、退群等）。
+   4. **回傳標準化輸出（Structured Output）**：
+      - 將扁平化、結構化的乾淨欄位包裝在 `return [{ json: { ... } }];`，供後續節點（如 IF 節點、AI Agent、HTTP Request）直接透過 `$json.userMessage` 或 `$json.replyToken` 便捷引用。
+
+   </details>
+
 5. **🔀 是否為文字訊息？（IF Node）**
    - **功能**：判斷 `$json.messageType` 是否等於 `text`，確保只有文字訊息進入主處理管線，避免圖片或貼圖造成後續字串處理錯誤。
 
