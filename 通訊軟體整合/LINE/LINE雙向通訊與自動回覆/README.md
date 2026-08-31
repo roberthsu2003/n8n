@@ -78,17 +78,17 @@ flowchart LR
      - **Method**：`POST`
      - **URL**：`https://api.line.me/v2/bot/message/reply`
      - **Authentication**：選擇 `Predefined Credential Type` -> `Header Auth`（使用在 [LINE 設定指南](../../../line設定/README.md#步驟-4在-n8n-設定-header-auth-憑證與發送訊息) 中建立的 `Authorization` 憑證）。
-     - **JSON Body**：
-       ```json
-       {
-         "replyToken": "={{ $json.replyToken }}",
-         "messages": [
+     - **JSON Body**（切換為 **Expression（fx）模式** 填入）：
+       ```javascript
+       ={{ JSON.stringify({
+         replyToken: $json.replyToken,
+         messages: [
            {
-             "type": "text",
-             "text": "={{ $json.replyText }}"
+             type: "text",
+             text: $json.replyText
            }
          ]
-       }
+       }) }}
        ```
 
 ---

@@ -1,5 +1,4 @@
 {
-  "name": "LINE 整合 AI 智慧客服助理（含對話記憶與免費回覆）",
   "nodes": [
     {
       "parameters": {
@@ -10,10 +9,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -200,
-        120
+        -16,
+        -336
       ],
-      "id": "line-ai-note",
+      "id": "d599e3aa-3c62-408e-a785-9510c4a816ec",
       "name": "流程說明"
     },
     {
@@ -26,10 +25,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -180,
-        380
+        128,
+        96
       ],
-      "id": "line-ai-webhook-trigger",
+      "id": "b3dcc932-4c2c-43dd-b2aa-7f3e7237acfa",
       "name": "LINE Webhook 觸發器",
       "webhookId": "line-ai-webhook"
     },
@@ -42,23 +41,23 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        80,
-        240
+        384,
+        -48
       ],
-      "id": "line-ai-respond-200",
+      "id": "73b82d74-9d31-40e6-b3e4-62d99c026e15",
       "name": "即時回傳 200 OK"
     },
     {
       "parameters": {
-        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body;\nif (!body || !body.events || body.events.length === 0) {\n  return [];\n}\n\nconst event = body.events[0];\nreturn [{\n  json: {\n    eventType: event.type,\n    replyToken: event.replyToken || '',\n    userId: event.source?.userId || '',\n    messageType: event.message?.type || '',\n    userMessage: event.message?.text || ''\n  }\n}];"
+        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body;\nif (!body || !body.events || body.events.length === 0) {\n  return [];\n}\n\nconst event = body.events[0];\nconst userId = event.source?.userId || '';\n\nreturn [{\n  json: {\n    eventType: event.type,\n    replyToken: event.replyToken || '',\n    userId,\n    sessionId: userId,\n    messageType: event.message?.type || '',\n    userMessage: event.message?.text || ''\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        460
+        384,
+        176
       ],
-      "id": "line-ai-parse-event",
+      "id": "93e69b74-67a8-47a1-860e-e08320de6767",
       "name": "解析 LINE 訊息事件"
     },
     {
@@ -88,10 +87,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        320,
-        460
+        624,
+        176
       ],
-      "id": "line-ai-check-text",
+      "id": "420f70bc-3b6a-4d81-a9c7-de2db797a8fa",
       "name": "是否為文字訊息？"
     },
     {
@@ -105,15 +104,19 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
-        560,
-        460
+        864,
+        176
       ],
-      "id": "line-ai-agent-core",
+      "id": "422eb60c-c94e-4b55-9045-837fcabba442",
       "name": "LINE AI 客服代理"
     },
     {
       "parameters": {
-        "model": "gpt-4o-mini",
+        "model": {
+          "__rl": true,
+          "value": "meta-llama/llama-3.3-70b-instruct",
+          "mode": "id"
+        },
         "options": {
           "temperature": 0.7
         }
@@ -121,30 +124,29 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        500,
-        680
+        800,
+        384
       ],
-      "id": "line-openai-model",
+      "id": "86ac95b2-b490-492a-822e-9ac5ad65089a",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "id": "kZ6wOkA4NqZDTRQ0",
           "name": "OpenAI account"
         }
       }
     },
     {
       "parameters": {
-        "sessionKey": "={{ $('解析 LINE 訊息事件').item.json.userId }}",
         "contextWindowLength": 10
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        660,
-        680
+        960,
+        384
       ],
-      "id": "line-ai-memory",
+      "id": "317e4515-9428-4d4d-a216-f72dfaa7e544",
       "name": "對話記憶 (依 User ID 隔離)"
     },
     {
@@ -161,15 +163,15 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        880,
-        460
+        1184,
+        176
       ],
-      "id": "send-line-ai-reply",
+      "id": "6a5489c6-9fac-4d14-827e-1aed77ce3a2c",
       "name": "呼叫 LINE Reply API 免費回傳",
       "credentials": {
         "httpHeaderAuth": {
-          "id": "YOUR_LINE_HEADER_AUTH_ID",
-          "name": "LINE Messaging API Header Auth"
+          "id": "XnZyy2Ri1bcj21yJ",
+          "name": "Header Auth account"
         }
       }
     }
@@ -213,6 +215,17 @@
         ]
       ]
     },
+    "LINE AI 客服代理": {
+      "main": [
+        [
+          {
+            "node": "呼叫 LINE Reply API 免費回傳",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "OpenAI Chat Model": {
       "ai_languageModel": [
         [
@@ -234,18 +247,12 @@
           }
         ]
       ]
-    },
-    "LINE AI 客服代理": {
-      "main": [
-        [
-          {
-            "node": "呼叫 LINE Reply API 免費回傳",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "pinData": {}
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
 }

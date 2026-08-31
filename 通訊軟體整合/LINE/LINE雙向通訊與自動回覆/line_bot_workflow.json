@@ -136,7 +136,7 @@
         "nodeCredentialType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"replyToken\": \"{{ $json.replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{ $json.replyText }}\"\n    }\n  ]\n}",
+        "jsonBody": "={{ JSON.stringify({\n  \"replyToken\": $json.replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $json.replyText\n    }\n  ]\n}) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",

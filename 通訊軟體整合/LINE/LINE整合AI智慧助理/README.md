@@ -71,7 +71,7 @@ flowchart LR
 
 4. **⚙️ 解析 LINE 訊息事件（Code Node）**
    - **功能**：從 Payload 中提取關鍵欄位：
-     - `userId`：發訊者專屬識別碼（格式為 `U` 開頭 33 碼）。
+     - `userId` / `sessionId`：發訊者專屬識別碼（格式為 `U` 開頭 33 碼），用於追蹤對話。
      - `replyToken`：用於免費回覆此則訊息的權杖（有效時效約 1 分鐘）。
      - `userMessage`：使用者傳送的文字提問。
      - `messageType`：訊息類型（如 `text`）。
@@ -90,13 +90,11 @@ flowchart LR
      4. 若使用者提及先前的提問，請參考對話歷史記憶進行連貫回應。
      ```
 
-7. **🧠 語言模型（OpenAI Chat Model / Gemini / Ollama）**
-   - **功能**：提供推論算力（預設 `gpt-4o-mini`，亦可無縫換為 Google Gemini 或本機免費 Ollama 模型）。
+7. **🧠 語言模型（OpenAI Chat Model / Llama / Gemini / Ollama）**
+   - **功能**：提供推論算力（預設支援 `meta-llama/llama-3.3-70b-instruct`，亦可無縫切換為 OpenAI GPT-4o、Google Gemini 或本機 Ollama 模型）。
 
 8. **💾 對話記憶（Window Buffer Memory Node）**
-   - **功能**：以 `userId` 為 Session Key：
-     - **Session Key**：`={{ $('解析 LINE 訊息事件').item.json.userId }}`
-     - **作用**：確保不同用戶在官方帳號發問時，各自保有獨立的對話上下文記憶，互不干擾。
+   - **功能**：紀錄最近 10 輪對話上下文（`contextWindowLength: 10`），讓 AI 客服能根據先前的問答歷史進行連貫且智慧的回應。
 
 9. **📤 呼叫 LINE Reply API 免費回傳（HTTP Request Node）**
    - **功能**：將 AI 生成的文字回答（`{{ $json.output }}`）透過 Reply API 送回：
