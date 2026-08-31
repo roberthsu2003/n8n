@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 📤 n8n 呼叫 LINE Message 服務（主動推播）\n\n1. **手動觸發 (Manual Trigger)**：手動點擊執行，或可更換為 Schedule 定時觸發。\n2. **設定推播內容 (Set)**：填入目標 LINE 用戶 ID (`userId`) 與欲發送的訊息文字。\n3. **呼叫 LINE Push API (HTTP Request)**：透過 Header Auth 憑證驗證，向 LINE 發送推播通知。",
-        "height": 240,
-        "width": 420
+        "content": "## 📤 n8n 呼叫 LINE Message 服務（主動推播）\n\n1. **手動觸發 (Manual Trigger)**：手動點擊執行，或更換為 Schedule 定時排程。\n2. **設定推播內容 (Set)**：填入目標 LINE 用戶 ID (`userId`) 與欲發送的訊息文字。\n   ⚠️ **注意**：範本預設的 `targetUserId` 是假資料，請至 LINE Developers > Basic settings 複製您的「Your user ID」替換！\n3. **呼叫 LINE Push API (HTTP Request)**：透過 Header Auth 憑證驗證，向 LINE 發送推播通知。",
+        "height": 280,
+        "width": 460
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
@@ -40,7 +40,7 @@
             {
               "id": "notification-message",
               "name": "pushMessage",
-              "value": "🔔【系統推播通知】\n您好！這是來自 n8n 自動化工作流程的主動推播訊息。\n目前時間：{{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "value": "=🔔【系統推播通知】\n您好！這是來自 n8n 自動化工作流程的主動推播訊息。\n目前時間：{{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
               "type": "string"
             }
           ]

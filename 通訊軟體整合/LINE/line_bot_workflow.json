@@ -34,7 +34,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 解析 LINE Webhook Payload\nconst body = $input.first().json.body || {};\nconst events = body.events || [];\n\nif (events.length === 0) {\n  return [];\n}\n\nconst event = events[0];\nconst messageType = event.message?.type || '';\nconst userMessage = event.message?.text || '';\nconst replyToken = event.replyToken || '';\nconst userId = event.source?.userId || '';\nconst eventType = event.type || '';\n\nreturn [{\n  json: {\n    eventType,\n    messageType,\n    userMessage,\n    replyToken,\n    userId,\n    timestamp: event.timestamp\n  }\n}];"
+        "jsCode": "// 解析 LINE Webhook Payload\nconst inputJson = $input.first().json;\nconst events = inputJson.body?.events || inputJson.events || [];\n\nif (!events || events.length === 0) {\n  return [];\n}\n\nconst event = events[0];\nconst messageType = event.message?.type || '';\nconst userMessage = event.message?.text || '';\nconst replyToken = event.replyToken || '';\nconst userId = event.source?.userId || '';\nconst eventType = event.type || '';\n\nreturn [{\n  json: {\n    eventType,\n    messageType,\n    userMessage,\n    replyToken,\n    userId,\n    timestamp: event.timestamp\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -125,8 +125,7 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.line.me/v2/bot/message/reply",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -142,7 +141,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"replyToken\": \"{{ $json.replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{ $json.replyText }}\"\n    }\n  ]\n}",
+        "jsonBody": "={{ JSON.stringify({\n  \"replyToken\": $json.replyToken,\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": $json.replyText\n    }\n  ]\n}) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",

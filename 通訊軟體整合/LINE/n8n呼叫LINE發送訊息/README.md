@@ -78,14 +78,30 @@ flowchart LR
 
 ---
 
+---
+
+> [!WARNING]
+> ### ⚠️ 重要提醒：範本中的 `targetUserId` 為虛構範例值！
+> 範本中預設的 `targetUserId`（`U1234567890abcdef1234567890abcdef`）是**假的佔位符**。若未替換直接執行，LINE API 會回傳 `400 Bad Request: Failed to send push message`。
+> 
+> **測試前如何取得您的真實 LINE User ID？**
+> * **方法 1（最快：LINE Developers 後台查看自己的 User ID）**：
+>   1. 登入 [LINE Developers Console](https://developers.line.biz/console/)。
+>   2. 進入您的 Messaging API Channel。
+>   3. 切換至 **Basic settings** 分頁，滑動到最下方的 **Your user ID**（以 `U` 開頭的 33 碼字串），複製該字串。
+> * **方法 2（透過 Webhook 接收）**：
+>   1. 執行 [範例 1：LINE 訊息觸發工作流](../LINE訊息觸發工作流/README.md)。
+>   2. 手機開啟 LINE 傳送任一則訊息給該官方帳號。
+>   3. 在 n8n Webhook 或 Code 節點的輸出結果中，即可複製該次事件的 `userId`。
+
 #### ⚙️ 設定步驟
 
 1. **確認前置憑證**：請確保已依照 **[📱 LINE 設定指南](../../../line設定/README.md)** 在 n8n 中建立了 `Header Auth` 憑證。
-2. **取得目標用戶的 `userId`**：
-   - 透過 [範例 1：LINE 訊息觸發工作流](../LINE訊息觸發工作流/README.md) 讓用戶先傳送一則訊息給官方帳號，即可從 n8n 的輸出資料中取得該用戶的 `userId`（以 `U` 開頭的 33 碼字串）。
+2. **填入真實的 `targetUserId`**：
+   - 依照上述警示提示取得您的真實 LINE User ID（以 `U` 開頭）。
+   - 點開「設定推播對象與內容」（Set 節點），將 `targetUserId` 替換為您的真實 User ID。
 3. **匯入工作流程**：在 n8n 介面點選 **Import from File** 匯入 [`line_push_message.json`](./line_push_message.json)。
-4. **填入 User ID**：點開「設定推播對象與內容」節點，將 `targetUserId` 改為您的 LINE User ID。
-5. **選擇憑證並執行**：
+4. **選擇憑證並執行**：
    - 點開「呼叫 LINE Push API」節點，確認 Credential 選擇了您的 Header Auth 帳號。
    - 點擊「Test step」或「Execute Workflow」，手機 LINE 即會立即收到推播通知！
 

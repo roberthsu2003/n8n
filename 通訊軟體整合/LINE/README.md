@@ -95,6 +95,7 @@ flowchart LR
 - 正確綁定 Header Auth 憑證 (`Authorization: Bearer <Token>`)
 
 - **附帶樣版**：[`line_push_message.json`](./n8n呼叫LINE發送訊息/line_push_message.json)
+> ⚠️ **注意**：樣版中的 `targetUserId`（`U1234567890...`）為假資料，測試前請至 [LINE Developers Console](https://developers.line.biz/console/) 的 **Basic settings** > **Your user ID** 複製您的真實 ID 貼入。
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
