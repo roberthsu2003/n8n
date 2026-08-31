@@ -96,9 +96,9 @@ flowchart LR
 
 ---
 
-### 步驟四：啟用工作流程 (Active) 並分享
+### 步驟四：發布工作流程 (Publish) 並分享
 
-1. **啟用工作流**：在工作流程畫布右上角，將開關切換為 **`Active（啟用）`** 並儲存 (`Ctrl + S` / `Cmd + S`)。
+1. **發布工作流程**：在工作流程畫布右上角，點擊 **`Publish（發布）`** 按鈕（狀態會顯示為已發布 **`Published`**），並儲存 (`Ctrl + S` / `Cmd + S`)。
 2. **指派權限**：
    - 若要讓其他同仁使用，可在 n8n **Settings ➔ Users** 中新增同仁帳號。
    - 將同仁指派為 **`Chat User`** 角色，並在專案或工作流程中給予 **`Project Chat User`** 或 **`Viewer`** 權限。
@@ -134,7 +134,7 @@ flowchart LR
   "nodes": [
     {
       "parameters": {
-        "content": "## 💬 n8n Chat Hub 整合工作流\n\n**本工作流特點：**\n1. 已開啟 **Make Available in n8n Chat Hub**。\n2. 已設定 **Agent Name（公務智慧助理）** 與 **Streaming 串流輸出**。\n3. 支援切換 OpenAI / OpenRouter / NVIDIA NIM / Gemini 等各類模型！\n\n> 💡 **發布步驟**：設定完成後，將右上角開關切換為 **Active（啟用）**，即可在左側 **Workflow agents** 中看見專屬助理！",
+        "content": "## 💬 n8n Chat Hub 整合工作流\n\n**本工作流特點：**\n1. 已開啟 **Make Available in n8n Chat Hub**。\n2. 已設定 **Agent Name（公務智慧助理）** 與 **Streaming 串流輸出**。\n3. 支援切換 OpenAI / OpenRouter / NVIDIA NIM / Gemini 等各類模型！\n\n> 💡 **發布步驟**：設定完成後，點擊右上角 **Publish（發布）**，即可在左側 **Workflow agents** 中看見專屬助理！",
         "height": 260,
         "width": 400,
         "color": 7
@@ -241,7 +241,7 @@ flowchart LR
 
 ### Q1：為什麼在左側 Chat Hub 中找不到剛剛建立的 Agent？
 - **排查步驟**：
-  1. **確認工作流是否已啟用**：右上角開關必須是綠色的 **Active** 狀態。
+  1. **確認工作流程是否已發布**：右上角狀態必須顯示為已發布 **`Published`**（若顯示 `Unpublished` 請點擊 **Publish** 發布）。
   2. **確認開關已打開**：`When chat message received` 節點中必須開啟 **`Make Available in n8n Chat Hub`**。
   3. **重新整理頁面**：按下 `F5` 或 `Cmd + R` 重新載入 Chat Hub 清單。
 
