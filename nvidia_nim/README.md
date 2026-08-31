@@ -149,6 +149,8 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
 3. 填入以下連線資訊：
    - **Credential Name**：`NVIDIA NIM API`（自訂便於識別的名稱）
    - **API Key**：貼上以 `nvapi-...` 開頭的 NVIDIA API Key。
+     > [!TIP]
+     > **貼上金鑰小撇步**：請確保金鑰字串前後**無多餘空格或換行符號**。若執行時出現 `ByteString` 錯誤，通常只要進入憑證清空並重新貼上 API Key 即可排除！
    - **Base URL（關鍵設定）**：在下方 **Base URL** 欄位填入：
      ```text
      https://integrate.api.nvidia.com/v1
@@ -165,9 +167,13 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
 2. 在 Model 連接端點點擊 `+` 號，搜尋並新增 **OpenAI Chat Model** 節點。
 3. 節點參數配置如下：
    - **Credential**：選擇剛剛建立的 `NVIDIA NIM API`（或已填入 `nvapi-...` 的 OpenAI 憑證）。
-   - **Model（選擇 From list）**：
-     - 左側下拉選單請切換為 **`From list`**。
-     - 右側模型選單中即可直接搜尋或選擇想要的模型（例如 **`nvidia/nemotron-3.5-lightning-30b-a3b`** 或 **`meta/llama-3.3-70b-instruct`**）。
+   - **Model（推薦選擇 By ID 或 From list）**：
+     - **推薦方式（By ID）**：左側下拉選單切換為 **`By ID`**，在右側文字欄位直接貼上模型 ID：
+       ```text
+       nvidia/nemotron-3.5-lightning-30b-a3b
+       ```
+       *(或 `meta/llama-3.3-70b-instruct`)*
+     - **清單選取（From list）**：切換為 `From list`，等待系統自動載入 NVIDIA 模型清單後點選。
    - **Base URL (關鍵設定)**：展開下方 **Options** ➔ 點擊 **Add Option** ➔ 勾選 **Base URL**，輸入：
      ```text
      https://integrate.api.nvidia.com/v1
@@ -313,9 +319,10 @@ NVIDIA NIM 完全相容於 **OpenAI API 規範**，因此在 n8n 中直接使用
   3. 若追求極致秒回，課堂上亦可同時搭配 [OpenRouter](./../openrouter/README.md) 的極速輕量模型（如 `google/gemini-2.0-flash-001` 或 `meta-llama/llama-3.3-70b-instruct`）進行交叉對比體驗！
 
 ### Q5：出現 `Cannot convert argument to a ByteString because the character at index...` 錯誤？
-- **原因**：n8n 底層的 LangChain / Node.js `fetch` 在發送 API 請求時，會將 **工作流程名稱（Workflow Name）** 放入 HTTP Header。由於 Header 只接受 ASCII（0~255），若 **工作流程名稱中包含中文（如「測試」的「測」字 Unicode 為 28204 > 255）**，就會引發此 ByteString 轉換錯誤。
+- **原因**：複製 API Key 時夾帶了全形空格、隱藏文字格式，或是工作流程名稱含有中文字元（如「測」字編碼 28204），導致 Node.js 底層在組裝 HTTP 請求 Header 時無法轉為標準 ByteString。
 - **解決方式**：
-  1. 點擊 n8n 左上角的工作流程名稱，改為 **純英文或數字**（例如改為 `NVIDIA-NIM-Test` 或 `My-AI-Agent`）。
-  2. 點擊右上角 **Save** 儲存後重新執行測試即可！
+  1. **重新貼上 API Key（最有效解法）**：進入 Credentials 編輯該憑證，**清空 API Key 欄位並重新複製貼上**（可先貼到純文字記事本過濾格式，確保前後無多餘空格）。
+  2. **檢查工作流程名稱**：點擊 n8n 左上角的工作流程名稱，確認已改為 **純英文或數字**（例如 `NVIDIA-NIM-Test`），並按下儲存。
+  3. **重新整理頁面**：按下 `F5` / `Cmd + R` 重新整理瀏覽器後重新執行測試即可！
 
 

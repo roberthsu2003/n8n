@@ -97,6 +97,8 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 3. 填入設定：
    - **Credential Name**：`OpenRouter API`（自訂便於識別的名稱）
    - **API Key**：貼上以 `sk-or-v1-...` 開頭的 OpenRouter API Key。
+     > [!TIP]
+     > **貼上金鑰小撇步**：請確保金鑰字串前後**無多餘空格或換行符號**。若日後執行出現 `ByteString` 錯誤，通常只要重新清空並重新貼上 API Key 即可排除！
    - **Base URL（關鍵設定）**：在下方 **Base URL** 欄位填入：
      ```text
      https://openrouter.ai/api/v1
@@ -112,9 +114,13 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 2. 在 Model 輸入點點擊 `+` 號，新增 **OpenAI Chat Model** 節點。
 3. 節點參數配置如下：
    - **Credential**：選擇剛剛建立的 `OpenRouter API`。
-   - **Model（選擇 From list）**：
-     - 左側下拉選單請切換為 **`From list`**。
-     - 右側模型選單中可直接搜尋或選擇模型（例如 **`meta-llama/llama-3.3-70b-instruct`** 或 **`google/gemini-2.0-flash-001`**）。
+   - **Model（推薦選擇 By ID 或 From list）**：
+     - **推薦方式（By ID）**：左側下拉選單切換為 **`By ID`**，在右側文字欄位直接貼上模型 ID：
+       ```text
+       meta-llama/llama-3.3-70b-instruct
+       ```
+       *(或 `google/gemini-2.0-flash-001`)*
+     - **清單選取（From list）**：切換為 `From list`，等待系統從 OpenRouter 自動同步載入模型清單後點選。
    - **Base URL (關鍵設定)**：展開下方 **Options** ➔ 點擊 **Add Option** ➔ 勾選 **Base URL**，輸入：
      ```text
      https://openrouter.ai/api/v1
@@ -242,7 +248,8 @@ OpenRouter 完全相容於 OpenAI 規範，在 n8n 中只需透過內建的 **Op
 - **解決方式**：請直接至 [OpenRouter Models 瀏覽頁面](https://openrouter.ai/models) 搜尋模型，點擊右上角複製正確的完整 Model ID（例如 `mistralai/mistral-large-2411`，包含團隊前綴斜線）。
 
 ### Q4：出現 `Cannot convert argument to a ByteString because the character at index...` 錯誤？
-- **原因**：n8n 底層的 LangChain / Node.js `fetch` 在向 API 發送請求時，會自動將 **工作流程名稱（Workflow Name）** 放入 HTTP Request Header 中。由於 HTTP Header 規範僅接受 ASCII 字元（編碼 0~255），若您的 **工作流程名稱包含中文（例如「測試」的「測」Unicode 為 28204 > 255）**，就會引發此 ByteString 轉換錯誤。
+- **原因**：複製 API Key 時夾帶了全形空格、隱藏文字格式，或是工作流程名稱含有中文字元（如「測」字編碼 28204），導致 Node.js 底層在組裝 HTTP 請求 Header 時無法轉為標準 ByteString。
 - **解決方式**：
-  1. 點擊 n8n 左上角的工作流程名稱，將其重新命名為 **純英文或數字**（例如改為 `OpenRouter-Test` 或 `My-AI-Workflow`）。
-  2. 點擊右上角 **Save** 儲存工作流程後再次執行測試，即可完美解決！
+  1. **重新貼上 API Key（最有效解法）**：進入 Credentials 編輯該憑證，**清空 API Key 欄位並重新複製貼上**（可先貼到純文字記事本過濾格式，確保前後無多餘空格）。
+  2. **檢查工作流程名稱**：點擊 n8n 左上角的工作流程名稱，確認已改為 **純英文或數字**（例如 `OpenRouter-Test`），並按下儲存。
+  3. **重新整理頁面**：按下 `F5` / `Cmd + R` 重新整理瀏覽器後重新執行測試即可！
