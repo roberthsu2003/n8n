@@ -13,8 +13,9 @@
 flowchart LR
     A["👆 手動或排程觸發 (Trigger)"] --> B["📋 設定多媒體與報表資料 (Set 節點)"]
     B --> C["🖼️ 發送 Telegram 照片與圖表 (Send Photo)"]
-    C --> D["📁 發送 Telegram 文件檔案 (Send Document)"]
-    D --> E["📱 Telegram 聊天室收到圖文與下載檔案"]
+    C --> D["📥 下載報表檔案 (HTTP Request - Binary)"]
+    D --> E["📁 發送 Telegram 文件檔案 (Send Document)"]
+    E --> F["📱 Telegram 聊天室收到圖文與下載檔案"]
 ```
 
 ---
@@ -36,9 +37,9 @@ flowchart LR
 3. **📋 設定多媒體與報表資料（Edit Fields / Set Node）**
    - **功能**：準備推播相關素材與目標聊天室 ID：
      - `targetChatId`：接收檔案的 Telegram Chat ID。
-     - `photoUrl`：高畫質圖片或圖表公開 URL（亦可為 n8n 二進位資料 `data`）。
+     - `photoUrl`：高畫質圖片或圖表公開 URL。
      - `photoCaption`：圖片下方顯示的 Markdown 說明文字。
-     - `documentUrl`：報表檔案 URL（例如 CSV 檔）。
+     - `documentUrl`：報表檔案下載 URL（例如 CSV 檔）。
      - `documentCaption`：檔案下方附帶的說明文字。
 
 4. **🖼️ 發送 Telegram 照片與圖表（Telegram Node - Send Photo）**
@@ -47,17 +48,25 @@ flowchart LR
      - **Resource**：`Photo`
      - **Operation**：`Send Photo`
      - **Chat ID**：`={{ $json.targetChatId }}`
-     - **File**：`={{ $json.photoUrl }}`（可填入網址或以 `binaryData` 格式傳入）
+     - **File**：`={{ $json.photoUrl }}`
      - **Additional Fields > Caption**：填入 `photoCaption` 並設定 `Parse Mode` 為 `Markdown`。
 
-5. **📁 發送 Telegram 文件檔案（Telegram Node - Send Document）**
-   - **功能**：調用 Telegram `sendDocument` API 發送實體檔案。
+5. **📥 下載報表檔案（HTTP Request Node）**
+   - **功能**：由 n8n 自行將 CSV 檔案下載為二進位資料（Binary），徹底避免 Telegram 伺服器因防盜鏈或中文編碼而拋出 `failed to get HTTP URL content` 錯誤。
+   - **設定要點**：
+     - **URL**：`={{ $('設定多媒體與報表資料').item.json.documentUrl }}`
+     - **Response Format**：`File`（存入 `data` 二進位屬性）。
+
+6. **📁 發送 Telegram 文件檔案（Telegram Node - Send Document）**
+   - **功能**：調用 Telegram `sendDocument` API，以二進位資料直接上傳發送實體檔案。
    - **設定要點**：
      - **Resource**：`Document`
      - **Operation**：`Send Document`
      - **Chat ID**：`={{ $('設定多媒體與報表資料').item.json.targetChatId }}`
-     - **File**：`={{ $('設定多媒體與報表資料').item.json.documentUrl }}`
+     - **Binary File**：開啟（`True`）
+     - **Input Data Field Name**：`data`
      - **Additional Fields > Caption**：填入檔案說明文字。
+     - **Additional Fields > File Name**：`學生成績單.csv`
 
 ---
 
