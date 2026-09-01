@@ -52,6 +52,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![LINE 整合 AI 智慧客服助理流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 LINE 整合 AI 智慧客服助理樣版 (line_ai_agent.json)](./line_ai_agent.json)
