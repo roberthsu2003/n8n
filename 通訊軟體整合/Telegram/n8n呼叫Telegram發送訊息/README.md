@@ -70,8 +70,14 @@ flowchart LR
 #### ⚙️ 設定步驟
 
 1. **取得目標 Chat ID**：
-   - **個人 Chat ID**：私訊您的機器人傳送 `/start`，透過範例 1 即可查看輸出中的 `chatId`（正整數）。
-   - **群組 Chat ID**：將機器人邀請加入群組並給予發言權限，在群組發送任意文字，透過範例 1 即可取得群組 `chatId`（通常為 `-100` 開頭的負整數）。
+   - **方式 A：在 Telegram 軟體內透過查詢機器人（最推薦、最快速 ⚡）**：
+     - **個人 Chat ID**：在 Telegram 搜尋 `@userinfobot`（或 `@raw_data_bot`）並點擊「開始 (Start)」，機器人回傳的 `Id:` 即為您的個人 Chat ID（正整數，例如 `123456789`）。
+     - **群組 / 頻道 Chat ID**：將 `@raw_data_bot` 邀請加入目標群組，它會立即在群組印出資訊，找到 `chat -> id`（通常為 `-100` 開頭的負整數，例如 `-1001234567890`）即為群組 Chat ID（取得後可將該 Bot 移出群組）。
+     - **轉傳訊息查詢**：亦可將群組或頻道的任一訊息「轉傳 (Forward)」給 `@userinfobot` 查詢來源 ID。
+   - **方式 B：透過已建好的 n8n 工作流程**：
+     - 私訊或在群組對您的機器人發送 `/start`，透過 [範例 1：Telegram 訊息觸發工作流程](../Telegram訊息觸發工作流/README.md) 的輸出節點即可直接查看 `chatId`。
+   - **方式 C：透過 Telegram Web 網頁版**：
+     - 瀏覽器登入 [Telegram Web](https://web.telegram.org/) 點進群組，網址列末端的數字（例如 `#-1001234567890`）即為群組 Chat ID。
 2. **匯入工作流程**：下載並匯入 [`telegram_send_message.json`](./telegram_send_message.json)。
 3. **填入 Chat ID 與綁定憑證**：
    - 在「準備推播報表資料」節點中，將 `targetChatId` 的值替換為您的實際 Chat ID。
