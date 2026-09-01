@@ -76,7 +76,7 @@
         }
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 4.4,
       "position": [
         340,
         380
