@@ -1,0 +1,122 @@
+{
+  "name": "基礎_Basic_LLM_Chain",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 1：Basic LLM Chain\n適合 AI 初學者的第一個基礎鏈範例。\n示範單次 Prompt 提詞與大語言模型互動（翻譯與語氣潤飾）。",
+        "height": 140,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-380, -220],
+      "typeVersion": 1,
+      "id": "b1-sticky-1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-360, 0],
+      "id": "b1-manual-trigger",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-1",
+              "name": "customer_feedback",
+              "value": "The product quality is absolutely stunning, but the delivery took almost two weeks to arrive in Taipei. Hope you can optimize the shipping speed.",
+              "type": "string"
+            },
+            {
+              "id": "field-2",
+              "name": "customer_name",
+              "value": "Emily Watson",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 0],
+      "id": "b1-set-input",
+      "name": "模擬客戶留言 (Edit Fields)"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=請將以下顧客留言（來自 {{ $json.customer_name }}）翻譯為優雅流暢的繁體中文（台灣習慣用語），並提供 2 點回覆建議：\n\n顧客原文：\n{{ $json.customer_feedback }}\n\n輸出格式要求：\n1. 【繁中翻譯】\n2. 【核心訴求】\n3. 【建議回覆方向】"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [100, 0],
+      "id": "b1-llm-chain",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:cloud",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "id": "b1-ollama-model",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "模擬客戶留言 (Edit Fields)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬客戶留言 (Edit Fields)": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -77,7 +77,7 @@ flowchart TD
 
 ---
 
-### 1. 基礎：Basic LLM Chain（基礎提示詞與文字生成）
+### 1. [基礎：Basic LLM Chain（基礎提示詞與文字生成）](./Basic_LLM_Chain/README.md)
 
 最純粹、最穩定的 AI 入門起點！學習如何透過 Prompt 與大語言模型互動，進行文本翻譯、語氣潤飾或自動生成。
 
@@ -86,6 +86,8 @@ flowchart TD
 - 使用 System Message 與 Prompt 提示詞規範輸出格式
 - 在提示詞中動態引用上游節點資料（例如 `{{ $json.user_comment }}`）
 - 多語言即時翻譯與在地化文案潤飾實作
+
+- **附帶樣版**：[`Basic_LLM_Chain.json`](./Basic_LLM_Chain/Basic_LLM_Chain.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -105,7 +107,7 @@ flowchart TD
 
 ---
 
-### 2. 基礎：Information Extractor（非結構化文字轉結構化 JSON）
+### 2. [基礎：Information Extractor（非結構化文字轉結構化 JSON）](./Information_Extractor/README.md)
 
 告別複雜難維護的 Regular Expression（正規表達式）！直接利用 AI 從雜亂無章的 Email、留言或發票中，精準抽取強型別 JSON 欄位。
 
@@ -114,6 +116,8 @@ flowchart TD
 - 定義字串（String）、數字（Number）、布林值（Boolean）與物件陣列（Array）
 - 自動處理非制式訂購留言、LINE 詢價訊息、履歷或發票文字
 - 將抽取出的乾淨資料直接銜接資料庫或 Google Sheets 寫入
+
+- **附帶樣版**：[`Information_Extractor.json`](./Information_Extractor/Information_Extractor.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -138,7 +142,7 @@ flowchart TD
 
 ---
 
-### 3. 基礎：Sentiment Analysis（文字情緒與滿意度分析）
+### 3. [基礎：Sentiment Analysis（文字情緒與滿意度分析）](./Sentiment_Analysis/README.md)
 
 即時掌握顧客情緒！自動分析客戶回饋的情感傾向，快速捕捉負面客訴並啟動預警機制。
 
@@ -147,6 +151,8 @@ flowchart TD
 - 自訂細部情感標籤（如：極度滿意、一般好評、疑慮詢問、憤怒投訴）
 - 取得情緒信心分數（Confidence Score）
 - 搭配 IF 節點：若偵測到負面極端情緒立即觸發緊急推播通知
+
+- **附帶樣版**：[`Sentiment_Analysis.json`](./Sentiment_Analysis/Sentiment_Analysis.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -167,7 +173,7 @@ flowchart TD
 
 ---
 
-### 4. 基礎：Text Classifier（文字意圖分類與智慧路由）
+### 4. [基礎：Text Classifier（文字意圖分類與智慧路由）](./Text_Classifier/README.md)
 
 自動化流程的智慧總機！根據文字內容將任務精準分類，配合 Switch 節點實現多路分支路由。
 
@@ -176,6 +182,8 @@ flowchart TD
 - 設定多類別標籤（如：技術支援、帳務發票、業務洽詢、人事招聘）
 - 設定 Fallback 兜底類別（防止無法識別的情況）
 - 搭配 Switch 節點實現自動化業務派工與跨部門流轉
+
+- **附帶樣版**：[`Text_Classifier.json`](./Text_Classifier/Text_Classifier.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -198,7 +206,7 @@ flowchart TD
 
 ---
 
-### 5. 基礎：Summarization Chain（長文本智慧摘要濃縮）
+### 5. [基礎：Summarization Chain（長文本智慧摘要濃縮）](./Summarization_Chain/README.md)
 
 長篇大論救星！一秒精煉長篇新聞、會議記錄與政策法規，產出條理分明的重點摘要。
 
@@ -206,6 +214,8 @@ flowchart TD
 - Summarization Chain 節點運作機制
 - **Stuff 模式**（短中篇文本快速整合）vs **Map-Reduce 模式**（處理超出 Token 限制的超長文件）
 - 自訂摘要輸出規範（例如：限制 3 點核心要點、列出潛在風險與行動建議）
+
+- **附帶樣版**：[`Summarization_Chain.json`](./Summarization_Chain/Summarization_Chain.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
@@ -228,7 +238,7 @@ flowchart TD
 
 ---
 
-### 6. 基礎：Question and Answer Chain（基礎文件檢索問答鏈）
+### 6. [基礎：Question and Answer Chain（基礎文件檢索問答鏈）](./Question_and_Answer_Chain/README.md)
 
 RAG 知識庫的最簡實踐！讓 AI 根據指定的檢索文件（Retriever）直接回答問題，杜絕模型胡言亂語。
 
@@ -237,6 +247,8 @@ RAG 知識庫的最簡實踐！讓 AI 根據指定的檢索文件（Retriever）
 - 連接 Vector Store Retriever 檢索器
 - 限制 AI 僅根據參考文件內容作答的邊界設定
 - 與 AI Agent 的差異：單向問答無額外推理循環，反應速度更快
+
+- **附帶樣版**：[`Question_and_Answer_Chain.json`](./Question_and_Answer_Chain/Question_and_Answer_Chain.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>

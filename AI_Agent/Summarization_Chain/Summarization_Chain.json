@@ -1,0 +1,125 @@
+{
+  "name": "基礎_Summarization_Chain",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 5：Summarization Chain\n學習如何使用 Summarization Chain 進行長篇大論、會議記錄與文章的自動濃縮與重點摘要。",
+        "height": 140,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-380, -220],
+      "typeVersion": 1,
+      "id": "b5-sticky-1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-360, 0],
+      "id": "b5-manual-trigger",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-1",
+              "name": "article_title",
+              "value": "2026年全球人工智慧與自動化工作流程發展趨勢報告",
+              "type": "string"
+            },
+            {
+              "id": "field-2",
+              "name": "article_content",
+              "value": "隨著生成式 AI 技術成熟，企業自動化正從傳統的固定規則工作流邁向具備自主決策能力的 AI Agent 架構。根據最新產業調查，超過 75% 的跨國企業已在客服、財務審核與軟體開發中部署多代理協同系統。然而，企業在落地過程中仍面臨三大挑戰：首先是數據安全與隱私防護，許多組織開始傾向在私有雲部署開源本地模型（如 Ollama/Llama 體系）；其次是模型幻覺與精確度問題，促使 RAG（檢索增強生成）成為企業知識庫的標準配置；最後則是工作流整合難度，現代自動化平台（如 n8n）透過直觀的視覺化畫布與開放生態，大幅降低了工程師建構 AI 應用的門檻。預計至 2027 年，具備工具調用能力的智慧代理將普及於各行各業。",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 0],
+      "id": "b5-set-input",
+      "name": "模擬長篇文章內容"
+    },
+    {
+      "parameters": {
+        "operation": "summarize",
+        "type": "stuff",
+        "options": {
+          "prompt": "=請閱讀以下文章（篇名：{{ $json.article_title }}）並產出繁體中文專業摘要：\n\n文章內容：\n{{ $json.article_content }}\n\n輸出格式要求：\n1. 🎯【一句話核心結論】（30 字以內）\n2. 📌【三大核心亮點與趨勢】（條列式重點說明）\n3. 💡【企業行動建議】（50 字以內）"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [100, 0],
+      "id": "b5-summary-chain",
+      "name": "Summarization Chain"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:cloud",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "id": "b5-ollama-model",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "模擬長篇文章內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬長篇文章內容": {
+      "main": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

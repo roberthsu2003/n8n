@@ -1,0 +1,117 @@
+{
+  "name": "基礎_Information_Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 2：Information Extractor\n學習如何從非結構化雜亂文字中，精準提取強型別 JSON 欄位（取代傳統複雜 Regex）。",
+        "height": 140,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-380, -220],
+      "typeVersion": 1,
+      "id": "b2-sticky-1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-360, 0],
+      "id": "b2-manual-trigger",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-1",
+              "name": "raw_message",
+              "value": "您好！我是王小明（聯絡電話：0912-345-678），請幫我將商品送到「台北市信義區信義路五段7號8樓」。\n我想訂購：阿里山高山茶 2 盒（單價 600 元），以及日月潭紅茶 1 盒（單價 450 元）。請幫我開立統編 88889999，謝謝！",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 0],
+      "id": "b2-set-input",
+      "name": "模擬自然語言訂購留言"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.raw_message }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"customer_name\": { \"type\": \"string\", \"description\": \"顧客姓名\" },\n    \"phone\": { \"type\": \"string\", \"description\": \"聯絡電話\" },\n    \"shipping_address\": { \"type\": \"string\", \"description\": \"收件地址\" },\n    \"tax_id\": { \"type\": \"string\", \"description\": \"統一編號（若無則為空）\" },\n    \"order_items\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"item_name\": { \"type\": \"string\", \"description\": \"商品名稱\" },\n          \"quantity\": { \"type\": \"number\", \"description\": \"購買數量\" },\n          \"unit_price\": { \"type\": \"number\", \"description\": \"單價\" }\n        },\n        \"required\": [\"item_name\", \"quantity\"]\n      }\n    },\n    \"total_amount\": { \"type\": \"number\", \"description\": \"訂單預估總金額\" }\n  },\n  \"required\": [\"customer_name\", \"phone\", \"shipping_address\", \"order_items\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [100, 0],
+      "id": "b2-info-extractor",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:cloud",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "id": "b2-ollama-model",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "模擬自然語言訂購留言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬自然語言訂購留言": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -1,0 +1,187 @@
+{
+  "name": "基礎_Question_and_Answer_Chain",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 6：Question & Answer Chain\n學習最簡潔的文件檢索問答鏈，讓 AI 依據指定的參考資料精準作答（RAG 入門基礎）。",
+        "height": 140,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-380, -220],
+      "typeVersion": 1,
+      "id": "b6-sticky-1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-360, 0],
+      "id": "b6-manual-trigger",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-1",
+              "name": "user_question",
+              "value": "請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 0],
+      "id": "b6-set-input",
+      "name": "模擬顧客提問"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_question }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.4,
+      "position": [100, 0],
+      "id": "b6-qa-chain",
+      "name": "Question and Answer Chain"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:cloud",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "id": "b6-ollama-model",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "memory": "inMemory"
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [260, 200],
+      "id": "b6-vector-store",
+      "name": "In-Memory Vector Store"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [260, 360],
+      "id": "b6-embeddings-model",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value": "【產品售後與保固條款】\n1. 保固期限：凡購買本公司產品憑發票可享有 1 年原廠有限保固。\n2. 人為損壞除外條款：進水、摔落、私自拆解或受潮等人為因素導致之故障，不在免費保固範圍內，需酌收零件檢修費。\n3. 退換貨規範：商品自收到次日起享有 7 天猶豫期（非試用期），辦理退貨需保持包裝完整無損，退款流程將於收到退件後 3 個工作天內完成退刷。",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [420, 360],
+      "id": "b6-doc-loader",
+      "name": "預載售後政策規章 (Default Data Loader)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "模擬顧客提問",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬顧客提問": {
+      "main": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In-Memory Vector Store": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "In-Memory Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "預載售後政策規章 (Default Data Loader)": {
+      "ai_document": [
+        [
+          {
+            "node": "In-Memory Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

@@ -1,0 +1,222 @@
+{
+  "name": "基礎_Sentiment_Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 3：Sentiment Analysis\n學習文字情緒與情感傾向分析，並搭配 IF 節點建立緊急客訴預警機制。",
+        "height": 140,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-380, -220],
+      "typeVersion": 1,
+      "id": "b3-sticky-1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-360, 0],
+      "id": "b3-manual-trigger",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-1",
+              "name": "review_text",
+              "value": "已經等了超過一個星期都沒有收到商品，聯絡客服完全沒有人回應！這是非常差勁的購物經驗，要求立即全額退款並道歉！",
+              "type": "string"
+            },
+            {
+              "id": "field-2",
+              "name": "order_id",
+              "value": "ORD-20260901-889",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 0],
+      "id": "b3-set-input",
+      "name": "模擬顧客評論與客訴"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.review_text }}",
+        "options": {
+          "sentimentProperty": "sentiment",
+          "scoreProperty": "confidence_score"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1,
+      "position": [100, 0],
+      "id": "b3-sentiment-node",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "id": "b3-ollama-model",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-1",
+              "leftValue": "={{ $json.sentiment }}",
+              "rightValue": "negative",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [360, 0],
+      "id": "b3-if-check",
+      "name": "是否為負面客訴？(IF)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-alert",
+              "name": "alert_message",
+              "value": "=🚨【緊急客訴警報】訂單 {{ $json.order_id }} 收到強烈負面評論！\n內容：{{ $json.review_text }}\n情緒判定：{{ $json.sentiment }} (信心指數: {{ $json.confidence_score }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [600, -80],
+      "id": "b3-alert-set",
+      "name": "發送緊急主管通知 (True)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-log",
+              "name": "log_message",
+              "value": "=一般評論記錄：訂單 {{ $json.order_id }} 情緒正常 ({{ $json.sentiment }})",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [600, 80],
+      "id": "b3-log-set",
+      "name": "記錄至一般日誌 (False)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "模擬顧客評論與客訴",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬顧客評論與客訴": {
+      "main": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "是否為負面客訴？(IF)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否為負面客訴？(IF)": {
+      "main": [
+        [
+          {
+            "node": "發送緊急主管通知 (True)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "記錄至一般日誌 (False)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}

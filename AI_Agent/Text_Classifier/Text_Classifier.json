@@ -1,0 +1,291 @@
+{
+  "name": "基礎_Text_Classifier",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 4：Text Classifier\n學習如何使用 AI 進行意圖多分類，並搭配 Switch 節點實現自動化業務分流。",
+        "height": 140,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-380, -220],
+      "typeVersion": 1,
+      "id": "b4-sticky-1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-360, 0],
+      "id": "b4-manual-trigger",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-1",
+              "name": "inquiry_message",
+              "value": "我們公司想採購 50 套企業版授權，請問是否有專屬企業折扣？另外是否支援開立三聯式發票與簽訂年度維護合約？",
+              "type": "string"
+            },
+            {
+              "id": "field-2",
+              "name": "sender_email",
+              "value": "procurement@techcorp.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-140, 0],
+      "id": "b4-set-input",
+      "name": "模擬進線諮詢信件"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.inquiry_message }}",
+        "categories": {
+          "categories": [
+            {
+              "name": "sales_lead",
+              "description": "企業採購、商務合作、大量授權、專屬報價洽詢"
+            },
+            {
+              "name": "technical_support",
+              "description": "系統報錯、無法登入、API 串接異常、功能故障"
+            },
+            {
+              "name": "billing_issue",
+              "description": "退款申請、信用卡扣款失敗、發票更換"
+            },
+            {
+              "name": "general_inquiry",
+              "description": "其他一般常見問題、營業時間、門市地點"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [100, 0],
+      "id": "b4-classifier-node",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:cloud",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [100, 200],
+      "id": "b4-ollama-model",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "value": "sales_lead",
+              "output": 0
+            },
+            {
+              "value": "technical_support",
+              "output": 1
+            },
+            {
+              "value": "billing_issue",
+              "output": 2
+            }
+          ],
+          "fallbackOutput": 3
+        },
+        "dataType": "string",
+        "value1": "={{ $json.category }}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [360, 0],
+      "id": "b4-switch-router",
+      "name": "依意圖分流 (Switch)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "action",
+              "value": "💼【商務商機】已自動建立 CRM 潛在客戶並通知業務代表！",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [620, -120],
+      "id": "b4-sales-route",
+      "name": "業務商機分支 (Output 0)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2",
+              "name": "action",
+              "value": "🔧【技術支援】已自動建立 Jira 工單並指派給工程值班人員！",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [620, -40],
+      "id": "b4-tech-route",
+      "name": "技術支援分支 (Output 1)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3",
+              "name": "action",
+              "value": "💳【帳務發票】已派送至財務部收件匣！",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [620, 40],
+      "id": "b4-billing-route",
+      "name": "帳務問題分支 (Output 2)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f4",
+              "name": "action",
+              "value": "💬【一般諮詢】已寄送常見 FAQ 說明手冊！",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [620, 120],
+      "id": "b4-general-route",
+      "name": "一般諮詢分支 (Fallback)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "模擬進線諮詢信件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬進線諮詢信件": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "依意圖分流 (Switch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "依意圖分流 (Switch)": {
+      "main": [
+        [
+          {
+            "node": "業務商機分支 (Output 0)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "技術支援分支 (Output 1)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "帳務問題分支 (Output 2)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "一般諮詢分支 (Fallback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
