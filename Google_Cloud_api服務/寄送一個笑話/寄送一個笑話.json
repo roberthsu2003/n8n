@@ -1,20 +1,41 @@
 {
-  "name": "寄送一個笑話",
+  "name": "多來源 API 整合與工程師笑話電子報自動發信",
   "nodes": [
     {
       "parameters": {
-        "content": "## 寄送1個笑話...\n",
-        "height": 224,
-        "width": 1104
+        "content": "## 🤣 多 API 整合與幽默笑話電子報\n\n1. **Schedule Trigger**：每週五下午或每日定時排程啟動。\n2. **HTTP Request 1 & 2**：分別抓取「名人名言」與「程式設計師幽默笑話」。\n3. **Edit Fields (Set)**：聚合多來源資料，提取名言、作者與笑話問答內容。\n4. **Gmail**：排版為精美雙卡片 HTML 郵件，自動寄送給團隊放鬆心情！",
+        "height": 260,
+        "width": 520,
+        "color": 4
       },
+      "id": "note-joke-overview",
+      "name": "流程總覽說明",
       "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -288,
-        -160
-      ],
       "typeVersion": 1,
-      "id": "03a1c979-e891-4dfb-a0a7-39d9a33b0187",
-      "name": "Sticky Note2"
+      "position": [
+        -280,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 17,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        140
+      ],
+      "id": "schedule-joke-trigger",
+      "name": "每週五下午 17:00 定時觸發"
     },
     {
       "parameters": {
@@ -22,65 +43,60 @@
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [
-        16,
-        -96
+        0,
+        140
       ],
-      "id": "3a0dcb70-db58-4f62-9ad7-b164ba10f914",
-      "name": "取得一個引言"
+      "id": "http-fetch-quote",
+      "name": "取得名人引言"
     },
     {
       "parameters": {
-        "url": "=https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single",
+        "url": "https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [
-        208,
-        -96
+        220,
+        140
       ],
-      "id": "6833de04-5673-4787-8749-e07b180679d3",
-      "name": "取得一個程式碼的笑話"
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {}
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -192,
-        -96
-      ],
-      "id": "6156db94-8a99-4642-a69f-ed96ecfa6a72",
-      "name": "安排時間點1"
+      "id": "http-fetch-joke",
+      "name": "取得程式設計師笑話"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "6d00045b-18c8-409b-a660-82a65f4e671c",
-              "name": "作者",
-              "value": "={{ $('取得一個引言').item.json.a }}",
+              "id": "set-quote-author",
+              "name": "quoteAuthor",
+              "value": "={{ $('取得名人引言').item.json[0].a || $('取得名人引言').item.json.a }}",
               "type": "string"
             },
             {
-              "id": "8794fc82-17df-4d59-8bc3-90a49912212b",
-              "name": "笑話",
+              "id": "set-quote-text",
+              "name": "quoteText",
+              "value": "={{ $('取得名人引言').item.json[0].q || $('取得名人引言').item.json.q }}",
+              "type": "string"
+            },
+            {
+              "id": "set-joke",
+              "name": "jokeContent",
               "value": "={{ $json.joke }}",
               "type": "string"
             },
             {
-              "id": "83dced00-3edc-41a7-abd1-706409d8e6cc",
-              "name": "類別",
+              "id": "set-category",
+              "name": "jokeCategory",
               "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "set-date",
+              "name": "sendDate",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
               "type": "string"
             }
           ]
@@ -90,77 +106,75 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        416,
-        -96
+        460,
+        140
       ],
-      "id": "da96c71e-9feb-47f5-b234-4be98c1ee48c",
-      "name": "取出前2個網站的資料"
+      "id": "set-aggregate-data",
+      "name": "聚合引言與笑話資料"
     },
     {
       "parameters": {
-        "sendTo": "roberthsu2003@gmail.com",
-        "subject": "這是一個笑話",
-        "emailType": "text",
-        "message": "=請看這裏的笑話\n作者:{{ $json.作者 }}\n類別:{{ $json.類別 }}\n笑話:{{ $json.笑話 }}",
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "=🎉 【週末放鬆特刊】{{ $json.sendDate }} 工程師幽默笑話與心靈金句",
+        "emailType": "html",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;\">\n  <div style=\"text-align: center; margin-bottom: 20px;\">\n    <h2 style=\"color: #0f172a; margin-bottom: 4px;\">💻 工程師週末放鬆特刊 ☕</h2>\n    <p style=\"color: #64748b; font-size: 14px; margin: 0;\">辛苦了一週，笑一笑準備迎接美好假期！</p>\n  </div>\n\n  <!-- 笑話卡片 -->\n  <div style=\"background: #ffffff; padding: 20px; border-radius: 12px; border-left: 5px solid #10b981; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 16px;\">\n    <span style=\"background: #d1fae5; color: #065f46; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold;\">😂 工程師笑話 ({{ $json.jokeCategory }})</span>\n    <p style=\"font-size: 16px; line-height: 1.6; color: #1e293b; margin: 12px 0 0 0;\">\n      {{ $json.jokeContent }}\n    </p>\n  </div>\n\n  <!-- 金句卡片 -->\n  <div style=\"background: #ffffff; padding: 20px; border-radius: 12px; border-left: 5px solid #8b5cf6; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);\">\n    <span style=\"background: #ede9fe; color: #5b21b6; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold;\">✨ 今日金句</span>\n    <p style=\"font-size: 15px; line-height: 1.6; color: #334155; font-style: italic; margin: 12px 0 6px 0;\">\n      “{{ $json.quoteText }}”\n    </p>\n    <p style=\"text-align: right; color: #64748b; font-size: 13px; margin: 0;\">\n      —— {{ $json.quoteAuthor }}\n    </p>\n  </div>\n</div>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        608,
-        -96
+        700,
+        140
       ],
-      "id": "7d52e404-c6ba-4aa5-97df-db452d8bf0a3",
-      "name": "發送一個笑話",
-      "webhookId": "191e32f2-155f-4566-8c05-798d322f6672",
+      "id": "gmail-send-joke-mail",
+      "name": "Gmail 發送幽默電子報",
       "credentials": {
         "gmailOAuth2": {
-          "id": "x0PFl2hklrzd3Zor",
+          "id": "YOUR_GMAIL_CRED_ID",
           "name": "Gmail account"
         }
       }
     }
   ],
-  "pinData": {},
   "connections": {
-    "取得一個引言": {
+    "每週五下午 17:00 定時觸發": {
       "main": [
         [
           {
-            "node": "取得一個程式碼的笑話",
+            "node": "取得名人引言",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "取得一個程式碼的笑話": {
+    "取得名人引言": {
       "main": [
         [
           {
-            "node": "取出前2個網站的資料",
+            "node": "取得程式設計師笑話",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "安排時間點1": {
+    "取得程式設計師笑話": {
       "main": [
         [
           {
-            "node": "取得一個引言",
+            "node": "聚合引言與笑話資料",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "取出前2個網站的資料": {
+    "聚合引言與笑話資料": {
       "main": [
         [
           {
-            "node": "發送一個笑話",
+            "node": "Gmail 發送幽默電子報",
             "type": "main",
             "index": 0
           }
@@ -168,21 +182,5 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "ac3d585f-e8bf-491c-bfef-e77b44262533",
-  "meta": {
-    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
-  },
-  "id": "1TXwwJIy0yBjxkhm",
-  "tags": [
-    {
-      "updatedAt": "2025-11-20T02:34:19.787Z",
-      "createdAt": "2025-11-20T02:34:19.787Z",
-      "id": "0jpUyf1qykdlExqM",
-      "name": "上課用"
-    }
-  ]
+  "pinData": {}
 }

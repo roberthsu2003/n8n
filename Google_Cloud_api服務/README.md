@@ -64,7 +64,7 @@ flowchart LR
 - 使用 Extract from File 與 Convert to File 節點
 - 雲端硬碟檔案自動上傳與資料夾管理
 
-- **附帶樣版**：[`儲存檔案至googe_drive.json`](./儲存檔案至google_drive/儲存檔案至googe_drive.json)
+- **附帶樣版**：[`儲存檔案至google_drive.json`](./儲存檔案至google_drive/儲存檔案至google_drive.json)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>

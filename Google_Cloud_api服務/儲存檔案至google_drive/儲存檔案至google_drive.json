@@ -1,0 +1,212 @@
+{
+  "name": "自動下載政府開放資料並轉存 Excel 至 Google Drive",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-start",
+      "name": "手動觸發",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://data.taipei/api/dataset/9cb8ebf1-8d21-4523-908c-af853867eea1/resource/cec51213-9585-4b4a-ae18-5c9309ddf453/download",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "http-download-csv",
+      "name": "下載 CSV 開放資料檔案",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -620,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "delimiter": ",",
+          "enableBOM": false,
+          "headerRow": true
+        }
+      },
+      "id": "extract-csv-records",
+      "name": "解析 CSV 資料",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "=台北市開放資料備份_{{ $now.format('yyyyMMdd_HHmmss') }}.xlsx"
+        }
+      },
+      "id": "convert-to-xlsx",
+      "name": "轉換為 Excel 檔案",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "name": "=台北市開放資料備份_{{ $now.format('yyyyMMdd_HHmmss') }}.xlsx",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "我的雲端硬碟 (根目錄)"
+        },
+        "options": {}
+      },
+      "id": "gdrive-upload-file",
+      "name": "上傳至 Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        120,
+        780
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CRED_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🌐 步驟 1：下載 CSV 檔案\n- 從台北市開放資料平台下載即時資料。\n- 回應格式設定為 **File (二進位檔案)**，自動傳入流程中。",
+        "height": 260,
+        "width": 260,
+        "color": 5
+      },
+      "id": "note-step1",
+      "name": "節點說明 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📥 步驟 2：解析 CSV 內容\n- 將二進位 CSV 檔案自動解碼。\n- 開啟 `headerRow: true` 將標題列自動轉換為 JSON 鍵值欄位。",
+        "height": 260,
+        "width": 260,
+        "color": 6
+      },
+      "id": "note-step2",
+      "name": "節點說明 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📤 步驟 3：轉存為 Excel (XLSX)\n- 將 JSON 資料打包轉換為正式的 Excel 工作表。\n- 動態依當前時間命名檔案（如 `備份_20260901_223000.xlsx`）。",
+        "height": 260,
+        "width": 260,
+        "color": 3
+      },
+      "id": "note-step3",
+      "name": "節點說明 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📁 步驟 4：自動上傳 Google Drive\n- 將轉換完成的 Excel 檔案上傳至指定 Google Drive 資料夾。\n- 自動獲取檔案 ID 與雲端分享連結。",
+        "height": 260,
+        "width": 280,
+        "color": 4
+      },
+      "id": "note-step4",
+      "name": "節點說明 4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        480
+      ]
+    }
+  ],
+  "connections": {
+    "手動觸發": {
+      "main": [
+        [
+          {
+            "node": "下載 CSV 開放資料檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下載 CSV 開放資料檔案": {
+      "main": [
+        [
+          {
+            "node": "解析 CSV 資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 CSV 資料": {
+      "main": [
+        [
+          {
+            "node": "轉換為 Excel 檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "轉換為 Excel 檔案": {
+      "main": [
+        [
+          {
+            "node": "上傳至 Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

@@ -1,27 +1,29 @@
 {
-  "name": "自動寄送gmail",
+  "name": "每日早晨金句晨報與 Gmail 自動排程發信",
   "nodes": [
     {
       "parameters": {
-        "content": "## 現在開始安排時間 ⏰\n\n1. 雙擊“時間計劃”以設定運行時間\n\n2. 連接您的 Gmail 並設定收件人\n\n3. 若要進行測試，請點選「計畫」節點上的「執行工作流程」。",
-        "height": 272,
-        "width": 1232
+        "content": "## ⏰ 每日晨間自動發信流程\n\n1. **Schedule Trigger**：設定每天早晨（例如 08:30）自動定時觸發。\n2. **HTTP Request**：從公開 API 即時獲取今日隨機勵志金句。\n3. **Edit Fields (Set)**：整理引言內容、作者與格式化當前日期。\n4. **Gmail**：自動組裝精美 HTML 郵件卡片並寄送至指定信箱！",
+        "height": 260,
+        "width": 500,
+        "color": 4
       },
+      "id": "note-gmail-overview",
+      "name": "流程總覽說明",
       "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -400,
-        -176
-      ],
       "typeVersion": 1,
-      "id": "56427147-bf89-4a40-a054-d97966010190",
-      "name": "Sticky Note1"
+      "position": [
+        -200,
+        -180
+      ]
     },
     {
       "parameters": {
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 7
+              "triggerAtHour": 8,
+              "triggerAtMinute": 30
             }
           ]
         }
@@ -29,11 +31,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        80,
-        -80
+        -160,
+        140
       ],
-      "id": "aefa24bf-29fa-45ec-888e-fd1794f4bf79",
-      "name": "安排時間點"
+      "id": "schedule-morning-trigger",
+      "name": "每天早晨 08:30 定時觸發"
     },
     {
       "parameters": {
@@ -41,34 +43,40 @@
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
+      "typeVersion": 4.4,
       "position": [
-        272,
-        -80
+        100,
+        140
       ],
-      "id": "0e53638f-a2e6-4c23-a6fd-8f5921826494",
-      "name": "HTTP Request"
+      "id": "http-fetch-quote",
+      "name": "取得每日勵志金句"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "1bec931c-8bcf-46dc-9eae-df2a5f3d1818",
-              "name": "問題",
-              "value": "={{ $json.q }}",
+              "id": "set-quote",
+              "name": "quoteText",
+              "value": "={{ $json[0].q || $json.q }}",
               "type": "string"
             },
             {
-              "id": "86cc85e9-2c5c-4cd0-a17e-4f8213ab5f3d",
-              "name": "作者",
-              "value": "={{ $json.a }}",
+              "id": "set-author",
+              "name": "quoteAuthor",
+              "value": "={{ $json[0].a || $json.a }}",
               "type": "string"
             },
             {
-              "id": "b4d73c76-72c2-4317-a42f-ac11f5a0d5c7",
-              "name": "結果",
-              "value": "={{ $json.h }}",
+              "id": "set-date",
+              "name": "currentDate",
+              "value": "={{ $now.format('yyyy 年 MM 月 dd 日 EEEE') }}",
+              "type": "string"
+            },
+            {
+              "id": "set-time",
+              "name": "currentTime",
+              "value": "={{ $now.format('HH:mm:ss') }}",
               "type": "string"
             }
           ]
@@ -78,67 +86,64 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        448,
-        -80
+        360,
+        140
       ],
-      "id": "42413544-05b2-433d-9083-0e27c6750e1f",
-      "name": "結果"
+      "id": "set-format-morning-data",
+      "name": "整理晨報與日期資料"
     },
     {
       "parameters": {
-        "sendTo": "roberthsu2003@gmail.com",
-        "subject": "從n8n發送過來的",
-        "emailType": "text",
-        "message": "=這個是從n8n寄來的引言\n引言是:{{ $json.問題 }}\n作者是:{{ $json.作者 }}\n回覆是:{{ $json.結果 }}",
+        "sendTo": "YOUR_EMAIL@gmail.com",
+        "subject": "=☀️ 【早安晨報】{{ $json.currentDate }} 每日能量金句",
+        "emailType": "html",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #f8fafc;\">\n  <div style=\"text-align: center; margin-bottom: 20px;\">\n    <span style=\"background: #dbeafe; color: #1d4ed8; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold;\">n8n 自動化晨間快遞</span>\n    <h2 style=\"color: #0f172a; margin: 12px 0 4px 0;\">☀️ 早安！美好的一天從這裡開始</h2>\n    <p style=\"color: #64748b; font-size: 14px; margin: 0;\">{{ $json.currentDate }}</p>\n  </div>\n  \n  <div style=\"background: #ffffff; padding: 24px; border-radius: 12px; border-left: 5px solid #3b82f6; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin: 20px 0;\">\n    <p style=\"font-size: 18px; line-height: 1.6; color: #1e293b; font-style: italic; margin-top: 0;\">\n      “{{ $json.quoteText }}”\n    </p>\n    <p style=\"text-align: right; color: #64748b; font-weight: bold; margin-bottom: 0;\">\n      —— {{ $json.quoteAuthor }}\n    </p>\n  </div>\n\n  <div style=\"text-align: center; color: #94a3b8; font-size: 12px; margin-top: 24px;\">\n    <p style=\"margin: 0;\">本郵件由 n8n 工作流程於 {{ $json.currentTime }} 自動生成與排程發送</p>\n  </div>\n</div>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        640,
-        -80
+        620,
+        140
       ],
-      "id": "32a2467f-811a-4ced-97e5-b8ef13da7ef3",
-      "name": "Send a message",
-      "webhookId": "e5289eea-1948-48c1-af5f-73bd26f45bfa",
-      "alwaysOutputData": true,
+      "id": "gmail-send-morning-mail",
+      "name": "Gmail 自動寄出 HTML 晨報",
       "credentials": {
         "gmailOAuth2": {
-          "id": "x0PFl2hklrzd3Zor",
+          "id": "YOUR_GMAIL_CRED_ID",
           "name": "Gmail account"
         }
       }
     }
   ],
-  "pinData": {},
   "connections": {
-    "安排時間點": {
+    "每天早晨 08:30 定時觸發": {
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "取得每日勵志金句",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request": {
+    "取得每日勵志金句": {
       "main": [
         [
           {
-            "node": "結果",
+            "node": "整理晨報與日期資料",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "結果": {
+    "整理晨報與日期資料": {
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Gmail 自動寄出 HTML 晨報",
             "type": "main",
             "index": 0
           }
@@ -146,21 +151,5 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "67ec070b-9a2d-489a-bb6c-efb1957de155",
-  "meta": {
-    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
-  },
-  "id": "SwU0cxyInMWhIe5J",
-  "tags": [
-    {
-      "updatedAt": "2025-11-20T02:34:19.787Z",
-      "createdAt": "2025-11-20T02:34:19.787Z",
-      "id": "0jpUyf1qykdlExqM",
-      "name": "上課用"
-    }
-  ]
+  "pinData": {}
 }

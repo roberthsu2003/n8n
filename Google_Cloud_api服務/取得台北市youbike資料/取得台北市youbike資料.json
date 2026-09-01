@@ -402,8 +402,8 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "loose",
-            "version": 1
+            "typeValidation": "strict",
+            "version": 2
           },
           "conditions": [
             {
@@ -424,7 +424,7 @@
       "id": "c25998e6-3eef-4cf6-b98f-36a18e43a4f7",
       "name": "判斷是否存在",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
+      "typeVersion": 2.2,
       "position": [
         960,
         208

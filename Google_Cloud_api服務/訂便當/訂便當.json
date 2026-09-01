@@ -1,203 +1,326 @@
 {
-    "nodes": [
-      {
-        "parameters": {
-          "formTitle": "訂便當系統",
-          "formDescription": "中午的便當",
-          "formFields": {
-            "values": [
-              {
-                "fieldName": "姓名",
-                "fieldLabel": "請輸入姓名",
-                "requiredField": true
-              },
-              {
-                "fieldName": "選擇便當類型",
-                "fieldLabel": "請選擇",
-                "fieldType": "dropdown",
-                "fieldOptions": {
-                  "values": [
-                    {
-                      "option": "火腿-120"
-                    },
-                    {
-                      "option": "雞腿-130"
-                    },
-                    {
-                      "option": "排骨-110"
-                    }
-                  ]
-                },
-                "requiredField": true
-              }
-            ]
-          },
-          "options": {
-            "appendAttribution": false,
-            "buttonLabel": "送出"
-          }
-        },
-        "type": "n8n-nodes-base.formTrigger",
-        "typeVersion": 2.4,
-        "position": [
-          -272,
-          0
-        ],
-        "id": "d903ba82-6aa5-4f9e-ba2f-4dc3be1bb5f3",
-        "name": "On form submission",
-        "webhookId": "cf4e6909-4849-47d2-aaef-9f6dca9e1b49"
+  "name": "辦公室與班級線上訂便當與自動登記 Google 試算表",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🍱 辦公室/班級線上訂便當自動化系統\n\n1. **Form Trigger**：同仁/學生透過手機或瀏覽器填寫線上表單（姓名、Email、主餐、加飯/飲料選項）。\n2. **Edit Fields (Set)**：自動解析選購品項名稱、單價、加購費用並計算訂單總額。\n3. **Google Sheets**：將每筆訂購資料自動追加記錄到試算表。\n4. **Gmail**：即時發送精美的訂單確認信給訂購者，告知已成功登記！",
+        "height": 260,
+        "width": 520,
+        "color": 4
       },
-      {
-        "parameters": {
-          "operation": "append",
-          "documentId": {
-            "__rl": true,
-            "value": "=https://docs.google.com/spreadsheets/d/12CksZzAiLBOLJjxyFofntketHl9sb1Iiad4qlLOeT2w/edit?gid=0#gid=0",
-            "mode": "url"
-          },
-          "sheetName": {
-            "__rl": true,
-            "value": 1333817722,
-            "mode": "list",
-            "cachedResultName": "工作表2",
-            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12CksZzAiLBOLJjxyFofntketHl9sb1Iiad4qlLOeT2w/edit#gid=1333817722"
-          },
-          "columns": {
-            "mappingMode": "defineBelow",
-            "value": {
-              "客戶姓名": "={{ $json['姓名'] }}",
-              "便當名稱": "={{ $json['便當名稱'] }}",
-              "價格": "={{ $json['價格'] }}",
-              "訂購日期": "={{ $json['時間'] }}"
+      "id": "note-bento-overview",
+      "name": "流程總覽說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "🍱 今日午餐訂便當系統",
+        "formDescription": "請於每日上午 10:30 前完成登記，系統將自動統計並發送確認信！",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "name",
+              "fieldLabel": "您的姓名",
+              "requiredField": true
             },
-            "matchingColumns": [],
-            "schema": [
-              {
-                "id": "客戶姓名",
-                "displayName": "客戶姓名",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": true
+            {
+              "fieldName": "email",
+              "fieldLabel": "電子郵件 (接收訂單確認信)",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldName": "bento_option",
+              "fieldLabel": "選擇主餐便當",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "🍗 酥脆大雞腿便當 - $130"
+                  },
+                  {
+                    "option": "🥩 經典厚切排骨便當 - $120"
+                  },
+                  {
+                    "option": "🐟 香煎無刺鯖魚便當 - $115"
+                  },
+                  {
+                    "option": "🥗 繽紛彩蔬健康便當 (全素) - $100"
+                  }
+                ]
               },
-              {
-                "id": "便當名稱",
-                "displayName": "便當名稱",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": true
-              },
-              {
-                "id": "價格",
-                "displayName": "價格",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": true
-              },
-              {
-                "id": "訂購日期",
-                "displayName": "訂購日期",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": true
+              "requiredField": true
+            },
+            {
+              "fieldName": "extra_option",
+              "fieldLabel": "加值選項",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "不需要"
+                  },
+                  {
+                    "option": "免費加飯"
+                  },
+                  {
+                    "option": "加購古早味紅茶 (+$20)"
+                  },
+                  {
+                    "option": "免費加飯 + 加購紅茶 (+$20)"
+                  }
+                ]
               }
-            ],
-            "attemptToConvertTypes": false,
-            "convertFieldsToString": false
-          },
-          "options": {}
+            },
+            {
+              "fieldName": "note",
+              "fieldLabel": "特殊需求 / 備註",
+              "placeholder": "例如：不加蔥、飯少、醬汁分開等"
+            }
+          ]
         },
-        "type": "n8n-nodes-base.googleSheets",
-        "typeVersion": 4.7,
-        "position": [
-          176,
-          0
-        ],
-        "id": "4a44eae1-e179-4150-bd58-1f027742e672",
-        "name": "Append row in sheet",
-        "credentials": {
-          "googleSheetsOAuth2Api": {
-            "id": "P5aeSky9Aez0k63U",
-            "name": "Google Sheets account"
-          }
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "確認送出訂單 🚀",
+          "responseMode": "lastNode"
         }
       },
-      {
-        "parameters": {
-          "assignments": {
-            "assignments": [
-              {
-                "id": "eb0fd415-2557-4a94-bcf3-369f9dccd96b",
-                "name": "姓名",
-                "value": "={{ $json['姓名'] }}",
-                "type": "string"
-              },
-              {
-                "id": "b0484469-c031-4700-a773-308e81f911fe",
-                "name": "便當名稱",
-                "value": "={{ $json['選擇便當類型'].split('-')[0] }}",
-                "type": "string"
-              },
-              {
-                "id": "280ba38c-2c33-4580-b34a-88691fe92d6f",
-                "name": "價格",
-                "value": "={{ Number($json['選擇便當類型'].split('-')[1]) }}",
-                "type": "number"
-              },
-              {
-                "id": "0c9b5f83-6802-4e82-a827-a254111a74de",
-                "name": "時間",
-                "value": "={{ $json.submittedAt.split('T')[0] }}",
-                "type": "string"
-              }
-            ]
-          },
-          "options": {}
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -260,
+        140
+      ],
+      "id": "form-trigger-bento",
+      "name": "訂便當線上表單觸發器",
+      "webhookId": "bento-order-form"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-name",
+              "name": "customerName",
+              "value": "={{ $json['name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-email",
+              "name": "customerEmail",
+              "value": "={{ $json['email'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-bento-name",
+              "name": "bentoName",
+              "value": "={{ $json['bento_option'].split(' - ')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-bento-price",
+              "name": "bentoPrice",
+              "value": "={{ Number($json['bento_option'].split('$')[1]) || 120 }}",
+              "type": "number"
+            },
+            {
+              "id": "set-extra-option",
+              "name": "extraOption",
+              "value": "={{ $json['extra_option'] || '無' }}",
+              "type": "string"
+            },
+            {
+              "id": "set-extra-fee",
+              "name": "extraFee",
+              "value": "={{ ($json['extra_option'] && $json['extra_option'].includes('+$20')) ? 20 : 0 }}",
+              "type": "number"
+            },
+            {
+              "id": "set-total-amount",
+              "name": "totalAmount",
+              "value": "={{ (Number($json['bento_option'].split('$')[1]) || 120) + (($json['extra_option'] && $json['extra_option'].includes('+$20')) ? 20 : 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "set-note",
+              "name": "orderNote",
+              "value": "={{ $json['note'] || '無特殊需求' }}",
+              "type": "string"
+            },
+            {
+              "id": "set-order-date",
+              "name": "orderDate",
+              "value": "={{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "set-order-time",
+              "name": "orderTime",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            }
+          ]
         },
-        "type": "n8n-nodes-base.set",
-        "typeVersion": 3.4,
-        "position": [
-          -64,
-          0
-        ],
-        "id": "64926f1f-3210-46e6-a9f1-a6ff5f3a4a66",
-        "name": "Edit Fields"
-      }
-    ],
-    "connections": {
-      "On form submission": {
-        "main": [
-          [
-            {
-              "node": "Edit Fields",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
+        "options": {}
       },
-      "Edit Fields": {
-        "main": [
-          [
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        40,
+        140
+      ],
+      "id": "set-process-bento",
+      "name": "拆解品項與計算金額"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "工作表1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "訂購日期": "={{ $json.orderDate }}",
+            "訂購時間": "={{ $json.orderTime }}",
+            "訂購人姓名": "={{ $json.customerName }}",
+            "電子信箱": "={{ $json.customerEmail }}",
+            "便當品項": "={{ $json.bentoName }}",
+            "加值選項": "={{ $json.extraOption }}",
+            "實收金額": "={{ $json.totalAmount }}",
+            "備註": "={{ $json.orderNote }}"
+          },
+          "matchingColumns": [],
+          "schema": [
             {
-              "node": "Append row in sheet",
-              "type": "main",
-              "index": 0
+              "id": "訂購日期",
+              "displayName": "訂購日期",
+              "type": "string"
+            },
+            {
+              "id": "訂購時間",
+              "displayName": "訂購時間",
+              "type": "string"
+            },
+            {
+              "id": "訂購人姓名",
+              "displayName": "訂購人姓名",
+              "type": "string"
+            },
+            {
+              "id": "電子信箱",
+              "displayName": "電子信箱",
+              "type": "string"
+            },
+            {
+              "id": "便當品項",
+              "displayName": "便當品項",
+              "type": "string"
+            },
+            {
+              "id": "加值選項",
+              "displayName": "加值選項",
+              "type": "string"
+            },
+            {
+              "id": "實收金額",
+              "displayName": "實收金額",
+              "type": "number"
+            },
+            {
+              "id": "備註",
+              "displayName": "備註",
+              "type": "string"
             }
           ]
-        ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        140
+      ],
+      "id": "sheets-append-bento",
+      "name": "Google Sheets 寫入訂單",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CRED_ID",
+          "name": "Google Sheets account"
+        }
       }
     },
-    "pinData": {},
-    "meta": {
-      "templateCredsSetupCompleted": true,
-      "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+    {
+      "parameters": {
+        "sendTo": "={{ $json.customerEmail }}",
+        "subject": "=🍱 【訂單確認】{{ $json.customerName }} 您好，您今日的午餐已完成登記！",
+        "emailType": "html",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;\">\n  <h2 style=\"color: #2563eb; margin-top: 0;\">🍱 今日午餐訂單登記成功！</h2>\n  <p>親愛的 <strong>{{ $json.customerName }}</strong> 您好：</p>\n  <p>您的午餐訂購資料已成功寫入登記表，詳細明細如下：</p>\n  <div style=\"background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;\">\n    <p style=\"margin: 6px 0;\"><strong>📋 訂購品項：</strong> {{ $json.bentoName }}</p>\n    <p style=\"margin: 6px 0;\"><strong>➕ 加值選項：</strong> {{ $json.extraOption }}</p>\n    <p style=\"margin: 6px 0;\"><strong>💰 應付金額：</strong> <span style=\"color: #e11d48; font-size: 18px; font-weight: bold;\">${{ $json.totalAmount }} 元</span></p>\n    <p style=\"margin: 6px 0;\"><strong>📝 備註需求：</strong> {{ $json.orderNote }}</p>\n    <p style=\"margin: 6px 0;\"><strong>🕒 登記時間：</strong> {{ $json.orderTime }}</p>\n  </div>\n  <p style=\"color: #64748b; font-size: 13px;\">💡 溫馨提醒：請於中午 12:00 前至茶水間/前台領取並完成付款，祝您用餐愉快！</p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        600,
+        140
+      ],
+      "id": "gmail-send-confirmation",
+      "name": "Gmail 發送訂單確認信",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CRED_ID",
+          "name": "Gmail account"
+        }
+      }
     }
-  }
+  ],
+  "connections": {
+    "訂便當線上表單觸發器": {
+      "main": [
+        [
+          {
+            "node": "拆解品項與計算金額",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "拆解品項與計算金額": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets 寫入訂單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets 寫入訂單": {
+      "main": [
+        [
+          {
+            "node": "Gmail 發送訂單確認信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}
