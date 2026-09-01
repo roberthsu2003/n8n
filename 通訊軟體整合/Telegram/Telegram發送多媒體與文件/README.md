@@ -12,10 +12,11 @@
 ```mermaid
 flowchart LR
     A["👆 手動或排程觸發 (Trigger)"] --> B["📋 設定多媒體與報表資料 (Set 節點)"]
-    B --> C["🖼️ 發送 Telegram 照片與圖表 (Send Photo)"]
-    C --> D["📥 下載報表檔案 (HTTP Request - Binary)"]
-    D --> E["📁 發送 Telegram 文件檔案 (Send Document)"]
-    E --> F["📱 Telegram 聊天室收到圖文與下載檔案"]
+    B --> C["📥 下載圖表圖片 (HTTP Request - Binary)"]
+    C --> D["🖼️ 發送 Telegram 照片與圖表 (Send Photo)"]
+    D --> E["📥 下載報表檔案 (HTTP Request - Binary)"]
+    E --> F["📁 發送 Telegram 文件檔案 (Send Document)"]
+    F --> G["📱 Telegram 聊天室收到圖文與下載檔案"]
 ```
 
 ---
@@ -23,6 +24,7 @@ flowchart LR
 ### 工作流程樣版下載
 
 - [📥 Telegram 發送多媒體與文件樣版 (telegram_send_media.json)](./telegram_send_media.json)
+- [🖼️ 範例圖表圖片下載 (chart.png)](./chart.png)
 - [📄 範例報表檔案下載 (學生成績單.csv)](./學生成績單.csv)
 
 ---
@@ -30,7 +32,7 @@ flowchart LR
 #### 📋 節點詳細說明
 
 1. **📝 流程說明（Sticky Note）**
-   - **功能**：說明如何傳遞外部圖片網址或本機/二進位檔案，以及設定圖文說明的技巧。
+   - **功能**：說明如何傳遞外部圖片網址或二進位檔案，以及設定圖文說明的技巧。
 
 2. **👆 手動觸發測試（Manual Trigger Node）**
    - **功能**：點擊「Execute Workflow」手動執行測試（亦可替換為 Schedule Trigger 排程觸發）。
@@ -38,27 +40,34 @@ flowchart LR
 3. **📋 設定多媒體與報表資料（Edit Fields / Set Node）**
    - **功能**：準備推播相關素材與目標聊天室 ID：
      - `targetChatId`：接收檔案的 Telegram Chat ID。
-     - `photoUrl`：高畫質圖片或圖表公開 URL。
+     - `photoUrl`：本資料夾中 `chart.png` 的 GitHub Raw 下載網址。
      - `photoCaption`：圖片下方顯示的 Markdown 說明文字。
-     - `documentUrl`：報表檔案下載 URL（例如 CSV 檔）。
+     - `documentUrl`：本資料夾中 `學生成績單.csv` 的 GitHub Raw 下載網址。
      - `documentCaption`：檔案下方附帶的說明文字。
 
-4. **🖼️ 發送 Telegram 照片與圖表（Telegram Node - Send Photo）**
-   - **功能**：調用 Telegram `sendPhoto` API。
+4. **📥 下載圖表圖片（HTTP Request Node）**
+   - **功能**：由 n8n 自行將圖片下載為二進位資料（Binary），避免 Telegram 伺服器因爬蟲限制而無法載入圖片。
+   - **設定要點**：
+     - **URL**：`={{ $json.photoUrl }}`
+     - **Response Format**：`File`（存入 `data` 二進位屬性）。
+
+5. **🖼️ 發送 Telegram 照片與圖表（Telegram Node - Send Photo）**
+   - **功能**：調用 Telegram `sendPhoto` API，以二進位資料直接上傳發送高解析度圖片。
    - **設定要點**：
      - **Resource**：`Photo`
      - **Operation**：`Send Photo`
-     - **Chat ID**：`={{ $json.targetChatId }}`
-     - **File**：`={{ $json.photoUrl }}`
+     - **Chat ID**：`={{ $('設定多媒體與報表資料').item.json.targetChatId }}`
+     - **Binary File**：開啟（`True`）
+     - **Input Data Field Name**：`data`
      - **Additional Fields > Caption**：填入 `photoCaption` 並設定 `Parse Mode` 為 `Markdown`。
 
-5. **📥 下載報表檔案（HTTP Request Node）**
+6. **📥 下載報表檔案（HTTP Request Node）**
    - **功能**：由 n8n 自行將 CSV 檔案下載為二進位資料（Binary），徹底避免 Telegram 伺服器因防盜鏈或中文編碼而拋出 `failed to get HTTP URL content` 錯誤。
    - **設定要點**：
      - **URL**：`={{ $('設定多媒體與報表資料').item.json.documentUrl }}`
      - **Response Format**：`File`（存入 `data` 二進位屬性）。
 
-6. **📁 發送 Telegram 文件檔案（Telegram Node - Send Document）**
+7. **📁 發送 Telegram 文件檔案（Telegram Node - Send Document）**
    - **功能**：調用 Telegram `sendDocument` API，以二進位資料直接上傳發送實體檔案。
    - **設定要點**：
      - **Resource**：`Document`
