@@ -18,6 +18,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![n8n 呼叫 Telegram 發送訊息流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 Telegram 發送訊息工作流程樣版 (telegram_send_message.json)](./telegram_send_message.json)
@@ -35,7 +41,7 @@ flowchart LR
 
 3. **📋 準備推播報表資料（Edit Fields / Set Node）**
    - **功能**：設定發送目標 `targetChatId` 與欲推播的各項指標數據：
-     - `targetChatId`：接收通知的 Telegram Chat ID（填入個人 ID 或群組 ID 如 `-100xxxxxxx`）。
+     - `targetChatId`：接收通知的 Telegram Chat ID（填入個人 ID 或群組 ID 如 `-100xxxxxxx`，詳細取得方式請參閱 [👇 步驟 1：取得目標 Chat ID](#get-chat-id)）。
      - `serverName`、`serverStatus`、`cpuUsage`、`memoryUsage`、`diskUsage`、`alertLevel` 等。
 
 4. **📤 發送 Telegram Markdown 推播訊息（Telegram Node）**
@@ -69,6 +75,7 @@ flowchart LR
 
 #### ⚙️ 設定步驟
 
+<a id="get-chat-id"></a>
 1. **取得目標 Chat ID**：
    - **方式 A：在 Telegram 軟體內透過查詢機器人（最推薦、最快速 ⚡）**：
      - **個人 Chat ID**：在 Telegram 搜尋 `@userinfobot`（或 `@raw_data_bot`）並點擊「開始 (Start)」，機器人回傳的 `Id:` 即為您的個人 Chat ID（正整數，例如 `123456789`）。
