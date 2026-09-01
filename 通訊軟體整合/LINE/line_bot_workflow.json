@@ -113,7 +113,7 @@
         "options": {}
       },
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         540,
         320

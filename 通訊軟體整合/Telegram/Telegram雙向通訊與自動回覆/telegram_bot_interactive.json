@@ -24,7 +24,7 @@
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegramTrigger",
-      "typeVersion": 1.2,
+      "typeVersion": 1.5,
       "position": [
         -180,
         380
@@ -65,7 +65,7 @@
         "options": {}
       },
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
+      "typeVersion": 3.5,
       "position": [
         60,
         380

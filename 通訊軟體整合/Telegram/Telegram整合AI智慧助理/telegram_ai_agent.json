@@ -10,120 +10,11 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -200,
-        120
+        1344,
+        672
       ],
-      "id": "telegram-ai-note",
+      "id": "150bcd80-c70e-468a-87a0-a73f3f8b03fb",
       "name": "流程說明"
-    },
-    {
-      "parameters": {
-        "updates": [
-          "message"
-        ],
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.telegramTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        -180,
-        380
-      ],
-      "id": "telegram-ai-trigger",
-      "name": "Telegram 訊息觸發器",
-      "credentials": {
-        "telegramApi": {
-          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
-          "name": "Telegram account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "chat-id",
-              "name": "chatId",
-              "value": "={{ $json.message.chat.id }}",
-              "type": "number"
-            },
-            {
-              "id": "user-name",
-              "name": "userName",
-              "value": "={{ $json.message.from.first_name }}",
-              "type": "string"
-            },
-            {
-              "id": "user-message",
-              "name": "userMessage",
-              "value": "={{ ($json.message.text || '').trim() }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        60,
-        380
-      ],
-      "id": "extract-ai-input",
-      "name": "提取提問內容與聊天室 ID"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=使用者名稱：{{ $json.userName }}\n使用者提問：{{ $json.userMessage }}",
-        "options": {
-          "systemMessage": "=你是一位專業、親切且高效的 Telegram 智慧助理。請遵循以下規則：\n1. 必須一律使用「繁體中文（台灣習慣用語）」進行回覆。\n2. 回答語氣友善親切，適度使用 emoji 增加互動感。\n3. 使用清晰易讀的 Markdown 條列式排版。\n4. 若使用者詢問先前的對話內容，請參考對話歷史記憶進行連貫回答。"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.7,
-      "position": [
-        300,
-        380
-      ],
-      "id": "telegram-ai-agent",
-      "name": "AI 智慧問答助理"
-    },
-    {
-      "parameters": {
-        "model": "gpt-4o-mini",
-        "options": {
-          "temperature": 0.7
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        260,
-        600
-      ],
-      "id": "openai-chat-model",
-      "name": "OpenAI Chat Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "YOUR_OPENAI_CREDENTIAL_ID",
-          "name": "OpenAI account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "contextWindowLength": 10
-      },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
-      "position": [
-        400,
-        600
-      ],
-      "id": "window-buffer-memory",
-      "name": "對話記憶 (以 Chat ID 隔離)"
     },
     {
       "parameters": {
@@ -136,17 +27,135 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        640,
-        380
+        2192,
+        944
       ],
-      "id": "send-ai-response-telegram",
+      "id": "20beeb09-dce5-4fe8-8008-1ec16e886cb0",
       "name": "回傳 AI 智慧回答至 Telegram",
+      "webhookId": "2e2e3b9a-7b61-401d-a691-16cad010573f",
       "credentials": {
         "telegramApi": {
-          "id": "YOUR_TELEGRAM_CREDENTIAL_ID",
+          "id": "aHqvp4EpI51iLIbw",
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "30e6a682-7930-4155-a5bf-f2cc67863f98",
+      "name": "Telegram 訊息觸發器",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        1376,
+        944
+      ],
+      "webhookId": "5f770ec6-6a9e-4a9b-a728-2fa37049e8ec",
+      "credentials": {
+        "telegramApi": {
+          "id": "aHqvp4EpI51iLIbw",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "chat-id",
+              "name": "chatId",
+              "type": "number",
+              "value": "={{ $json.message.chat.id }}"
+            },
+            {
+              "id": "user-name",
+              "name": "userName",
+              "type": "string",
+              "value": "={{ $json.message.from.first_name }}"
+            },
+            {
+              "id": "user-message",
+              "name": "userMessage",
+              "type": "string",
+              "value": "={{ ($json.message.text || '').trim() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8a574d4-7bc1-42d8-a773-f5fe372846d6",
+      "name": "提取提問內容與聊天室 ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1616,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=使用者名稱：{{ $json.userName }}\n使用者提問：{{ $json.userMessage }}",
+        "options": {
+          "systemMessage": "=你是一位專業、親切且高效的 Telegram 智慧助理。請遵循以下規則：\n1. 必須一律使用「繁體中文（台灣習慣用語）」進行回覆。\n2. 回答語氣友善親切，適度使用 emoji 增加互動感。\n3. 使用清晰易讀的 Markdown 條列式排版。\n4. 若使用者詢問先前的對話內容，請參考對話歷史記憶進行連貫回答。"
+        }
+      },
+      "id": "6cd864f7-7a06-4b9e-84a1-715c49f38118",
+      "name": "AI 智慧問答助理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1856,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "z-ai/glm-5.3-flash"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "0a4a5f6e-4697-4a82-b781-9692297c9df8",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1808,
+        1152
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "lUmweMogi5GUYPfT",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.chatId }}",
+        "contextWindowLength": 10
+      },
+      "id": "0d5617d8-4bc2-46f8-940a-1ada5072e642",
+      "name": "對話記憶 (以 Chat ID 隔離)",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1952,
+        1152
+      ]
     }
   ],
   "connections": {
@@ -166,6 +175,17 @@
         [
           {
             "node": "AI 智慧問答助理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 智慧問答助理": {
+      "main": [
+        [
+          {
+            "node": "回傳 AI 智慧回答至 Telegram",
             "type": "main",
             "index": 0
           }
@@ -193,18 +213,12 @@
           }
         ]
       ]
-    },
-    "AI 智慧問答助理": {
-      "main": [
-        [
-          {
-            "node": "回傳 AI 智慧回答至 Telegram",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "pinData": {}
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
 }

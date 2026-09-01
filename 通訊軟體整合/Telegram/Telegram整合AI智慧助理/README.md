@@ -73,10 +73,11 @@ flowchart LR
    - **功能**：提供大語言模型推論算力（預設配置 `gpt-4o-mini`，亦可無縫替換為 Google Gemini 或本地免費 Ollama 模型）。
 
 6. **💾 對話記憶（Window Buffer Memory Node）**
-   - **功能**：自動記錄並滑動維護最近 N 輪的對話歷史。
+   - **功能**：以使用者的 `chatId` 隔離儲存，自動維護最近 N 輪的對話歷史。
    - **核心設定**：
-     - **Context Window Length**：預設儲存最近 10 輪對話（可依需求調整）。
-     - *(備註：保持預設無須填寫 sessionKey，即可正常運作)*
+     - **Session ID Type**：選擇 `Custom Key`
+     - **Session Key**：`={{ $json.chatId }}`（以 Telegram 聊天室 ID 進行記憶隔離）
+     - **Context Window Length**：預設儲存最近 10 輪對話。
 
 7. **📤 回傳 AI 智慧回答至 Telegram（Telegram Node）**
    - **功能**：將 AI 生成的文字內容（`{{ $json.output }}`）即時傳送回使用者的 Telegram 聊天室，支援 Markdown 語法排版。
