@@ -45,6 +45,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![LINE 雙向通訊與自動回覆流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 LINE 雙向通訊工作流程樣版 (line_bot_workflow.json)](./line_bot_workflow.json)
