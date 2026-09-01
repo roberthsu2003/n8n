@@ -114,7 +114,6 @@
     },
     {
       "parameters": {
-        "sessionKey": "={{ $('提取提問內容與聊天室 ID').item.json.chatId }}",
         "contextWindowLength": 10
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",

@@ -36,6 +36,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![Telegram 整合 AI 智慧助理流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 Telegram 整合 AI 智慧助理樣版 (telegram_ai_agent.json)](./telegram_ai_agent.json)
@@ -45,14 +51,14 @@ flowchart LR
 #### 📋 節點詳細說明
 
 1. **📝 流程說明（Sticky Note）**
-   - **功能**：說明如何將 Telegram 訊息導入 AI Agent，並利用 Session Key 實現多用戶記憶隔離。
+   - **功能**：說明如何將 Telegram 訊息導入 AI Agent，並利用 Window Buffer Memory 實現多輪對話記憶。
 
 2. **⚡ Telegram 訊息觸發器（Telegram Trigger Node）**
    - **功能**：即時接收來自私聊或群組的提問文字。
 
 3. **⚙️ 提取提問內容與聊天室 ID（Edit Fields / Set Node）**
    - **功能**：準備傳遞給 AI Agent 的輸入參數：
-     - `chatId`：用於識別用戶/群組，並作為對話記憶的 Session Key。
+     - `chatId`：用於識別用戶/群組聊天室。
      - `userName`：發問者的名稱。
      - `userMessage`：使用者傳送的提問文字。
 
@@ -67,10 +73,10 @@ flowchart LR
    - **功能**：提供大語言模型推論算力（預設配置 `gpt-4o-mini`，亦可無縫替換為 Google Gemini 或本地免費 Ollama 模型）。
 
 6. **💾 對話記憶（Window Buffer Memory Node）**
-   - **功能**：記錄最近 N 輪的對話歷史。
+   - **功能**：自動記錄並滑動維護最近 N 輪的對話歷史。
    - **核心設定**：
-     - **Session Key**：`={{ $('提取提問內容與聊天室 ID').item.json.chatId }}`（確保每位使用者的對話歷史彼此獨立不混淆）。
-     - **Context Window Length**：預設儲存最近 10 輪對話。
+     - **Context Window Length**：預設儲存最近 10 輪對話（可依需求調整）。
+     - *(備註：保持預設無須填寫 sessionKey，即可正常運作)*
 
 7. **📤 回傳 AI 智慧回答至 Telegram（Telegram Node）**
    - **功能**：將 AI 生成的文字內容（`{{ $json.output }}`）即時傳送回使用者的 Telegram 聊天室，支援 Markdown 語法排版。
