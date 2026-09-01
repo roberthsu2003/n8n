@@ -19,6 +19,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![LINE Flex Message 互動圖文卡片流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 LINE Flex Message 圖文卡片工作流程樣版 (line_flex_message.json)](./line_flex_message.json)
