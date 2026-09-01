@@ -3,15 +3,15 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## ✈️ 範例 4：Telegram 發送多媒體與文件檔案\n\n1. **Manual Trigger**：手動觸發執行流程。\n2. **Edit Fields (Set)**：設定目標 Chat ID、圖片網址、圖表標題與附帶說明 Caption。\n3. **HTTP Request (下載圖片)**：自 GitHub 庫下載實體圖表為 Binary 二進位資料。\n4. **Telegram Node (Send Photo)**：以 Binary 模式穩定發送高解析度照片或趨勢圖。\n5. **HTTP Request (下載報表)**：自外部/庫下載實體 CSV 報表為 Binary 二進位資料。\n6. **Telegram Node (Send Document)**：以 Binary 模式上傳發送報表檔案至指定聊天室。",
-        "height": 260,
-        "width": 500
+        "content": "## ✈️ 範例 4：Telegram 發送多媒體與文件檔案\n\n1. **Manual Trigger**：手動觸發執行流程。\n2. **Edit Fields (Set)**：設定目標 Chat ID、圖片網址、圖表標題與附帶說明 Caption。\n3. **Telegram Node (Send Photo)**：發送高解析度照片或監控趨勢圖。\n4. **HTTP Request**：自外部網址下載實體 CSV/PDF 報表檔案為 Binary 資料。\n5. **Telegram Node (Send Document)**：以 Binary 模式上傳並發送報表檔案至指定聊天室。",
+        "height": 250,
+        "width": 460
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
         -200,
-        90
+        110
       ],
       "id": "telegram-media-note",
       "name": "流程說明"
@@ -68,7 +68,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        80,
+        100,
         380
       ],
       "id": "prepare-media-payload",
@@ -76,39 +76,18 @@
     },
     {
       "parameters": {
-        "url": "={{ $json.photoUrl }}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file"
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        300,
-        380
-      ],
-      "id": "download-photo-file",
-      "name": "下載圖表圖片"
-    },
-    {
-      "parameters": {
         "operation": "sendPhoto",
-        "chatId": "={{ $('設定多媒體與報表資料').item.json.targetChatId }}",
-        "binaryData": true,
-        "binaryPropertyName": "data",
+        "chatId": "={{ $json.targetChatId }}",
+        "file": "={{ $json.photoUrl }}",
         "additionalFields": {
-          "caption": "={{ $('設定多媒體與報表資料').item.json.photoCaption }}",
+          "caption": "={{ $json.photoCaption }}",
           "parse_mode": "Markdown"
         }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        520,
+        360,
         380
       ],
       "id": "send-telegram-photo",
@@ -134,7 +113,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        740,
+        620,
         380
       ],
       "id": "download-csv-file",
@@ -154,7 +133,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        960,
+        880,
         380
       ],
       "id": "send-telegram-document",
@@ -180,17 +159,6 @@
       ]
     },
     "設定多媒體與報表資料": {
-      "main": [
-        [
-          {
-            "node": "下載圖表圖片",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "下載圖表圖片": {
       "main": [
         [
           {
