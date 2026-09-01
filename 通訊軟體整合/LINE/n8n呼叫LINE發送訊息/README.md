@@ -19,6 +19,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![n8n 呼叫 LINE 發送推播訊息流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 n8n 呼叫 LINE 發送推播訊息樣版 (line_push_message.json)](./line_push_message.json)
