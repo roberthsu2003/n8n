@@ -20,6 +20,12 @@ flowchart LR
 
 ---
 
+### 預覽圖
+
+![Telegram 訊息觸發工作流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 Telegram 訊息觸發工作流程樣版 (telegram_trigger_workflow.json)](./telegram_trigger_workflow.json)
