@@ -13,13 +13,11 @@
 
 ### 🧩 n8n 自動化工作流的五大核心要素
 
-```mermaid
-flowchart LR
-    A["⚡ 1. 觸發 (Trigger)<br/>定時排程 / Webhook / 表單 / 郵件"] --> B["🔗 2. 連接 (Connect)<br/>OAuth2 授權 / REST API / 資料庫"]
-    B --> C["⚙️ 3. 資料運算 (Transform)<br/>JSON 解析 / 格式轉換 / AI Agent"]
-    C --> D["🧪 4. 測試與驗證 (Test)<br/>節點除錯 / Mock 資料 / 錯誤攔截"]
-    D --> E["🚀 5. 上線啟動 (Activate)<br/>7x24 常駐監聽 / 即時自動化"]
-```
+1. **⚡ 觸發 (Trigger)**：工作流的起點，支援定時排程 (Schedule)、外部事件推播 (Webhook)、表單提交 (Form) 或收到郵件等事件。
+2. **🔗 連接 (Connect)**：透過 OAuth 2.0 授權、API Key 或資料庫連線，安全連結各項雲端服務與內部系統。
+3. **⚙️ 資料運算 (Transform)**：解析 JSON 結構、格式轉換、資料過濾、條件分流，或呼叫 AI Agent 進行智慧語意運算。
+4. **🧪 測試與驗證 (Test)**：在畫布上逐步執行單節點 (Test Step)、模擬測試資料並即時排查錯誤。
+5. **🚀 上線啟動 (Activate)**：切換為 Active 啟用狀態，由 n8n 引擎 7x24 常駐監聽並全自動執行任務。
 
 ---
 
@@ -27,16 +25,14 @@ flowchart LR
 
 本教材規劃了循序漸進的階梯式學習地圖，讓學生與團隊成員都能輕鬆找到適合的切入點：
 
-```mermaid
-flowchart TD
-    Step1["🛠️ 第 1 階段：環境建置與基礎設定<br/>Docker 安裝 / ngrok 外網通道 / 憑證申請"] --> Step2["🎯 第 2 階段：核心基礎與初階範例<br/>手動觸發 / JSON 結構 / DataTable / 表單"]
-    Step2 --> Step3["🔗 第 3 階段：Webhook 與前後端 WebAPI<br/>GET/POST 即時反饋 / 玻璃擬態測試台 / 檔案上傳"]
-    Step3 --> Step4["☁️ 第 4 階段：Google 服務與辦公自動化<br/>訂便當系統 / Gmail HTML 晨報 / Docs 證書 PDF"]
-    Step4 --> Step5["💬 第 5 階段：通訊軟體整合 (LINE & Telegram)<br/>LINE Reply 免費回覆 / Flex 卡片 / TG 機器人"]
-    Step5 --> Step6["💻 第 6 階段：Code 節點與資料庫架構<br/>JavaScript 髒資料清洗 / Postgres CRUD / 報表分組"]
-    Step6 --> Step7["🤖 第 7 階段：AI Agent 與 RAG 向量知識庫<br/>Ollama / Gemini / Supabase pgvector / Multi-Agent"]
-    Step7 --> Step8["🌍 第 8 階段：零預算雲端永久部署<br/>Hugging Face / Koyeb / Render / OCI 永不下線"]
-```
+- **第 1 階段：環境建置與基礎設定** ➔ Docker 安裝、ngrok 外網通道建立與 API 憑證申請。
+- **第 2 階段：核心基礎與初階範例** ➔ 手動觸發、JSON 資料流、DataTable 內建表格與表單操作。
+- **第 3 階段：Webhook 與前後端 WebAPI** ➔ GET/POST 即時反饋、玻璃擬態測試台與檔案上傳統計。
+- **第 4 階段：Google 服務與辦公自動化** ➔ 訂便當系統、Gmail HTML 晨報與 Docs 證書自動轉存 PDF。
+- **第 5 階段：通訊軟體整合 (LINE & Telegram)** ➔ LINE Reply 免費回覆、Flex 圖文卡片與 Telegram 機器人。
+- **第 6 階段：Code 節點與資料庫架構** ➔ JavaScript 髒資料清洗、Postgres CRUD 與多表統計分組。
+- **第 7 階段：AI Agent 與 RAG 向量知識庫** ➔ Ollama / Gemini、Supabase pgvector 與 Multi-Agent 多代理協同。
+- **第 8 階段：零預算雲端永久部署** ➔ Hugging Face、Koyeb、Render 與 OCI 永久免費雲端上線。
 
 ---
 
@@ -168,18 +164,7 @@ flowchart TD
 
 ---
 
-### 🏢 12. [企業專案實戰](./企業專案/工研院產業/README.md)
-* [工研院產業專案自動化整合實例](./企業專案/工研院產業/README.md)
+### 🏢 12. [企業專案實戰](./企業專案/README.md)
 
 ---
 
-## 💡 課堂學習與 AI 賦能建議 (MCP AI Copilot)
-
-本教材所有實作範例皆遵循 **n8n 最新節點標準規範**，並在各範例說明文檔（`README.md`）底部附帶 **`<details>` AI 賦能延伸實作**：
-* 在完成基礎節點設定後，您可以直接複製折疊區塊內的 **Prompt 提詞**。
-* 透過 MCP 連線 AI 助理（Claude、ChatGPT 或 Gemini），AI 將在畫布上全自動為您擴充進階商業邏輯！
-
----
-
-**講義維護與更新**：持續對齊 n8n 最新官方版本（GitHub `n8n-io/n8n` master）  
-**適用對象**：自動化入門學習者、全端開發者、企業行政/總務/行銷與 AI 應用架構師
