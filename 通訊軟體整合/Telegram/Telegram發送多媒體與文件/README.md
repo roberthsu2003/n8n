@@ -23,6 +23,7 @@ flowchart LR
 ### 工作流程樣版下載
 
 - [📥 Telegram 發送多媒體與文件樣版 (telegram_send_media.json)](./telegram_send_media.json)
+- [📄 範例報表檔案下載 (學生成績單.csv)](./學生成績單.csv)
 
 ---
 
