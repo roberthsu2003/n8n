@@ -3,51 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>n8n 自動化問候系統</title>
+    <title>n8n Webhook 互動實戰測試台 - 自動化問候系統</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="background-glob"></div>
+    <div class="background-glob glob-1"></div>
     <div class="background-glob glob-2"></div>
+    <div class="background-glob glob-3"></div>
     
     <div class="container">
         <header>
-            <h1>自動化問候系統</h1>
-            <p>透過 n8n Webhook 觸發您的專屬問候</p>
+            <div class="badge-tag">n8n Webhook 實戰工作坊</div>
+            <h1>自動化問候系統 🚀</h1>
+            <p>透過 HTTP POST 呼叫 n8n Webhook，體驗即時前後端串接與資料流運算</p>
         </header>
 
-        <main class="card glass">
-            <form id="greetingForm">
-                <div class="input-group">
-                    <label for="name">您的姓名</label>
-                    <input type="text" id="name" name="name" placeholder="請輸入姓名" required autocomplete="off">
+        <!-- Webhook URL 設定面板 -->
+        <section class="card glass config-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">⚙️</span>
+                    <span>Webhook 端點設定</span>
                 </div>
+                <div class="url-modes">
+                    <button type="button" class="mode-btn active" id="btnModeTest">Test 測試模式</button>
+                    <button type="button" class="mode-btn" id="btnModeProd">Prod 正式模式</button>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="url-input-wrapper">
+                    <input type="url" id="webhookUrl" placeholder="請輸入 n8n Webhook 完整網址..." required autocomplete="off">
+                    <button type="button" id="btnResetUrl" title="恢復預設網址">↺ 預設</button>
+                </div>
+                <small class="help-text">💡 提示：在 n8n 畫布點擊「Test step」時請使用 <code>webhook-test</code>；工作流程切為 Active 時請使用 <code>webhook</code>。</small>
+            </div>
+        </section>
 
-                <div class="input-group">
-                    <label for="age">您的年齡</label>
-                    <input type="number" id="age" name="age" placeholder="例如: 25" required min="1" max="120">
+        <!-- 表單輸入與快捷測試 -->
+        <main class="card glass main-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">📝</span>
+                    <span>發送 Payload 資料 (POST Body)</span>
+                </div>
+                <!-- 快速填入範例 -->
+                <div class="preset-group">
+                    <span class="preset-label">快速體驗：</span>
+                    <button type="button" class="preset-btn" id="presetXiaoMing">👦 小明 (25歲)</button>
+                    <button type="button" class="preset-btn" id="presetXiaoMei">🌸 小美 (18歲)</button>
+                    <button type="button" class="preset-btn error-preset" id="presetEmpty">⚠️ 留空 (測400錯誤)</button>
+                </div>
+            </div>
+
+            <form id="greetingForm">
+                <div class="form-row">
+                    <div class="input-group flex-2">
+                        <label for="name">訪客姓名 <span class="required">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="例如：王小明" autocomplete="off">
+                    </div>
+                    <div class="input-group flex-1">
+                        <label for="age">年齡</label>
+                        <input type="number" id="age" name="age" placeholder="例如：25" min="1" max="120">
+                    </div>
                 </div>
 
                 <button type="submit" id="submitBtn">
-                    <span class="btn-text">發送 Webhook</span>
+                    <span class="btn-text">⚡ 發送 Webhook 請求 (POST)</span>
                     <div class="btn-loader"></div>
                 </button>
             </form>
 
+            <!-- 回應結果顯示區 -->
             <div id="resultArea" class="result-container hidden">
-                <h3>來自 n8n 的回應</h3>
-                <div class="response-box">
-                    <p id="greetingText" class="typing-effect"></p>
-                    <div class="meta-info">
-                        <span class="timestamp-label">處理時間:</span>
-                        <span id="timestampText">--</span>
+                <div class="result-header">
+                    <div class="status-badge" id="statusBadge">200 OK</div>
+                    <div class="metrics">
+                        <span class="latency" id="latencyBadge">⏱️ 0 ms</span>
+                        <span class="timestamp" id="responseTimestamp">--:--:--</span>
                     </div>
+                </div>
+
+                <!-- 模式切換分頁 -->
+                <div class="result-tabs">
+                    <button type="button" class="tab-btn active" id="tabVisual">✨ 視覺化卡片</button>
+                    <button type="button" class="tab-btn" id="tabJson">💻 原始 JSON 回應</button>
+                    <button type="button" class="copy-btn" id="btnCopyJson">📋 複製 JSON</button>
+                </div>
+
+                <!-- 視覺化問候卡片 -->
+                <div id="viewVisual" class="tab-content active">
+                    <div class="response-box" id="responseBox">
+                        <div class="greeting-icon" id="greetingIcon">👋</div>
+                        <p id="greetingText" class="greeting-text"></p>
+                        <div class="meta-tags" id="metaTags">
+                            <span class="meta-pill" id="metaUser">👤 訪客：--</span>
+                            <span class="meta-pill" id="metaTime">🕒 時間：--</span>
+                            <span class="meta-pill" id="metaIp">🌐 IP：--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON 檢視器 -->
+                <div id="viewJson" class="tab-content">
+                    <pre><code id="jsonCodeBlock" class="json-code">{}</code></pre>
                 </div>
             </div>
         </main>
+
+        <!-- 課堂學習排查提示 -->
+        <footer class="tips-footer">
+            <details>
+                <summary>💡 <strong>新手常見問題與避坑秘笈（點擊展開）</strong></summary>
+                <div class="tips-content">
+                    <ul>
+                        <li><strong>❓ 發送後一直轉圈圈？</strong> 請確認 n8n 畫布上的 Webhook 節點是否已點擊「Test step / Listen for test event」正在等待請求。</li>
+                        <li><strong>❓ 出現 CORS 跨域錯誤？</strong> 本機開發時，建議使用 n8n 的 <code>webhook-test</code> 測試端點，或確保透過同一網域/隧道代理訪問。</li>
+                        <li><strong>❓ 為什麼要用 <code>$json.body.name</code>？</strong> 因為 Webhook POST 的資料在 n8n 內部會包裝在 <code>body</code> 物件中！</li>
+                    </ul>
+                </div>
+            </details>
+        </footer>
     </div>
 
     <script src="script.js"></script>

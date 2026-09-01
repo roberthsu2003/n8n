@@ -1,6 +1,70 @@
 {
-  "name": "教學範例:自動化問候系統",
+  "name": "Webhook 範例 2：互動式網頁表單與個人化問候系統",
   "nodes": [
+    {
+      "parameters": {
+        "content": "## 📍 步驟 1：接收 POST 請求\n- 監聽 `/greeting` 路徑。\n- 外部發送的 JSON 資料存於 `$json.body` 中（如 `name`, `age`）。",
+        "height": 260,
+        "width": 280,
+        "color": 4
+      },
+      "id": "note-step1",
+      "name": "Sticky Note 步驟 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🔍 步驟 2：驗證輸入資料\n- 使用 IF 節點檢查 `$json.body.name` 是否存在且不為空。\n- **True** ➔ 姓名有效，進入成功問候流程。\n- **False** ➔ 姓名為空，進入錯誤防護流程。",
+        "height": 260,
+        "width": 300,
+        "color": 5
+      },
+      "id": "note-step2",
+      "name": "Sticky Note 步驟 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        220,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🎉 成功分支 (200 OK)\n- 組合溫暖的個人化問候語與伺服器時間。\n- 回傳包含 `status: success` 的 JSON 資料給前端。",
+        "height": 240,
+        "width": 380,
+        "color": 2
+      },
+      "id": "note-success",
+      "name": "Sticky Note 成功分支",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ 錯誤分支 (400 Bad Request)\n- 當用戶未提供姓名時，回傳友善的錯誤提醒與排查建議。\n- 設定 HTTP 狀態碼為 400，符合標準 RESTful API 規範。",
+        "height": 240,
+        "width": 380,
+        "color": 3
+      },
+      "id": "note-error",
+      "name": "Sticky Note 錯誤分支",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        340
+      ]
+    },
     {
       "parameters": {
         "httpMethod": "POST",
@@ -8,175 +72,178 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "bdfbc8a6-a604-4b85-a633-4c12ab9ede88",
+      "id": "webhook-greeting-trigger",
       "name": "Webhook 觸發器",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
-        -16,
-        16
+        -60,
+        320
       ],
       "webhookId": "greeting-webhook"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.body.name }}",
-              "operation": "isNotEmpty"
+              "id": "check-name-not-empty",
+              "leftValue": "={{ $json.body.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
-      "id": "18c37f5e-5a1e-4de5-a037-e19ee4e3e820",
+      "id": "if-check-name",
       "name": "檢查姓名",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "typeVersion": 2.2,
       "position": [
-        192,
-        16
+        260,
+        320
       ]
     },
     {
       "parameters": {
-        "values": {
-          "string": [
+        "assignments": {
+          "assignments": [
             {
-              "name": "greeting",
-              "value": "={{ '你好,' + $json.body.name + '!你今年' + $json.body.age + '歲,歡迎來到自動化世界!' }}"
+              "id": "set-status",
+              "name": "status",
+              "value": "success",
+              "type": "string"
             },
             {
+              "id": "set-greeting",
+              "name": "greeting",
+              "value": "=👋 你好，{{ $json.body.name }}！你今年 {{ $json.body.age || '未知' }} 歲，歡迎來到 n8n 自動化世界！🎉",
+              "type": "string"
+            },
+            {
+              "id": "set-username",
+              "name": "userName",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "set-userage",
+              "name": "userAge",
+              "value": "={{ $json.body.age }}",
+              "type": "number"
+            },
+            {
+              "id": "set-time",
               "name": "time",
-              "value": "={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}"
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "set-client-ip",
+              "name": "clientIp",
+              "value": "={{ $json.headers['x-forwarded-for'] || $json.headers['host'] || '127.0.0.1' }}",
+              "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "285ad415-6700-426a-b799-c86bd7f9e8fa",
+      "id": "set-success-greeting",
       "name": "設定問候訊息",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
+      "typeVersion": 3.4,
       "position": [
-        544,
-        -192
+        600,
+        140
       ]
     },
     {
       "parameters": {
-        "values": {
-          "string": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "set-err-status",
+              "name": "status",
+              "value": "error",
+              "type": "string"
+            },
+            {
+              "id": "set-err-message",
               "name": "error",
-              "value": "請提供您的姓名"
+              "value": "請提供您的姓名 (name 欄位不可為空)",
+              "type": "string"
+            },
+            {
+              "id": "set-err-hint",
+              "name": "hint",
+              "value": "請檢查 POST JSON Body 是否包含 { \"name\": \"您的名字\", \"age\": 25 }",
+              "type": "string"
+            },
+            {
+              "id": "set-err-time",
+              "name": "time",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "bb3b888a-0740-4f4a-84ae-f36493e1b0ee",
+      "id": "set-error-message",
       "name": "設定錯誤訊息",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
+      "typeVersion": 3.4,
       "position": [
-        544,
-        112
+        600,
+        500
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json }}",
-        "options": {}
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
       },
-      "id": "5b9256fd-32d2-42ad-83d2-86a269b30076",
-      "name": "回應成功",
+      "id": "respond-success-200",
+      "name": "回應成功 (200)",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
-        688,
-        -192
+        860,
+        140
       ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json }}",
-        "options": {}
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 400
+        }
       },
-      "id": "180f40cb-1f56-4f88-92cd-e640f4d8e914",
-      "name": "回應錯誤",
+      "id": "respond-error-400",
+      "name": "回應錯誤 (400)",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
+      "typeVersion": 1.1,
       "position": [
-        704,
-        112
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## 📍 步驟一:接收請求\n使用 POST 方法發送 JSON 資料\n記得資料在 $json.body 裡面",
-        "height": 384,
-        "color": 4
-      },
-      "id": "4d8b04b0-71ce-4fd9-9b38-4e8ea1728d9a",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -96,
-        -160
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ✅ 步驟二:驗證資料\n檢查 name 是否為空\ntrue → 成功 / false → 錯誤",
-        "height": 384,
-        "color": 5
-      },
-      "id": "11fe7d5b-53fa-4b29-ad7a-40bf79649c8e",
-      "name": "Sticky Note1",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        160,
-        -160
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## 🎉 成功路徑\n建立問候訊息並回應",
-        "height": 284,
-        "width": 400,
-        "color": 2
-      },
-      "id": "f86fd40b-f0e0-4651-8ed9-e7168007e720",
-      "name": "Sticky Note2",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        512,
-        -304
-      ]
-    },
-    {
-      "parameters": {
-        "content": "## ⚠️ 錯誤路徑\n回傳錯誤訊息",
-        "height": 236,
-        "width": 400
-      },
-      "id": "486d012e-5b04-4d98-bc93-c9523914183f",
-      "name": "Sticky Note3",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        512,
-        32
+        860,
+        500
       ]
     }
   ],
-  "pinData": {},
   "connections": {
     "Webhook 觸發器": {
       "main": [
@@ -211,7 +278,7 @@
       "main": [
         [
           {
-            "node": "回應成功",
+            "node": "回應成功 (200)",
             "type": "main",
             "index": 0
           }
@@ -222,7 +289,7 @@
       "main": [
         [
           {
-            "node": "回應錯誤",
+            "node": "回應錯誤 (400)",
             "type": "main",
             "index": 0
           }
@@ -230,14 +297,5 @@
       ]
     }
   },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "772d630f-38c8-4c29-8aca-83b83fe2e850",
-  "meta": {
-    "instanceId": "7760517cfb99a9708da4a95c1beadf896e07d75295475b5b8128f732afd4828d"
-  },
-  "id": "pNnsQ78UuzFTyigP",
-  "tags": []
+  "pinData": {}
 }

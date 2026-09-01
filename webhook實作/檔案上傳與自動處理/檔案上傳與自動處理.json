@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### 📁 Webhook 檔案上傳與解析流程\n1. Webhook 接收外部以 Multipart Form-Data 上傳的 CSV 檔案\n2. Extract from File 解析檔案二進位資料為 JSON\n3. 統計資料筆數並即時回傳處理摘要",
+        "content": "### 📁 Webhook 檔案上傳與即時運算報表\n1. **Webhook 觸發器**：接收外部以 `multipart/form-data` 上傳的實體 CSV 檔案。\n2. **Extract from File**：自動將二進位檔案資料 (`data`) 解析為結構化 JSON 陣列。\n3. **Code 統計運算**：自動計算總筆數、各科平均分與總分，產生精美摘要。\n4. **Respond to Webhook**：將報表以 JSON 即時回傳給上傳端。",
         "height": 280,
-        "width": 380
+        "width": 420
       },
       "id": "sticky-note-1",
       "name": "Sticky Note",
@@ -13,7 +13,7 @@
       "typeVersion": 1,
       "position": [
         200,
-        180
+        140
       ]
     },
     {
@@ -30,7 +30,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        260,
+        240,
         360
       ],
       "webhookId": "file-upload-webhook"
@@ -54,14 +54,14 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst recordCount = items.length;\n\nreturn [{\n  json: {\n    message: '檔案解析成功',\n    total_records: recordCount,\n    sample_records: items.slice(0, 3).map(i => i.json),\n    processed_at: new Date().toISOString()\n  }\n}];"
+        "jsCode": "const items = $input.all();\nconst recordCount = items.length;\n\nlet totalChinese = 0;\nlet totalEnglish = 0;\nlet totalMath = 0;\nlet validGradesCount = 0;\n\nconst parsedRecords = items.map(item => {\n  const row = item.json;\n  const c = parseFloat(row.chinese) || 0;\n  const e = parseFloat(row.english) || 0;\n  const m = parseFloat(row.math) || 0;\n  if (row.chinese !== undefined || row.english !== undefined || row.math !== undefined) {\n    totalChinese += c;\n    totalEnglish += e;\n    totalMath += m;\n    validGradesCount++;\n  }\n  return {\n    ...row,\n    total_score: (c + e + m),\n    average_score: Math.round(((c + e + m) / 3) * 10) / 10\n  };\n});\n\nconst summary = {\n  status: 'success',\n  message: '🎉 CSV 檔案已成功解析並完成統計運算！',\n  total_records: recordCount,\n  statistics: validGradesCount > 0 ? {\n    avg_chinese: Math.round((totalChinese / validGradesCount) * 10) / 10,\n    avg_english: Math.round((totalEnglish / validGradesCount) * 10) / 10,\n    avg_math: Math.round((totalMath / validGradesCount) * 10) / 10,\n    class_average: Math.round(((totalChinese + totalEnglish + totalMath) / (validGradesCount * 3)) * 10) / 10\n  } : null,\n  sample_preview: parsedRecords.slice(0, 3),\n  processed_at: new Date().toISOString()\n};\n\nreturn [{ json: summary }];"
       },
       "id": "summarize-records",
       "name": "生成處理摘要",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        700,
+        720,
         360
       ]
     },
@@ -78,7 +78,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        920,
+        960,
         360
       ]
     }
@@ -118,8 +118,5 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  }
+  "pinData": {}
 }

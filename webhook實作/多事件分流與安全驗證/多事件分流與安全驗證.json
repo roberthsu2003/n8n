@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "### 🛡️ Webhook 安全金鑰驗證與事件分流\n1. Webhook 接收帶有自訂 Header (`x-api-key`) 的 POST 事件\n2. IF 節點驗證金鑰是否正確（錯誤則回傳 401 Unauthorized）\n3. Switch 節點依據事件類型 (`event_type`) 進行多路分流處理",
+        "content": "### 🛡️ Webhook 安全金鑰驗證與事件分流\n1. Webhook 接收帶有自訂 Header (`x-api-key`) 的 POST 事件\n2. IF 節點驗證金鑰是否正確（錯誤則回傳 401 Unauthorized）\n3. Switch 節點依據事件類型 (`event_type`) 進行多路分流處理\n4. 各分支處理後統一回傳結構化 JSON 結果",
         "height": 280,
         "width": 420
       },
@@ -13,7 +13,7 @@
       "typeVersion": 1,
       "position": [
         180,
-        160
+        140
       ]
     },
     {
@@ -36,18 +36,31 @@
     {
       "parameters": {
         "conditions": {
-          "string": [
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
             {
-              "value1": "={{ $json.headers['x-api-key'] }}",
-              "value2": "secret-token-12345"
+              "id": "check-api-key",
+              "leftValue": "={{ $json.headers['x-api-key'] }}",
+              "rightValue": "secret-token-12345",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
-          ]
-        }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       },
       "id": "check-auth",
       "name": "驗證 API Key",
       "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
+      "typeVersion": 2.2,
       "position": [
         420,
         360
@@ -56,7 +69,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"無效的 API Key，請在 Header 帶入正確的 x-api-key\"\n}",
+        "responseBody": "={\n  \"status\": \"error\",\n  \"error\": \"Unauthorized\",\n  \"message\": \"無效的 API Key，請在 Request Header 帶入正確的 x-api-key\",\n  \"timestamp\": \"{{ $now.format('yyyy-MM-dd HH:mm:ss') }}\"\n}",
         "options": {
           "responseCode": 401
         }
@@ -67,51 +80,109 @@
       "typeVersion": 1.1,
       "position": [
         640,
-        500
+        540
       ]
     },
     {
       "parameters": {
-        "dataType": "string",
-        "value1": "={{ $json.body.event_type }}",
         "rules": {
-          "rules": [
+          "values": [
             {
-              "value2": "user_signup",
-              "output": 0
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-user-signup",
+                    "leftValue": "={{ $json.body.event_type }}",
+                    "rightValue": "user_signup",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "新會員註冊"
             },
             {
-              "value2": "order_paid",
-              "output": 1
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-order-paid",
+                    "leftValue": "={{ $json.body.event_type }}",
+                    "rightValue": "order_paid",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "訂單付款成功"
             }
           ]
         },
-        "fallbackOutput": 2
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
       "id": "switch-events",
       "name": "分流事件類型",
       "type": "n8n-nodes-base.switch",
-      "typeVersion": 2,
+      "typeVersion": 3.2,
       "position": [
-        640,
+        660,
         280
       ]
     },
     {
       "parameters": {
-        "fields": {
-          "values": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "signup-status",
               "name": "status",
-              "stringValue": "success"
+              "value": "success",
+              "type": "string"
             },
             {
+              "id": "signup-event",
               "name": "event",
-              "stringValue": "user_signup"
+              "value": "user_signup",
+              "type": "string"
             },
             {
+              "id": "signup-user-id",
+              "name": "user_id",
+              "value": "={{ $json.body.user_id || 'U-TEMP' }}",
+              "type": "string"
+            },
+            {
+              "id": "signup-action",
               "name": "action",
-              "stringValue": "新會員歡迎信已排程發送"
+              "value": "新會員歡迎信已排程發送，已指派新手引導任務",
+              "type": "string"
+            },
+            {
+              "id": "signup-processed-at",
+              "name": "processed_at",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
             }
           ]
         },
@@ -120,27 +191,45 @@
       "id": "handle-signup",
       "name": "處理新會員註冊",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
-        880,
-        160
+        920,
+        140
       ]
     },
     {
       "parameters": {
-        "fields": {
-          "values": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "payment-status",
               "name": "status",
-              "stringValue": "success"
+              "value": "success",
+              "type": "string"
             },
             {
+              "id": "payment-event",
               "name": "event",
-              "stringValue": "order_paid"
+              "value": "order_paid",
+              "type": "string"
             },
             {
+              "id": "payment-order-id",
+              "name": "order_id",
+              "value": "={{ $json.body.order_id || 'ORD-UNKNOWN' }}",
+              "type": "string"
+            },
+            {
+              "id": "payment-action",
               "name": "action",
-              "stringValue": "訂單付款成功，通知倉庫出貨"
+              "value": "訂單付款驗證成功，已開立電子發票並通知倉庫撿貨",
+              "type": "string"
+            },
+            {
+              "id": "payment-processed-at",
+              "name": "processed_at",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
             }
           ]
         },
@@ -149,27 +238,39 @@
       "id": "handle-payment",
       "name": "處理訂單付款",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
-        880,
+        920,
         280
       ]
     },
     {
       "parameters": {
-        "fields": {
-          "values": [
+        "assignments": {
+          "assignments": [
             {
+              "id": "fallback-status",
               "name": "status",
-              "stringValue": "warning"
+              "value": "warning",
+              "type": "string"
             },
             {
+              "id": "fallback-event",
               "name": "event",
-              "stringValue": "unknown"
+              "value": "={{ $json.body.event_type || 'undefined' }}",
+              "type": "string"
             },
             {
+              "id": "fallback-action",
               "name": "action",
-              "stringValue": "未知的事件類型，已記錄 Log"
+              "value": "未定義的事件類型，已自動記錄稽核日誌 (Audit Log)",
+              "type": "string"
+            },
+            {
+              "id": "fallback-processed-at",
+              "name": "processed_at",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
             }
           ]
         },
@@ -178,10 +279,10 @@
       "id": "handle-fallback",
       "name": "處理未知事件",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 3.2,
+      "typeVersion": 3.4,
       "position": [
-        880,
-        400
+        920,
+        420
       ]
     },
     {
@@ -197,7 +298,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        1100,
+        1180,
         280
       ]
     }
@@ -291,8 +392,5 @@
       ]
     }
   },
-  "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  }
+  "pinData": {}
 }
