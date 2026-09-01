@@ -40,12 +40,17 @@ flowchart TD
 
 ---
 
-## 🚀 零成本快速入門：Ollama 與 Google Gemini
+## 🤖 AI 助手與模型註冊主軸
 
-在開始之前，若您希望以**零 API 成本**進行本章節的所有學習：
+在開始進行 AI 工作流建構前，請先完成以下任一或兩個推薦平台的模型 API 註冊與憑證串接（支援免費額度、標準 OpenAI 相容 API、且符合企業與政府機關資安合規）：
 
-> 📖 **[Ollama 本地安裝與設定指南](./Ollama安裝與設定.md)**  
-> 包含 macOS / Windows / Linux 安裝、免費下載 `llama3`、`gemma` 模型及 n8n 憑證串接說明。另外也可直接使用 **Google Gemini API**（提供免費額度且無需信用卡綁定）。
+• 🤖 **AI 助手與模型註冊**：[**NVIDIA NIM 微服務模型串接**](../nvidia_nim/README.md) ｜ [**OpenRouter 多模型聚合平台 (資安合規)**](../openrouter/README.md)
+
+> [!TIP]
+> **為什麼推薦以 NVIDIA NIM 與 OpenRouter 作為核心模型來源？**
+> 1. **NVIDIA NIM（微服務推論平台）**：提供美商輝達官方代管的頂級開源模型（如 `meta/llama-3.3-70b-instruct`、`nvidia/nemotron-3.5-lightning-30b-a3b`、`mistralai/mistral-large-2-instruct`），註冊即可免費取得 API 測試額度，速度極快且完全支援 Tool Calling。
+> 2. **OpenRouter（多模型聚合平台）**：單一 API 金鑰即可調用全球主流模型（Claude 3.5 Sonnet、GPT-4o、Llama 3.3 等），具備資安合規篩選（可排除受限地區模型），並提供多種免費可用端點。
+> 3. **標準 OpenAI 相容介面**：在 n8n 中只需使用標準的 `OpenAI Chat Model` 節點，透過自訂 Base URL 即可無縫切換，無需安裝額外外掛！
 
 ---
 

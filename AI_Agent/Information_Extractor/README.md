@@ -6,6 +6,10 @@
 
 過去我們必須撰寫極度脆弱且難以維護的 Regular Expression（正規表達式）來硬抓文字；現在透過 **Information Extractor** 節點，只要提供 **JSON Schema（欄位規格定義）**，AI 就會自動以強型別（String, Number, Array, Object）將目標資訊精準擷取出來，轉換為乾淨的 JSON 物件供後續資料庫儲存。
 
+> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
+> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
+> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（推薦 `anthropic/claude-3.5-sonnet` 或 `meta-llama/llama-3.3-70b-instruct`）
+
 ---
 
 ## 🧭 工作流程架構
@@ -14,7 +18,7 @@
 flowchart LR
     Trigger["👆 Manual Trigger"] --> RawInput["📝 雜亂非結構化文字<br/>(自然語言留言/訂購需求)"]
     RawInput --> Extractor["📄 Information Extractor<br/>(依據 JSON Schema 強型別抽取)"]
-    Model["🧠 LLM 模型 (Ollama / Gemini)"] -.->|解析語意| Extractor
+    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|解析語意| Extractor
     Extractor --> JSONOutput["📦 結構化 JSON 輸出<br/>(姓名, 電話, 地址, 商品陣列)"]
 ```
 
@@ -44,7 +48,7 @@ flowchart LR
      - `order_items` (Array) - 商品明細陣列（包含 `item_name`, `quantity`, `unit_price`）
      - `total_amount` (Number) - 總金額
 
-4. **🧠 Ollama Chat Model（語言模型）**
+4. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
    - 建議設定 `temperature: 0` 或 `0.1`，讓數值與欄位抽取維持最高準確度與一致性。
 
 ---

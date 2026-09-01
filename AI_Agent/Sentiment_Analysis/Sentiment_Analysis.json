@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 3：Sentiment Analysis\n學習文字情緒與情感傾向分析，並搭配 IF 節點建立緊急客訴預警機制。",
-        "height": 140,
-        "width": 320
+        "content": "## 基礎 3：Sentiment Analysis\n學習文字情緒與情感傾向分析，並搭配 IF 節點建立緊急客訴預警機制。\n\n📌 支援模型：NVIDIA NIM / OpenRouter (OpenAI 相容)",
+        "height": 160,
+        "width": 340
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [-380, -220],
@@ -63,18 +63,18 @@
     },
     {
       "parameters": {
-        "model": "gemma4:cloud",
+        "model": "meta/llama-3.3-70b-instruct",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
       "position": [100, 200],
-      "id": "b3-ollama-model",
-      "name": "Ollama Chat Model",
+      "id": "b3-openai-model",
+      "name": "NVIDIA NIM / OpenRouter (OpenAI Chat Model)",
       "credentials": {
-        "ollamaApi": {
-          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
-          "name": "Ollama account"
+        "openAiApi": {
+          "id": "YOUR_NVIDIA_OR_OPENROUTER_CREDENTIAL_ID",
+          "name": "NVIDIA NIM / OpenRouter Account"
         }
       }
     },
@@ -173,7 +173,7 @@
         ]
       ]
     },
-    "Ollama Chat Model": {
+    "NVIDIA NIM / OpenRouter (OpenAI Chat Model)": {
       "ai_languageModel": [
         [
           {

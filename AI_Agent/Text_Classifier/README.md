@@ -6,6 +6,10 @@
 
 **Text Classifier** 節點是工作流的「AI 智慧總機」。透過定義各個類別的名稱與詳細描述，LLM 會在沒有大量訓練資料的情況下（Zero-shot Classification），自動將輸入文字歸類至最合適的類別標籤。後續搭配 n8n 的 **Switch 節點**，即可輕鬆實現自動化任務派工與跨部門流轉。
 
+> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
+> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
+> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（推薦 `meta-llama/llama-3.3-70b-instruct`）
+
 ---
 
 ## 🧭 工作流程架構
@@ -14,7 +18,7 @@
 flowchart LR
     Trigger["👆 Manual Trigger"] --> Msg["📨 模擬進線信件<br/>(企業大量採購詢價)"]
     Msg --> Classifier["🏷️ Text Classifier<br/>(AI 意圖分類器)"]
-    Model["🧠 LLM 模型 (Ollama / Gemini)"] -.->|意圖比對| Classifier
+    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|意圖比對| Classifier
     Classifier --> SwitchNode["🔀 依意圖分流 (Switch)"]
     SwitchNode -->|sales_lead| Route1["💼 業務商機 (寫入 CRM/通知業務)"]
     SwitchNode -->|technical_support| Route2["🔧 技術支援 (建立 Jira 工單)"]
@@ -48,6 +52,9 @@ flowchart LR
 
 4. **🔀 依意圖分流 (Switch 節點)**
    - 根據 `{{ $json.category }}` 的值，將資料流導向 4 個不同分支（Output 0~2 以及 Fallback Output 3）。
+
+5. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
+   - 穩定提供高精準度的意圖判定。
 
 ---
 

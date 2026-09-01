@@ -6,6 +6,10 @@
 
 不同於具備自主決策與工具調用循環的 AI Agent，**Basic LLM Chain 採用確定性的「單向處理鏈」**：接收輸入資料 ➔ 組合 Prompt 提示詞 ➔ 呼叫語言模型（LLM）➔ 輸出結果。適用於文字翻譯、格式潤飾、摘要生成、以及固定規則的內容產出。
 
+> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
+> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（免費取得 API Key，使用 `meta/llama-3.3-70b-instruct` 或 `nvidia/nemotron-3.5-lightning-30b-a3b`）
+> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（單一 Key 調用多種主流合規模型）
+
 ---
 
 ## 🧭 工作流程架構
@@ -14,7 +18,7 @@
 flowchart LR
     Trigger["👆 Manual Trigger<br/>(手動觸發)"] --> Input["📝 模擬客戶留言<br/>(Edit Fields / Set)"]
     Input --> Chain["🔗 Basic LLM Chain<br/>(注入 Prompt 提示詞)"]
-    Model["🧠 Ollama / Gemini / OpenAI<br/>(語言模型)"] -.->|掛載模型| Chain
+    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model 節點)"] -.->|掛載模型| Chain
     Chain --> Output["📤 結構化翻譯與建議回覆"]
 ```
 
@@ -41,8 +45,11 @@ flowchart LR
    - **功能**：接收上游資料，透過 Expression 語法 `{{ $json.customer_feedback }}` 組合提示詞，並送入模型。
    - **提示詞規範**：要求模型輸出繁體中文翻譯、核心訴求與建議回覆方向。
 
-5. **🧠 Ollama Chat Model（或 Google Gemini / OpenAI）**
-   - **功能**：提供底層推理能力，可無縫切換本機 Ollama（如 `llama3`、`gemma`）或雲端 API。
+5. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
+   - **Base URL 設定**：
+     - NVIDIA NIM：`https://integrate.api.nvidia.com/v1`
+     - OpenRouter：`https://openrouter.ai/api/v1`
+   - **模型選擇**：例如 `meta/llama-3.3-70b-instruct`。
 
 ---
 
@@ -50,7 +57,7 @@ flowchart LR
 
 - **基礎 Chain 觀念**：理解單向 LLM 呼叫與 AI Agent 循環推理的差異。
 - **動態提示詞（Expression）**：掌握在 Prompt 中動態注入 `$json` 變數的技巧。
-- **模型掛載機制**：理解 n8n「AI Language Model」特殊連接點的掛載方式。
+- **標準 OpenAI 相容介面**：學會透過 Base URL 連接 NVIDIA NIM 與 OpenRouter。
 
 ---
 

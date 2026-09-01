@@ -8,6 +8,10 @@
 1. **Stuff 模式**：適合單篇中短篇文章，直接將全文塞入 Prompt 進行快速摘要。
 2. **Map-Reduce 模式**：適合超長篇巨幅文檔（甚至超過模型單次上下文上限），先將文檔自動切塊並分別摘要（Map），最後再將各小段摘要整合為總摘要（Reduce）。
 
+> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
+> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
+> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（推薦 `meta-llama/llama-3.3-70b-instruct`）
+
 ---
 
 ## 🧭 工作流程架構
@@ -16,7 +20,7 @@
 flowchart LR
     Trigger["👆 Manual Trigger"] --> Article["📑 模擬長篇文章<br/>(產業趨勢報告/新聞全文)"]
     Article --> Summarizer["📝 Summarization Chain<br/>(Stuff / Map-Reduce 模式)"]
-    Model["🧠 LLM 模型 (Ollama / Gemini)"] -.->|精煉萃取| Summarizer
+    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|精煉萃取| Summarizer
     Summarizer --> Output["📋 結構化重點摘要<br/>(結論 + 亮點 + 建議)"]
 ```
 
@@ -41,8 +45,8 @@ flowchart LR
    - **Type**：`stuff`（一般文章）或 `map_reduce`（巨篇長文）。
    - **自訂提示詞**：要求產出「🎯 一句話核心結論」、「📌 三大核心亮點」與「💡 企業行動建議」。
 
-4. **🧠 Ollama Chat Model（語言模型）**
-   - 連接本地或雲端大模型進行推理與文字濃縮。
+4. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
+   - 連接高效開源大模型進行推理與文字濃縮。
 
 ---
 

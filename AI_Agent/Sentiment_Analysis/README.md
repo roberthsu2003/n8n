@@ -6,6 +6,10 @@
 
 **Sentiment Analysis** 節點利用大語言模型強大的語意理解能力，精準分析文字背後的情感傾向（例如：Positive 正面、Neutral 中立、Negative 負面），並輸出信心評分（Confidence Score）。透過與 IF 條件節點結合，可以第一時間過濾出極度不滿的客訴，自動發送 Telegram / LINE 警報給主管介入處理。
 
+> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
+> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
+> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（推薦 `meta-llama/llama-3.3-70b-instruct`）
+
 ---
 
 ## 🧭 工作流程架構
@@ -14,7 +18,7 @@
 flowchart LR
     Trigger["👆 Manual Trigger"] --> Review["💬 模擬顧客評論/留言<br/>(含強烈負面客訴)"]
     Review --> Sentiment["😊 Sentiment Analysis<br/>(分析情感與信心指數)"]
-    Model["🧠 LLM 模型 (Ollama / Gemini)"] -.->|語意判定| Sentiment
+    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|語意判定| Sentiment
     Sentiment --> Check{"判斷是否為負面<br/>(sentiment == negative)"}
     Check -->|True 是| Alert["🚨 發送緊急主管通報<br/>(Telegram / Slack)"]
     Check -->|False 否| Log["📝 存入一般常規評論日誌"]
@@ -46,6 +50,9 @@ flowchart LR
    - 條件規則：`{{ $json.sentiment }} == "negative"`。
    - **True 分支**：串接緊急通報，附帶訂單編號與評論原文。
    - **False 分支**：記錄至一般資料表。
+
+5. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
+   - 透過標準 OpenAI 相容介面提供高效的情感分析推理。
 
 ---
 

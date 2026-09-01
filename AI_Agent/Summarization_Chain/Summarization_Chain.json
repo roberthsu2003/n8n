@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 5：Summarization Chain\n學習如何使用 Summarization Chain 進行長篇大論、會議記錄與文章的自動濃縮與重點摘要。",
-        "height": 140,
-        "width": 320
+        "content": "## 基礎 5：Summarization Chain\n學習如何使用 Summarization Chain 進行長篇大論、會議記錄與文章的自動濃縮與重點摘要。\n\n📌 支援模型：NVIDIA NIM / OpenRouter (OpenAI 相容)",
+        "height": 160,
+        "width": 340
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [-380, -220],
@@ -34,7 +34,7 @@
             {
               "id": "field-2",
               "name": "article_content",
-              "value": "隨著生成式 AI 技術成熟，企業自動化正從傳統的固定規則工作流邁向具備自主決策能力的 AI Agent 架構。根據最新產業調查，超過 75% 的跨國企業已在客服、財務審核與軟體開發中部署多代理協同系統。然而，企業在落地過程中仍面臨三大挑戰：首先是數據安全與隱私防護，許多組織開始傾向在私有雲部署開源本地模型（如 Ollama/Llama 體系）；其次是模型幻覺與精確度問題，促使 RAG（檢索增強生成）成為企業知識庫的標準配置；最後則是工作流整合難度，現代自動化平台（如 n8n）透過直觀的視覺化畫布與開放生態，大幅降低了工程師建構 AI 應用的門檻。預計至 2027 年，具備工具調用能力的智慧代理將普及於各行各業。",
+              "value": "隨著生成式 AI 技術成熟，企業自動化正從傳統的固定規則工作流邁向具備自主決策能力的 AI Agent 架構。根據最新產業調查，超過 75% 的跨國企業已在客服、財務審核與軟體開發中部署多代理協同系統。然而，企業在落地過程中仍面臨三大挑戰：首先是數據安全與隱私防護，許多組織開始傾向使用合規的歐美雲端推論微服務（如 NVIDIA NIM 與 OpenRouter 架構）；其次是模型幻覺與精確度問題，促使 RAG（檢索增強生成）成為企業知識庫的標準配置；最後則是工作流整合難度，現代自動化平台（如 n8n）透過直觀的視覺化畫布與開放生態，大幅降低了工程師建構 AI 應用的門檻。預計至 2027 年，具備工具調用能力的智慧代理將普及於各行各業。",
               "type": "string"
             }
           ]
@@ -63,20 +63,20 @@
     },
     {
       "parameters": {
-        "model": "gemma4:cloud",
+        "model": "meta/llama-3.3-70b-instruct",
         "options": {
           "temperature": 0.2
         }
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
       "position": [100, 200],
-      "id": "b5-ollama-model",
-      "name": "Ollama Chat Model",
+      "id": "b5-openai-model",
+      "name": "NVIDIA NIM / OpenRouter (OpenAI Chat Model)",
       "credentials": {
-        "ollamaApi": {
-          "id": "YOUR_OLLAMA_CREDENTIAL_ID",
-          "name": "Ollama account"
+        "openAiApi": {
+          "id": "YOUR_NVIDIA_OR_OPENROUTER_CREDENTIAL_ID",
+          "name": "NVIDIA NIM / OpenRouter Account"
         }
       }
     }
@@ -105,7 +105,7 @@
         ]
       ]
     },
-    "Ollama Chat Model": {
+    "NVIDIA NIM / OpenRouter (OpenAI Chat Model)": {
       "ai_languageModel": [
         [
           {

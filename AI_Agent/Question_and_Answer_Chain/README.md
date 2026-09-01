@@ -6,6 +6,10 @@
 
 **Question and Answer Chain** 是 RAG（檢索增強生成）的最精簡入門架構！它將**語言模型（LLM）**與**檢索器（Retriever / Vector Store）**直接串連。當收到提問時，檢索器會先找出與問題最相關的文件段落，並將段落作為參考依據交由 LLM 作答。因為是純粹的單向問答鏈，反應速度極快，架構清晰明瞭。
 
+> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
+> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
+> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（推薦 `meta-llama/llama-3.3-70b-instruct`）
+
 ---
 
 ## 🧭 工作流程架構
@@ -23,7 +27,7 @@ flowchart LR
         DocLoader -.-> VectorStore
     end
     
-    Model["🧠 LLM 模型 (Ollama / Gemini)"] -.->|語意回答| QAChain
+    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|語意回答| QAChain
     VectorStore -.->|提供相關段落| QAChain
     QAChain --> Output["📤 精準規章回覆<br/>(進水屬人為損壞不保固)"]
 ```
@@ -50,8 +54,11 @@ flowchart LR
 
 4. **🗄️ In-Memory Vector Store & Embeddings**
    - **Vector Store**：在記憶體中建立即時向量索引庫。
-   - **Embeddings**：使用 `nomic-embed-text` 或其他嵌入模型將文字轉為向量數字。
+   - **Embeddings**：將文字轉為向量數字。
    - **Default Data Loader**：預載產品售後規章（包含 1 年保固、人為進水損壞不保固、7 天猶豫期規範）。
+
+5. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
+   - 嚴格根據檢索段落回答問題。
 
 ---
 
