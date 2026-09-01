@@ -28,6 +28,12 @@ flowchart TD
 
 ---
 
+### 預覽圖
+
+![Telegram 雙向通訊與指令自動回覆流程預覽](./images/pic1.png)
+
+---
+
 ### 工作流程樣版下載
 
 - [📥 Telegram 雙向通訊與指令自動回覆樣版 (telegram_bot_interactive.json)](./telegram_bot_interactive.json)
@@ -88,9 +94,9 @@ flowchart TD
    - 在 Telegram 與 `@BotFather` 對話，輸入 `/setcommands`。
    - 選擇您的機器人，並貼上以下清單：
      ```text
-     start - 開啟主選單與歡迎詞
-     help - 查看指令說明手冊
-     info - 查看系統運行狀態
+     /start - 開啟主選單與歡迎詞
+     /help - 查看指令說明手冊
+     /info - 查看系統運行狀態
      ```
    - 這樣使用者在輸入框打 `/` 時就會自動彈出精美指令選單！
 4. **啟動工作流測試**：將工作流設為 **Active**，在 Telegram 點擊 `/start`、`/help`、`/info` 或隨意傳送文字，體驗即時互動反饋！
