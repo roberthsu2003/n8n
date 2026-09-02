@@ -89,11 +89,10 @@
 ---
 
 ### 🤖 5. [AI Agent 與 LLM 模型整合：打造智慧多代理團隊](./AI_Agent/README.md)
-結合大型語言模型（NVIDIA NIM、OpenRouter、Gemini、OpenAI）與 RAG 私有向量知識庫：
+結合大型語言模型（NVIDIA NIM、OpenRouter、Gemini、OpenAI）與企業自動化工作流：
 * **[🟢 階段一：基礎專用 AI 節點](./AI_Agent/階段一_基礎專用AI節點/README.md)**：Basic LLM Chain、Information Extractor、Sentiment Analysis、Text Classifier、Summarization Chain 與 Q&A Chain 確定性單向處理鏈。
 * **[🟡 階段二：AI Agent 核心與工具調用](./AI_Agent/階段二_AI_Agent核心與工具調用/README.md)**：智能客服聊天機器人（Memory 記憶）、臺北市 YouBike 2.0 即時查詢（API Tool）、即時天氣與新聞助理（多工具自主決策）。
-* **[🟠 階段三：企業級 RAG 向量知識庫](./AI_Agent/階段三_企業級RAG向量知識庫/README.md)**：入門記憶體儲存、Supabase 雲端向量庫、Metadata 來源過濾檢索策略、Pinecone 百萬級向量庫與語意檢索。
-* **[🔴 階段四：企業級進階實戰與多代理](./AI_Agent/階段四_企業級進階實戰與多代理/README.md)**：萬能工作流助理（Call Workflow Tool）、Gmail 客服郵件分類與工單閉環、Multi-Agent Supervisor 多代理人協同團隊、端到端全渠道客服中樞。
+* **[🔴 階段三：企業級進階實戰與多代理](./AI_Agent/階段三_企業級進階實戰與多代理/README.md)**：萬能工作流助理（Call Workflow Tool）、Gmail 客服郵件分類與工單閉環、Multi-Agent Supervisor 多代理人協同團隊、端到端全渠道客服中樞。
 
 ---
 
@@ -112,8 +111,9 @@
 2. **Supabase Low-Code 表格存取**：免寫 SQL，透過視覺化介面讀寫資料表
 3. **電商訂單 Upsert 與關聯統計**：`ON CONFLICT` 防重複下單與跨表 JOIN 分組報表
 4. **資料庫變更即時偵測與推播**：定時排程監控 pending 訂單，Telegram 發送即時告警
-5. **Supabase pgvector 向量知識庫**：關聯式資料庫與 RAG 向量一體化檢索
-6. **Pinecone 雲端向量資料庫 RAG**：Serverless 專用向量庫毫秒級高併發語意搜尋
+5. **Supabase pgvector 向量知識庫**：關聯式資料庫與 RAG 向量一體化檢索（含切塊上傳與 Drive 同步）
+6. **RAG 檢索策略與來源過濾**：自然語言意圖識別、動態 Metadata Filter 注入與 Postgres 對話記憶
+7. **Pinecone 雲端向量資料庫 RAG**：Serverless 專用向量庫毫秒級高併發語意搜尋
 
 ---
 

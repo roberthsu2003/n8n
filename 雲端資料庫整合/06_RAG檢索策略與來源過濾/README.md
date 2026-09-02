@@ -1,6 +1,7 @@
-# 基礎範例 3：RAG 檢索策略與 Metadata 來源過濾
+# 🗄️ 雲端資料庫整合
+## 範例 6：RAG 檢索策略與 Metadata 來源過濾（精準語意搜尋）
 
-## 📚 工作流程說明
+### 📚 工作流程說明
 
 在真實企業 RAG 應用中，單靠「向量語意相似度」往往會面臨**跨部門文件混淆、歷史舊版本干擾**等問題。
 
@@ -116,4 +117,4 @@ flowchart LR
 
 ---
 
-[⬅️ 返回上一單元：02_Supabase雲端向量庫](../02_Supabase雲端向量庫/README.md) ｜ [➡️ 前往下一單元：04_Pinecone雲端向量庫](../04_Pinecone雲端向量庫/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)
+[⬅️ 返回範例 5：Supabase pgvector 向量知識庫](../05_Supabase_pgvector向量知識庫/README.md) ｜ [➡️ 前往範例 7：Pinecone 雲端向量資料庫與 AI 檢索](../07_Pinecone雲端向量資料庫與AI檢索/README.md) ｜ [🏠 返回資料庫總目錄](../README.md)
