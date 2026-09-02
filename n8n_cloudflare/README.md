@@ -93,6 +93,9 @@ DOMAIN=n8n.yourdomain.com
 
 # Cloudflare Zero Trust 取得的 Tunnel Token
 CLOUDFLARE_TUNNEL_TOKEN=eyJhIjoi...請替換為您的完整Token...
+
+# ⚠️ 若使用備份 Volume (n8n_data) 還原，請務必填入備份環境的加密金鑰：
+N8N_ENCRYPTION_KEY=11FpZn6tsYW+C+Ui+CKF6nc2iOcEtYBT
 ```
 
 ---
@@ -119,6 +122,7 @@ services:
       - TZ=Asia/Taipei
       - N8N_RUNNERS_ENABLED=true
       - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-}
     volumes:
       - n8n_data:/home/node/.n8n
 

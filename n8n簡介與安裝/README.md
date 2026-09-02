@@ -91,6 +91,24 @@ docker run -d \
   - 例如：`http://host.docker.internal:8080/api`
 - **時區設定**：已設定為 `Asia/Taipei`，確保工作流程的時間戳記正確
 - **資料持久化**：使用 `n8n_data` 資料卷儲存所有設定與工作流程，即使容器重新啟動或刪除重建也不會遺失資料
+- ⚠️ **使用備份 Volume 還原時的必備環境變數**：  
+  如果您是使用已備份的 `n8n_data` Volume 啟動容器，`docker run` 指令中**務必額外加上 `-e N8N_ENCRYPTION_KEY=...`**（例如：`-e N8N_ENCRYPTION_KEY=11FpZn6tsYW+C+Ui+CKF6nc2iOcEtYBT`），否則 n8n 將無法解密原先儲存的 API Key 與憑證帳密！
+  ```bash
+  # 還原備份 Volume 時的啟動範例（額外帶入 -e N8N_ENCRYPTION_KEY）：
+  docker run -d \
+    --name n8n \
+    --restart always \
+    -p 5678:5678 \
+    -e N8N_HOST=abcd-1234.ngrok-free.dev \
+    -e N8N_PROTOCOL=https \
+    -e N8N_PORT=5678 \
+    -e N8N_EDITOR_BASE_URL=https://abcd-1234.ngrok-free.dev \
+    -e WEBHOOK_URL=https://abcd-1234.ngrok-free.dev \
+    -e GENERIC_TIMEZONE=Asia/Taipei \
+    -e N8N_ENCRYPTION_KEY=11FpZn6tsYW+C+Ui+CKF6nc2iOcEtYBT \
+    -v n8n_data:/home/node/.n8n \
+    docker.n8n.io/n8nio/n8n
+  ```
 
 ---
 

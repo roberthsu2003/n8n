@@ -76,7 +76,20 @@ n8n-ngrok/
 
 ---
 
+## ⚠️ 重要備註：使用備份 Volume 還原時必加環境變數
+
+如果您是匯入或使用已備份的 `n8n_data` Volume（例如從 Docker Desktop 匯入的備份檔），請務必在 `.env` 中加入 **`N8N_ENCRYPTION_KEY`**：
+
+```env
+# 若使用備份 Volume 還原，請務必填入與備份環境完全相同的加密金鑰：
+N8N_ENCRYPTION_KEY=11FpZn6tsYW+C+Ui+CKF6nc2iOcEtYBT
+```
+> 💡 **為什麼需要？** n8n 資料庫中所有已儲存的 API Key、Token 與連線密碼都是透過此金鑰加密，若未設定或金鑰不符，還原後所有憑證將無法解密使用。詳細說明請見 [n8n的備份方式](../n8n的備份方式/README.md)。
+
+---
+
 ## 🔗 相關章節與後續設定
 - 🐳 **若尚未安裝 Docker**：[Docker 安裝指南](../docker安裝/README.md)
+- 💾 **資料備份與還原**：[n8n 資料備份與還原指南](../n8n的備份方式/README.md)
 - 🔑 **外部服務整合**：[LINE Messaging API 設定](../line設定/README.md) ｜ [Google Cloud Platform 設定](../google_cloud設定/README.md)
 - 🤖 **AI Agent 協作**：[n8n MCP 協議設定指南](../n8n_mcp/README.md)

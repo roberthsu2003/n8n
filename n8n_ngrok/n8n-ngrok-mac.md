@@ -157,6 +157,9 @@ NGROK_DOMAIN=abcd-1234.ngrok-free.dev
 ```env
 NGROK_AUTHTOKEN=2abcDEFghiJKLmnoPQRstuVWXyz_1a2B3c4D5e6F7g8H9i
 NGROK_DOMAIN=teacher-class-01.ngrok-free.dev
+
+# ⚠️ 若使用備份 Volume (n8n_data) 還原，請務必填入備份環境的加密金鑰：
+N8N_ENCRYPTION_KEY=11FpZn6tsYW+C+Ui+CKF6nc2iOcEtYBT
 ```
 
 ⚠️ 注意事項：
@@ -188,6 +191,7 @@ services:
       - GENERIC_TIMEZONE=Asia/Taipei
       - TZ=Asia/Taipei
       - N8N_RUNNERS_ENABLED=true
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-}
     volumes:
       - n8n_data:/home/node/.n8n
 
