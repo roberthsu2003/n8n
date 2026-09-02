@@ -116,11 +116,20 @@ flowchart LR
 
 ---
 
-## 💡 實際應用場景
+### 💡 實際應用場景
 
 - **電商平台商品評論**：5 星好評自動引導至社群分享，1~2 星差評立即通報售後客服團隊。
 - **客服 Helpdesk 郵件進線分流**：負面情緒信件優先派工（High Priority Queue）。
 - **社群媒體輿情監控**：即時分析粉專留言，過濾公關危機事件。
+
+---
+
+### ⚙️ 設定步驟
+
+1. **匯入流程**：將 `Sentiment_Analysis.json` 複製並貼上至 n8n 編輯器中。
+2. **綁定憑證**：在 OpenAI Chat Model 節點中選取您的 NVIDIA NIM 或 OpenRouter 憑證。
+3. **執行測試**：點擊「Execute Workflow」或在 Manual Trigger 點擊測試。
+4. **檢視結果**：觀察資料是否自動從 `Negative`（第 3 個輸出端）流出，並成功觸發「🚨 發送緊急主管客訴警報」。
 
 ---
 

@@ -109,11 +109,20 @@ flowchart LR
 
 ---
 
-## 💡 實際應用場景
+### 💡 實際應用場景
 
 - **客服 Email 智慧派工**：自動識別售前、售後、客訴與財務信件。
 - **GitHub / Jira 議題自動打標籤**：依據 Bug 描述自動打上 `frontend`、`backend`、`database` 等標籤。
 - **社群媒體貼文分流**：將社群留言自動分類為行銷合作、產品反饋或公關危機。
+
+---
+
+### ⚙️ 設定步驟
+
+1. **匯入流程**：將 `Text_Classifier.json` 複製並貼上至 n8n 編輯器中。
+2. **綁定憑證**：在 OpenAI Chat Model 節點中選取您的 NVIDIA NIM 或 OpenRouter 憑證。
+3. **執行測試**：點擊「Execute Workflow」或在 Manual Trigger 點擊測試。
+4. **檢視結果**：觀察大批量授權詢價信件是否自動從 `sales_lead`（Output 0）端口輸出，並成功觸發「💼 業務商機分支」。
 
 ---
 

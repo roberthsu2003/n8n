@@ -119,11 +119,20 @@ flowchart LR
 
 ---
 
-## 💡 實際應用場景
+### 💡 實際應用場景
 
-- LINE / Messenger 社群團購下單訊息自動解析並寫入 Google 試算表。
-- 履歷文字（Resume）自動抽取求職者姓名、學歷、技能清單與工作年資。
-- 廠商報價單 / 發票 OCR 文字自動抽取金額、品名與發票號碼。
+- **LINE / Messenger 社群團購下單訊息自動解析**：自動提取品項與地址並寫入資料庫。
+- **履歷文字（Resume）自動抽取**：自動解析求職者姓名、學歷、技能清單與工作年資。
+- **廠商報價單 / 發票 OCR 文字提取**：自動抽取統一編號、品名與金額。
+
+---
+
+### ⚙️ 設定步驟
+
+1. **匯入流程**：將 `Information_Extractor.json` 複製並貼上至 n8n 編輯器中。
+2. **綁定憑證**：在 OpenAI Chat Model 節點中選取您的 NVIDIA NIM 或 OpenRouter 憑證。
+3. **執行測試**：點擊「Execute Workflow」或在 Manual Trigger 點擊測試。
+4. **檢視成果**：點擊 Information Extractor 節點，查看右側 Output 是否已成功輸出結構化 JSON（姓名、電話、地址與商品明細陣列）。
 
 ---
 

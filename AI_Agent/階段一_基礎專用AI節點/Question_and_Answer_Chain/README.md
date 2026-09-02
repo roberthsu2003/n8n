@@ -49,37 +49,114 @@ flowchart TD
 
 ---
 
+## 📋 節點詳細說明（各節點職責與運作原理）
+
+### 1. **📝 Sticky Note（便利貼）**
+- **功能**：畫布流程的註解與指引。
+- **內容**：清楚標示 6 階層標準 RAG 的連線關係，提醒開發者各節點底部的必連插槽。
+
+---
+
+### 2. **👆 執行工作流 (Manual Trigger)**
+- **功能**：手動點擊「Execute Workflow」按鈕來啟動流程。
+- **用途**：適合開發測試、單次偵錯與學習驗證。
+
+---
+
+### 3. **💬 模擬顧客提問 (Edit Fields / Set)**
+- **功能**：模擬進線顧客提出的口語問題。
+- **內容**：包含欄位 `user_question`：「*請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？*」。
+
+---
+
+### 4. **❓ Question and Answer Chain（RAG 總指揮核心）**
+- **功能**：RAG 檢索問答流程的主控節點（Root Chain）。
+- **操作**：
+  - 接收來自上游的顧客問題（`{{ $json.user_question }}`）。
+  - 調用底部的 **Retriever（檢索器）** 前往向量知識庫搜尋最相關的政策規章。
+  - 將檢索到的規章段落與顧客問題組裝，交由 **Chat Model** 生成流暢的繁體中文解答。
+- **必連插槽**：
+  - `Model *` ➔ 連接語言模型
+  - `Retriever *` ➔ 連接向量檢索器
+
+---
+
+### 5. **🧠 NVIDIA NIM / OpenRouter (OpenAI Chat Model)**
+- **功能**：提供大語言模型（LLM）的文字理解與回覆生成大腦。
+- **參數**：建議設定 `temperature: 0.1`，讓回答高度忠於規章條文，嚴格防止模型自由發揮（胡言亂語）。
+
+---
+
+### 6. **🔍 Vector Store Retriever（向量檢索適配器）**
+- **功能**：作為 `Question and Answer Chain` 與 `Vector Store` 之間的「轉接橋樑」。
+- **為什麼需要它？**：
+  - QA Chain 要求的插槽型別是 `ai_retriever`（檢索器）。
+  - Vector Store 提供的插槽型別是 `ai_vectorStore`（資料庫）。
+  - 透過此節點可將向量資料庫封裝為具備語意搜尋功能的檢索器。
+
+---
+
+### 7. **🗄️ In-Memory Vector Store（記憶體向量資料庫）**
+- **功能**：知識庫的臨時儲存所。
+- **概念**：在流程執行時，於記憶體中建立一個微型向量索引，儲存所有切片後的政策規章向量，提供毫秒級的相似度比對。
+
+---
+
+### 8. **🔤 Embeddings Model（向量嵌入模型）** 💡（初學者重點科普）
+
+#### ❓ 什麼是「Embedding（向量化）」？學生常問：這到底是做什麼的？
+> **生活化比喻（AI 的文字座標翻譯官）**：
+> 1. **人類用文字思考**，但**電腦和資料庫只懂數字**。
+> 2. `Embeddings Model`（如 `text-embedding-3-small`）就像是一本「語意數學字典」。它會把每一句話、每一個詞彙，轉換成一串包含 1536 個數字的**空間座標（數學向量 Vector）**。
+> 3. **語意越相近的文字，在數學空間中的距離就越近！**
+>
+> ```text
+> 「進水」 ───(數學距離極近)───> 「受潮、液體滲入」
+> 「退貨」 ───(數學距離極近)───> 「退款、猶豫期」
+> 「西瓜」 ───(數學距離極遠)───> 「保固維修」
+> ```
+> 4. **為什麼 RAG 非要它不可？**
+>    傳統資料庫搜尋只能「字面完全一樣」才找得到（Keyword Search）；但有了 **Embedding 向量化**，即便顧客問：「*手機掉到馬桶裡有保固嗎？*」，AI 透過向量計算也能精準找到寫著「*液體滲入損壞不予免費保固*」的條款！
+
+- **功能**：負責將政策規章文字與使用者的提問「即時轉換為數學向量」，供向量資料庫進行語意搜尋。
+
+---
+
+### 9. **📄 預載售後政策規章 (Default Data Loader)**
+- **功能**：資料來源載入器。
+- **內容**：內建載入整篇真實的企業售後服務與保固條款規章（涵蓋 1 年保固、進水人為損壞除外、7 天退貨、3 天刷退等規定）。
+
+---
+
+### 10. **✂️ Recursive Character Text Splitter（文本智慧切片器）**
+- **功能**：長文分塊切片。
+- **概念**：自動將長篇規章以每 1,000 字切成小塊（Chunk），並保留 200 字的重疊（Overlap），防止法規條文在段落交界處被硬生生切斷。
+
+---
+
+### 11. **🎯 整理與輸出政策解答 (Set)**
+- **功能**：將 RAG 問答鏈最終生成的解答文字（`rag_answer`）整理為標準 JSON 格式，方便後續串接 LINE、Email 或客服系統輸出。
+
+---
+
 ## 🛠️ 常見錯誤排查：為什麼原本的畫布會亮紅燈？
 
 ### 🔴 致命錯誤 1：`In-Memory Vector Store` 無法直接連到 `QA Chain`
-- **原因剖析**：
-  - `Question and Answer Chain` 底部插槽要求的型別是 **`Retriever *`（`ai_retriever`）**。
-  - `In-Memory Vector Store` 節點輸出的型別是 **`Vector Store`（`ai_vectorStore`）**。
-  - 兩者型別不相容，因此 Vector Store 無法直接連入 QA Chain，導致 Vector Store 孤立飄在畫布上，QA Chain 的 Retriever 插槽呈現空白並亮紅燈！
-- **解決方案**：
-  - 在兩者之間必須加入一個 **`Vector Store Retriever`** 節點作為「檢索適配器」！
-
----
+- **原因**：QA Chain 底部要求 `Retriever *` 型別，而 Vector Store 是 `Vector Store` 型別，兩者型別不相容。
+- **解決方案**：在兩者之間加入 **`Vector Store Retriever`** 節點轉接即可！
 
 ### 🔴 致命錯誤 2：`Default Data Loader` 缺少 `Text Splitter *`
-- **原因剖析**：
-  - 在 n8n 中，`Default Data Loader` 節點負責載入長篇文章，但它需要知道「如何切片」，因此底部標有紅星的 **`Text Splitter *`** 插槽為必連項目。
-- **解決方案**：
-  - 在下方連接一個 **`Recursive Character Text Splitter`** 節點（Chunk Size 1000, Chunk Overlap 200）。
-
----
+- **原因**：`Default Data Loader` 底部紅星標記的 `Text Splitter *` 為必連插槽。
+- **解決方案**：在下方連接 **`Recursive Character Text Splitter`** 節點。
 
 ### 🔴 致命錯誤 3：`Embeddings Model` 缺少憑證
-- **解決方案**：
-  - 確保已選取有效 OpenAI / OpenRouter 憑證，並選用 `text-embedding-3-small`。
-
----
+- **解決方案**：選取有效的 OpenAI / OpenRouter 憑證，並選用 `text-embedding-3-small`。
 
 ---
 
 ## 📄 預載售後政策規章（Default Data Loader 偽資料文本）
 
-在 `Default Data Loader` 節點中，我們預先載入了一份結構完整、條款明確的企業售後規章偽資料，供向量檢索器進行語意比對：
+在 `Default Data Loader` 節點中預載的規章全文如下：
 
 ```text
 【TechCorp 數位智能 產品售後服務與保固政策總規章（2026年版）】
@@ -118,17 +195,28 @@ flowchart TD
 
 ## 🎯 學習重點
 
-- **嚴格型別插槽架構**：理解 n8n LangChain 節點中 Chain ➔ Retriever ➔ Vector Store ➔ Embeddings / Document ➔ Splitter 的 6 級依賴關係。
-- **零幻覺保證**：限制模型只能依據檢索到的政策回答，絕不胡亂捏造。
-- **完全告別孤立節點**：掌握適配器概念，徹底消除所有紅色未連線警告。
+- **標準 6 階層 RAG 架構**：理解 Chain ➔ Retriever ➔ Vector Store ➔ Embeddings / Document ➔ Splitter 的嚴格依賴關係。
+- **語意搜尋（Semantic Search）**：了解 Embedding 向量模型如何跨越字面限制，實現意圖匹配。
+- **零幻覺保證**：限制 AI 只能嚴格依據檢索出的規章回答。
 
 ---
 
-## 💡 實際應用場景
+### 💡 實際應用場景
 
 - **內部企業 HR 規章查詢機器人**：員工詢問請假、報帳、差旅補助辦法。
 - **電商客服售後 FAQ 機器人**：精準解答退貨條件、保固範圍、物流時效。
 - **產品操作手冊技術支援**：依據說明書解答特定錯誤代碼與障礙排除步驟。
+
+---
+
+### ⚙️ 設定步驟
+
+1. **匯入流程**：將 `Question_and_Answer_Chain.json` 複製並貼上至 n8n 編輯器中。
+2. **綁定模型憑證**：
+   - 在 OpenAI Chat Model 節點中選取您的 NVIDIA NIM 或 OpenRouter 憑證。
+   - 在 Embeddings Model 節點中選取您的 Embeddings 憑證（`text-embedding-3-small`）。
+3. **執行測試**：點擊「Execute Workflow」或在 Manual Trigger 點擊測試。
+4. **檢視成果**：點擊最後一個「整理與輸出政策解答」節點，查看 AI 是否嚴格依據規章回答「進水不屬免費保固」與「退款 3 個工作天」。
 
 ---
 

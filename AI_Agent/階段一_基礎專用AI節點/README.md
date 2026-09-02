@@ -15,12 +15,12 @@
 ```mermaid
 flowchart TD
     Input["收到任務文字"] --> Q{"任務類型？"}
-    Q -->|翻譯/潤飾/生成| C1["1. Basic LLM Chain"]
-    Q -->|非結構化文字轉 JSON| C2["2. Information Extractor"]
-    Q -->|情感傾向/滿意度| C3["3. Sentiment Analysis"]
-    Q -->|多類別意圖分流| C4["4. Text Classifier"]
-    Q -->|長文章/會議濃縮| C5["5. Summarization Chain"]
-    Q -->|單份文檔精準檢索| C6["6. Question & Answer Chain"]
+    Q -->|文字翻譯 / 文案潤飾 / Prompt 互動| C1["1. Basic LLM Chain"]
+    Q -->|非結構化文字 ➔ 強型別 JSON 抽取| C2["2. Information Extractor"]
+    Q -->|情感傾向 ➔ 原生三路情緒路由| C3["3. Sentiment Analysis"]
+    Q -->|多意圖分類 ➔ 動態多端口業務派工| C4["4. Text Classifier"]
+    Q -->|長篇報告 / 會議記錄智慧分塊濃縮| C5["5. Summarization Chain"]
+    Q -->|企業規章 / 政策手冊 RAG 精準問答| C6["6. Question & Answer Chain"]
 ```
 
 ---
@@ -39,31 +39,31 @@ flowchart TD
 
 ---
 
-### 3. [範例 3：Sentiment Analysis（文字情緒與滿意度分析）](./Sentiment_Analysis/README.md)
-*即時掌握顧客情緒！自動分析客戶回饋的情感傾向，快速捕捉負面客訴並啟動預警。*
-- **學習重點**：正/負/中立與自訂情緒分類、信心指數評分、搭配 IF 節點緊急通報。
+### 3. [範例 3：Sentiment Analysis（文字情緒分析與三路語意分流）](./Sentiment_Analysis/README.md)
+*即時掌握顧客情緒！原生自帶 Positive / Neutral / Negative 三路輸出端口，達成秒級客訴預警。*
+- **學習重點**：AI 語意路由器概念、原生三路端口分流、信心評分指標。
 - **附帶樣版**：[`Sentiment_Analysis.json`](./Sentiment_Analysis/Sentiment_Analysis.json)
 
 ---
 
-### 4. [範例 4：Text Classifier（文字意圖分類與智慧路由）](./Text_Classifier/README.md)
-*自動化流程的智慧總機！根據文字內容精準分類，配合 Switch 節點實現多路業務派工。*
-- **學習重點**：Zero-shot 分類原理、類別描述撰寫、搭配 Switch 實現流程分流。
+### 4. [範例 4：Text Classifier（文字意圖分類與動態多路路由）](./Text_Classifier/README.md)
+*自動化流程的智慧總機！依據定義的 Categories 動態生成輸出端口，實現跨部門自動化派工。*
+- **學習重點**：動態多端口路由機制、Category 描述寫作技巧、多標籤與 Other 容錯分支。
 - **附帶樣版**：[`Text_Classifier.json`](./Text_Classifier/Text_Classifier.json)
 
 ---
 
 ### 5. [範例 5：Summarization Chain（長文本智慧摘要濃縮）](./Summarization_Chain/README.md)
-*長篇大論救星！一秒精煉長篇新聞、會議記錄與政策法規，產出條理分明的重點摘要。*
-- **學習重點**：Stuff 模式 vs Map-Reduce 模式、突破 Token 限制、條列式結構化摘要。
+*長篇大論救星！自動將長文切片（Chunking 1000 字）並保留重疊緩衝（Overlap 200 字），產出條理分明的精準摘要。*
+- **學習重點**：克服 Token 上限、分塊（Chunking）與重疊（Overlap）原理、結構化決策摘要。
 - **附帶樣版**：[`Summarization_Chain.json`](./Summarization_Chain/Summarization_Chain.json)
 
 ---
 
-### 6. [範例 6：Question & Answer Chain（基礎文件檢索問答鏈）](./Question_and_Answer_Chain/README.md)
-*RAG 知識庫最簡實踐！讓 AI 根據指定的檢索文件（Retriever）直接回答問題，杜絕幻覺。*
-- **學習重點**：Retriever 與 Vector Store 掛載、Embeddings 原理、嚴格依規章作答。
-- **附帶樣版**：[`Question_and_Answer_Chain.json`](./Question_and_Answer_Chain/Question_and_Answer_Chain.json)
+### 6. [範例 6：Question & Answer Chain（RAG 規章知識庫問答）](./Question_and_Answer_Chain/README.md)
+*標準 6 階層 RAG 知識庫落地！讓 AI 嚴格根據指定的企業規章文件檢索回答，徹底杜絕幻覺。*
+- **學習重點**：6 階層標準 RAG 架構、Vector Store Retriever 適配器、Embeddings 向量化原理。
+- **附帶樣版**：[`Question_and_Answer_Chain.json`](./Question_and_Answer_Chain/Question_and_Answer_Chain.json)、[`售後服務與保固政策規章.txt`](./Question_and_Answer_Chain/售後服務與保固政策規章.txt)
 
 ---
 
