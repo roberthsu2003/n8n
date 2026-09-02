@@ -48,7 +48,7 @@ flowchart LR
 為了方便學習完整 RAG 生命週期，我們提供以下額外延伸範例：
 1. **[01_RAG文件索引_本機上傳.json](./額外範例/01_RAG文件索引_本機上傳.json)**：本機上傳 PDF/TXT/MD 文件，自動切塊、計算 Embeddings 並寫入 Supabase 向量庫。
 2. **[02_RAG文件索引_Google_Drive同步.json](./額外範例/02_RAG文件索引_Google_Drive同步.json)**：自動監聽 Google Drive 雲端資料夾，同步解析並向量化新增文件。
-3. **[04_RAG智能問答_進階版_來源過濾.json](./額外範例/04_RAG智能問答_進階版_來源過濾.json)**：支援 Metadata 來源過濾（如依部門/文件類型篩選）與相似度評分進階檢索。
+3. 👉 **進階檢索策略（Metadata 來源過濾）**：已獨立為專屬單元，請前往學習 [**範例 3：RAG 檢索策略與來源過濾**](../04_檢索策略/README.md)。
 
 ---
 
