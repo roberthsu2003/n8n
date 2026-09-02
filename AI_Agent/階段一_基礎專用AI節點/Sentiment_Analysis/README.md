@@ -1,10 +1,18 @@
-# 基礎範例 3：Sentiment Analysis（文字情緒與滿意度分析）
+# 基礎範例 3：Sentiment Analysis（AI 語意情緒分流與客訴預警）
 
 ## 📚 工作流程說明
 
-即時掌握顧客情緒與社群輿情是提升客戶滿意度的關鍵！
+在客戶關係管理（CRM）與自動化客服中，即時辨識使用者的情緒傾向至關重要！
 
-**Sentiment Analysis** 節點利用大語言模型強大的語意理解能力，精準分析文字背後的情感傾向（例如：Positive 正面、Neutral 中立、Negative 負面），並輸出信心評分（Confidence Score）。透過與 IF 條件節點結合，可以第一時間過濾出極度不滿的客訴，自動發送 Telegram / LINE 警報給主管介入處理。
+**Sentiment Analysis（情緒分析）** 節點是 n8n 的專用 AI 節點之一。它結合了大語言模型（LLM）的深度語意理解能力，但最特別的是：**它本身就是一個「AI 語意路由器（Semantic Router）」！**
+
+### 💡 核心觀念：為什麼不需要額外串接 IF 節點？
+過去做情緒分析時，我們常誤以為必須先拿到 `sentiment: "negative"` 文字，再接一個 `IF` 節點來判斷。然而在 n8n 中，**Sentiment Analysis 節點原生就提供 3 個輸出端口（Output Ports）**：
+- 🟢 **Output 0 (Positive)**：正面讚揚分支
+- ⚪ **Output 1 (Neutral)**：中立平穩分支
+- 🔴 **Output 2 (Negative)**：負面客訴分支
+
+AI 會根據語意分析結果，**自動將資料導向對應的輸出通道**，完全不需手動撰寫條件判斷式！
 
 > 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
 > - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
@@ -16,114 +24,103 @@
 
 ```mermaid
 flowchart LR
-    Trigger["👆 Manual Trigger"] --> Review["💬 模擬顧客評論/留言<br/>(含強烈負面客訴)"]
-    Review --> Sentiment["😊 Sentiment Analysis<br/>(分析情感與信心指數)"]
+    Trigger["👆 Manual Trigger"] --> Review["💬 模擬顧客評論/客訴<br/>(王小明 - 逾期未到貨留言)"]
+    Review --> Sentiment["😊 Sentiment Analysis<br/>(AI 語意情緒路由器)"]
     Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|語意判定| Sentiment
-    Sentiment --> Check{"判斷是否為負面<br/>(sentiment == negative)"}
-    Check -->|True 是| Alert["🚨 發送緊急主管通報<br/>(Telegram / Slack)"]
-    Check -->|False 否| Log["📝 存入一般常規評論日誌"]
+    
+    Sentiment -->|🟢 Positive 正面| Bonus["💖 好評感謝與發放回購券<br/>(自動送 9 折優惠碼)"]
+    Sentiment -->|⚪ Neutral 中立| Log["📝 記錄至一般常規日誌<br/>(存入客服備查資料庫)"]
+    Sentiment -->|🔴 Negative 負面| Alert["🚨 發送緊急主管客訴警報<br/>(Slack/LINE 即時通報)"]
 ```
 
 ---
 
 ## 📥 工作流程圖下載
 
-- [下載範例流程：Sentiment_Analysis.json](./Sentiment_Analysis.json)
+- [下載重構範例流程：Sentiment_Analysis.json](./Sentiment_Analysis.json)
 
 ---
 
 ## 📋 節點詳細說明
 
 1. **📝 Sticky Note（便利貼）**
-   - 標記教學重點與情緒分流機制。
+   - 標記教學重點與原生三路輸出分流機制。
 
 2. **🔄 模擬顧客評論與客訴 (Edit Fields)**
-   - 包含訂單編號 `order_id` 與一段表達延誤與客服失聯的強烈不滿文字。
+   - 包含顧客姓名 `customer_name`、訂單編號 `order_id` 與一段表達延誤未到貨且客服失聯的強烈不滿文字 `review_text`。
 
-3. **😊 Sentiment Analysis（情緒分析節點）**
-   - **Text**：傳入文字 `{{ $json.review_text }}`。
-   - **輸出屬性**：
-     - `sentiment`：判定之情緒（positive, neutral, negative 或自訂標籤）。
-     - `confidence_score`：模型判定之信心評分（0~1）。
+3. **😊 Sentiment Analysis（情緒分析與語意路由核心）**
+   - **Text to Analyze**：傳入自然語言文字 `{{ $json.review_text }}`。
+   - **三路原生輸出（Outputs）**：
+     - `Positive`（第 1 個輸出端）：導向好評獎勵流程。
+     - `Neutral`（第 2 個輸出端）：導向常規存檔流程。
+     - `Negative`（第 3 個輸出端）：導向負面客訴緊急警報流程。
+   - **輸出屬性（Output JSON）**：
+     - 自動在資料中附加 `sentiment`（情緒類別）與 `confidence_score`（信心指數，0~1）。
 
-4. **🔀 是否為負面客訴？(IF 節點)**
-   - 條件規則：`{{ $json.sentiment }} == "negative"`。
-   - **True 分支**：串接緊急通報，附帶訂單編號與評論原文。
-   - **False 分支**：記錄至一般資料表。
+4. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
+   - 建議設定 `temperature: 0`，以保持情緒判定的確定性與一致性。
 
-5. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
-   - 透過標準 OpenAI 相容介面提供高效的情感分析推理。
+5. **💖 / 📝 / 🚨 三大處置分支節點**
+   - **好評感謝分支 (Positive)**：自動生成感謝詞並發送回購禮券。
+   - **常規日誌分支 (Neutral)**：寫入常規記錄，供日後客服參考。
+   - **緊急警報分支 (Negative)**：提取訂單編號、顧客姓名、負面評論原文與信心指數，即時發送警報給主管介入處理。
 
 ---
 
 ## ⚙️ 節點設定指南與參數詳解
 
-在 n8n 中配置 `Sentiment Analysis` 節點時，需注意以下核心設定：
+在 n8n 中配置 `Sentiment Analysis` 節點時，請掌握以下設定要點：
 
 ### 1. 必填參數：Text to Analyze（待分析文字）
-- **欄位作用**：告訴 AI 模型哪一段文字需要進行情感與情緒傾向分析。
-- **填寫方式**：點擊輸入框右側的 **Expression（表達式）** 模式，引用前置節點帶入的變數，例如：
+- **欄位作用**：指定要讓 AI 分析情緒的文字內容。
+- **設定方式**：切換為 **`Expression`（表達式）** 模式，填入：
   ```text
   {{ $json.review_text }}
   ```
-  *(若上游欄位名稱為 `message` 或 `content`，則填 `{{ $json.message }}` 或 `{{ $json.content }}`)*
-- ⚠️ **注意事項**：此欄位為必填項（有紅色驚嘆號），若未填入文字或表達式，節點將無法執行。
+- ⚠️ **注意事項**：此欄位為必填項（有紅色驚嘆號），未填寫時無法執行。
 
 ### 2. 底部模型插槽：Model *（語言模型）
-- 節點底部標有紅星的 `Model *` 插槽為**必要連接**。
-- 必須從畫布下方拉線連接一個語言模型節點（如 `OpenAI Chat Model`、`NVIDIA NIM`、`OpenRouter` 或 `Ollama Chat Model`），以提供語意判斷能力。
+- 節點底部標有紅星的 `Model *` 插槽為**必接插槽**。
+- 必須從畫布下方拉線連接一個語言模型節點（如 `OpenAI Chat Model`、`NVIDIA NIM` 或 `Ollama Chat Model`）。
 
 ### 3. Options 進階選項（點擊 Add Option）
-- **Sentiment Property**：自訂輸出情緒結果的欄位名稱（預設為 `sentiment`）。
-- **Score Property**：自訂信心分數欄位名稱（預設為 `confidence_score`，數值介於 0 ~ 1）。
-- **自訂情緒分類（Custom Sentiments）**：除預設的 `positive` / `neutral` / `negative` 之外，可自訂細部標籤（如 `urgent_complaint`、`praise`、`refund_request` 等）。
-
-### 4. 節點輸出資料結構範例
-執行後，節點會在原 JSON 物件中自動附加情緒分析結果：
-```json
-{
-  "customer_name": "王小明",
-  "order_id": "ORD-20260901-889",
-  "review_text": "已經等了超過一個星期都沒有收到商品，客服完全沒人理，要求全額退款！",
-  "sentiment": "negative",
-  "confidence_score": 0.98
-}
-```
+- **Sentiment Property**：自訂輸出情緒名稱的欄位（預設為 `sentiment`）。
+- **Score Property**：自訂信心評分的欄位（預設為 `confidence_score`）。
+- **自訂情緒分類（Custom Sentiments）**：若業務需要，可自訂輸出端口（例如增加 `Toxic`、`Urgent` 等多種標籤）。
 
 ---
 
 ## 🛠️ 常見錯誤排除（Troubleshooting）
 
-### ❓ 出現 `Issues: - Parameter "Text to Analyze" is required.` 警告？
+### ❓ 為什麼執行時出現 `Issues: - Parameter "Text to Analyze" is required.`？
 
-如果您在點擊 `Execute step` 時看到此錯誤提示，表示 **`Text to Analyze` 欄位為空白**。請依照以下步驟解決：
+表示 `Text to Analyze` 欄位目前為空白。請依照以下步驟操作：
 
-1. **先執行前置節點**：
-   - 檢查左側 INPUT 面板是否顯示 `No input data`。
-   - 若是，請先點擊左側面板中的 **`Execute previous nodes`** 按鈕，讓前置的模擬評論節點執行並傳入資料。
-2. **切換為 Expression 填入變數**：
-   - 將 `Text to Analyze` 由 `Fixed` 切換為 **`Expression`** 模式。
-   - 填入表達式：`={{ $json.review_text }}`（或直接從左側 INPUT 面板將 `review_text` 拖曳至輸入框中）。
-3. **確認底部模型已連接**：
-   - 確認節點下方的紅星 `Model *` 已成功拉線連接至 `OpenAI Chat Model`（或 NVIDIA NIM / OpenRouter）。
-4. **重新執行**：
-   - 點擊右上角 **`Execute step`** 即可成功輸出情緒分析結果！
+1. **先點擊左側「Execute previous nodes」**：
+   - 讓前置的「模擬顧客評論」節點先執行，左側 INPUT 面板就會載入 `review_text` 欄位資料。
+2. **切換為 Expression 模式填入變數**：
+   - 將 `Text to Analyze` 切換為 **`Expression`** 模式，填入 `={{ $json.review_text }}`（或直接用滑鼠從左側面板將 `review_text` 拖曳進輸入框）。
+3. **確認底部 Model* 已連線**：
+   - 確認底部紅星插槽已連線至語言模型節點。
+4. **點擊「Execute step」**：
+   - 執行成功後，資料會自動從對應的輸出端口（如 Negative）流出！
 
 ---
 
 ## 🎯 學習重點
 
-- **情感傾向判定**：理解 LLM 如何解讀文字語意並標記情緒。
-- **信心指標運用**：透過信心評分可過濾模糊不清的評論。
-- **自動化危機預警**：學習「AI 分析 ➔ 條件判斷 ➔ 即時警報」的經典自動化模式。
+- **AI 語意路由概念**：掌握多分支輸出（Multi-Output Ports）架構，擺脫傳統繁瑣的 IF 條件串接。
+- **即時公關危機攔截**：負面客訴在第一時間經由 Negative 輸出端自動分流，達成秒級警報。
+- **全自動化顧客分群經營**：正面好評即時觸發獎勵機制，提升顧客黏著度與回購率。
 
 ---
 
 ## 💡 實際應用場景
 
-- Google 商家、App Store / Google Play 用戶評論每日自動情緒評級。
-- 客服信箱進線時，自動將負面嚴重情緒的郵件標記為高優先級（High Priority）。
-- 社群品牌風向即時監控（公關危機預警）。
+- **電商平台商品評論**：5 星好評自動引導至社群分享，1~2 星差評立即通報售後客服團隊。
+- **客服 Helpdesk 郵件進線分流**：負面情緒信件優先派工（High Priority Queue）。
+- **社群媒體輿情監控**：即時分析粉專留言，過濾公關危機事件。
 
 ---
 
@@ -132,12 +129,16 @@ flowchart LR
 <details>
 <summary>👉 點擊展開可直接複製給 AI 助理的 Prompt 提詞</summary>
 
-> 💡 **任務目標**：透過 AI 自訂五星級滿意度標籤，並根據情緒自動擬定不同語氣的回覆草稿。
+> 💡 **任務目標**：透過 AI 助理在 Sentiment Analysis 後方自動串接 Telegram 警報與 Google Sheets 資料表記錄。
 
 ```text
-請幫我在目前的「Sentiment Analysis」流程中進行升級：
-1. 將 Sentiment Analysis 的情緒標籤自訂為 5 等級：5_star_praise, 4_star_satisfied, 3_star_neutral, 2_star_minor_issue, 1_star_furious。
-2. 串接一個 Basic LLM Chain 節點：根據判定出的等級自動生成適當語氣的繁中公關回覆（例如 5 星表達感謝並給予折扣碼；1 星表達誠摯歉意並主動提供客服專線）。
-請幫我配置好節點與提示詞！
+請幫我擴充目前的「Sentiment Analysis」情緒分流工作流程：
+1. 當 Sentiment Analysis 判定為 Negative（第 3 個輸出端）時：
+   - 串接 Telegram 節點（或 Slack 節點），向「客服主管群組」發送緊急告警，內容包含：訂單編號、顧客姓名、評論原文與情緒信心分數。
+2. 當判定為 Positive（第 1 個輸出端）時：
+   - 串接 Google Sheets 節點（Append row），將顧客姓名、好評內容與日期自動寫入「優良顧客感謝清單」。
+3. 當判定為 Neutral（第 2 個輸出端）時：
+   - 串接 Google Sheets 節點記錄至「常規意見反應表」。
+請幫我建立所有目標節點並完成三路連線！
 ```
 </details>

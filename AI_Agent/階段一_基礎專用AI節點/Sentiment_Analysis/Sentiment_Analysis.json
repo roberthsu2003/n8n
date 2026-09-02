@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 3：Sentiment Analysis（情緒分析）\n學習文字情緒傾向分析，並搭配 IF 節點建立緊急客訴預警機制。\n\n📌 測試與執行步驟：\n1. 點擊「執行工作流 (Manual Trigger)」啟動流程\n2. 點擊進入「Sentiment Analysis」節點：\n   • Text to Analyze：已設定表達式 `{{ $json.review_text }}`\n   • 底部 Model*：已連接 OpenAI Chat Model 語言模型\n3. 觀察右側 Output 產出的 `sentiment` (negative) 與 `confidence_score`\n4. 後續由 IF 節點自動將負面客訴導向「緊急主管通報」分支",
+        "content": "## 基礎 3：Sentiment Analysis（AI 語意情緒分流）\nSentiment Analysis 節點原生具備「三路多分支輸出（Positive / Neutral / Negative）」，本質就是一個 AI 語意路由器（無需額外接 IF 節點）！\n\n📌 原生三路分流機制：\n• 🟢 Positive 輸出埠 ➔ 好評感謝與發放回購券\n• ⚪ Neutral 輸出埠 ➔ 記錄至一般常規日誌\n• 🔴 Negative 輸出埠 ➔ 觸發緊急主管客訴警報",
         "height": 240,
-        "width": 380
+        "width": 420
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [-380, -260],
@@ -70,7 +70,9 @@
     {
       "parameters": {
         "model": "meta/llama-3.3-70b-instruct",
-        "options": {}
+        "options": {
+          "temperature": 0
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -86,40 +88,50 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
+        "assignments": {
+          "assignments": [
             {
-              "id": "cond-1",
-              "leftValue": "={{ $json.sentiment }}",
-              "rightValue": "negative",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
+              "id": "f-positive",
+              "name": "thank_message",
+              "value": "=💖【好評反饋】感謝顧客 {{ $json.customer_name }} 的肯定！訂單 {{ $json.order_id }} 滿意度極高，自動發放 9 折回購優惠券！",
+              "type": "string"
             }
-          ],
-          "combinator": "and"
+          ]
         },
         "options": {}
       },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [360, 0],
-      "id": "b3-if-check",
-      "name": "是否為負面客訴？(IF)"
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, -120],
+      "id": "b3-positive-set",
+      "name": "好評感謝與發放回購券 (Positive)"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "f-alert",
+              "id": "f-neutral",
+              "name": "log_message",
+              "value": "=📝【常規記錄】訂單 {{ $json.order_id }} 顧客 {{ $json.customer_name }} 留言情緒中立平穩，已記錄至客服資料庫備查。",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [400, 0],
+      "id": "b3-neutral-set",
+      "name": "記錄至一般常規日誌 (Neutral)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-negative",
               "name": "alert_message",
               "value": "=🚨【緊急客訴警報】訂單 {{ $json.order_id }}（顧客：{{ $json.customer_name }}）收到強烈負面評論！\n內容：{{ $json.review_text }}\n情緒判定：{{ $json.sentiment }} (信心指數: {{ $json.confidence_score }})",
               "type": "string"
@@ -130,29 +142,9 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [600, -80],
-      "id": "b3-alert-set",
-      "name": "發送緊急主管通知 (True)"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "f-log",
-              "name": "log_message",
-              "value": "=一般評論記錄：訂單 {{ $json.order_id }} 情緒正常 ({{ $json.sentiment }})",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [600, 80],
-      "id": "b3-log-set",
-      "name": "記錄至一般日誌 (False)"
+      "position": [400, 120],
+      "id": "b3-negative-set",
+      "name": "發送緊急主管客訴警報 (Negative)"
     }
   ],
   "pinData": {},
@@ -194,25 +186,21 @@
       "main": [
         [
           {
-            "node": "是否為負面客訴？(IF)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "是否為負面客訴？(IF)": {
-      "main": [
-        [
-          {
-            "node": "發送緊急主管通知 (True)",
+            "node": "好評感謝與發放回購券 (Positive)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "記錄至一般日誌 (False)",
+            "node": "記錄至一般常規日誌 (Neutral)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "發送緊急主管客訴警報 (Negative)",
             "type": "main",
             "index": 0
           }
