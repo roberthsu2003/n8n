@@ -3,12 +3,12 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 5：Summarization Chain\n學習如何使用 Summarization Chain 進行長篇大論、會議記錄與文章的自動濃縮與重點摘要。\n\n📌 支援模型：NVIDIA NIM / OpenRouter (OpenAI 相容)",
-        "height": 160,
-        "width": 340
+        "content": "## 基礎 5：Summarization Chain（長文分塊智慧摘要）\n專為長篇報告、會議記錄與新聞長文設計的 AI 摘要鏈，自動分塊解決 Token 上限問題！\n\n📌 核心預設設定解析：\n• Data to Summarize：Use Node Input (JSON) 接收上游長文\n• Chunking Strategy：Simple (Define Below)\n• Characters Per Chunk：1000 字/塊\n• Chunk Overlap：200 字重疊（避免句子被截斷失真）\n• 底部 Model*：必接語言模型（NVIDIA NIM / OpenRouter / Ollama）",
+        "height": 260,
+        "width": 460
       },
       "type": "n8n-nodes-base.stickyNote",
-      "position": [-380, -220],
+      "position": [-380, -280],
       "typeVersion": 1,
       "id": "b5-sticky-1",
       "name": "Sticky Note"
@@ -27,14 +27,14 @@
           "assignments": [
             {
               "id": "field-1",
-              "name": "article_title",
-              "value": "2026年全球人工智慧與自動化工作流程發展趨勢報告",
+              "name": "document_title",
+              "value": "2026年企業級 AI Agent 自動化工作流落地趨勢與資安實踐報告",
               "type": "string"
             },
             {
               "id": "field-2",
-              "name": "article_content",
-              "value": "隨著生成式 AI 技術成熟，企業自動化正從傳統的固定規則工作流邁向具備自主決策能力的 AI Agent 架構。根據最新產業調查，超過 75% 的跨國企業已在客服、財務審核與軟體開發中部署多代理協同系統。然而，企業在落地過程中仍面臨三大挑戰：首先是數據安全與隱私防護，許多組織開始傾向使用合規的歐美雲端推論微服務（如 NVIDIA NIM 與 OpenRouter 架構）；其次是模型幻覺與精確度問題，促使 RAG（檢索增強生成）成為企業知識庫的標準配置；最後則是工作流整合難度，現代自動化平台（如 n8n）透過直觀的視覺化畫布與開放生態，大幅降低了工程師建構 AI 應用的門檻。預計至 2027 年，具備工具調用能力的智慧代理將普及於各行各業。",
+              "name": "document_content",
+              "value": "【執行摘要】隨著生成式人工智慧從單純的聊天機器人邁向具備自主工具調用與多步驟決策能力的 AI Agent，企業自動化架構正迎來根本性的典範轉移。本年度調查涵蓋全球 500 大跨國企業，超過 78% 的受訪企業已在生產環境中導入 AI 輔助流程。\n\n【核心發現一：多代理協同取代單一模型】現代自動化不再依賴單一大型模型解決所有問題，而是透過 Specialized Agents（專用代理）進行任務分工。例如由 Router Agent 負責意圖路由，Information Extractor 負責從雜亂輸入中提取結構化 JSON，最後由 Summarization Agent 彙整全案報告。這種微服務化架構大幅提升了系統的穩定度與響應速度。\n\n【核心發現二：企業資安與合規性推論服務崛起】過去企業對於將機敏業務數據直接傳送至公開公有雲存在高度疑慮。2026 年主流趨勢轉向採用具備嚴格資安審計的私有化微服務架構（如 NVIDIA NIM 微服務與 OpenRouter 企業聚合通道），配合地端部署之開源模型，在完全符合 GDPR 與台灣個資法規範下進行低延遲推論。\n\n【核心發現三：視覺化工作流與 RAG 知識庫標準化】自動化平台（如 n8n）透過直觀的節點拖曳與開放生態，大幅降低了工程團隊串接外部 API 與 Vector Store（向量資料庫）的門檻。透過 RAG 技術，AI Agent 能夠即時檢索企業內部知識庫，有效將模型幻覺率由過去的 18% 降低至 2% 以下。\n\n【結論與建議】建議企業應儘早啟動自動化流程盤點，從小規模的專用 AI 節點（如情緒分析、意圖分類、自動摘要）切入，逐步建立跨部門的自主工作流生態系。",
               "type": "string"
             }
           ]
@@ -45,14 +45,16 @@
       "typeVersion": 3.4,
       "position": [-140, 0],
       "id": "b5-set-input",
-      "name": "模擬長篇文章內容"
+      "name": "模擬長篇產業報告內容"
     },
     {
       "parameters": {
-        "operation": "summarize",
-        "type": "stuff",
+        "dataToSummarize": "json",
+        "chunkingStrategy": "simple",
+        "charactersPerChunk": 1000,
+        "chunkOverlap": 200,
         "options": {
-          "prompt": "=請閱讀以下文章（篇名：{{ $json.article_title }}）並產出繁體中文專業摘要：\n\n文章內容：\n{{ $json.article_content }}\n\n輸出格式要求：\n1. 🎯【一句話核心結論】（30 字以內）\n2. 📌【三大核心亮點與趨勢】（條列式重點說明）\n3. 💡【企業行動建議】（50 字以內）"
+          "prompt": "=請閱讀以下輸入之長篇報告，並輸出結構化繁體中文專業摘要：\n\n輸出格式要求：\n1. 🎯【核心結論與大局觀】（50 字以內精準濃縮）\n2. 📌【三大關鍵趨勢重點】（條列式解析）\n3. 💡【企業落地行動建議】（30 字具體行動方針）"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.chainSummarization",
@@ -79,6 +81,26 @@
           "name": "NVIDIA NIM / OpenRouter Account"
         }
       }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-out",
+              "name": "final_summary_report",
+              "value": "={{ $json.text || $json.response?.text || $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [360, 0],
+      "id": "b5-output-set",
+      "name": "整理與發布摘要成果"
     }
   ],
   "pinData": {},
@@ -87,14 +109,14 @@
       "main": [
         [
           {
-            "node": "模擬長篇文章內容",
+            "node": "模擬長篇產業報告內容",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "模擬長篇文章內容": {
+    "模擬長篇產業報告內容": {
       "main": [
         [
           {
@@ -111,6 +133,17 @@
           {
             "node": "Summarization Chain",
             "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "整理與發布摘要成果",
+            "type": "main",
             "index": 0
           }
         ]
