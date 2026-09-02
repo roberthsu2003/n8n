@@ -73,8 +73,7 @@
   1. [**入門版：記憶體儲存 RAG**](./階段三_企業級RAG向量知識庫/01_記憶體儲存入門/README.md)：In-Memory Vector Store、上傳即問答
   2. [**基礎版：Supabase 雲端儲存 RAG**](./階段三_企業級RAG向量知識庫/02_Supabase雲端向量庫/README.md)：索引與查詢分離、雲端資料庫建置
   3. [**基礎版：RAG 檢索策略與來源過濾**](./階段三_企業級RAG向量知識庫/03_檢索策略與來源過濾/README.md)：意圖分析、動態 Metadata Filter 注入、Postgres 記憶
-  4. [**進階版：本地 PostgreSQL + PGVector**](./階段三_企業級RAG向量知識庫/04_本地PostgreSQL向量庫/README.md)：完全私有化控管
-  5. [**進階版：雲端專用 Pinecone 向量庫**](./階段三_企業級RAG向量知識庫/05_Pinecone雲端向量庫/README.md)：百萬級向量即時檢索與 Google Drive 串接
+  4. [**進階版：雲端專用 Pinecone 向量庫**](./階段三_企業級RAG向量知識庫/04_Pinecone雲端向量庫/README.md)：百萬級向量即時檢索與 Google Drive 串接
 
 👉 **[進入階段三完整教學 ➔](./階段三_企業級RAG向量知識庫/README.md)**
 

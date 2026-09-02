@@ -116,4 +116,4 @@ flowchart LR
 
 ---
 
-[⬅️ 返回上一單元：02_Supabase雲端向量庫](../02_Supabase雲端向量庫/README.md) ｜ [➡️ 前往下一單元：04_本地PostgreSQL向量庫](../04_本地PostgreSQL向量庫/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)
+[⬅️ 返回上一單元：02_Supabase雲端向量庫](../02_Supabase雲端向量庫/README.md) ｜ [➡️ 前往下一單元：04_Pinecone雲端向量庫](../04_Pinecone雲端向量庫/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)

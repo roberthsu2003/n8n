@@ -92,7 +92,7 @@
 結合大型語言模型（NVIDIA NIM、OpenRouter、Gemini、OpenAI）與 RAG 私有向量知識庫：
 * **[🟢 階段一：基礎專用 AI 節點](./AI_Agent/階段一_基礎專用AI節點/README.md)**：Basic LLM Chain、Information Extractor、Sentiment Analysis、Text Classifier、Summarization Chain 與 Q&A Chain 確定性單向處理鏈。
 * **[🟡 階段二：AI Agent 核心與工具調用](./AI_Agent/階段二_AI_Agent核心與工具調用/README.md)**：智能客服聊天機器人（Memory 記憶）、臺北市 YouBike 2.0 即時查詢（API Tool）、即時天氣與新聞助理（多工具自主決策）。
-* **[🟠 階段三：企業級 RAG 向量知識庫](./AI_Agent/階段三_企業級RAG向量知識庫/README.md)**：入門記憶體儲存、Supabase 雲端向量庫、本地 PostgreSQL (PGVector)、Pinecone 百萬級向量庫與語意檢索策略。
+* **[🟠 階段三：企業級 RAG 向量知識庫](./AI_Agent/階段三_企業級RAG向量知識庫/README.md)**：入門記憶體儲存、Supabase 雲端向量庫、Metadata 來源過濾檢索策略、Pinecone 百萬級向量庫與語意檢索。
 * **[🔴 階段四：企業級進階實戰與多代理](./AI_Agent/階段四_企業級進階實戰與多代理/README.md)**：萬能工作流助理（Call Workflow Tool）、Gmail 客服郵件分類與工單閉環、Multi-Agent Supervisor 多代理人協同團隊、端到端全渠道客服中樞。
 
 ---
