@@ -3,12 +3,12 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 6：Question & Answer Chain（RAG 知識庫檢索問答）\n標準 RAG（檢索增強生成）架構：讓 AI 僅依據指定規章政策精準回答，徹底消除幻覺！\n\n📌 5 大核心節點連線關係（防呆指南）：\n1. QA Chain ➔ 必接 Model* (語言模型) 與 Retriever* (向量庫)\n2. In-Memory Vector Store ➔ 必接 Embedding* (向量化) 與 Document (資料載入)\n3. Default Data Loader ➔ 必接 Text Splitter* (文本切片器)\n4. 各插槽已完整對接，徹底消除孤立節點與紅燈警告！",
-        "height": 270,
-        "width": 470
+        "content": "## 基礎 6：Question & Answer Chain（RAG 規章知識庫問答）\n標準 RAG（檢索增強生成）完整 6 階層架構：讓 AI 嚴格根據規章條文精準作答，徹底消除幻覺！\n\n📌 核心節點層級串接鏈（由上至下）：\n1. QA Chain ➔ 底部必接 Model* (語言模型) 與 Retriever* (向量檢索適配器)\n2. Vector Store Retriever ➔ 底部必接 Vector Store (向量儲存庫)\n3. In-Memory Vector Store ➔ 底部必接 Embedding* (向量模型) 與 Document (文件載入器)\n4. Default Data Loader ➔ 底部必接 Text Splitter* (文本切片器)\n5. 補齊所有適配節點後，所有紅燈與孤立節點全部消除！",
+        "height": 280,
+        "width": 500
       },
       "type": "n8n-nodes-base.stickyNote",
-      "position": [-380, -290],
+      "position": [-380, -300],
       "typeVersion": 1,
       "id": "b6-sticky-1",
       "name": "Sticky Note"
@@ -61,7 +61,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
-      "position": [0, 220],
+      "position": [-40, 200],
       "id": "b6-openai-model",
       "name": "NVIDIA NIM / OpenRouter (OpenAI Chat Model)",
       "credentials": {
@@ -72,12 +72,20 @@
       }
     },
     {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [160, 200],
+      "id": "b6-vs-retriever",
+      "name": "Vector Store Retriever"
+    },
+    {
       "parameters": {
         "memory": "inMemory"
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [200, 220],
+      "position": [240, 360],
       "id": "b6-vector-store",
       "name": "In-Memory Vector Store"
     },
@@ -88,7 +96,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.1,
-      "position": [120, 380],
+      "position": [160, 520],
       "id": "b6-embeddings-model",
       "name": "Embeddings Model",
       "credentials": {
@@ -101,12 +109,12 @@
     {
       "parameters": {
         "dataType": "string",
-        "value": "【產品售後與保固條款規章】\n1. 保固期限：凡購買本公司全系列正品憑發票或保固卡，享有自購買日起 1 年原廠有限保固。\n2. 人為損壞除外條款：產品若因進水、浸泡液體、重摔破裂、私自拆解改裝或受潮等人為操作不當因素導致之故障，均不在免費保固維修範圍內，將酌收零件更換工本費與檢測費。\n3. 七天猶豫期退換貨：依照消保法規定，商品自簽收次日起享有 7 天猶豫期（非試用期）。辦理退貨時商品需保持全新未拆封且包裝配件完整。本公司收到退回商品確認無誤後，將於 3 個工作天內完成信用卡退刷與匯款退款流程。\n4. 客服諮詢專線：週一至週五 09:00 - 18:00，客服專線 0800-888-999。",
+        "value": "【TechCorp 數位智能 產品售後服務與保固政策總規章（2026年版）】\n\n一、 原廠保固範圍與期限\n1. 凡購買本公司全系列正品，憑購買發票、電子訂單憑證或產品保固卡，享有自簽收日起算「1 年（12 個月）原廠有限保固服務」。\n2. 保固期內，若屬非人為因素引起之硬體功能故障、晶片瑕疵或零組件異常，本公司提供免費檢測與免費維修更換服務。\n\n二、 人為損壞與除外條款（非免費保固項目）\n以下情況均不在免費保固範圍內，本公司將依檢測情況酌收零件工本費與檢測服務費（基本檢測費 500 元）：\n1. 液體滲入損壞：產品因進水、受潮、浸泡液體、飲料潑灑或汗水侵蝕導致之機板短路與零件鏽蝕。\n2. 物理外力撞擊：因重摔、擠壓、撞擊導致外殼破裂、螢幕碎裂或內部結構損毀。\n3. 非原廠拆修：未經原廠授權私自拆解、改裝、更換副廠零件或刷除非官方韌體者。\n4. 天災不可抗力：因雷擊、水災、火災、地震等天然災害造成之損壞。\n\n三、 7 天猶豫期與退貨規範\n1. 猶豫期計算：依照消費者保護法規定，線上通路訂購之商品享有自收件次日起算「7 天猶豫期（鑑賞期）」。\n2. 猶豫期非試用期：辦理退貨之商品必須保持全新未拆封狀態，包含主機、配件、原廠包裝盒、說明書、發票及贈品皆需完整無缺。\n3. 退貨運費負擔：在 7 天猶豫期內提出合規退貨申請，由本公司委派物流免費到府取件。\n\n四、 退款時程與作業天數\n1. 驗收時效：本公司售後中心於收到退回包裹後，將於 1 個工作天內完成商品完整性驗收。\n2. 款項返還：\n   - 信用卡付款：確認驗收無誤後，將於「3 個工作天內」完成信用卡線上刷退。\n   - ATM / 貨到付款：將於「5 個工作天內」將款項全額匯入買方指定之銀行帳戶。\n\n五、 新品不良（DOA）換貨規範\n1. 若商品於收件後「15 天內」發生非人為之功能性故障，本公司將免費提供原箱換新機服務。\n\n六、 客服諮詢專線\n- 客服專線：0800-888-999（週一至週五 09:00 - 18:00）\n- 線上報修：https://service.techcorp.com",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1,
-      "position": [300, 380],
+      "position": [360, 520],
       "id": "b6-doc-loader",
       "name": "預載售後政策規章 (Default Data Loader)"
     },
@@ -118,7 +126,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
-      "position": [300, 520],
+      "position": [360, 680],
       "id": "b6-text-splitter",
       "name": "Recursive Character Text Splitter"
     },
@@ -138,7 +146,7 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [380, 0],
+      "position": [400, 0],
       "id": "b6-answer-set",
       "name": "整理與輸出政策解答"
     }
@@ -178,12 +186,23 @@
         ]
       ]
     },
-    "In-Memory Vector Store": {
+    "Vector Store Retriever": {
       "ai_retriever": [
         [
           {
             "node": "Question and Answer Chain",
             "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In-Memory Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
             "index": 0
           }
         ]
