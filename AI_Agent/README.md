@@ -22,11 +22,11 @@
 
 | 比較項目 | 🟢 專用基礎 AI 節點 / Chains | 🟡🔴 AI Agent 智慧代理 |
 | :--- | :--- | :--- |
-| **代表節點** | `Basic LLM Chain`, `Information Extractor`, `Text Classifier`, `Sentiment Analysis`, `Summarization Chain` | `AI Agent` (Tools Agent) |
+| **代表節點** | `Basic LLM Chain`, `Information Extractor`, `Text Classifier`, `Sentiment Analysis`, `Summarization Chain`, `Question & Answer Chain` | `AI Agent` (Tools Agent) |
 | **決策邏輯** | **確定性單向流程**（輸入 ➔ 處理 ➔ 輸出） | **自主推理循環**（思考 ➔ 決定工具 ➔ 執行 ➔ 總結） |
 | **工具調用** | 無（專注於單一文字處理任務） | 具備（自主決定呼叫 API、計算機、搜尋或子工作流） |
 | **速度與成本** | ⚡ 最快、Token 消耗少、結果穩定可控 | 🧠 消耗較多 Token、具備多輪推理能力 |
-| **適用情境** | 翻譯、非結構文字轉 JSON、情緒打分、意圖分類、長文摘要 | 互動客服機器人、動態多工具調度、多代理團隊協同 |
+| **適用情境** | 翻譯、非結構文字轉 JSON、情緒打分、意圖分類、長文摘要、文件檢索問答 | 互動客服機器人、動態多工具調度、多代理團隊協同 |
 
 ---
 
