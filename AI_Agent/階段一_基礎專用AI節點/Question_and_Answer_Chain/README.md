@@ -45,8 +45,8 @@ flowchart TD
 
 ## 📥 工作流程與資料檔案下載
 
-- [下載修復與完整連線範例流程：Question_and_Answer_Chain.json](./Question_and_Answer_Chain.json)
-- [查看/下載售後規章偽資料文本：售後服務與保固政策規章.txt](./售後服務與保固政策規章.txt)
+- [下載完整範例工作流程：Question_and_Answer_Chain.json](./Question_and_Answer_Chain.json)
+- [查看/下載售後規章範例文本：售後服務與保固政策規章.txt](./售後服務與保固政策規章.txt)
 
 ---
 
