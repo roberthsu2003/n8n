@@ -1,45 +1,76 @@
 # 基礎範例 6：Question and Answer Chain（RAG 規章知識庫問答）
 
-## 📚 工作流程說明
-
-在自動化客服與企業問答中，通用大語言模型（如 GPT、Llama、Claude）常常會產生「幻覺（Hallucination）」或回答過時的資訊。
-
-**Question and Answer Chain（檢索問答鏈）** 是建構 **RAG（Retrieval-Augmented Generation，檢索增強生成）** 的標準專用 AI 節點。透過將企業內部的「售後規章、產品手冊、保固條款」載入向量資料庫，當使用者提問時，系統會先**精準檢索出相關的規章段落**，再交由 AI **嚴格根據該段落作答**，徹底消除胡言亂語！
-
-> 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
-> - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
-> - [**OpenRouter 多模型聚合平台**](../../openrouter/README.md)（推薦 `meta-llama/llama-3.3-70b-instruct`）
+> 📖 **教學定位**：本範例為標準 RAG（檢索增強生成）的基礎必修課。學習如何將企業內部的「售後規章」建立為向量知識庫，並透過問答鏈讓 AI 嚴格根據條文精準作答，徹底消除胡言亂語與幻覺。
 
 ---
 
-## 🧭 工作流程架構（RAG 完整 6 階層串接鏈）
+## 一、這個工作流在教什麼？
 
-在 n8n 中，RAG 工作流由「**主資料流程**」與「**AI 子節點插槽鏈**」兩個維度共同組成：
+用一份「售後服務規章」文字，建立一個能精準回答顧客問題的問答機器人。
+
+核心概念是 **RAG（Retrieval-Augmented Generation，檢索增強生成）**：
+先把規章切碎、轉成向量存入資料庫；當顧客提問時，先「語意檢索」出最相關的規章段落，再把段落連同問題一起交給大語言模型作答。
+
+### ❓ 為什麼非要 RAG 不可？
+
+| 做法 | 面臨問題 |
+|---|---|
+| **直接問 LLM**<br/>「我們的退貨規定是什麼？」 | 模型不知道貴公司的內部私有規章，只能憑空瞎編（產生**幻覺 Hallucination**）。 |
+| **把整份規章塞進 Prompt** | 文件一大就會超過 Context 視窗上限、成本極高（Token 昂貴），且模型容易忽略長文的中間段落。 |
+| **RAG（檢索增強生成）** | 只撈出最相關的 2～4 段精華餵給模型，**精準度高、節省 Token 成本、答案具備可溯源性**。 |
+
+> 💡 **一句話總結給學生**：
+> **RAG = 開書考試。不是要模型死記硬背，而是在它答題前，精準幫它翻到正確的那一頁！**
+
+---
+
+## 二、整體架構：兩條獨立的線（寫入端 vs 查詢端）
+
+本工作流程最關鍵的觀念，在於它在同一個流程中貫穿了 **寫入端（建立知識庫）** 與 **查詢端（檢索與回答問題）** 兩條核心路線：
 
 ```mermaid
 flowchart TD
-    Trigger["👆 執行工作流<br/>(Manual Trigger)"] --> LoadDoc["📄 載入售後規章知識庫<br/>(Edit Fields: 設定 policy_text)"]
-    LoadDoc --> Question["💬 模擬顧客提問<br/>(Edit Fields: 設定 user_question)"]
-    Question --> QAChain["❓ Question and Answer Chain<br/>(RAG 檢索問答核心)"]
-    QAChain --> Answer["🎯 整理與輸出政策解答<br/>(依規章精準確認解答)"]
-    
-    Model["🧠 Chat Model<br/>(NVIDIA NIM / OpenRouter)"] -.->|1. Model 語言模型| QAChain
-    
-    subgraph RAG_Stack ["🗄️ 知識庫向量檢索完整階層鏈"]
-        RetrieverNode["🔍 Vector Store Retriever<br/>(檢索適配器)"]
-        VectorStore["🗄️ In-Memory Vector Store<br/>(向量儲存庫)"]
-        Embeddings["🔤 Embeddings Model<br/>(text-embedding-3-small)"]
-        DocLoader["📄 預載售後政策規章<br/>(Default Data Loader)"]
-        Splitter["✂️ Recursive Character Text Splitter<br/>(文本智慧切片器)"]
+    subgraph Write_Pipeline ["📥 寫入端 / 建立知識庫"]
+        Trigger["👆 執行工作流<br/>(Manual Trigger)"] --> LoadDoc["📄 載入售後規章知識庫<br/>(Set: 產生 policy_text)"]
+        LoadDoc --> InsertVS["🗄️ 寫入向量資料庫 (Insert)<br/>(In-Memory Vector Store)"]
         
-        VectorStore -.->|3. Vector Store 向量庫| RetrieverNode
-        Embeddings -.->|4. Embedding 向量模型| VectorStore
-        DocLoader -.->|5. Document 文件載入| VectorStore
-        Splitter -.->|6. Text Splitter 文本切片| DocLoader
+        DocLoader["📄 預載售後政策規章<br/>(Default Data Loader: Type=JSON)"] -.->|Document| InsertVS
+        Splitter["✂️ Recursive Character Text Splitter<br/>(Chunk: 600, Overlap: 100)"] -.->|Text Splitter| DocLoader
     end
 
-    RetrieverNode -.->|2. Retriever 檢索器| QAChain
+    subgraph Read_Pipeline ["🔍 查詢端 / 檢索回答問題"]
+        InsertVS --> Question["💬 模擬顧客提問<br/>(Set: 產生 user_question)"]
+        Question --> QAChain["❓ Question and Answer Chain<br/>(RAG 總指揮核心)"]
+        QAChain --> Answer["🎯 整理與輸出政策解答<br/>(Set: 提取 rag_answer)"]
+        
+        ChatModel["🧠 Chat Model<br/>(NVIDIA NIM / OpenRouter)"] -.->|Model| QAChain
+        Retriever["🔍 Vector Store Retriever<br/>(檢索適配器)"] -.->|Retriever| QAChain
+        RetrieveVS["🗄️ In-Memory Vector Store<br/>(Retrieve 模式)"] -.->|Vector Store| Retriever
+    end
+
+    SharedEmbed["🔤 Embeddings Google Gemini<br/>(models/gemini-embedding-001)"] -.->|Embedding| InsertVS
+    SharedEmbed -.->|Embedding| RetrieveVS
 ```
+
+> ⚠️ **關鍵記憶體機制**：
+> 1. **為什麼需要兩顆 Vector Store 節點？**
+>    - `Insert 模式` 的節點才有 `Document` 插槽（負責收錄文件）。
+>    - `Retrieve 模式` 的節點只有 `Embedding` 插槽（負責供 Retriever 調度搜尋）。
+>    - **一顆節點無法同時兼具兩種插槽與用途**，因此必須拆為寫入與查詢兩顆節點。
+> 2. **In-Memory 生命週期**：資料暫存於 n8n 執行記憶體中，n8n 重啟即會清空。因此測試時每次都必須從 `Manual Trigger` 完整執行一遍。
+
+---
+
+## 三、六層架構比喻表（觀念速查）
+
+| 層級 | 節點名稱 | 白話生活比喻 | 核心職責 |
+|:---:|---|---|---|
+| **1. 資料來源** | 載入售後規章知識庫 | 拿到一本全新的政策規章手冊 | 注入原始文本資料（`policy_text`） |
+| **2. 文件載入** | Default Data Loader | 把手冊打開，攤平成標準閱讀格式 | 將 JSON 文字包裝為 LangChain Document |
+| **3. 智慧切片** | Recursive Character Text Splitter | 將厚手冊撕成一張張重點便利貼 | 依語意標點分割成 600 字小區塊 |
+| **4. 向量嵌入** | Embeddings Google Gemini | 幫每張便利貼編上「語意空間座標」 | 將文字轉為數學向量（如 768 維） |
+| **5. 儲存檢索** | Vector Store (Insert / Retrieve) | 把便利貼收進抽屜；提問時撈出最像的幾張 | 記憶體索引儲存與語意相似度檢索 |
+| **6. 組織生成** | QA Chain + Chat Model | 看著撈出來的便利貼，親切寫出白話解答 | 結合問題與規章片段，生成零幻覺回覆 |
 
 ---
 
@@ -50,136 +81,157 @@ flowchart TD
 
 ---
 
-## 🔍 連接與除錯大解密：為什麼之前節點會亮紅燈？
+## 四、節點逐一詳細說明（參數配置與教學重點）
 
-### 🛑 常見錯誤 1：Default Data Loader 出現 `The value "string" is not supported!`
-- **原因分析**：
-  - n8n 的 `Default Data Loader`（預設資料載入器）底層只支援 `JSON` 與 `Binary` 兩種資料類型，**下拉選單中沒有 `string` 這個值**。
-  - 若在 JSON 設定中誤填了 `"dataType": "string"`，n8n 就會亮紅燈發出警告。
-- **正確設定**：
-  1. 打開 `Default Data Loader` 節點。
-  2. 將 **Type of Data** 選擇為 **`JSON`**。
-  3. 點擊 **Add Option** ➔ 新增 **JSON Data**。
-  4. 輸入表達式：`={{ $json.policy_text }}`（指向主流程準備好的知識庫文字欄位）。
+### 1. 👆 執行工作流（Manual Trigger）
+- **節點類型**：`n8n-nodes-base.manualTrigger`
+- **作用**：手動點擊「Execute workflow」或「Test step」啟動整條流程。
+- **教學重點**：Trigger 是 n8n 每條工作流的起點。教學階段使用 Manual Trigger，實務生產環境可換成 `Webhook`（接前端聊天視窗）或 `Schedule Trigger`（定時排程重建向量庫）。
 
 ---
 
-### 🛑 常見錯誤 2：Default Data Loader 左側提示 `No input connected`
-- **原因分析**：
-  - `Default Data Loader` 是一個子節點（Sub-node），它需要由**主流程（Parent nodes）**傳遞資料過來。
-  - 如果主流程中沒有前置節點先載入規章文字（例如直接從 Trigger 連到只有問題的節點），Data Loader 就拿不到規章文本，只能在記憶體中建立空索引或拿問題當知識庫。
-- **正確設定**：
-  - 在主流程的 `Manual Trigger` 之後，加入 **`載入售後規章知識庫 (Edit Fields)`** 節點，將規章全文存入 `policy_text` 欄位中，隨後一併流經 QA Chain。
+### 2. 📄 載入售後規章知識庫（Set / Edit Fields）
+- **節點類型**：`n8n-nodes-base.set`（v3.4）
+- **作用**：將整份售後規章條文放進欄位 `policy_text`。
+- **教學重點**：
+  - 此處為「教學示範資料注入點」。在企業真實場景中，可替換為 `Google Drive`、`Notion`、`MySQL / PostgreSQL` 或 `HTTP Request` 節點自動讀取。
+  - 讓學生理解：n8n 的資料是一包一包的 JSON Item 在節點間傳遞流動，`policy_text` 就是這包 JSON 中的一個 String 屬性。
 
 ---
 
-### 🛑 常見錯誤 3：`In-Memory Vector Store` 無法直接連到 `QA Chain`
-- **原因分析**：
-  - `Question and Answer Chain` 底部要求的插槽是 `Retriever *`（檢索器）。
-  - `In-Memory Vector Store` 輸出的插槽是 `Vector Store`（向量儲存庫）。
-- **正確設定**：
-  - 兩者中間必須加入 **`Vector Store Retriever`** 作為適配轉接橋樑。
+### 3. 🗄️ 寫入向量資料庫（Insert）
+- **節點類型**：`@n8n/n8n-nodes-langchain.vectorStoreInMemory`
+- **關鍵參數**：
+  - **Mode**：`Insert Documents`
+  - **Clear Store**：`true`（每次寫入前清空舊快取，避免重複堆疊）
+- **底部插槽**：
+  - `Embedding *`（必填）➔ 連接 Embeddings Model
+  - `Document`（必填）➔ 連接 Default Data Loader
+- **教學重點（本課最關鍵觀念）**：
+  - **為什麼要兩顆 Vector Store？** 因為 `Insert` 模式才有 `Document` 插槽接收文本；而 `Retrieve` 模式只有 `Embedding` 插槽供檢索。一顆節點無法同時身兼兩職。
+  - 正式企業環境可延伸：將 In-Memory 替換為 `Qdrant`、`Pinecone`、`Supabase (pgvector)`，資料便能永久保存，不需每次重新 Insert。
 
 ---
 
-### 🛑 常見錯誤 4：`Default Data Loader` 底部缺少 `Text Splitter *`
-- **原因分析**：
-  - 長篇規章如果沒有切片，整篇塞入向量庫會導致檢索失真，且容易超出單段 Embedding 上限。
-- **正確設定**：
-  - 在 `Default Data Loader` 底部必連插槽接上 **`Recursive Character Text Splitter`**（建議 Chunk Size: 600, Overlap: 100）。
-
----
-
-## 📋 節點詳細說明（各節點職責與參數）
-
-### 1. **📝 Sticky Note（便利貼）**
-- **功能**：畫布流程的註解與指引，清楚標示主資料流程與 AI 子節點插槽的連線規範。
-
----
-
-### 2. **👆 執行工作流 (Manual Trigger)**
-- **功能**：手動點擊「Test step」或「Execute Workflow」按鈕啟動測試。
-
----
-
-### 3. **📄 載入售後規章知識庫 (Edit Fields / Set)**
-- **功能**：模擬企業知識庫資料源，將整篇售後保固規章載入至 `policy_text` 欄位。
-- **欄位配置**：
-  - 名稱：`policy_text`
-  - 類型：`String`
-  - 內容：包含保固範圍、進水人為損壞除外條款、7天退貨猶豫期、3天刷退時程等完整規章全文。
-
----
-
-### 4. **💬 模擬顧客提問 (Edit Fields / Set)**
-- **功能**：模擬顧客進線提問的口語問題。
-- **欄位配置**：
-  - 名稱：`user_question`
-  - 內容：`請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？`
-
----
-
-### 5. **❓ Question and Answer Chain（RAG 總指揮核心）**
-- **功能**：RAG 問答鏈的主控核心。
-- **操作**：
-  - Prompt Text：設定為 `={{ $json.user_question }}`。
-  - 自動透過 Retriever 檢索最相符的條款片段，組裝後交給 LLM 回覆。
-- **插槽連接**：
-  - `Model *` ➔ 連接語言模型（NVIDIA NIM / OpenRouter）。
-  - `Retriever *` ➔ 連接向量檢索適配器（Vector Store Retriever）。
-
----
-
-### 6. **🧠 NVIDIA NIM / OpenRouter (OpenAI Chat Model)**
-- **功能**：文字理解與精準回覆生成大腦。
-- **建議設定**：`temperature: 0.1`，讓回覆嚴格遵循規章文字，杜絕自由發揮與幻覺。
-
----
-
-### 7. **🔍 Vector Store Retriever（向量檢索適配器）**
-- **功能**：將 Vector Store 轉接包裝為 QA Chain 認可的 Retriever 介面。
-- **插槽連接**：
-  - `Vector Store *` ➔ 連接 In-Memory Vector Store。
-
----
-
-### 8. **🗄️ In-Memory Vector Store（記憶體向量資料庫）**
-- **功能**：在工作流執行期間，於記憶體建立即時向量索引並進行語意相似度檢索。
-- **插槽連接**：
-  - `Embedding *` ➔ 連接 Embeddings Model。
-  - `Document` ➔ 連接預載售後政策規章 (Default Data Loader)。
-
----
-
-### 9. **🔤 Embeddings Model（向量嵌入模型）**
-- **功能**：將規章切片與顧客問題轉換為 1536 維空間數學向量。
-- **模型推薦**：`text-embedding-3-small`。
-
----
-
-### 10. **📄 預載售後政策規章 (Default Data Loader)**
-- **功能**：從上游取得規章文字，準備轉交給切片器與向量資料庫。
-- **參數關鍵**：
-  - **Type of Data**：`JSON`
+### 4. 📄 預載售後政策規章（Default Data Loader）
+- **節點類型**：`@n8n/n8n-nodes-langchain.documentDefaultDataLoader`
+- **關鍵參數**：
+  - **Type of Data**：`JSON`（⚠️ 學生最常選錯成 String 或維持預設 Binary 而報錯）
+  - **JSON Mode**：`expressionData`
   - **JSON Data**：`={{ $json.policy_text }}`
+- **底部插槽**：`Text Splitter *` ➔ 連接 Recursive Character Text Splitter
+- **作用**：將上游傳入的 JSON 字串轉換為 LangChain 標準 Document 資料物件。
 
 ---
 
-### 11. **✂️ Recursive Character Text Splitter（文本切片器）**
-- **功能**：將長篇條文自動切成適合向量化的語意區塊。
-- **參數設定**：
-  - Chunk Size：`600`
-  - Chunk Overlap：`100`
+### 5. ✂️ Recursive Character Text Splitter（文本切片器）
+- **節點類型**：`@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter`
+- **關鍵參數**：
+  - **Chunk Size**：`600`
+  - **Chunk Overlap**：`100`
+- **教學重點（RAG 檢索品質的核心生命線）**：
+  - **Chunk Size（切片大小）**：每段文字容量。太大 ➔ 包含過多無關主題，檢索雜訊多；太小 ➔ 完整語意被切斷。繁體中文條文建議抓 300～600 字最合適。
+  - **Chunk Overlap（重疊字數）**：相鄰兩段保留重疊的字數，避免關鍵規定剛好在切分邊界被硬生生切斷。
+  - **Recursive（遞迴）的真義**：優先以段落（`\n\n`）、換行（`\n`）、句號（`。`）依序嘗試切割，儘量確保每句話完整，最後逼不得已才硬切字元。
 
 ---
 
-### 12. **🎯 整理與輸出政策解答 (Edit Fields / Set)**
-- **功能**：提取問答鏈的最終輸出文字（`rag_answer`），方便下游串接客服介面。
-- **表達式**：`={{ $json.text || $json.response?.text || $json.output }}`
+### 6. 🔤 Embeddings Google Gemini（向量嵌入模型）
+- **節點類型**：`@n8n/n8n-nodes-langchain.embeddingsGoogleGemini`
+- **憑證**：Google Gemini(PaLM) API（可於 Google AI Studio 免費申請）
+- **建議模型**：`models/gemini-embedding-001`
+- **重要連線**：**一顆 Embedding 節點同時接到底部兩個 Vector Store 節點！**
+- **教學重點**：
+  - **Embedding 是什麼**：將文字轉換為空間數學座標（向量）。語意越接近，向量空間距離越近。顧客問「東西摔壞能修嗎」，即便規章寫的是「物理外力撞擊除外條款」，語意搜尋也能精準命中。
+  - **寫入端與查詢端必須使用同一顆模型**：如果寫入用 Gemini（768 維），查詢用 OpenAI（1536 維），向量空間維度完全不同，會直接報錯或檢索出亂碼。
 
 ---
 
-## 📄 預載售後政策規章（測試文本）
+### 7. 💬 模擬顧客提問（Set / Edit Fields）
+- **節點類型**：`n8n-nodes-base.set`（v3.4）
+- **欄位配置**：
+  - `user_question`：`請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？`
+- **教學重點**：實務上此節點即為顧客在 LINE、Messenger、網頁聊天室輸入的即時訊息。
+
+---
+
+### 8. ❓ Question and Answer Chain（RAG 總指揮核心）
+- **節點類型**：`@n8n/n8n-nodes-langchain.chainRetrievalQa`（v1.4）
+- **關鍵參數**：
+  - **Prompt Type**：`Define below`
+  - **Text**：`={{ $json.user_question }}`
+- **底部插槽**：
+  - `Model *` ➔ 連接語言模型
+  - `Retriever *` ➔ 連接向量檢索器
+- **作用**：封裝好的 RAG 控制中樞，背後自動執行三件事：
+  1. 拿問題到 Retriever 檢索出最相關的 2~4 個規章段落。
+  2. 將檢索出的規章片段與問題自動組裝進 Prompt 範本。
+  3. 呼叫 Chat Model 進行閱讀理解並輸出精準解答。
+
+---
+
+### 9. 🧠 NVIDIA NIM / OpenRouter（OpenAI Chat Model）
+- **節點類型**：`@n8n/n8n-nodes-langchain.lmChatOpenAi`（v1.2）
+- **建議設定**：`temperature: 0.1`，模型推薦 `meta/llama-3.3-70b-instruct`。
+- **教學重點（區分 Chat Model 與 Embedding Model 的差異）**：
+  - **Embedding Model**：只負責「文字轉數字座標」，專門找資料，不會講話。
+  - **Chat Model**：負責「閱讀理解與組織語言」，看著找到的資料講人話。
+  - 兩者職責分明，**絕對不可互換**。
+
+---
+
+### 10. 🔍 Vector Store Retriever（向量檢索適配器）
+- **節點類型**：`@n8n/n8n-nodes-langchain.retrieverVectorStore`
+- **底部插槽**：`Vector Store *` ➔ 連接 In-Memory Vector Store
+- **關鍵參數**：`Limit`（即 top-k，預設檢索 4 筆最相關片段）。
+- **教學重點**：QA Chain 只認 Retriever 介面，透過轉接頭將 Vector Store 封裝成標準檢索器。
+
+---
+
+### 11. 🗄️ In-Memory Vector Store（Retrieve 模式）
+- **節點類型**：`@n8n/n8n-nodes-langchain.vectorStoreInMemory`
+- **底部插槽**：`Embedding *`（接同一顆 Gemini Embedding 節點）
+- **教學重點**：查詢端透過此節點直接在記憶體中比對相似度，並提供給 Retriever。
+
+---
+
+### 12. 🎯 整理與輸出政策解答（Set / Edit Fields）
+- **節點類型**：`n8n-nodes-base.set`（v3.4）
+- **欄位配置**：
+  - `rag_answer`：`={{ $json.text || $json.response?.text || $json.output }}`
+- **作用**：提取乾淨的最終解答文字，便於後續串接 LINE Notify、Slack、Email 或回寫資料庫。
+
+---
+
+## 五、常見錯誤與除錯清單（學生排錯聖經）
+
+| 症狀 / 報錯訊息 | 發生原因 | 正確解決方案 |
+|---|---|---|
+| **節點顯示紅色驚嘆號** | 底部帶有 `*` 的必填插槽未連接，或 API 憑證未選取。 | 檢查並補齊所有子節點插槽與 API Key 憑證。 |
+| **`The value "string" is not supported!`** | Default Data Loader 的 `Type of Data` 誤選或誤設為 string。 | 將 Type of Data 改選為 **`JSON`**，並使用 Expression 指定 `{{ $json.policy_text }}`。 |
+| **答案完全在編造（幻覺）** | 查詢端未撈到任何規章資料，AI 只能自由發揮。 | 確認工作流每次測試皆從 Manual Trigger 完整跑過（確保寫入端已先執行）。 |
+| **報錯：維度不符（Dimension Mismatch）** | 寫入端與查詢端使用了不同的 Embedding 模型。 | 確保寫入與查詢的兩顆 Vector Store 連接的是**同一顆 Embeddings Model 節點**。 |
+| **重新整理後查不到資料** | In-Memory 資料只存於 RAM 中，n8n 重啟後會消失。 | 每次測試務必點擊 `Manual Trigger` 執行完整工作流，重建向量索引。 |
+| **AI 抓錯規章段落回答** | Chunk Size 太大導致雜訊多，或太大導致片段被切散。 | 調整 Text Splitter 的 Chunk Size 為 500~600，Overlap 為 100。 |
+
+---
+
+## 六、建議課堂操作與實驗順序（刻意改壞教學法）
+
+1. **第一步：先跑寫入端**
+   - 點擊「載入售後規章知識庫」與「寫入向量資料庫」，觀察規章文字如何被注入與切割。
+2. **第二步：執行完整流程**
+   - 點擊 Manual Trigger 跑完全程，在「整理與輸出政策解答」檢視精準的保固與退款回答。
+3. **第三步：課堂實驗「刻意改壞 — 換成錯誤 Embedding」**
+   - 將查詢端的 Embedding 換成不同模型 ➔ 觀察 n8n 拋出維度不符錯誤，讓學生深刻體會「向量空間一致性」。
+4. **第四步：課堂實驗「刻意改壞 — 調整 Chunk Size」**
+   - 將 Chunk Size 改為極端的 `50` ➔ 觀察條文被切成碎片後，AI 檢索上下文缺失導致回答品質劇降。
+5. **第五步：測試邊界問題**
+   - 提問規章中完全沒寫的事項（如：「可以退款到別人的比特幣錢包嗎？」）➔ 觀察 AI 是否能誠實回答規章未載明。
+
+---
+
+## 📄 預載售後政策規章（測試文本全文）
 
 ```text
 【TechCorp 數位智能 產品售後服務與保固政策總規章（2026年版）】
@@ -213,14 +265,3 @@ flowchart TD
 - 客服專線：0800-888-999（週一至週五 09:00 - 18:00）
 - 線上報修：https://service.techcorp.com
 ```
-
----
-
-## 🎯 測試與驗證
-
-1. 匯入最新版 [`Question_and_Answer_Chain.json`](./Question_and_Answer_Chain.json)。
-2. 在 **Chat Model** 與 **Embeddings Model** 中綁定您的 API 金鑰憑證。
-3. 點擊 **Test step** 或 **Execute Workflow**。
-4. 檢視最後一個節點「整理與輸出政策解答」，AI 會精準回答：
-   - **進水損壞**：屬於人為除外責任，不享有免費保固，需酌收零件費與基本檢測費 500 元。
-   - **退貨時效**：享有 7 天猶豫期；收到退貨驗收後，信用卡將於 3 個工作天內完成刷退，匯款則為 5 個工作天。

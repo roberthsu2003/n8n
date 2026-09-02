@@ -3,22 +3,28 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 6：Question & Answer Chain（RAG 規章知識庫問答）\n標準 RAG（檢索增強生成）完整 6 階層架構：讓 AI 嚴格根據規章條文精準作答，徹底消除幻覺！\n\n📌 正確連接與資料流向說明：\n1. 主流程：【Manual Trigger】➔【載入售後規章知識庫】(放入 policy_text) ➔【模擬顧客提問】(放入 user_question) ➔【QA Chain】➔【輸出解答】\n2. AI 子節點插槽鏈（由上至下）：\n   - QA Chain ➔ 底部接 Model* (語言模型) 與 Retriever* (向量檢索適配器)\n   - Vector Store Retriever ➔ 底部接 Vector Store (向量儲存庫)\n   - In-Memory Vector Store ➔ 底部接 Embedding* (向量模型) 與 Document (文件載入器)\n   - Default Data Loader ➔ Type 選擇 JSON，並指定 jsonData: {{ $json.policy_text }}；底部接 Text Splitter* (文本切片器)\n3. 補齊所有適配節點後，所有紅燈與孤立節點全部消除！",
-        "height": 340,
-        "width": 640
+        "content": "## 基礎 6：Question & Answer Chain（RAG 規章知識庫問答）\n\n📌 關鍵觀念：**寫入**與**查詢**必須是「兩顆」Vector Store，靠相同的記憶體向量庫架構串起來。\nInsert 模式才有 Document 插槽；Retrieve 模式只有 Embedding 插槽 —— 一顆節點做不到兩件事。\n\n1. 主流程（Main）：【Manual Trigger】➔【載入售後規章知識庫】(policy_text) ➔【寫入向量資料庫 (Insert)】➔【模擬顧客提問】(user_question) ➔【QA Chain】➔【整理與輸出政策解答】\n2. 寫入端：寫入向量資料庫 ➔ 底部接 Embedding*（向量模型）與 Document（文件載入器）\n   Default Data Loader ➔ Type 選 JSON、Mode 選 Expression、jsonData: {{ $json.policy_text }}；底部接 Text Splitter*\n3. 查詢端：QA Chain ➔ 底部接 Model* 與 Retriever*；Vector Store Retriever ➔ 底部接 Vector Store；In-Memory Vector Store (Retrieve) ➔ 底部接 Embedding*（與寫入端同一顆模型，維度才對得上）\n\n⚠️ In-Memory 資料存在記憶體，n8n 重啟即消失，所以每次都必須從 Manual Trigger 完整跑一次。",
+        "height": 360,
+        "width": 1000
       },
       "type": "n8n-nodes-base.stickyNote",
-      "position": [-580, -380],
+      "position": [
+        3312,
+        1424
+      ],
       "typeVersion": 1,
-      "id": "b6-sticky-1",
+      "id": "9ed29ce8-88e2-4946-8b96-67383fda591f",
       "name": "Sticky Note"
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [-560, 0],
-      "id": "b6-manual-trigger",
+      "position": [
+        3344,
+        1808
+      ],
+      "id": "be035755-89b8-44ef-865d-af9911005836",
       "name": "執行工作流 (Manual Trigger)"
     },
     {
@@ -37,8 +43,11 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-340, 0],
-      "id": "b6-set-policy",
+      "position": [
+        3552,
+        1808
+      ],
+      "id": "1b79308a-f695-471e-99c6-8c597c900184",
       "name": "載入售後規章知識庫"
     },
     {
@@ -57,32 +66,48 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-120, 0],
-      "id": "b6-set-input",
-      "name": "模擬顧客提問"
+      "position": [
+        4000,
+        1808
+      ],
+      "id": "e05aca66-c78d-4e9d-9f41-38c3b82e1dd3",
+      "name": "模擬顧客提問",
+      "executeOnce": true
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.user_question }}"
+        "text": "={{ $json.user_question }}",
+        "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
       "typeVersion": 1.4,
-      "position": [120, 0],
-      "id": "b6-qa-chain",
+      "position": [
+        4240,
+        1808
+      ],
+      "id": "2c7c3919-5681-4a7f-a401-484de88ab68b",
       "name": "Question and Answer Chain"
     },
     {
       "parameters": {
-        "model": "meta/llama-3.3-70b-instruct",
+        "model": {
+          "__rl": true,
+          "value": "meta-llama/llama-3.3-70b-instruct",
+          "mode": "list",
+          "cachedResultName": "meta-llama/llama-3.3-70b-instruct"
+        },
         "options": {
           "temperature": 0.1
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
-      "position": [-20, 200],
-      "id": "b6-openai-model",
+      "position": [
+        4128,
+        2000
+      ],
+      "id": "3d741804-41af-489e-96c4-aeb29c51b829",
       "name": "NVIDIA NIM / OpenRouter (OpenAI Chat Model)",
       "credentials": {
         "openAiApi": {
@@ -95,48 +120,37 @@
       "parameters": {},
       "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
       "typeVersion": 1,
-      "position": [180, 200],
-      "id": "b6-vs-retriever",
+      "position": [
+        4352,
+        2000
+      ],
+      "id": "f7d8dd2c-4e10-4fea-915c-05dfe7b896a9",
       "name": "Vector Store Retriever"
     },
     {
-      "parameters": {
-        "memory": "inMemory"
-      },
+      "parameters": {},
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [260, 360],
-      "id": "b6-vector-store",
+      "position": [
+        4352,
+        2176
+      ],
+      "id": "90e9a6c2-ead6-4427-a1d6-aa5e9a9ec263",
       "name": "In-Memory Vector Store"
     },
     {
       "parameters": {
-        "model": "text-embedding-3-small",
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.policy_text }}",
         "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.1,
-      "position": [180, 520],
-      "id": "b6-embeddings-model",
-      "name": "Embeddings Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "YOUR_OPENAI_OR_OPENROUTER_CREDENTIAL_ID",
-          "name": "Embeddings Account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "dataType": "json",
-        "options": {
-          "jsonData": "={{ $json.policy_text }}"
-        }
       },
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1,
-      "position": [380, 520],
-      "id": "b6-doc-loader",
+      "position": [
+        3792,
+        2000
+      ],
+      "id": "cd7edd6b-90fb-42eb-af3b-ca2972a224bd",
       "name": "預載售後政策規章 (Default Data Loader)"
     },
     {
@@ -147,8 +161,11 @@
       },
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
-      "position": [380, 680],
-      "id": "b6-text-splitter",
+      "position": [
+        3760,
+        2208
+      ],
+      "id": "f99d6c56-5ec3-4826-a62d-08cf154de171",
       "name": "Recursive Character Text Splitter"
     },
     {
@@ -167,12 +184,45 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [420, 0],
-      "id": "b6-answer-set",
+      "position": [
+        4544,
+        1808
+      ],
+      "id": "e5db6d28-32aa-4df6-a6fc-38e0f81460f0",
       "name": "整理與輸出政策解答"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [
+        3776,
+        1808
+      ],
+      "id": "5f6e060f-2a4b-4a3e-862c-cee919ce9462",
+      "name": "寫入向量資料庫 (Insert)"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        4016,
+        2336
+      ],
+      "id": "d9e3a4dd-a525-4c91-b1f2-591fa63069af",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_GOOGLE_GEMINI_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
-  "pinData": {},
   "connections": {
     "執行工作流 (Manual Trigger)": {
       "main": [
@@ -189,6 +239,17 @@
       "main": [
         [
           {
+            "node": "寫入向量資料庫 (Insert)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "寫入向量資料庫 (Insert)": {
+      "main": [
+        [
+          {
             "node": "模擬顧客提問",
             "type": "main",
             "index": 0
@@ -201,6 +262,17 @@
         [
           {
             "node": "Question and Answer Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question and Answer Chain": {
+      "main": [
+        [
+          {
+            "node": "整理與輸出政策解答",
             "type": "main",
             "index": 0
           }
@@ -240,22 +312,11 @@
         ]
       ]
     },
-    "Embeddings Model": {
-      "ai_embedding": [
-        [
-          {
-            "node": "In-Memory Vector Store",
-            "type": "ai_embedding",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "預載售後政策規章 (Default Data Loader)": {
       "ai_document": [
         [
           {
-            "node": "In-Memory Vector Store",
+            "node": "寫入向量資料庫 (Insert)",
             "type": "ai_document",
             "index": 0
           }
@@ -273,19 +334,24 @@
         ]
       ]
     },
-    "Question and Answer Chain": {
-      "main": [
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
         [
           {
-            "node": "整理與輸出政策解答",
-            "type": "main",
+            "node": "寫入向量資料庫 (Insert)",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "In-Memory Vector Store",
+            "type": "ai_embedding",
             "index": 0
           }
         ]
       ]
     }
   },
-  "active": false,
+  "pinData": {},
   "settings": {
     "executionOrder": "v1"
   },
