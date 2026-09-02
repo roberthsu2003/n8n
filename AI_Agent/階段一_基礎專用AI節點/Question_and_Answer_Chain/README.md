@@ -62,6 +62,12 @@ flowchart TD
 
 ---
 
+## 預覽圖
+
+![](./images/Question_and_Answer_Chain.png)
+
+---
+
 ## 🔌 三、畫布插槽連線指南（常見紅燈與斷點排查）
 
 在 n8n 畫布上連接節點底部插槽（Sub-nodes）時，若出現紅色驚嘆號或懸空的 `+` 號，請對照以下步驟修復：

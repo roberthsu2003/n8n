@@ -24,6 +24,12 @@ flowchart LR
 
 ---
 
+## 預覽圖
+
+![](./images/Summarization_Chain.png)
+
+---
+
 ## 📥 工作流程圖下載
 
 - [下載重構範例流程：Summarization_Chain.json](./Summarization_Chain.json)

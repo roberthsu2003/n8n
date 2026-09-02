@@ -35,6 +35,12 @@ flowchart LR
 
 ---
 
+## 預覽圖
+
+![](./images/Sentiment_Analysis.png)
+
+---
+
 ## 📥 工作流程圖下載
 
 - [下載重構範例流程：Sentiment_Analysis.json](./Sentiment_Analysis.json)

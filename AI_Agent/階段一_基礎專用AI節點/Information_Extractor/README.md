@@ -24,6 +24,12 @@ flowchart LR
 
 ---
 
+## 預覽圖
+
+![](./images/Information_Extractor.png)
+
+---
+
 ## 📥 工作流程圖下載
 
 - [下載範例流程：Information_Extractor.json](./Information_Extractor.json)

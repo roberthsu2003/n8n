@@ -33,6 +33,12 @@ flowchart LR
 
 ---
 
+## 預覽圖
+
+![](./images/Text_Classifier.png)
+
+---
+
 ## 📥 工作流程圖下載
 
 - [下載重構範例流程：Text_Classifier.json](./Text_Classifier.json)
