@@ -1,10 +1,10 @@
-# 基礎範例 6：Question and Answer Chain（基礎文件檢索問答鏈）
+# 基礎範例 6：Question and Answer Chain（RAG 規章知識庫問答）
 
 ## 📚 工作流程說明
 
-如何讓 AI 根據指定的企業內部手冊準確回答問題，且絕對不胡言亂語（模型幻覺）？
+在自動化客服與企業問答中，通用大語言模型（如 GPT、Llama、Claude）常常會產生「幻覺（Hallucination）」或回答過時的資訊。
 
-**Question and Answer Chain** 是 RAG（檢索增強生成）的最精簡入門架構！它將**語言模型（LLM）**與**檢索器（Retriever / Vector Store）**直接串連。當收到提問時，檢索器會先找出與問題最相關的文件段落，並將段落作為參考依據交由 LLM 作答。因為是純粹的單向問答鏈，反應速度極快，架構清晰明瞭。
+**Question and Answer Chain（檢索問答鏈）** 是建構 **RAG（Retrieval-Augmented Generation，檢索增強生成）** 的核心節點。透過將企業內部的「售後規章、產品手冊、保固條款」載入向量資料庫，當使用者提問時，系統會先**精準檢索出相關的規章段落**，再交由 AI **嚴格根據該段落作答**，徹底消除胡言亂語！
 
 > 🤖 **模型註冊與串接指南（推薦資安合規主軸）**：
 > - [**NVIDIA NIM 微服務模型串接**](../../nvidia_nim/README.md)（推薦 `meta/llama-3.3-70b-instruct`）
@@ -12,69 +12,87 @@
 
 ---
 
-## 🧭 工作流程架構
+## 🧭 工作流程架構（5 大核心節點標準連線）
 
 ```mermaid
 flowchart LR
-    Trigger["👆 Manual Trigger"] --> Question["💬 模擬顧客提問<br/>(進水是否有保固？)"]
-    Question --> QAChain["❓ Question & Answer Chain<br/>(文件檢索問答鏈)"]
+    Trigger["👆 Manual Trigger"] --> Question["💬 模擬顧客提問<br/>(進水是否保固？退貨多久？)"]
+    Question --> QAChain["❓ Question and Answer Chain<br/>(RAG 檢索問答核心)"]
     
-    subgraph Knowledge_Layer["知識庫檢索層"]
-        VectorStore["🗄️ In-Memory Vector Store<br/>(向量資料庫)"]
-        Embeddings["🔤 Embeddings Model<br/>(向量嵌入模型)"]
-        DocLoader["📄 售後政策規章<br/>(Document Loader)"]
-        Embeddings -.-> VectorStore
-        DocLoader -.-> VectorStore
+    Model["🧠 Chat Model<br/>(NVIDIA NIM / OpenRouter)"] -.->|Model*| QAChain
+    
+    subgraph RAG_Engine ["🗄️ 知識庫檢索引擎 (Retriever)"]
+        VectorStore["🗄️ In-Memory Vector Store"]
+        Embeddings["🔤 Embeddings Model<br/>(text-embedding-3-small)"]
+        DocLoader["📄 預載售後政策規章<br/>(Default Data Loader)"]
+        Splitter["✂️ Recursive Character<br/>Text Splitter"]
+        
+        Embeddings -.->|Embedding*| VectorStore
+        DocLoader -.->|Document| VectorStore
+        Splitter -.->|Text Splitter*| DocLoader
     end
     
-    Model["🧠 NVIDIA NIM / OpenRouter<br/>(OpenAI Chat Model)"] -.->|語意回答| QAChain
-    VectorStore -.->|提供相關段落| QAChain
-    QAChain --> Output["📤 精準規章回覆<br/>(進水屬人為損壞不保固)"]
+    VectorStore -.->|Retriever*| QAChain
+    QAChain --> Answer["🎯 整理與輸出政策解答<br/>(依規章確認：進水不保固/退款3天)"]
 ```
 
 ---
 
 ## 📥 工作流程圖下載
 
-- [下載範例流程：Question_and_Answer_Chain.json](./Question_and_Answer_Chain.json)
+- [下載修復與完整連線範例流程：Question_and_Answer_Chain.json](./Question_and_Answer_Chain.json)
 
 ---
 
-## 📋 節點詳細說明
+## 🛠️ 常見錯誤剖析：為什麼原本的節點會亮紅燈？
 
-1. **📝 Sticky Note（便利貼）**
-   - 標記教學重點與檢索問答架構。
+如果您在畫布上看到節點亮紅色驚嘆號或無法執行，通常是以下 3 個原因：
 
-2. **🔄 模擬顧客提問 (Edit Fields)**
-   - 模擬使用者詢問：「請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？」。
+### 🔴 問題 1：`In-Memory Vector Store` 孤立未連接（Retriever* 空白）
+- **原因**：`Question and Answer Chain` 節點底部標有紅星的 **`Retriever *`** 插槽未拉線，而 `In-Memory Vector Store` 節點孤立飄在畫布上。
+- **解法**：必須將 `In-Memory Vector Store` 向上拉線連接至 `Question and Answer Chain` 的 `Retriever *` 插槽！
 
-3. **❓ Question and Answer Chain（問答鏈核心）**
-   - **Text**：傳入用戶提問 `{{ $json.user_question }}`。
-   - **AI Retriever 連接點**：連接 In-Memory Vector Store。
+### 🔴 問題 2：`Default Data Loader` 缺少 `Text Splitter *`
+- **原因**：在 n8n 的標準規範中，`Default Data Loader` 節點底部有一個紅星插槽 **`Text Splitter *`**（必接），未連接分詞器時會直接亮紅燈報錯。
+- **解法**：在下方新增一個 **`Recursive Character Text Splitter`** 節點並拉線連接至 `Default Data Loader`。
 
-4. **🗄️ In-Memory Vector Store & Embeddings**
-   - **Vector Store**：在記憶體中建立即時向量索引庫。
-   - **Embeddings**：將文字轉為向量數字。
-   - **Default Data Loader**：預載產品售後規章（包含 1 年保固、人為進水損壞不保固、7 天猶豫期規範）。
+### 🔴 問題 3：`Embeddings Model` 缺少憑證
+- **解法**：確認已選取相容的 OpenAI / OpenRouter 憑證，並使用 `text-embedding-3-small` 或相容嵌入模型。
 
-5. **🧠 OpenAI Chat Model（連接 NVIDIA NIM / OpenRouter）**
-   - 嚴格根據檢索段落回答問題。
+---
+
+## 📋 5 大關鍵節點角色詳解
+
+1. **❓ Question and Answer Chain（RAG 總指揮）**
+   - 負責接收使用者問題，協調向量檢索器（Retriever）找出最相關的政策條文，最後交由 Chat Model 組織成流暢的自然語言回覆。
+
+2. **🗄️ In-Memory Vector Store（記憶體向量庫）**
+   - 充當知識庫的角色，儲存規章條文的向量特徵值，提供語意相似度檢索（Semantic Search）。
+
+3. **🔤 Embeddings Model（向量嵌入模型）**
+   - 將人類文字轉化為高維度數學向量（如 `text-embedding-3-small`）。
+
+4. **📄 預載售後政策規章 (Default Data Loader)**
+   - 載入企業內部的知識庫文字（如 1 年保固、進水人為損壞不保固、7 天猶豫期、3 天退款規章）。
+
+5. **✂️ Recursive Character Text Splitter（文本切片器）**
+   - 自動將長篇政策條款切分為小區塊（Chunk），方便向量庫進行精確檢索。
 
 ---
 
 ## 🎯 學習重點
 
-- **RAG 核心架構入門**：理解文檔檢索（Retrieve）與文本生成（Generate）的分工。
-- **向量嵌入（Embeddings）**：認識文字向量化的基本原理。
-- **杜絕幻覺**：觀察 AI 如何嚴格依據規章文字準確回答「進水屬人為損壞不在保固內」。
+- **標準 RAG 架構落地**：掌握「文件載入 ➔ 切片 ➔ 向量化 ➔ 檢索 ➔ 模型生成」的完整企業級閉環。
+- **零幻覺保證**：透過指定檢索器，限制模型只能依據檢索到的政策回答，絕不胡亂捏造。
+- **多插槽協同串接**：學會 n8n 中 Model、Retriever、Embedding、Document 與 Text Splitter 的層級依賴關係。
 
 ---
 
 ## 💡 實際應用場景
 
-- 企業內部員工請假規章與差旅報銷政策問答。
-- 單一產品操作手冊與故障排除速查。
-- 法律條文與合約重點精準問答。
+- **內部企業 HR 規章查詢機器人**：員工詢問請假、報帳、差旅補助辦法。
+- **電商客服售後 FAQ 機器人**：精準解答退貨條件、保固範圍、物流時效。
+- **產品操作手冊技術支援**：依據說明書解答特定錯誤代碼與障礙排除步驟。
 
 ---
 
@@ -83,12 +101,13 @@ flowchart LR
 <details>
 <summary>👉 點擊展開可直接複製給 AI 助理的 Prompt 提詞</summary>
 
-> 💡 **任務目標**：透過 AI 在問答鏈下方加入「出處條款標註」與「格式化美化」。
+> 💡 **任務目標**：透過 AI 助理將 Question and Answer Chain 連接 Webhook 與通訊軟體，打造即時客服問答機器人。
 
 ```text
-請幫我在目前的「Question and Answer Chain」流程中進行延伸：
-1. 在 Question and Answer Chain 的提示詞中規範：回答時請條列式呈現，且在最後一行務必標註【依據條款：第 X 條】。
-2. 若使用者的問題在檢索規章中完全找不到答案，請回答：「抱歉，本規章手冊中未包含此資訊，建議您轉接專人客服。」
-請幫我配置好問答鏈參數！
+請幫我在目前的「Question and Answer Chain」工作流程中升級為線上客服機器人：
+1. 起點改為接收 Webhook（或 Chat Trigger）傳入的顧客問題 {{ $json.chatInput }}。
+2. 透過 Question and Answer Chain 連接知識庫進行檢索回答。
+3. 串接 LINE Notify（或 Telegram / Slack）節點，將問題與 AI 依據規章回答的內容發送給顧客。
+請幫我配置好連線與變數對應！
 ```
 </details>

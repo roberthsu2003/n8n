@@ -3,12 +3,12 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 6：Question & Answer Chain\n學習最簡潔的文件檢索問答鏈，讓 AI 依據指定的參考資料精準作答（RAG 入門基礎）。\n\n📌 支援模型：NVIDIA NIM / OpenRouter (OpenAI 相容)",
-        "height": 160,
-        "width": 340
+        "content": "## 基礎 6：Question & Answer Chain（RAG 知識庫檢索問答）\n標準 RAG（檢索增強生成）架構：讓 AI 僅依據指定規章政策精準回答，徹底消除幻覺！\n\n📌 5 大核心節點連線關係（防呆指南）：\n1. QA Chain ➔ 必接 Model* (語言模型) 與 Retriever* (向量庫)\n2. In-Memory Vector Store ➔ 必接 Embedding* (向量化) 與 Document (資料載入)\n3. Default Data Loader ➔ 必接 Text Splitter* (文本切片器)\n4. 各插槽已完整對接，徹底消除孤立節點與紅燈警告！",
+        "height": 270,
+        "width": 470
       },
       "type": "n8n-nodes-base.stickyNote",
-      "position": [-380, -220],
+      "position": [-380, -290],
       "typeVersion": 1,
       "id": "b6-sticky-1",
       "name": "Sticky Note"
@@ -61,7 +61,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
-      "position": [100, 200],
+      "position": [0, 220],
       "id": "b6-openai-model",
       "name": "NVIDIA NIM / OpenRouter (OpenAI Chat Model)",
       "credentials": {
@@ -77,7 +77,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [260, 200],
+      "position": [200, 220],
       "id": "b6-vector-store",
       "name": "In-Memory Vector Store"
     },
@@ -88,7 +88,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
       "typeVersion": 1.1,
-      "position": [260, 360],
+      "position": [120, 380],
       "id": "b6-embeddings-model",
       "name": "Embeddings Model",
       "credentials": {
@@ -101,14 +101,46 @@
     {
       "parameters": {
         "dataType": "string",
-        "value": "【產品售後與保固條款】\n1. 保固期限：凡購買本公司產品憑發票可享有 1 年原廠有限保固。\n2. 人為損壞除外條款：進水、摔落、私自拆解或受潮等人為因素導致之故障，不在免費保固範圍內，需酌收零件檢修費。\n3. 退換貨規範：商品自收到次日起享有 7 天猶豫期（非試用期），辦理退貨需保持包裝完整無損，退款流程將於收到退件後 3 個工作天內完成退刷。",
+        "value": "【產品售後與保固條款規章】\n1. 保固期限：凡購買本公司全系列正品憑發票或保固卡，享有自購買日起 1 年原廠有限保固。\n2. 人為損壞除外條款：產品若因進水、浸泡液體、重摔破裂、私自拆解改裝或受潮等人為操作不當因素導致之故障，均不在免費保固維修範圍內，將酌收零件更換工本費與檢測費。\n3. 七天猶豫期退換貨：依照消保法規定，商品自簽收次日起享有 7 天猶豫期（非試用期）。辦理退貨時商品需保持全新未拆封且包裝配件完整。本公司收到退回商品確認無誤後，將於 3 個工作天內完成信用卡退刷與匯款退款流程。\n4. 客服諮詢專線：週一至週五 09:00 - 18:00，客服專線 0800-888-999。",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
       "typeVersion": 1,
-      "position": [420, 360],
+      "position": [300, 380],
       "id": "b6-doc-loader",
       "name": "預載售後政策規章 (Default Data Loader)"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1000,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [300, 520],
+      "id": "b6-text-splitter",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-answer",
+              "name": "rag_answer",
+              "value": "={{ $json.text || $json.response?.text || $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [380, 0],
+      "id": "b6-answer-set",
+      "name": "整理與輸出政策解答"
     }
   ],
   "pinData": {},
@@ -174,6 +206,28 @@
           {
             "node": "In-Memory Vector Store",
             "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "預載售後政策規章 (Default Data Loader)",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question and Answer Chain": {
+      "main": [
+        [
+          {
+            "node": "整理與輸出政策解答",
+            "type": "main",
             "index": 0
           }
         ]
