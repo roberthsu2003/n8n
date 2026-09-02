@@ -3,12 +3,12 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 4：Text Classifier\n學習如何使用 AI 進行意圖多分類，並搭配 Switch 節點實現自動化業務分流。\n\n📌 支援模型：NVIDIA NIM / OpenRouter (OpenAI 相容)",
-        "height": 160,
-        "width": 340
+        "content": "## 基礎 4：Text Classifier（AI 意圖分類與動態多路路由）\nText Classifier 節點會依據您定義的「分類清單（Categories）」，在右側自動生成對應數量的原生輸出端口（無需額外接 Switch 節點）！\n\n📌 原生 4 路動態分流機制：\n• 💼 Output 0 (sales_lead) ➔ 業務商機（通知業務代表）\n• 🔧 Output 1 (technical_support) ➔ 技術支援（建立 Jira 工單）\n• 💳 Output 2 (billing_issue) ➔ 帳務發票（轉發財務部）\n• 💬 Output 3 (general_inquiry) ➔ 一般諮詢（回覆 FAQ）",
+        "height": 260,
+        "width": 450
       },
       "type": "n8n-nodes-base.stickyNote",
-      "position": [-380, -220],
+      "position": [-380, -280],
       "typeVersion": 1,
       "id": "b4-sticky-1",
       "name": "Sticky Note"
@@ -81,7 +81,9 @@
     {
       "parameters": {
         "model": "meta/llama-3.3-70b-instruct",
-        "options": {}
+        "options": {
+          "temperature": 0
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -97,40 +99,12 @@
     },
     {
       "parameters": {
-        "rules": {
-          "rules": [
-            {
-              "value": "sales_lead",
-              "output": 0
-            },
-            {
-              "value": "technical_support",
-              "output": 1
-            },
-            {
-              "value": "billing_issue",
-              "output": 2
-            }
-          ],
-          "fallbackOutput": 3
-        },
-        "dataType": "string",
-        "value1": "={{ $json.category }}"
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [360, 0],
-      "id": "b4-switch-router",
-      "name": "依意圖分流 (Switch)"
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
               "id": "f1",
               "name": "action",
-              "value": "💼【商務商機】已自動建立 CRM 潛在客戶並通知業務代表！",
+              "value": "💼【商務商機】寄件人 {{ $json.sender_email }} 詢問大量授權採購，已自動建立 CRM 潛在客戶並通知業務代表！",
               "type": "string"
             }
           ]
@@ -139,9 +113,9 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [620, -120],
+      "position": [420, -180],
       "id": "b4-sales-route",
-      "name": "業務商機分支 (Output 0)"
+      "name": "業務商機分支 (sales_lead)"
     },
     {
       "parameters": {
@@ -150,7 +124,7 @@
             {
               "id": "f2",
               "name": "action",
-              "value": "🔧【技術支援】已自動建立 Jira 工單並指派給工程值班人員！",
+              "value": "🔧【技術支援】寄件人 {{ $json.sender_email }} 提報系統問題，已自動建立 Jira 工單並指派工程人員！",
               "type": "string"
             }
           ]
@@ -159,9 +133,9 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [620, -40],
+      "position": [420, -60],
       "id": "b4-tech-route",
-      "name": "技術支援分支 (Output 1)"
+      "name": "技術支援分支 (technical_support)"
     },
     {
       "parameters": {
@@ -170,7 +144,7 @@
             {
               "id": "f3",
               "name": "action",
-              "value": "💳【帳務發票】已派送至財務部收件匣！",
+              "value": "💳【帳務發票】寄件人 {{ $json.sender_email }} 詢問發票或退款事宜，已派送至財務部收件匣！",
               "type": "string"
             }
           ]
@@ -179,9 +153,9 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [620, 40],
+      "position": [420, 60],
       "id": "b4-billing-route",
-      "name": "帳務問題分支 (Output 2)"
+      "name": "帳務問題分支 (billing_issue)"
     },
     {
       "parameters": {
@@ -190,7 +164,7 @@
             {
               "id": "f4",
               "name": "action",
-              "value": "💬【一般諮詢】已寄送常見 FAQ 說明手冊！",
+              "value": "💬【一般諮詢】寄件人 {{ $json.sender_email }} 提出一般諮詢，已自動發送常見問題 FAQ 手冊！",
               "type": "string"
             }
           ]
@@ -199,9 +173,9 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [620, 120],
+      "position": [420, 180],
       "id": "b4-general-route",
-      "name": "一般諮詢分支 (Fallback)"
+      "name": "一般諮詢分支 (general_inquiry)"
     }
   ],
   "pinData": {},
@@ -243,39 +217,28 @@
       "main": [
         [
           {
-            "node": "依意圖分流 (Switch)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "依意圖分流 (Switch)": {
-      "main": [
-        [
-          {
-            "node": "業務商機分支 (Output 0)",
+            "node": "業務商機分支 (sales_lead)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "技術支援分支 (Output 1)",
+            "node": "技術支援分支 (technical_support)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "帳務問題分支 (Output 2)",
+            "node": "帳務問題分支 (billing_issue)",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "一般諮詢分支 (Fallback)",
+            "node": "一般諮詢分支 (general_inquiry)",
             "type": "main",
             "index": 0
           }
