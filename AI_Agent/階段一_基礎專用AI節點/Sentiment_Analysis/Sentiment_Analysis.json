@@ -3,9 +3,9 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 3：Sentiment Analysis\n學習文字情緒與情感傾向分析，並搭配 IF 節點建立緊急客訴預警機制。\n\n📌 支援模型：NVIDIA NIM / OpenRouter (OpenAI 相容)",
-        "height": 160,
-        "width": 340
+        "content": "## 基礎 3：Sentiment Analysis\n學習文字情緒與情感傾向分析，並搭配 IF 節點建立緊急客訴預警機制。\n\n📌 核心設定要點：\n1. Text to Analyze：綁定 `{{ $json.review_text }}`\n2. 底部 Model*：必接語言模型（NVIDIA NIM / OpenRouter / Ollama）\n3. Options：輸出 sentiment 與 confidence_score",
+        "height": 210,
+        "width": 360
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [-380, -220],
