@@ -122,7 +122,7 @@ flowchart TD
 4. 加入客戶歷史資料到 Context
 
 ### 步驟四：設定知識庫查詢
-1. 建立 **Vector Store**（參考 [RAG 智能問答系統](./RAG智能問答系統/README.md)）
+1. 建立 **Vector Store**（參考 [RAG 智能問答系統](../../階段三_企業級RAG向量知識庫/README.md)）
 2. 加入 **Vector Store Retriever** 節點
 3. 設定檢索參數
 4. 將檢索結果加入 AI Context

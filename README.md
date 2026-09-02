@@ -89,18 +89,11 @@
 ---
 
 ### 🤖 5. [AI Agent 與 LLM 模型整合：打造智慧多代理團隊](./AI_Agent/README.md)
-結合大型語言模型（Ollama、Gemini、OpenAI、Claude）與 RAG 私有向量知識庫：
-* **階段一：基礎對話與工具呼叫**
-  1. **智能客服聊天機器人**：對話上下文、System Prompt 與 Window Buffer Memory 記憶
-  2. **臺北市 YouBike 2.0 即時查詢**：單一工具調用，串接市府開放資料 API
-  3. **多工具天氣與新聞助理**：多工具自主選擇，使用 `$fromAI()` 動態生成查詢參數
-* **階段二：RAG 私有知識庫與工作流自動化**
-  4. **企業私有知識庫 RAG 問答系統**：向量檢索（In-Memory / Supabase），杜絕模型幻覺
-  5. **具備工作流呼叫能力的 AI 萬能助理**：掛載 Calculator Tool 與 Call n8n Workflow Tool
-  6. **Gmail 客服郵件智慧分類與歸檔**：結構化 JSON 輸出、高急迫告警分流與 Google Sheets 記錄
-* **階段三：多代理協同與企業級平台**
-  7. **多代理人協作團隊 (Multi-Agent)**：Supervisor 主管代理拆解任務，指揮「調研」與「文案」專家
-  8. **端到端客戶服務自動化平台**：全渠道 Webhook 接入、RAG 檢索、意圖判斷與真人客服升級
+結合大型語言模型（NVIDIA NIM、OpenRouter、Gemini、OpenAI）與 RAG 私有向量知識庫：
+* **[🟢 階段一：基礎專用 AI 節點](./AI_Agent/階段一_基礎專用AI節點/README.md)**：Basic LLM Chain、Information Extractor、Sentiment Analysis、Text Classifier、Summarization Chain 與 Q&A Chain 確定性單向處理鏈。
+* **[🟡 階段二：AI Agent 核心與工具調用](./AI_Agent/階段二_AI_Agent核心與工具調用/README.md)**：智能客服聊天機器人（Memory 記憶）、臺北市 YouBike 2.0 即時查詢（API Tool）、即時天氣與新聞助理（多工具自主決策）。
+* **[🟠 階段三：企業級 RAG 向量知識庫](./AI_Agent/階段三_企業級RAG向量知識庫/README.md)**：入門記憶體儲存、Supabase 雲端向量庫、本地 PostgreSQL (PGVector)、Pinecone 百萬級向量庫與語意檢索策略。
+* **[🔴 階段四：企業級進階實戰與多代理](./AI_Agent/階段四_企業級進階實戰與多代理/README.md)**：萬能工作流助理（Call Workflow Tool）、Gmail 客服郵件分類與工單閉環、Multi-Agent Supervisor 多代理人協同團隊、端到端全渠道客服中樞。
 
 ---
 

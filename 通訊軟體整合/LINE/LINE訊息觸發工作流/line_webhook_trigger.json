@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        80,
-        -160
+        0,
+        0
       ],
-      "id": "602d8d73-853c-4eca-8cc3-c963c593a136",
+      "id": "e7a24f04-acc5-4fe5-9413-0b32c4c066cc",
       "name": "流程說明"
     },
     {
@@ -25,10 +25,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        304,
-        208
+        224,
+        368
       ],
-      "id": "4580b68f-43cb-438f-90d8-778016ad6b90",
+      "id": "b9ec69f4-9229-4235-99e5-fbc49b3c1ace",
       "name": "LINE Webhook 觸發器",
       "webhookId": "line-webhook-trigger-id"
     },
@@ -41,10 +41,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        576,
-        96
+        496,
+        256
       ],
-      "id": "c27e7e4b-f9ac-4990-8539-e59d3bced946",
+      "id": "cb1f960c-1865-4580-857f-d7dd03e2303e",
       "name": "即時回傳 200 OK"
     },
     {
@@ -54,10 +54,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
-        320
+        496,
+        480
       ],
-      "id": "29cf7e33-45d8-47d0-b7eb-42af6246da58",
+      "id": "ebbd458d-118e-4c4a-a29d-5a78dd59c65a",
       "name": "解析 LINE 訊息"
     },
     {
@@ -87,10 +87,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        816,
-        320
+        736,
+        480
       ],
-      "id": "d95d68d7-b659-414e-90ee-43b3d22b0e57",
+      "id": "716824c4-2c0d-4fc7-a76b-b756ac848202",
       "name": "是否為文字訊息？"
     },
     {
@@ -116,10 +116,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1072,
-        240
+        992,
+        400
       ],
-      "id": "c22e2fe3-6371-4f03-8b41-d5c0c76090c0",
+      "id": "071ceacf-bc30-4b79-9c80-31afadcfe17d",
       "name": "整理輸出日誌"
     }
   ],
@@ -165,8 +165,6 @@
   },
   "pinData": {},
   "meta": {
-    "aiBuilderAssisted": true,
-    "builderVariant": "mcp",
-    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+    "instanceId": "c803ca8a26bf45bc3f88f1f78c91d96677081380780467fcefe6b6050eab3548"
   }
 }

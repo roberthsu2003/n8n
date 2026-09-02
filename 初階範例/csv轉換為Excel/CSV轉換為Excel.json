@@ -2,12 +2,12 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "2d7e2c1f-d2c2-40b9-bd4f-8d79403cf280",
+      "id": "274c9337-6046-4d8b-a16b-d658bb7fc447",
       "name": "手動觸發",
       "type": "n8n-nodes-base.manualTrigger",
       "position": [
-        -640,
-        448
+        -800,
+        352
       ],
       "typeVersion": 1
     },
@@ -22,12 +22,12 @@
           }
         }
       },
-      "id": "b4e74d5b-4e2c-4b26-8fb5-ee694cc11fc3",
+      "id": "bb0fa9a4-dee0-4292-8cd7-a420f87072f3",
       "name": "下載CSV檔案",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        -416,
-        448
+        -576,
+        352
       ],
       "typeVersion": 4.2
     },
@@ -39,12 +39,12 @@
           "headerRow": true
         }
       },
-      "id": "834dbda1-e8dd-4e28-ad1c-41f7e2c765b8",
+      "id": "49d16c5e-ff22-4556-8377-62e359291328",
       "name": "解析CSV資料",
       "type": "n8n-nodes-base.extractFromFile",
       "position": [
-        -112,
-        448
+        -272,
+        352
       ],
       "typeVersion": 1
     },
@@ -53,12 +53,12 @@
         "operation": "xlsx",
         "options": {}
       },
-      "id": "be5609f8-04c0-4fd0-9923-97e23070cdeb",
+      "id": "bad130f1-2360-4c56-a3c7-381454ef338e",
       "name": "轉換為Excel",
       "type": "n8n-nodes-base.convertToFile",
       "position": [
-        192,
-        448
+        32,
+        352
       ],
       "typeVersion": 1.1,
       "alwaysOutputData": true
@@ -70,12 +70,12 @@
         "width": 280,
         "color": 5
       },
-      "id": "11b23ef2-ff40-4862-bd91-80d2aef26925",
+      "id": "41037c3c-0a29-48dc-abb8-eb57fd8ff34a",
       "name": "節點說明1",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -512,
-        112
+        -672,
+        16
       ],
       "typeVersion": 1
     },
@@ -86,12 +86,12 @@
         "width": 280,
         "color": 6
       },
-      "id": "2108c7a1-7fb4-4bf7-b4b8-7b40f16b4fb5",
+      "id": "fe1cc3b0-317d-4147-af80-23305b264e6e",
       "name": "節點說明2",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -176,
-        112
+        -336,
+        16
       ],
       "typeVersion": 1
     },
@@ -102,12 +102,12 @@
         "width": 280,
         "color": 3
       },
-      "id": "d43e8a6c-4c0f-4ea7-897e-0143ade277a0",
+      "id": "565c4799-c499-4ce4-874c-85f6d75abe7c",
       "name": "節點說明3",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        160,
-        96
+        0,
+        0
       ],
       "typeVersion": 1
     }
@@ -149,6 +149,6 @@
   },
   "pinData": {},
   "meta": {
-    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+    "instanceId": "c803ca8a26bf45bc3f88f1f78c91d96677081380780467fcefe6b6050eab3548"
   }
 }

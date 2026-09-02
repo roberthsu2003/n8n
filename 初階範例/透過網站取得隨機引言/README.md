@@ -11,8 +11,6 @@
 
 ### 影片和template
 
-[youtube](https://www.youtube.com/watch?v=dKTcAfBfFLU&t=11s)
-
 [範例_透過網站取得引言-樣版下載](./範例_透過網站取得引言.json)
 
 #### 📋 節點詳細說明

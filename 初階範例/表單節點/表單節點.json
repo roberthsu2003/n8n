@@ -52,12 +52,12 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.4,
       "position": [
-        -144,
-        -48
+        0,
+        0
       ],
-      "id": "a07dac5a-d49a-40d6-942a-99b3a11e2b09",
+      "id": "a2fb6ab9-758e-40da-a067-d113874a27bc",
       "name": "On form submission",
-      "webhookId": "fe0041e9-f67b-4eee-b1be-4cbf263d93d4"
+      "webhookId": "c2e64fb1-be45-4a17-ab35-0f43282c1bf9"
     },
     {
       "parameters": {
@@ -138,10 +138,10 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        288,
-        -48
+        432,
+        0
       ],
-      "id": "a5f9f02e-c80f-4558-83da-b4f75f4a3b24",
+      "id": "5d8601df-b447-4010-af0c-d991ca4d2e34",
       "name": "Insert row"
     },
     {
@@ -151,13 +151,13 @@
         "output": "={{ ($json['國文'] < 0 || $json['國文'] > 100 || $json['英文'] < 0 || $json['英文'] > 100 || $json['數學'] < 0 || $json['數學'] > 100) ? 0 : 1 }}",
         "looseTypeValidation": "="
       },
-      "id": "582c74fc-e119-40cc-b62f-4ffa8e8e8389",
+      "id": "d53f46a3-749b-4f76-b734-be399d3c78a4",
       "name": "Validate score range",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        48,
-        -48
+        192,
+        0
       ]
     }
   ],
@@ -188,9 +188,6 @@
   },
   "pinData": {},
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "aiBuilderAssisted": true,
-    "builderVariant": "mcp",
-    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+    "instanceId": "c803ca8a26bf45bc3f88f1f78c91d96677081380780467fcefe6b6050eab3548"
   }
 }
