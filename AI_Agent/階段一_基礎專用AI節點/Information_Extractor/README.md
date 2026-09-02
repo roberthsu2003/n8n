@@ -53,6 +53,64 @@ flowchart LR
 
 ---
 
+## 📖 JSON Schema 格式設計與原理說明
+
+在 `Information Extractor` 節點中，我們所設定的不是一般的「資料 JSON」，而是遵循國際標準的 **[JSON Schema（JSON 結構規格定義）](https://json-schema.org/learn/miscellaneous-examples)**。
+
+### 1. 範例 Schema 完整結構
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "customer_name": { "type": "string", "description": "顧客姓名" },
+    "phone": { "type": "string", "description": "聯絡電話" },
+    "shipping_address": { "type": "string", "description": "收件地址" },
+    "tax_id": { "type": "string", "description": "統一編號（若無則為空）" },
+    "order_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_name": { "type": "string", "description": "商品名稱" },
+          "quantity": { "type": "number", "description": "購買數量" },
+          "unit_price": { "type": "number", "description": "單價" }
+        },
+        "required": ["item_name", "quantity"]
+      }
+    },
+    "total_amount": { "type": "number", "description": "訂單預估總金額" }
+  },
+  "required": ["customer_name", "phone", "shipping_address", "order_items"]
+}
+```
+
+### 2. 關鍵欄位語法解析
+
+- **`"type": "object"`**：宣告最外層輸出必須是一個鍵值對物件（Key-Value Object）。
+- **`"properties"`**：定義該物件底下包含的所有欄位名稱與規格。
+- **`"type": "string" | "number" | "boolean" | "array" | "object"`**：
+  - 強型別約束。例如宣告為 `"number"` 時，AI 會自動將自然語言中的「2 盒」轉換為純數字 `2`；「單價 600 元」轉換為 `600`。
+- **`"description"`（極重要）**：
+  - **給 LLM 的語意提示詞**。AI 會依據這段描述在非結構化文字中進行語意對齊與搜尋。
+- **`"order_items"` 陣列與巢狀結構**：
+  - `"type": "array"`：宣告該欄位為清單/陣列。
+  - `"items"`：定義陣列中每一項（Item）的子結構。此處定義每個項目都是一個包含商品名稱、數量與單價的 `object`。
+- **`"required": [...]`**：
+  - 必填約束。強制要求 LLM 輸出時必須包含這些欄位鍵值，確保下游流程資料完整性。
+
+### 3. 為什麼 AI 節點需要 JSON Schema？
+
+| 比較維度 | 傳統 Prompt 要求「請輸出 JSON」 | 使用 JSON Schema（Structured Outputs） |
+| :--- | :--- | :--- |
+| **型別安全** | 數字容易變成字串 `"2"` 或包含中文單位 | 100% 強制轉換為指定型別（如數值 `2`） |
+| **格式穩定度** | 容易夾帶 \`\`\`json 標籤或遺漏括號 | 底層 Grammar-Guided 採樣約束，輸出保證可被解析 |
+| **巢狀清單抽取** | 難以穩定抽取多筆訂購商品 | 透過 `items` 結構可精準一次抽出陣列物件 |
+
+> 📚 **延伸閱讀**：更多標準規範與語法可參考 [JSON Schema 官方範例](https://json-schema.org/learn/miscellaneous-examples)。
+
+---
+
 ## 🎯 學習重點
 
 - **強型別 Schema 設計**：學會定義 String, Number, Boolean, Array, Object 等資料型態。
