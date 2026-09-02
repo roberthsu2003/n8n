@@ -82,12 +82,32 @@ flowchart LR
 執行後，節點會在原 JSON 物件中自動附加情緒分析結果：
 ```json
 {
+  "customer_name": "王小明",
   "order_id": "ORD-20260901-889",
   "review_text": "已經等了超過一個星期都沒有收到商品，客服完全沒人理，要求全額退款！",
   "sentiment": "negative",
   "confidence_score": 0.98
 }
 ```
+
+---
+
+## 🛠️ 常見錯誤排除（Troubleshooting）
+
+### ❓ 出現 `Issues: - Parameter "Text to Analyze" is required.` 警告？
+
+如果您在點擊 `Execute step` 時看到此錯誤提示，表示 **`Text to Analyze` 欄位為空白**。請依照以下步驟解決：
+
+1. **先執行前置節點**：
+   - 檢查左側 INPUT 面板是否顯示 `No input data`。
+   - 若是，請先點擊左側面板中的 **`Execute previous nodes`** 按鈕，讓前置的模擬評論節點執行並傳入資料。
+2. **切換為 Expression 填入變數**：
+   - 將 `Text to Analyze` 由 `Fixed` 切換為 **`Expression`** 模式。
+   - 填入表達式：`={{ $json.review_text }}`（或直接從左側 INPUT 面板將 `review_text` 拖曳至輸入框中）。
+3. **確認底部模型已連接**：
+   - 確認節點下方的紅星 `Model *` 已成功拉線連接至 `OpenAI Chat Model`（或 NVIDIA NIM / OpenRouter）。
+4. **重新執行**：
+   - 點擊右上角 **`Execute step`** 即可成功輸出情緒分析結果！
 
 ---
 

@@ -3,12 +3,12 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 基礎 3：Sentiment Analysis\n學習文字情緒與情感傾向分析，並搭配 IF 節點建立緊急客訴預警機制。\n\n📌 核心設定要點：\n1. Text to Analyze：綁定 `{{ $json.review_text }}`\n2. 底部 Model*：必接語言模型（NVIDIA NIM / OpenRouter / Ollama）\n3. Options：輸出 sentiment 與 confidence_score",
-        "height": 210,
-        "width": 360
+        "content": "## 基礎 3：Sentiment Analysis（情緒分析）\n學習文字情緒傾向分析，並搭配 IF 節點建立緊急客訴預警機制。\n\n📌 測試與執行步驟：\n1. 點擊「執行工作流 (Manual Trigger)」啟動流程\n2. 點擊進入「Sentiment Analysis」節點：\n   • Text to Analyze：已設定表達式 `{{ $json.review_text }}`\n   • 底部 Model*：已連接 OpenAI Chat Model 語言模型\n3. 觀察右側 Output 產出的 `sentiment` (negative) 與 `confidence_score`\n4. 後續由 IF 節點自動將負面客訴導向「緊急主管通報」分支",
+        "height": 240,
+        "width": 380
       },
       "type": "n8n-nodes-base.stickyNote",
-      "position": [-380, -220],
+      "position": [-380, -260],
       "typeVersion": 1,
       "id": "b3-sticky-1",
       "name": "Sticky Note"
@@ -27,14 +27,20 @@
           "assignments": [
             {
               "id": "field-1",
-              "name": "review_text",
-              "value": "已經等了超過一個星期都沒有收到商品，聯絡客服完全沒有人回應！這是非常差勁的購物經驗，要求立即全額退款並道歉！",
+              "name": "customer_name",
+              "value": "王小明",
               "type": "string"
             },
             {
               "id": "field-2",
               "name": "order_id",
               "value": "ORD-20260901-889",
+              "type": "string"
+            },
+            {
+              "id": "field-3",
+              "name": "review_text",
+              "value": "已經等了超過一個星期都沒有收到商品，聯絡客服完全沒有人回應！這是非常差勁的購物經驗，要求立即全額退款並道歉！",
               "type": "string"
             }
           ]
@@ -115,7 +121,7 @@
             {
               "id": "f-alert",
               "name": "alert_message",
-              "value": "=🚨【緊急客訴警報】訂單 {{ $json.order_id }} 收到強烈負面評論！\n內容：{{ $json.review_text }}\n情緒判定：{{ $json.sentiment }} (信心指數: {{ $json.confidence_score }})",
+              "value": "=🚨【緊急客訴警報】訂單 {{ $json.order_id }}（顧客：{{ $json.customer_name }}）收到強烈負面評論！\n內容：{{ $json.review_text }}\n情緒判定：{{ $json.sentiment }} (信心指數: {{ $json.confidence_score }})",
               "type": "string"
             }
           ]
