@@ -22,7 +22,7 @@ flowchart TD
     Question --> QAChain["❓ Question and Answer Chain<br/>(RAG 檢索問答核心)"]
     QAChain --> Answer["🎯 整理與輸出政策解答<br/>(依規章確認：進水不保固/退款3天)"]
     
-    Model["🧠 Chat Model<br/>(NVIDIA NIM / OpenRouter)"] -.->|1. ai_languageModel| QAChain
+    Model["🧠 Chat Model<br/>(NVIDIA NIM / OpenRouter)"] -.->|1. Model 語言模型| QAChain
     
     subgraph RAG_Stack ["🗄️ 知識庫檢索完整階層鏈條"]
         RetrieverNode["🔍 Vector Store Retriever<br/>(檢索適配器)"]
@@ -31,12 +31,13 @@ flowchart TD
         DocLoader["📄 預載售後政策規章<br/>(Default Data Loader)"]
         Splitter["✂️ Recursive Character Text Splitter<br/>(文本切片器)"]
         
-        RetrieverNode -.->|2. ai_retriever (必接)| QAChain
-        VectorStore -.->|3. ai_vectorStore (必接)| RetrieverNode
-        Embeddings -.->|4. ai_embedding (必接)| VectorStore
-        DocLoader -.->|5. ai_document (必接)| VectorStore
-        Splitter -.->|6. ai_textSplitter (必接)| DocLoader
+        VectorStore -.->|3. Vector Store 向量庫| RetrieverNode
+        Embeddings -.->|4. Embedding 向量模型| VectorStore
+        DocLoader -.->|5. Document 文件載入| VectorStore
+        Splitter -.->|6. Text Splitter 文本切片| DocLoader
     end
+
+    RetrieverNode -.->|2. Retriever 檢索器| QAChain
 ```
 
 ---
