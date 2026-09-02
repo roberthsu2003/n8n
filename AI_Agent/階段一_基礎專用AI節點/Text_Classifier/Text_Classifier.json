@@ -53,19 +53,19 @@
         "categories": {
           "categories": [
             {
-              "name": "sales_lead",
+              "category": "sales_lead",
               "description": "企業採購、商務合作、大量授權、專屬報價洽詢"
             },
             {
-              "name": "technical_support",
+              "category": "technical_support",
               "description": "系統報錯、無法登入、API 串接異常、功能故障"
             },
             {
-              "name": "billing_issue",
+              "category": "billing_issue",
               "description": "退款申請、信用卡扣款失敗、發票更換"
             },
             {
-              "name": "general_inquiry",
+              "category": "general_inquiry",
               "description": "其他一般常見問題、營業時間、門市地點"
             }
           ]

@@ -71,7 +71,9 @@ flowchart LR
 在配置 `Text Classifier` 節點時，請掌握以下關鍵設定：
 
 ### 1. Categories（類別清單設計原則）
-- **Name（類別名稱）**：英文代號（如 `sales_lead`），這會作為輸出端口的識別名稱。
+- **Category（類別名稱，必填 ⚠️）**：
+  - 填入英文代號（例如 `sales_lead`、`technical_support`）。
+  - **重要**：這個名稱會直接成為該節點右側「輸出端口（Output Port）」的標籤名稱！
 - **Description（類別描述，極關鍵）**：
   - 這是**給 LLM 的語意判斷提示**！描述寫得越具體、關鍵字越完整，AI 分類的精準度就越高。
 
@@ -84,6 +86,10 @@ flowchart LR
 ---
 
 ## 🛠️ 常見錯誤排除（Troubleshooting）
+
+### ❓ 出現 `Issues: - Parameter "Category" is required.` 警告？
+- **原因**：Categories 清單中的 **Category（類別名稱）** 欄位為空白。
+- **解決方式**：請為每一個類別輸入英文字串名稱（例如 `sales_lead`、`technical_support`、`billing_issue`、`general_inquiry`）。
 
 ### ❓ 為什麼不需要接 Switch 節點？
 - **錯誤做法**：在 Text Classifier 後方接 Switch，並只拉一條線連到 Switch。這會導致只有第一個類別（Output 0）能流進 Switch，其他類別的資料會被丟失！
