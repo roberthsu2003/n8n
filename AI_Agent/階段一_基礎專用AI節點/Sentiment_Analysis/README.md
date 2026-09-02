@@ -56,6 +56,41 @@ flowchart LR
 
 ---
 
+## ⚙️ 節點設定指南與參數詳解
+
+在 n8n 中配置 `Sentiment Analysis` 節點時，需注意以下核心設定：
+
+### 1. 必填參數：Text to Analyze（待分析文字）
+- **欄位作用**：告訴 AI 模型哪一段文字需要進行情感與情緒傾向分析。
+- **填寫方式**：點擊輸入框右側的 **Expression（表達式）** 模式，引用前置節點帶入的變數，例如：
+  ```text
+  {{ $json.review_text }}
+  ```
+  *(若上游欄位名稱為 `message` 或 `content`，則填 `{{ $json.message }}` 或 `{{ $json.content }}`)*
+- ⚠️ **注意事項**：此欄位為必填項（有紅色驚嘆號），若未填入文字或表達式，節點將無法執行。
+
+### 2. 底部模型插槽：Model *（語言模型）
+- 節點底部標有紅星的 `Model *` 插槽為**必要連接**。
+- 必須從畫布下方拉線連接一個語言模型節點（如 `OpenAI Chat Model`、`NVIDIA NIM`、`OpenRouter` 或 `Ollama Chat Model`），以提供語意判斷能力。
+
+### 3. Options 進階選項（點擊 Add Option）
+- **Sentiment Property**：自訂輸出情緒結果的欄位名稱（預設為 `sentiment`）。
+- **Score Property**：自訂信心分數欄位名稱（預設為 `confidence_score`，數值介於 0 ~ 1）。
+- **自訂情緒分類（Custom Sentiments）**：除預設的 `positive` / `neutral` / `negative` 之外，可自訂細部標籤（如 `urgent_complaint`、`praise`、`refund_request` 等）。
+
+### 4. 節點輸出資料結構範例
+執行後，節點會在原 JSON 物件中自動附加情緒分析結果：
+```json
+{
+  "order_id": "ORD-20260901-889",
+  "review_text": "已經等了超過一個星期都沒有收到商品，客服完全沒人理，要求全額退款！",
+  "sentiment": "negative",
+  "confidence_score": 0.98
+}
+```
+
+---
+
 ## 🎯 學習重點
 
 - **情感傾向判定**：理解 LLM 如何解讀文字語意並標記情緒。
