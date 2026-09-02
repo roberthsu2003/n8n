@@ -114,6 +114,7 @@
 5. **Supabase pgvector 向量知識庫**：關聯式資料庫與 RAG 向量一體化檢索（含切塊上傳與 Drive 同步）
 6. **RAG 檢索策略與來源過濾**：自然語言意圖識別、動態 Metadata Filter 注入與 Postgres 對話記憶
 7. **Pinecone 雲端向量資料庫 RAG**：Serverless 專用向量庫毫秒級高併發語意搜尋
+8. **Pinecone 與 Ollama 金融客服 RAG**：Google Drive 檔案自動讀取切塊、Hugging Face 多語言嵌入與 Ollama 私有模型問答雙軌實戰
 
 ---
 

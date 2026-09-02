@@ -49,13 +49,16 @@ flowchart LR
 
 ### 步驟 2：建立免費 Serverless 向量索引 (Index)
 1. 進入 Pinecone 控制台，點選 **Create Index**。
-2. 填寫以下設定：
+2. 填寫以下設定（⚠️ **注意免費區域與維度**）：
    - **Index Name**：例如 `n8n-rag-knowledge`。
-   - **Dimensions（向量維度）**：
-     - 若使用 OpenAI `text-embedding-3-small`，請填 **`1536`**。
-     - 若使用 Google Gemini `text-embedding-004`，請填 **`768`**。
+   - **Dimensions（向量維度）**：**必須與 Embedding 向量模型完全一致**（一旦建立無法更改）：
+     - 若使用 OpenAI `text-embedding-3-small` / `text-embedding-ada-002`：填 **`1536`**
+     - 若使用 Google Gemini `text-embedding-004`：填 **`768`**
+     - 若使用 Hugging Face `intfloat/multilingual-e5-large`：填 **`1024`**
    - **Metric（距離演算法）**：選擇 **`cosine`**。
-   - **Capacity Mode**：選擇 **`Serverless`**（由 AWS / GCP 雲端託管，完全免費）。
+   - **Cloud Provider（雲端服務商）**：選擇 **`AWS`**。
+   - **Region（地區）**：⚠️ **務必選擇 `us-east-1` (N. Virginia，美國維吉尼亞州)**！
+     > 💡 **重要提醒**：Pinecone 的免費 Starter 方案目前僅在美國特定區域（主要是 **AWS `us-east-1` N. Virginia**）提供永久免費配額。若選擇其他區域可能需要綁定信用卡或升級付費方案。
 3. 點擊 **Create Index**，等待約 5~10 秒即可建立完成！
 
 ### 步驟 3：取得 Pinecone API Key

@@ -1,5 +1,5 @@
 {
-  "name": "03_檢索策略與來源過濾",
+  "name": "RAG 檢索策略與 Metadata 來源過濾",
   "nodes": [
     {
       "parameters": {

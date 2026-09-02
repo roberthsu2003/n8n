@@ -60,9 +60,9 @@ flowchart TD
 
 ---
 
-## 📚 實作範例導覽（由淺至深 7 大範例）
+## 📚 實作範例導覽（由淺至深 8 大範例）
 
-本教學規劃了七個循序漸進、兼具理論與實務價值的實作範例：
+本教學規劃了八個循序漸進、兼具理論與實務價值的實作範例：
 
 ---
 
@@ -143,6 +143,17 @@ flowchart TD
 
 ---
 
+### 8. [範例 8：Pinecone 向量庫與 Ollama 本地模型——信用卡權益客服 RAG 雙軌實戰](./08_Pinecone與Ollama信用卡客服RAG實戰/README.md)
+
+**難度**：進階 🔴 ｜ **核心技術**：Google Drive 自動同步 + Hugging Face (1024維) + Pinecone + Ollama 本地模型
+
+打造企業金融級信用卡客服！在單一工作流中整合「雲端硬碟檔案搜尋下載 ➔ 多語言切塊向量化」的自動索引管道，以及「Ollama 私有模型 ➔ Pinecone 知識庫檢索」的無幻覺客服問答管道。
+
+- **學習重點**：Google Drive 檔案動態搜尋下載、Split in Batches 批次向量化、Hugging Face `multilingual-e5-large` 嵌入、Ollama 私有模型串接與嚴格計算 Prompt 設計。
+- **附帶樣版**：[`08_pinecone_ollama_rag.json`](./08_Pinecone與Ollama信用卡客服RAG實戰/08_pinecone_ollama_rag.json)、[`信用卡權益說明.txt`](./08_Pinecone與Ollama信用卡客服RAG實戰/信用卡權益說明.txt)
+
+---
+
 ## 📊 資料庫與向量檢索方案評估比較
 
 | 評估維度 | 🐘 Supabase (PostgreSQL) | 🌲 Pinecone (Serverless) |
@@ -170,4 +181,5 @@ flowchart TD
 5. Supabase pgvector 向量知識庫 ➔ 掌握 PostgreSQL 向量化儲存與 RAG 檢索
 6. RAG 檢索策略與來源過濾 ➔ 掌握自然語言意圖識別與動態 Metadata 過濾
 7. Pinecone 雲端向量資料庫 ➔ 掌握專用 Serverless 向量資料庫架構
+8. Pinecone 與 Ollama 雙軌實戰 ➔ 掌握雲端同步、多語言 Embedding 與私有化 LLM 客服
 ```
