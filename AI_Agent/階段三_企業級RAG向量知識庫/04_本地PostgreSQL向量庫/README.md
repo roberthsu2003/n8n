@@ -582,11 +582,6 @@ gunzip -c /tmp/backup.sql.gz | psql -U postgres n8n_rag_db
 
 **🎓 您已經掌握了 RAG 的最高階應用！**
 
-**📚 相關指南**：
-- [升級到PGVector指南.md](./升級到PGVector指南.md) - 完整的遷移步驟
-- [基礎版 Supabase](../02_基礎版_Supabase雲端儲存/README.md) - 如果需要快速原型
-
 ---
 
-*最後更新：2025-01-19*  
-*版本：v1.0.0*
+[⬅️ 返回上一單元：03_檢索策略與來源過濾](../03_檢索策略與來源過濾/README.md) ｜ [➡️ 前往下一單元：05_Pinecone雲端向量庫](../05_Pinecone雲端向量庫/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)

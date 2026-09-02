@@ -14,20 +14,20 @@
 
 | 順序 | 階段 | 範例名稱 | 說明／學習重點 | 連結 |
 |------|------|----------|----------------|------|
-| 1 | 入門 | RAG 初體驗：記憶體儲存 | 什麼是 RAG、Embeddings、In-Memory Vector Store、單一工作流程、上傳即問答 | [01 入門版（記憶體儲存）](./01_入門版_記憶體儲存/README.md) |
-| 2 | 基礎 | RAG 基礎：向量持久化與多來源 | 分離式架構（索引／查詢）、Supabase 雲端資料庫、本機＋Google Drive 多來源寫入 | [02 基礎版（Supabase 雲端儲存）](./02_基礎版_Supabase雲端儲存/README.md) |
-| 3 | 基礎 | RAG 檢索策略：Metadata 來源過濾 | 智能意圖識別、動態 Metadata 過濾注入、Postgres 連續對話記憶 | [04 檢索策略與來源過濾](./04_檢索策略/README.md) |
-| 4 | 進階 | RAG 進階：本地向量資料庫 | PostgreSQL + PGVector、自建向量庫、完全本地控制 | [03 進階版（本地 PostgreSQL）](./03_進階版_本地PostgreSQL/README.md) |
-| 5 | 進階 | RAG 進階：雲端向量資料庫（Pinecone） | 雲端向量庫、Google Drive→向量→Pinecone、Gemini Embeddings、Chat + 檢索 | [Pinecone 向量資料庫](./pinecone向量資料庫/README.md) |
-| 6 | 進階 | 多模態 RAG 或企業應用 | 圖片/表格檢索、權限與多租戶、評測與優化 | [07 多模態或企業應用（大綱）](./07_多模態或企業應用/README.md) |
+| 1 | 入門 | RAG 初體驗：記憶體儲存 | 什麼是 RAG、Embeddings、In-Memory Vector Store、單一工作流程、上傳即問答 | [01_記憶體儲存入門](./01_記憶體儲存入門/README.md) |
+| 2 | 基礎 | RAG 基礎：向量持久化與多來源 | 分離式架構（索引／查詢）、Supabase 雲端資料庫、本機＋Google Drive 多來源寫入 | [02_Supabase雲端向量庫](./02_Supabase雲端向量庫/README.md) |
+| 3 | 基礎 | RAG 檢索策略：Metadata 來源過濾 | 智能意圖識別、動態 Metadata 過濾注入、Postgres 連續對話記憶 | [03_檢索策略與來源過濾](./03_檢索策略與來源過濾/README.md) |
+| 4 | 進階 | RAG 進階：本地向量資料庫 | PostgreSQL + PGVector、自建向量庫、完全本地控制 | [04_本地PostgreSQL向量庫](./04_本地PostgreSQL向量庫/README.md) |
+| 5 | 進階 | RAG 進階：雲端向量資料庫（Pinecone） | 雲端向量庫、Google Drive→向量→Pinecone、Gemini Embeddings、Chat + 檢索 | [05_Pinecone雲端向量庫](./05_Pinecone雲端向量庫/README.md) |
+| 6 | 拓展 | 多模態 RAG 或企業應用 | 圖片/表格檢索、權限與多租戶、評測與優化 | [06_多模態與企業應用](./06_多模態與企業應用/README.md) |
 
 ---
 
 ## 本區現有範例快速連結
 
-- **入門**：[RAG 智能問答系統（入門版）](./01_入門版_記憶體儲存/README.md)
-- **基礎**：[RAG 智能問答系統（基礎版 Supabase）](./02_基礎版_Supabase雲端儲存/README.md) ｜ [RAG 檢索策略與來源過濾](./04_檢索策略/README.md)
-- **進階**：[RAG 智能問答系統（進階版 PostgreSQL）](./03_進階版_本地PostgreSQL/README.md) ｜ [Pinecone 向量資料庫](./pinecone向量資料庫/README.md)
+- **入門**：[01_記憶體儲存入門](./01_記憶體儲存入門/README.md)
+- **基礎**：[02_Supabase雲端向量庫](./02_Supabase雲端向量庫/README.md) ｜ [03_檢索策略與來源過濾](./03_檢索策略與來源過濾/README.md)
+- **進階**：[04_本地PostgreSQL向量庫](./04_本地PostgreSQL向量庫/README.md) ｜ [05_Pinecone雲端向量庫](./05_Pinecone雲端向量庫/README.md)
 
 ---
 
@@ -621,13 +621,13 @@ RAG 是一種結合**資訊檢索**和**AI 生成**的技術，讓 AI 能夠：
 
 準備好了嗎？選擇您的起點：
 
-### 🟢 [開始入門版 →](./01_入門版_記憶體儲存/README.md)
+### 🟢 [開始入門版 →](./01_記憶體儲存入門/README.md)
 **5 分鐘快速體驗 RAG 魔力**
 
-### 🟡 [開始基礎版 →](./02_基礎版_Supabase雲端儲存/README.md)
+### 🟡 [開始基礎版 →](./02_Supabase雲端向量庫/README.md)
 **快速部署雲端 RAG 系統**
 
-### 🔴 [開始進階版 →](./03_進階版_本地PostgreSQL/README.md)
+### 🔴 [開始進階版 →](./04_本地PostgreSQL向量庫/README.md)
 **建立完全掌控的企業級系統**
 
 ---

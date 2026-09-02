@@ -33,7 +33,7 @@ flowchart LR
         VStore --- Embed
     end
     
-    Agent <-->|調用檢索| Tool
+    Agent <-->|"調用檢索"| VSTool
     Agent --> Respond["💬 Respond to Chat<br/>(回傳依據知識庫之回覆)"]
 ```
 
@@ -144,4 +144,4 @@ ON documents USING hnsw (embedding vector_cosine_ops);
 
 ---
 
-[⬅️ 返回階段二：AI Agent 核心與工具調用](../../階段二_AI_Agent核心與工具調用/README.md) ｜ [➡️ 前往進階版：本地 PostgreSQL](../../階段三_企業級RAG向量知識庫/03_進階版_本地PostgreSQL/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)
+[⬅️ 返回上一單元：01_記憶體儲存入門](../01_記憶體儲存入門/README.md) ｜ [➡️ 前往下一單元：03_檢索策略與來源過濾](../03_檢索策略與來源過濾/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)

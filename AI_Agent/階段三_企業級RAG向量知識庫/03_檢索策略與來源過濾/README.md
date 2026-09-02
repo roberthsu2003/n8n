@@ -22,10 +22,10 @@
 flowchart LR
     User["👤 使用者提問<br/>(含來源意圖)"] --> Chat["💬 Chat Trigger<br/>(對話介面)"]
     Chat --> Parse["🔍 解析輸入意圖<br/>(提取關鍵字與來源)"]
-    Parse --> Check{"❓ 是否指定來源?"}
+    Parse --> Check{"❓ 是否指定來源"}
     
-    Check -->|是 (本機/Drive)| SetFilter["🏷️ 注入 Metadata Filter<br/>(where: source = 'drive')"]
-    Check -->|否 (全庫搜尋)| SetAll["🌐 全域搜尋模式<br/>(all_sources)"]
+    Check -->|"是 (指定來源)"| SetFilter["🏷️ 注入 Metadata Filter<br/>where: source = drive"]
+    Check -->|"否 (全庫搜尋)"| SetAll["🌐 全域搜尋模式<br/>all_sources"]
     
     SetFilter --> Agent["🤖 AI Agent (進階 DocuBot)"]
     SetAll --> Agent
@@ -38,8 +38,8 @@ flowchart LR
         VStore --- Embed
     end
     
+    Agent <-->|"調用檢索"| VSTool
     Memory[("💾 Postgres Chat Memory<br/>(多輪對話記憶)")] -.-> Agent
-    Agent <-->|精準過濾檢索| Knowledge
     Agent --> Respond["💬 Respond to Chat<br/>(標註來源並回傳答案)"]
 ```
 
@@ -116,4 +116,4 @@ flowchart LR
 
 ---
 
-[⬅️ 返回基礎版：Supabase 雲端儲存](../02_基礎版_Supabase雲端儲存/README.md) ｜ [➡️ 前往進階版：本地 PostgreSQL](../03_進階版_本地PostgreSQL/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)
+[⬅️ 返回上一單元：02_Supabase雲端向量庫](../02_Supabase雲端向量庫/README.md) ｜ [➡️ 前往下一單元：04_本地PostgreSQL向量庫](../04_本地PostgreSQL向量庫/README.md) ｜ [🏠 返回 RAG 總目錄](../README.md)
