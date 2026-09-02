@@ -24,6 +24,12 @@ flowchart LR
 
 ---
 
+## 🖼️ 預覽圖
+
+![](./images/Basic_LLM_Chain.png)
+
+---
+
 ## 📥 工作流程圖下載
 
 - [下載範例流程：Basic_LLM_Chain.json](./Basic_LLM_Chain.json)
