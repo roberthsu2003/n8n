@@ -1,5 +1,5 @@
 {
-  "name": "01_RAG文件索引_本機上傳",
+  "name": "02_額外範例_文件索引_本機上傳",
   "nodes": [
     {
       "parameters": {
@@ -29,12 +29,24 @@
               "requiredField": true,
               "fieldOptions": {
                 "values": [
-                  {"option": "技術文件"},
-                  {"option": "使用手冊"},
-                  {"option": "政策規範"},
-                  {"option": "常見問題"},
-                  {"option": "培訓教材"},
-                  {"option": "其他"}
+                  {
+                    "option": "技術文件"
+                  },
+                  {
+                    "option": "使用手冊"
+                  },
+                  {
+                    "option": "政策規範"
+                  },
+                  {
+                    "option": "常見問題"
+                  },
+                  {
+                    "option": "培訓教材"
+                  },
+                  {
+                    "option": "其他"
+                  }
                 ]
               }
             },
@@ -59,7 +71,10 @@
       "name": "📤 表單觸發器",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.1,
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "webhookId": "rag-upload-form"
     },
     {
@@ -72,7 +87,10 @@
       "name": "📄 提取檔案內容",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
-      "position": [480, 400]
+      "position": [
+        480,
+        400
+      ]
     },
     {
       "parameters": {
@@ -128,7 +146,10 @@
       "name": "🏷️ 設定文件資訊",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [720, 400]
+      "position": [
+        720,
+        400
+      ]
     },
     {
       "parameters": {
@@ -139,7 +160,10 @@
       "name": "✂️ 遞迴字元分割器",
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
-      "position": [960, 400]
+      "position": [
+        960,
+        400
+      ]
     },
     {
       "parameters": {
@@ -150,7 +174,10 @@
       "name": "🧠 Google Gemini 嵌入",
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1,
-      "position": [960, 600]
+      "position": [
+        960,
+        600
+      ]
     },
     {
       "parameters": {
@@ -190,7 +217,10 @@
       "name": "💾 Simple Vector Store (插入)",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [1200, 400]
+      "position": [
+        1200,
+        400
+      ]
     }
   ],
   "connections": {

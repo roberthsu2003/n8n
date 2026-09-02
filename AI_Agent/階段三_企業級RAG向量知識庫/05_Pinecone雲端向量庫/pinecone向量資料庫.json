@@ -1,5 +1,5 @@
 {
-  "name": "pinecone向量資料庫",
+  "name": "05_Pinecone雲端向量庫",
   "nodes": [
     {
       "parameters": {},

@@ -1,5 +1,5 @@
 {
-  "name": "02_RAG文件索引_Google_Drive同步",
+  "name": "02_額外範例_文件索引_Google_Drive同步",
   "nodes": [
     {
       "parameters": {
@@ -16,7 +16,10 @@
       "name": "⏰ 每日凌晨2點執行",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "notes": "📅 排程設定:\n- 每天凌晨 2:00 自動執行\n- 可改為手動觸發測試\n- Cron 表達式: 0 2 * * *"
     },
     {
@@ -50,7 +53,10 @@
       "name": "📂 列出 Google Drive 檔案",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
-      "position": [480, 400],
+      "position": [
+        480,
+        400
+      ],
       "notes": "🔍 檔案過濾條件:\n✅ PDF 檔案\n✅ Word 檔案 (.docx)\n✅ 純文字檔 (.txt)\n❌ 排除已刪除檔案"
     },
     {
@@ -62,7 +68,10 @@
       "name": "🔄 逐一處理檔案",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [720, 400],
+      "position": [
+        720,
+        400
+      ],
       "notes": "⚙️ 批次處理設定:\n- 每次處理 1 個檔案\n- 避免記憶體溢出\n- 可追蹤處理進度"
     },
     {
@@ -86,7 +95,10 @@
       "name": "⬇️ 下載檔案內容",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
-      "position": [960, 400],
+      "position": [
+        960,
+        400
+      ],
       "notes": "📥 下載設定:\n- 自動轉換 Google Docs 為純文字\n- 保留原始格式資訊\n- 下載至 binary 資料"
     },
     {
@@ -99,7 +111,10 @@
       "name": "📄 提取檔案內容",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
-      "position": [1200, 400]
+      "position": [
+        1200,
+        400
+      ]
     },
     {
       "parameters": {
@@ -173,7 +188,10 @@
       "name": "🏷️ 設定檔案資訊",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [1440, 400]
+      "position": [
+        1440,
+        400
+      ]
     },
     {
       "parameters": {
@@ -184,7 +202,10 @@
       "name": "✂️ 遞迴字元分割器",
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
-      "position": [1680, 400]
+      "position": [
+        1680,
+        400
+      ]
     },
     {
       "parameters": {
@@ -195,7 +216,10 @@
       "name": "🧠 Google Gemini 嵌入",
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1,
-      "position": [1680, 600]
+      "position": [
+        1680,
+        600
+      ]
     },
     {
       "parameters": {
@@ -247,7 +271,10 @@
       "name": "💾 Simple Vector Store (插入)",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [1920, 400]
+      "position": [
+        1920,
+        400
+      ]
     }
   ],
   "connections": {

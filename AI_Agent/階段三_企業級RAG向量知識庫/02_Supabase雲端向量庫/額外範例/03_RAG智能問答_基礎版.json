@@ -1,5 +1,5 @@
 {
-  "name": "03_RAG智能問答_基礎版",
+  "name": "02_額外範例_RAG智能問答_基礎版",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,10 @@
       "name": "💬 Chat Trigger",
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "webhookId": "rag-chat-basic"
     },
     {
@@ -28,7 +31,10 @@
       "name": "🤖 AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.8,
-      "position": [480, 400]
+      "position": [
+        480,
+        400
+      ]
     },
     {
       "parameters": {
@@ -44,7 +50,10 @@
       "name": "🧠 Google Gemini Flash",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
-      "position": [480, 600],
+      "position": [
+        480,
+        600
+      ],
       "notes": "⚙️ 模型設定:\n- Temperature: 0.3 (較保守,更準確)\n- Max Tokens: 2048\n- Top P: 0.9\n- Top K: 40"
     },
     {
@@ -58,7 +67,10 @@
       "name": "🔍 Vector Store Tool",
       "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
       "typeVersion": 1.1,
-      "position": [720, 400]
+      "position": [
+        720,
+        400
+      ]
     },
     {
       "parameters": {
@@ -69,7 +81,10 @@
       "name": "💾 Simple Vector Store",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [720, 600],
+      "position": [
+        720,
+        600
+      ],
       "notes": "⚠️ 重要提醒:\n必須與索引 workflow 使用\n相同的 embedding 模型!"
     },
     {
@@ -80,7 +95,10 @@
       "name": "🧠 Embeddings Google Gemini",
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1,
-      "position": [720, 800]
+      "position": [
+        720,
+        800
+      ]
     },
     {
       "parameters": {
@@ -90,7 +108,10 @@
       "name": "💬 Respond to Chat",
       "type": "@n8n/n8n-nodes-langchain.respondToChat",
       "typeVersion": 1.1,
-      "position": [960, 400]
+      "position": [
+        960,
+        400
+      ]
     }
   ],
   "connections": {

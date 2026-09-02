@@ -1,5 +1,5 @@
 {
-  "name": "04_RAG智能問答_進階版_來源過濾",
+  "name": "03_檢索策略與來源過濾",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,10 @@
       "name": "💬 Chat Trigger",
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
-      "position": [240, 400],
+      "position": [
+        240,
+        400
+      ],
       "webhookId": "rag-chat-advanced"
     },
     {
@@ -51,7 +54,10 @@
       "name": "🔍 解析使用者輸入",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [480, 400],
+      "position": [
+        480,
+        400
+      ],
       "notes": "🤖 智能識別功能:\n\n關鍵字 → 來源\n━━━━━━━━━━━━\n本機/本地/上傳 → local_upload\nGoogle/Drive/雲端 → google_drive\n無關鍵字 → all (全部)"
     },
     {
@@ -80,7 +86,10 @@
       "name": "❓ 是否需要過濾來源",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.1,
-      "position": [720, 400]
+      "position": [
+        720,
+        400
+      ]
     },
     {
       "parameters": {
@@ -112,7 +121,10 @@
       "name": "🎯 設定來源過濾",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [960, 200],
+      "position": [
+        960,
+        200
+      ],
       "notes": "✅ 有指定來源\n\n過濾條件:\nwhere: {\n  source: {\n    $eq: \"local_upload\"\n    或 \"google_drive\"\n  }\n}"
     },
     {
@@ -145,7 +157,10 @@
       "name": "🌐 查詢所有來源",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [960, 600],
+      "position": [
+        960,
+        600
+      ],
       "notes": "❌ 未指定來源\n\n查詢範圍:\n所有可用文件\n(本機上傳 + Google Drive)"
     },
     {
@@ -157,7 +172,10 @@
       "name": "🔗 合併分支",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [1200, 400]
+      "position": [
+        1200,
+        400
+      ]
     },
     {
       "parameters": {
@@ -172,7 +190,10 @@
       "name": "🤖 AI Agent (進階)",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.8,
-      "position": [1440, 400]
+      "position": [
+        1440,
+        400
+      ]
     },
     {
       "parameters": {
@@ -188,7 +209,10 @@
       "name": "🧠 Google Gemini Flash",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1.1,
-      "position": [1440, 600]
+      "position": [
+        1440,
+        600
+      ]
     },
     {
       "parameters": {
@@ -203,7 +227,10 @@
       "name": "🔍 Vector Store Tool (動態過濾)",
       "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
       "typeVersion": 1.1,
-      "position": [1680, 400],
+      "position": [
+        1680,
+        400
+      ],
       "notes": "🎯 動態來源過濾\n\n根據使用者意圖,自動設定:\n• local_upload 過濾\n• google_drive 過濾\n• 或不過濾 (全部)"
     },
     {
@@ -215,7 +242,10 @@
       "name": "💾 Simple Vector Store",
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1,
-      "position": [1680, 600]
+      "position": [
+        1680,
+        600
+      ]
     },
     {
       "parameters": {
@@ -225,7 +255,10 @@
       "name": "🧠 Embeddings Google Gemini",
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1,
-      "position": [1680, 800]
+      "position": [
+        1680,
+        800
+      ]
     },
     {
       "parameters": {
@@ -235,7 +268,10 @@
       "name": "💬 Respond to Chat",
       "type": "@n8n/n8n-nodes-langchain.respondToChat",
       "typeVersion": 1.1,
-      "position": [1920, 400]
+      "position": [
+        1920,
+        400
+      ]
     }
   ],
   "connections": {
