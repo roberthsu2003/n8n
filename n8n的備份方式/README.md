@@ -1,88 +1,146 @@
-# n8n的備份方式
-在 Docker 上備份 n8n 其實非常簡單，關鍵在於「打包資料夾」**或**「備份資料庫與設定」。
+# n8n 的備份與還原完整指南
 
-依據你當初啟動 n8n 的方式（使用單純的 Data Volume，還是綁定本地資料夾的 Bind Mount），主要有以下兩種最常見且安全的備份方法。
+在 Docker 環境中備份 n8n 非常安全且容易，關鍵在於**備份 n8n 的儲存空間（Volume/資料夾）**或**匯出工作流程與憑證**。
 
----
-
-## 方法一：直接備份資料夾（最推薦、最簡單）
-
-如果你當初是用 `docker-compose` 或者有將 n8n 的資料夾透過 `-v` 參數對應到你電腦的實體路徑（例如 `/home/user/n8n_data`），那麼你所有的工作流、認證資料、SQLite 資料庫都在這個資料夾裡。
-
-### 備份步驟：
-
-1. **停止 n8n 容器**（避免備份到一半有資料在寫入而損壞）：
-```bash
-docker stop <你的n8n容器名稱>
-
-```
-
-
-2. **將資料夾壓縮備份**：
-把你的 n8n 資料夾（包含內部的 `.n8n` 或 `git` 等隱藏檔案）直接壓縮起來。
-```bash
-tar -czvf n8n_backup.tar.gz /path/to/your/n8n_data
-
-```
-
-
-3. **導出環境設定**：
-如果你有使用 `docker-compose.yml`，請連同這個 `.yml` 檔案一起複製保存。它記錄了你的環境變數和加密金鑰（`N8N_ENCRYPTION_KEY`）。
-
-### 還原到新電腦：
-
-1. 將 `n8n_backup.tar.gz` 和 `docker-compose.yml` 複製到新電腦。
-2. 解壓縮資料夾到指定路徑。
-3. 在新電腦上執行 `docker compose up -d`，n8n 就會完美復活，所有 Workflow 和帳號都在。
+根據學生與常見部署方式，主要分為以下三種備份情境：
 
 ---
 
-## 方法二：使用 n8n 內建的 CLI 命令導出（純工作流備份）
+## 🚀 情境一：Docker 具名 Volume 備份（學生最常用：`n8n_data`）
 
-如果你當初**沒有**把資料夾映射出來（資料存在 Docker 的匿名 Volume 裡），或者你**只想備份工作流（Workflows）與憑證（Credentials）**，可以用 n8n 自帶的指令直接匯出成 JSON 檔。
+如果學生是使用 Docker 具名 Volume 啟動 n8n（例如：`-v n8n_data:/home/node/.n8n`，在 Docker Desktop 的 **Volumes** 頁面會看到名為 **`n8n_data`** 的項目）：
 
-### 備份步驟：
+> [!IMPORTANT]
+> **備份前務必先停止 n8n 容器**！  
+> n8n 預設使用 SQLite 資料庫（`database.sqlite`），如果在容器運行中複製，可能因資料正在寫入而導致備份檔損毀。
 
-1. **導出所有工作流（Workflows）：**
+---
+
+### 📦 步驟 1：暫停 n8n 容器
+- 在 Docker Desktop 的 **Containers** 頁面找到 n8n 容器，點擊 ⏹️ **Stop**。
+- 或在終端機執行：
+  ```bash
+  docker stop <你的n8n容器名稱或ID>
+  ```
+
+---
+
+### 📦 步驟 2：執行單行打包備份指令
+
+開啟終端機（Mac 終端機 / Windows PowerShell），切換到你想存放備份檔的目錄（如桌面），執行以下對應指令：
+
+#### 🍏 Mac / Linux 終端機：
 ```bash
+docker run --rm -v n8n_data:/data -v "$(pwd)":/backup alpine tar czvf /backup/n8n_data_backup_$(date +%Y%m%d).tar.gz -C /data .
+```
+
+#### 🪟 Windows PowerShell：
+```powershell
+docker run --rm -v n8n_data:/data -v "${PWD}:/backup" alpine tar czvf /backup/n8n_data_backup_$(Get-Date -Format "yyyyMMdd").tar.gz -C /data .
+```
+
+#### 🪟 Windows CMD（命令提示字元）：
+```cmd
+docker run --rm -v n8n_data:/data -v "%cd%":/backup alpine tar czvf /backup/n8n_data_backup.tar.gz -C /data .
+```
+
+> **💡 指令原理解析**：
+> - `--rm`：打包完成後自動銷毀臨時的 Alpine 容器，不佔空間。
+> - `-v n8n_data:/data`：掛載名為 `n8n_data` 的 Volume。
+> - `-v "$(pwd)":/backup`：將本機目前所在的目錄掛載為 `/backup`。
+> - `tar czvf ...`：將 `/data` 內的所有資料壓縮成 `.tar.gz` 壓縮檔。
+
+---
+
+### 📦 步驟 3：重新啟動 n8n 容器
+備份完成後，在 Docker Desktop 點擊 ▶️ **Start** 即可恢復運作。
+
+---
+
+### 🔄 如何還原 Volume 備份（換電腦或重灌時）
+
+當需要將備份還原到新電腦時：
+
+1. **建立全新的 `n8n_data` Volume**（如果尚未建立）：
+   ```bash
+   docker volume create n8n_data
+   ```
+
+2. **將備份檔還原進 Volume**（請在存放備份檔的目錄下執行）：
+   - **Mac / Linux**：
+     ```bash
+     docker run --rm -v n8n_data:/data -v "$(pwd)":/backup alpine sh -c "rm -rf /data/* && tar xzvf /backup/n8n_data_backup_*.tar.gz -C /data"
+     ```
+   - **Windows PowerShell**：
+     ```powershell
+     docker run --rm -v n8n_data:/data -v "${PWD}:/backup" alpine sh -c "rm -rf /data/* && tar xzvf /backup/n8n_data_backup_*.tar.gz -C /data"
+     ```
+
+3. **啟動新 n8n 容器**，所有工作流程、帳號與連線資訊就會完整恢復！
+
+---
+
+## 🖥️ 情境二：使用 Docker Desktop 介面直接匯出
+
+如果你偏好圖形介面：
+
+1. **先停止 n8n 容器**。
+2. 進入 Docker Desktop 左側選單的 **Volumes**。
+3. 點擊進入 **`n8n_data`**。
+4. 切換到上方頁籤的 **Data**，可檢視其中的資料（如 `database.sqlite`、`config` 等）。
+5. 點擊右側 Actions 的 🗂️ **Export / Save volume data**（複製圖示），即可將整個 Volume 內容匯出至本機硬碟。
+
+---
+
+## 📁 情境三：本地資料夾備份（Bind Mount / docker-compose）
+
+如果你當初啟動時是將本機資料夾掛載到容器（例如 `./n8n_data:/home/node/.n8n`）：
+
+1. **停止 n8n 容器**：
+   ```bash
+   docker stop <你的n8n容器名稱>
+   ```
+2. **打包資料夾**：
+   ```bash
+   tar -czvf n8n_backup.tar.gz /path/to/your/n8n_data
+   ```
+3. **備份 `docker-compose.yml`**：將 Compose 設定檔連同壓縮檔一起妥善保存。
+
+---
+
+## 📄 情境四：使用 n8n 內建 CLI 匯出（純 JSON 工作流與憑證）
+
+如果只想單純備份或轉移**工作流程（Workflows）**與**憑證（Credentials）**，不需要備份整個資料庫：
+
+### 匯出指令：
+```bash
+# 1. 匯出所有工作流程為 JSON
 docker exec -it <你的n8n容器名稱> n8n export:workflow --all --output=/files/all_workflows.json
 
-```
-
-
-2. **導出所有憑證設定（Credentials）：**
-```bash
+# 2. 匯出所有憑證
 docker exec -it <你的n8n容器名稱> n8n export:credentials --all --output=/files/all_credentials.json
-
 ```
+*註：執行後請使用 `docker cp` 將 `/files/` 內的 JSON 複製到電腦硬碟。*
 
-
-*註：`/files/` 是 n8n 容器內的預設路徑，執行完後，記得把這兩個 JSON 檔從容器內複製出來（`docker cp`）存到你的電腦。*
-
-### 還原到新電腦：
-
-在新電腦裝好乾淨的 n8n 後，將 JSON 檔放入新容器，並執行導入指令：
-
+### 還原指令：
 ```bash
+# 在新容器中匯入
 docker exec -it <新n8n容器名稱> n8n import:workflow --input=/files/all_workflows.json
 docker exec -it <新n8n容器名稱> n8n import:credentials --input=/files/all_credentials.json
-
 ```
 
 ---
 
-## ⚠️ 極度重要注意事項（漏掉這步，換電腦會打不開）
+## ⚠️ 極度重要注意事項（避免換電腦後密碼失效）
 
-不論你用哪種方法，n8n 在第一次啟動時都會自動生成一組「資料加密金鑰（Encryption Key）」。用來加密你在 n8n 裡儲生的密碼、API Key 等敏感資訊。
+> [!CAUTION]
+> n8n 在首次啟動時會自動生成一組 **資料加密金鑰（Encryption Key）**，用於加密資料庫中儲存的 API Token、密碼等敏感憑證。
 
-如果你換到新電腦，**必須確保新舊電腦的加密金鑰完全一致**，否則就算工作流還原了，所有的帳號密碼都會因為無法解密而失效！
-
-**做法：**
-請檢查你舊電腦的環境變數，找到 `N8N_ENCRYPTION_KEY` 的數值（如果是用 SQLite，通常也可以在舊資料夾的 `config` 裡找到）。在新電腦啟動時，務必在 Docker 環境變數中帶入同一個金鑰：
-
-```yaml
-# docker-compose.yml 範例
-environment:
-  - N8N_ENCRYPTION_KEY=你的舊金鑰（絕對不能變）
-
-```
+如果換到新電腦：
+1. 請檢查舊環境的 `N8N_ENCRYPTION_KEY`（或舊資料夾內的 `config` 檔）。
+2. 在新電腦啟動時，**務必使用完全相同的金鑰**，否則還原後已儲存的 API 金鑰會因無法解密而失效：
+   ```yaml
+   # docker-compose.yml 範例
+   environment:
+     - N8N_ENCRYPTION_KEY=你的舊金鑰（務必保持一致）
+   ```
