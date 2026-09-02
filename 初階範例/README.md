@@ -54,7 +54,7 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 > 💡 **從無到有建立全新工作流**：
 > 透過 MCP 連線，AI 不僅能修改既有流程，更具備**「從零自動建立全新工作流」**的能力！只要以自然語言描述需求，AI 就能在 n8n 畫布上自動新增工作流、建立所有節點、填入測試資料、設定欄位表達式並完成串接。
 
-**可直接複製給 AI 的 Prompt 提詞（建立全新工作流）**：
+#### 提詞 1：從零建立「進階 JSON 巢狀資料處理」工作流
 ```text
 請在 n8n 替我從無到有建立一個全新的「進階 JSON 巢狀資料處理」工作流程：
 1. 建立一個全新的空白工作流，命名為「進階 JSON 巢狀資料實戰」。
@@ -65,6 +65,33 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
    - 第一個購買的商品名稱 (items[0].name)
    - 判斷是否為 VIP 並回傳折扣文字（如「享 VIP 9折優惠」）
 5. 請直接幫我在畫布上建立所有節點、配置好表達式語法並完成連線！
+```
+
+---
+
+#### 提詞 2：進階陣列拆解實戰（使用 Item Lists 節點將陣列拆解為單筆資料）
+> 📌 **應用說明**：當一筆訂單內包含多筆商品陣列（`items`）時，若要將每筆商品「逐一寫入資料庫/DataTable」，必須先透過 **`Item Lists (Split Out Items)`** 節點將 1 筆訂單物件拆解為多筆獨立的 n8n Items。
+
+```text
+請在 n8n 替我建立一個「JSON 巢狀陣列拆解與逐筆資料處理」工作流程：
+1. 建立一個全新的空白工作流，命名為「JSON 陣列拆解與批次寫入實戰」。
+2. 起點使用 Manual Trigger 節點。
+3. 串接一個 Set (Edit Fields) 節點，生成包含商品清單陣列的訂購資料：
+   - customer_name: "王小明"
+   - phone: "0912-345-678"
+   - order_items (Array):
+     - [0] item_name: "阿里山高山茶", quantity: 2, unit_price: 600
+     - [1] item_name: "日月潭紅茶", quantity: 1, unit_price: 450
+4. 串接一個 Item Lists 節點（Operation: Split Out Items）：
+   - Field to Split Out: order_items
+   - Include: other fields（保留顧客姓名與電話）
+   - 將原本 1 筆訂單拆解為 2 筆獨立的商品項目。
+5. 串接 Set (Edit Fields) 節點整理每筆明細欄位：
+   - 「顧客姓名」：{{ $json.customer_name }}
+   - 「商品名稱」：{{ $json.item_name }}
+   - 「購買數量」：{{ $json.quantity }}
+   - 「小計金額」：{{ $json.quantity * $json.unit_price }}
+6. 請幫我在畫布上建立所有節點、設定好欄位表達式並完成連線！
 ```
 </details>
 

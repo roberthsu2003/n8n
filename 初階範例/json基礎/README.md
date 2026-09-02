@@ -71,10 +71,62 @@
 
 #### ⚙️ 設定步驟
 
-1. **匯入流程**：將此工作流程代碼複製並貼上至 n8n 編輯器中。
-2. **執行流程**：點擊畫面底部的「Execute Workflow」按鈕。
-3. **互動學習**：
-   - 依照畫面上便利貼（Sticky Notes）的編號順序閱讀說明。
-   - 點擊每個節點，查看其「Output Data」面板，觀察 JSON 資料的實際樣貌。
-   - 在「Using JSON」與「Final Exam」節點中，觀察表達式是如何運作的。
+---
+
+### 🤖 AI 賦能延伸實作（附 Prompt 提詞）
+
+<details>
+<summary>👉 點擊展開可直接複製給 AI 助理的 Prompt 提詞（含陣列拆解實戰）</summary>
+
+> 💡 **任務目標**：透過 MCP 連線，讓 AI 助理自動從零建立「JSON 巢狀陣列拆解」實戰工作流。
+
+#### 提詞 1：從零建立「進階 JSON 巢狀資料處理」工作流
+```text
+請在 n8n 替我從無到有建立一個全新的「進階 JSON 巢狀資料處理」工作流程：
+1. 建立一個全新的空白工作流，命名為「進階 JSON 巢狀資料實戰」。
+2. 起點使用 Manual Trigger 節點。
+3. 串接一個 Code 節點或 Set 節點，生成一組包含會員與訂單資訊的巢狀 JSON 物件（例如：customer_name: "王小明"、is_vip: true、items 陣列：包含多筆商品名稱、單價與數量）。
+4. 接續新增一個 Set (Edit Fields) 節點，使用 n8n 表達式提取出：
+   - 購買總品項數量 (items.length)
+   - 第一個購買的商品名稱 (items[0].name)
+   - 判斷是否為 VIP 並回傳折扣文字（如「享 VIP 9折優惠」）
+5. 請直接幫我在畫布上建立所有節點、配置好表達式語法並完成連線！
+```
+
+---
+
+#### 提詞 2：進階陣列拆解實戰（使用 Item Lists 節點將陣列拆解為單筆資料）
+> 📌 **核心原理**：
+> 當來源資料是一筆訂單且內部包含多筆商品（`order_items` 陣列）時，若要將商品逐筆寫入資料庫/DataTable，必須使用 **`Item Lists (Split Out Items)`** 節點將陣列拆解為多筆獨立的 n8n Items。
+>
+> ```mermaid
+> flowchart LR
+>     A["📦 1 筆訂單<br/>(含 2 樣商品陣列)"] --> B["✂️ Item Lists (Split Out)"]
+>     B --> C["📄 明細 1：高山茶"]
+>     B --> D["📄 明細 2：紅茶"]
+> ```
+
+```text
+請在 n8n 替我建立一個「JSON 巢狀陣列拆解與逐筆資料處理」工作流程：
+1. 建立一個全新的空白工作流，命名為「JSON 陣列拆解與批次寫入實戰」。
+2. 起點使用 Manual Trigger 節點。
+3. 串接一個 Set (Edit Fields) 節點，生成包含商品清單陣列的訂購資料：
+   - customer_name: "王小明"
+   - phone: "0912-345-678"
+   - order_items (Array):
+     - [0] item_name: "阿里山高山茶", quantity: 2, unit_price: 600
+     - [1] item_name: "日月潭紅茶", quantity: 1, unit_price: 450
+4. 串接一個 Item Lists 節點（Operation: Split Out Items）：
+   - Field to Split Out: order_items
+   - Include: other fields（保留顧客姓名與電話）
+   - 將原本 1 筆訂單拆解為 2 筆獨立的商品項目。
+5. 串接 Set (Edit Fields) 節點整理每筆明細欄位：
+   - 「顧客姓名」：{{ $json.customer_name }}
+   - 「商品名稱」：{{ $json.item_name }}
+   - 「購買數量」：{{ $json.quantity }}
+   - 「小計金額」：{{ $json.quantity * $json.unit_price }}
+6. 請幫我在畫布上建立所有節點、設定好欄位表達式並完成連線！
+```
+</details>
+
 
