@@ -1,0 +1,186 @@
+{
+  "name": "03_RAG智能問答_基礎版",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": false,
+          "subtitle": "💬 請輸入您的問題,我會從文件庫中尋找答案\n\n✨ 支援多輪對話\n📚 自動檢索相關文件\n🎯 提供準確回答"
+        }
+      },
+      "id": "chat-trigger-101",
+      "name": "💬 Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 400],
+      "webhookId": "rag-chat-basic"
+    },
+    {
+      "parameters": {
+        "agent": "toolsAgent",
+        "promptType": "define",
+        "text": "=你是一個專業的文件助理 AI,名稱是「DocuBot」。\n\n【你的核心任務】\n根據文件資料庫的內容,準確回答使用者的問題。\n\n【可用工具】\n- document_search: 在文件資料庫中搜尋相關資訊\n\n【回答準則】\n1. **準確性優先**\n   - 只根據文件內容回答\n   - 找到答案時,清楚說明來源\n   - 找不到時,坦誠告知並建議如何獲取資訊\n\n2. **回答格式**\n   - 使用繁體中文\n   - 結構清晰,易於理解\n   - 適當使用列表或分點說明\n\n3. **專業態度**\n   - 保持友善、耐心的語氣\n   - 如問題不清楚,禮貌地請求補充\n   - 避免使用過於技術性的術語,除非必要\n\n4. **上下文理解**\n   - 記住對話歷史\n   - 理解代詞指涉 (\"它\"、\"這個\" 等)\n   - 連貫回答相關問題\n\n【當前使用者問題】\n{{ $json.chatInput }}\n\n【回答開始】",
+        "options": {
+          "systemMessage": "=📅 當前時間: {{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\n🗄️ 資料庫狀態: 已連接\n🌐 語言: 繁體中文\n\n你可以使用 document_search 工具存取完整的文件資料庫。"
+        }
+      },
+      "id": "ai-agent-101",
+      "name": "🤖 AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [480, 400]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "options": {
+          "temperature": 0.3,
+          "maxOutputTokens": 2048,
+          "topP": 0.9,
+          "topK": 40
+        }
+      },
+      "id": "gemini-chat-101",
+      "name": "🧠 Google Gemini Flash",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [480, 600],
+      "notes": "⚙️ 模型設定:\n- Temperature: 0.3 (較保守,更準確)\n- Max Tokens: 2048\n- Top P: 0.9\n- Top K: 40"
+    },
+    {
+      "parameters": {
+        "name": "document_search",
+        "description": "使用此工具在文件資料庫中搜尋相關資訊。\n\n【使用時機】\n- 使用者詢問具體問題\n- 需要查找文件中的特定資訊\n- 驗證某個說法是否正確\n\n【輸入內容】\n輸入與問題相關的關鍵字或完整問題。\n例如: \"產品退貨政策\"、\"如何設定帳號\"、\"支援的檔案格式\"\n\n【輸出內容】\n返回最相關的文件段落 (Top 4)",
+        "topK": 4,
+        "options": {}
+      },
+      "id": "vector-tool-101",
+      "name": "🔍 Vector Store Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [720, 400]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve",
+        "options": {}
+      },
+      "id": "vector-store-101",
+      "name": "💾 Simple Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [720, 600],
+      "notes": "⚠️ 重要提醒:\n必須與索引 workflow 使用\n相同的 embedding 模型!"
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-004"
+      },
+      "id": "embeddings-101",
+      "name": "🧠 Embeddings Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [720, 800]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "respond-101",
+      "name": "💬 Respond to Chat",
+      "type": "@n8n/n8n-nodes-langchain.respondToChat",
+      "typeVersion": 1.1,
+      "position": [960, 400]
+    }
+  ],
+  "connections": {
+    "💬 Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "🤖 AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 AI Agent": {
+      "main": [
+        [
+          {
+            "node": "💬 Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Google Gemini Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🤖 AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Vector Store Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "🤖 AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💾 Simple Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "🔍 Vector Store Tool",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "💾 Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-005",
+      "name": "RAG系統"
+    },
+    {
+      "createdAt": "2025-01-17T00:00:00.000Z",
+      "updatedAt": "2025-01-17T00:00:00.000Z",
+      "id": "tag-006",
+      "name": "智能問答"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-17T00:00:00.000Z",
+  "versionId": "workflow-03-v1"
+}
