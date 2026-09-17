@@ -1,0 +1,377 @@
+{
+  "name": "英文單字卡 1000 - 分批去重版",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "mode": "id",
+          "value": "gemma4:31b-cloud"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=請產生 40 個「{{ ($json.hint || '日常常用').trim() }}」、適合台灣高中到多益程度的常用英文單字（不要 the/be 這類最常見字）。只輸出純 JSON 陣列，不要 markdown、不要解釋。每個元素格式：{\"word\": \"polish\", \"meaning_zh\": \"擦亮、改進\", \"pos\": \"動詞\", \"example_en\": \"You should polish your English speaking skills before going abroad.\"}。pos 請用繁體中文（名詞/動詞/形容詞/副詞等）。example_en 要自然實用、包含該單字。"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.9,
+          "num_predict": 8000,
+          "format": "json"
+        }
+      },
+      "id": "d88ba79b-c437-4a6b-895d-9008fa29aaa3",
+      "name": "Ollama 產生單字",
+      "position": [
+        144,
+        208
+      ],
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "ollamaApi": {
+          "id": "FOfduibYw5CGhNZ6",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const existing = new Set(\n  $('讀取已有單字').all().map((i) => {\n    const r = i.json?.row ?? i.json ?? {};\n    return String(r.word ?? '').trim().toLowerCase();\n  }).filter(Boolean)\n);\nconst seen = new Set();\nconst rows = [];\nlet totalParsed = 0, skippedExisting = 0, skippedDup = 0, skippedInvalid = 0;\nfor (const item of $input.all()) {\n  const j = item.json ?? {};\n  let raw = j.text ?? j.output ?? j.content ?? '';\n  if (typeof raw !== 'string') raw = JSON.stringify(j);\n  raw = String(raw).replace(/```json/gi, '').replace(/```/g, '').trim();\n  let arr;\n  try { arr = JSON.parse(raw); }\n  catch (e) {\n    const m = String(raw).match(/\\[[\\s\\S]*\\]/);\n    if (!m) { skippedInvalid++; continue; }\n    try { arr = JSON.parse(m[0]); } catch (e2) { skippedInvalid++; continue; }\n  }\n  if (!Array.isArray(arr)) { skippedInvalid++; continue; }\n  for (const w of arr) {\n    totalParsed++;\n    const word = String(w.word ?? '').trim();\n    const meaning_zh = String(w.meaning_zh ?? '').trim();\n    const pos = String(w.pos ?? '').trim();\n    const example_en = String(w.example_en ?? '').trim();\n    if (!/^[A-Za-z][A-Za-z'\\- ]{1,30}$/.test(word)) { skippedInvalid++; continue; }\n    if (!meaning_zh) { skippedInvalid++; continue; }\n    const key = word.toLowerCase();\n    if (existing.has(key)) { skippedExisting++; continue; }\n    if (seen.has(key)) { skippedDup++; continue; }\n    seen.add(key);\n    rows.push({ json: {\n      word,\n      meaning_zh,\n      extra: '',\n      pos,\n      progress: '不熟',\n      example_en,\n      tts_url: 'https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=' + encodeURIComponent(word)\n    }});\n  }\n}\nif (rows.length === 0) {\n  throw new Error('組裝單字卡：無可用新單字（解析:' + totalParsed + ' 已存在:' + skippedExisting + ' 批次內重複:' + skippedDup + ' 無效:' + skippedInvalid + '）。請檢查 Ollama 回傳是否為純 JSON 陣列。');\n}\nreturn rows;"
+      },
+      "id": "1e67b40e-01d9-4f39-be56-99943d83e6aa",
+      "name": "組裝單字卡",
+      "position": [
+        416,
+        208
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "mode": "id",
+          "value": "Rb52LxcrfOgPITXL"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "word",
+              "displayName": "word",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "meaning_zh",
+              "displayName": "meaning_zh",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "extra",
+              "displayName": "extra",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "pos",
+              "displayName": "pos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "progress",
+              "displayName": "progress",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "example_en",
+              "displayName": "example_en",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tts_url",
+              "displayName": "tts_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a55c3bff-5e04-4047-9027-74315431a0b7",
+      "name": "寫入 Data Table",
+      "position": [
+        576,
+        208
+      ],
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "path": "vocab-cards",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "17ddc5c0-9041-479c-a155-4407e7f89826",
+      "name": "單字卡網頁入口",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -528,
+        624
+      ],
+      "webhookId": "941967ae-36e5-4cc1-8b65-544d0e6d9a72"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "mode": "id",
+          "value": "Rb52LxcrfOgPITXL"
+        },
+        "returnAll": true
+      },
+      "id": "03aaebf7-6e4d-4533-9a84-dca3acdf812a",
+      "name": "讀取單字",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        608
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((i) => i.json?.row || i.json).filter((r) => r && String(r.word || '').trim());\nconst esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');\nconst escAttr = (s) => esc(s).replace(/'/g, '&#39;');\nconst cards = items.map((r) => {\n  const word = esc(r.word);\n  const key = escAttr(String(r.word ?? '').toLowerCase());\n  return '<article class=\"card\" data-word=\"' + key + '\" data-meaning=\"' + escAttr(r.meaning_zh) + '\"><h2>' + word + '</h2><div class=\"meta\"><span class=\"badge\">解釋：' + esc(r.meaning_zh) + '</span><span class=\"badge\">補充：' + esc(r.extra || 'Empty') + '</span><span class=\"badge pos\">' + esc(r.pos) + '</span><span class=\"badge prog\">' + esc(r.progress || '不熟') + '</span></div><p class=\"ex\">' + esc(r.example_en) + '</p><div class=\"row\"><audio controls preload=\"none\" src=\"' + escAttr(r.tts_url) + '\"></audio><button onclick=\"mark(\\'' + key + '\\',\\'已會\\')\">已會</button><button onclick=\"mark(\\'' + key + '\\',\\'不熟\\')\">不熟</button></div></article>';\n}).join('\\n');\nconst html = '<!DOCTYPE html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>英文單字卡</title><style>body{font-family:sans-serif;max-width:900px;margin:0 auto;padding:16px}.toolbar{position:sticky;top:0;background:#fff;padding:8px 0;display:flex;gap:8px}.card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}.card h2{font-size:2em;margin:0 0 8px}.badge{display:inline-block;background:#f2f2f2;border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0;font-size:.85em}.pos{background:#fef3c7}.ex{margin:12px 0}.row{display:flex;gap:8px;align-items:center}.hint{color:#666;font-size:.85em}#focus{border:2px solid #333;border-radius:12px;padding:8px;margin:12px 0}</style></head><body><h1>英文單字卡共 ' + items.length + ' 張</h1><p class=\"hint\">進度（已會/不熟）僅保存在此瀏覽器 localStorage，換裝置不會同步；發音取自 Google TTS，可能失效。</p><div class=\"toolbar\"><input id=\"q\" placeholder=\"搜尋單字或中文\" oninput=\"filter()\" style=\"flex:1;padding:8px\"><button onclick=\"random()\">隨機抽卡</button></div><div id=\"focus\"></div><div id=\"list\">' + cards + '</div><script>var prog=JSON.parse(localStorage.getItem(\\'vocabProg\\')||\\'{}\\');function paint(){document.querySelectorAll(\\'.prog\\').forEach(function(b){var w=b.closest(\\'.card\\').dataset.word;if(prog[w])b.textContent=prog[w];});}function mark(w,s){prog[String(w||\\'\\').toLowerCase()]=s;localStorage.setItem(\\'vocabProg\\',JSON.stringify(prog));paint();}function filter(){var q=document.getElementById(\\'q\\').value.toLowerCase();document.querySelectorAll(\\'#list .card\\').forEach(function(c){c.style.display=(c.dataset.word.indexOf(q)>-1||c.dataset.meaning.indexOf(q)>-1)?\\'\\':\\'none\\';});}function random(){var cs=[...document.querySelectorAll(\\'#list .card\\')].filter(function(c){return c.style.display!==\\'none\\';});if(!cs.length)return;var c=cs[Math.floor(Math.random()*cs.length)];var f=document.getElementById(\\'focus\\');f.innerHTML=\\'<h3>隨機抽卡</h3>\\';f.appendChild(c.cloneNode(true));window.scrollTo(0,0);}paint();</script></body></html>';\nreturn [{ json: { html } }];"
+      },
+      "id": "7e9a0217-1e09-4f01-92cf-533b4c9a159d",
+      "name": "組網頁 HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "61c0cdcf-43aa-4cff-ab5a-7161a8db32a6",
+      "name": "回傳網頁",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        128,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "mode": "id",
+          "value": "Rb52LxcrfOgPITXL"
+        },
+        "returnAll": true
+      },
+      "id": "a060136b-9bc6-4ec5-a4fa-7f4fa4811343",
+      "name": "讀取已有單字",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        208
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');\nconst topics = ['職場溝通','旅遊交通','餐飲美食','科技網路','健康醫療','教育學習','商業金融','環境氣候','運動休閒','文化藝術','政治法律','科學研究','家庭生活','購物消費','社交情感','日常時間','自然動物','城市生活','求職面試','商務書信','會議簡報','客服應對','天氣季節','興趣愛好'];\nconst seeds = [\n  ...letters.map((L) => ({ json: { hint: `以 ${L} 開頭的常用英文單字` } })),\n  ...topics.map((t) => ({ json: { hint: `主題「${t}」相關的常用英文單字` } })),\n];\nreturn seeds;"
+      },
+      "id": "00173e01-5dd6-44f1-a1cd-4172b2756738",
+      "name": "批次種子",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        208
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        208
+      ],
+      "id": "a3b95738-9aef-4884-b0f4-083b97bbf64f",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama 產生單字": {
+      "main": [
+        [
+          {
+            "node": "組裝單字卡",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "組裝單字卡": {
+      "main": [
+        [
+          {
+            "node": "寫入 Data Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "單字卡網頁入口": {
+      "main": [
+        [
+          {
+            "node": "讀取單字",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取單字": {
+      "main": [
+        [
+          {
+            "node": "組網頁 HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "組網頁 HTML": {
+      "main": [
+        [
+          {
+            "node": "回傳網頁",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取已有單字": {
+      "main": [
+        [
+          {
+            "node": "批次種子",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "批次種子": {
+      "main": [
+        [
+          {
+            "node": "Ollama 產生單字",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "讀取已有單字",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "ade6a593-c4be-4714-ab0e-553f00df828f",
+  "meta": {
+    "instanceId": "94d90db65590328b359dcb902bc887cbaf19a6a50060b45353a48d1715007106"
+  },
+  "nodeGroups": [],
+  "id": "WgGWiOFNor1XzzZi",
+  "tags": []
+}

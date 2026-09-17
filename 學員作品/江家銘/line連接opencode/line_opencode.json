@@ -1,0 +1,878 @@
+{
+  "name": "line_opencode",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-opencode",
+        "options": {}
+      },
+      "id": "08afd884-1e47-4632-b39f-1ab9bcad42aa",
+      "name": "LINE Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        2032,
+        2032
+      ],
+      "webhookId": "2fc22bc1-3f70-4cbf-b8e7-70084328134c",
+      "notes": "LINE Developers Webhook URL 填: https://retold-doily-unwilling.ngrok-free.dev/webhook/line-opencode, Method POST。onReceived=收到立即回 200，避免 LINE 等太久重試。記得切 Active 用 Production URL。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body ?? $input.first().json;\nconst ev = body.events?.[0];\nif (!ev) return [{ json: { isVerify: true } }];\nconst text = (ev.message?.text ?? '').trim();\nreturn [{ json: {\n  isVerify: false,\n  userId: ev.source?.userId ?? '',\n  replyToken: ev.replyToken ?? '',\n  text,\n  prompt: text\n}}];"
+      },
+      "id": "f528928e-a5e1-4c50-94fc-3ca8f78b8ce8",
+      "name": "Parse LINE",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        2032
+      ],
+      "notes": "自然對話解析：不需前綴，直接取 text 為 prompt。verify 空 events 直接結束。"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cond-verify",
+              "leftValue": "={{ $json.isVerify }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "187e4f86-d55d-4e05-bc96-894147bf9960",
+      "name": "Is Verify",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2480,
+        1872
+      ],
+      "notes": "LINE Verify 空 events 走 true 直接結束，不往下跑。"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-white",
+              "leftValue": "={{ $json.userId }}",
+              "rightValue": "={{ 'U16669b8a67ef0a4ee6533739da81629f' }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0af01cdc-8f77-49df-8b7b-52ec612b7725",
+      "name": "Check whitelist",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2480,
+        2032
+      ],
+      "notes": "白名單吃 n8n 環境變數 LINE_USER_ID，只放行你一人。false 不回應。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst text = (j.prompt ?? '').trim();\nconst s = $getWorkflowStaticData('global');\nconst p = s.pending;\nlet cmd = 'new';\nif (!text) cmd = 'fallback';\nelse if (p) {\n  if (/^(好|好的|確認|確定|執行|可以|要|沒問題|yes|ok|okay|做吧|開始吧|動手吧)[。！!，,\\s]*$/i.test(text)) cmd = 'confirm';\n  else if (text.length < 8 && /^(好|確認|執行|yes|ok)/i.test(text)) cmd = 'confirm';\n  else if (/取消|不要了|算了|不用了|別做|停止|cancel/i.test(text)) cmd = 'fallback';\n  else cmd = 'new';\n} else {\n  if (/^(status|狀態|在嗎|還在嗎|健康檢查|上線嗎|test)/i.test(text) || (/狀態/.test(text) && text.length < 12)) cmd = 'status';\n  else if (/取消|說明|幫助|help|用法|指令/i.test(text) && text.length < 12) cmd = 'fallback';\n  else cmd = 'new';\n}\nreturn [{ json: { ...j, cmd } }];"
+      },
+      "id": "1ef406df-3975-4cdc-a3c2-7c9f34cfd475",
+      "name": "Detect intent",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        2032
+      ],
+      "notes": "自然對話意圖：有 pending 時 好=執行 取消=取消，其他=新任務；無 pending 時 狀態=狀態，其他=新任務。"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "r-new",
+                    "leftValue": "={{ $json.cmd }}",
+                    "rightValue": "new",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": "new"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "r-status",
+                    "leftValue": "={{ $json.cmd }}",
+                    "rightValue": "status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": "status"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "r-confirm",
+                    "leftValue": "={{ $json.cmd }}",
+                    "rightValue": "confirm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": "confirm"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "fallback"
+        }
+      },
+      "id": "204a77ad-e622-45cb-b149-0e353a7d0869",
+      "name": "Route command",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2800,
+        2032
+      ],
+      "notes": "自然對話路由：new=新任務 status=狀態 confirm=確認執行 fallback=取消+說明"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4096/session",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"title\": {{ JSON.stringify('LINE ask: ' + ($json.prompt ?? '').slice(0, 30)) }}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "e8a77449-10d8-4213-aef5-822ce8909788",
+      "name": "Create session ask",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2912,
+        1808
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "標題帶內容前30字，方便在列表分辨。serve 目錄由啟動 serve 時的 cwd 決定。"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:4096/session/{{ $json.id }}/message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"agent\": \"plan\", \"model\": {\"providerID\": \"opencode\", \"modelID\": \"muse-spark-1.3-contributor-free\"}, \"parts\": [{\"type\": \"text\", \"text\": {{ JSON.stringify('你是桌面助手，用繁體中文回覆。使用者說：' + ($('Route command').item.json.prompt ?? '') + '\\n規則：問答查詢直接回答，開頭加【問答】。需改檔案/改程式時你是唯讀，只輸出預覽（改哪檔、改什麼、內容/diff），開頭加【改程式】。') }}}]}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "id": "b481872e-e97c-4e3c-b064-22ecf1a54875",
+      "name": "Prompt session ask",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3120,
+        1808
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "自然對話首問：plan 唯讀，先判斷問答或改程式。問答開頭【問答】直接回，改程式開頭【改程式】只給預覽不改檔。"
+    },
+    {
+      "parameters": {
+        "url": "http://host.docker.internal:4096/global/health",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 5000
+        }
+      },
+      "id": "cc8969a8-9379-4082-bd97-4b88e781fd4f",
+      "name": "Check opencode health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2912,
+        1952
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "GET /global/health 實測 opencode 在不在，成功/失敗都交給 Prepare Status 呈現，不再假裝正常。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst s = $getWorkflowStaticData('global');\nconst p = s.pending;\nconst pend = p ? `待確認: ${p.prompt?.slice(0,200)} (${Math.round((Date.now()-p.createdAt)/1000)}秒前)，回 好 執行、取消 取消` : '無待確認事項';\nconst online = (j && j.healthy === true) ? ('正常' + (j.version ? ` (v${j.version})` : '')) : '離線或無回應';\nlet uid = '';\ntry { uid = $('Parse LINE').first().json.userId ?? ''; } catch(e) {}\nreturn [{ json: { userId: uid, output: `桌機 opencode: ${online}\\n工作目錄: C:\\\\Users\\\\ryan\\\\Desktop\\\\opencode\\n${pend}\\n直接傳訊息即可，問答直接回，改程式會先預覽` } }];"
+      },
+      "id": "b5dd1699-08ce-433e-87dd-d37b7454c82c",
+      "name": "Prepare Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        1952
+      ],
+      "notes": "依 health 結果回報在線/離線 + pending 提醒。userId 取 Parse LINE。自然對話版說明。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst p = (j.prompt ?? '').trim();\nconst DIR = 'C:\\\\Users\\\\ryan\\\\Desktop\\\\opencode';\nif (!p) return [{ json: { ...j, blocked: true, output: '空指令，已忽略。用法: /run 把按鈕改成藍色' } }];\nconst bad = [/rm\\s+-rf\\s+[\\/~.]/i, /remove-item\\b.*(-recurse|\\/s)/i, /\\bdel\\s+\\/[sfq]/i, /\\bformat\\s+[a-z]:/i, /\\b(rd|rmdir)\\s+\\/s/i, /\\.env/i, /NGROK_AUTHTOKEN/i, /CHANNEL_ACCESS_TOKEN/i, /OPENCODE_SERVER_PASSWORD/i, /\\.git[\\/\\\\]/i, /\\bgit\\s+push\\b/i, /\\bgit\\s+reset\\s+--hard\\b/i, /\\bnpm\\s+publish\\b/i, /\\b(shutdown|taskkill|stop-process|stop-computer)\\b/i, /\\breg\\s+delete\\b/i, /\\b(ssh|scp|plink)\\b/i, /\\|\\s*(ba|z)?sh\\b/i, /\\b(invoke-webrequest|invoke-restmethod|iwr|curl)\\b/i, /base64\\s+-d/i];\nconst hit = bad.find(r => r.test(p));\nif (hit) return [{ json: { ...j, blocked: true, output: '已擋下高風險字 (' + hit + ')，請換說法或本機處理。' } }];\nreturn [{ json: { ...j, blocked: false, directory: DIR, output: '' } }];"
+      },
+      "id": "51cb2745-0034-4bfa-b6ce-e363a80e6408",
+      "name": "Check dangerous",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        2096
+      ],
+      "notes": "舊版高風險檢查（已停用，現整合進 Format Preview or Answer）。保留僅供參考。"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c-block",
+              "leftValue": "={{ $json.blocked }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8b5f09a1-a27e-46f8-937f-0e53c50e229a",
+      "name": "Is Blocked",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3120,
+        2096
+      ],
+      "notes": "true=直接推警告，false=存 pending。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst s = $getWorkflowStaticData('global');\ns.pending = { userId: j.userId, prompt: j.prompt, directory: j.directory, createdAt: Date.now() };\nreturn [{ json: { userId: j.userId, output: `要執行(未執行):\\n${j.prompt.slice(0,1000)}\\n目錄: ${j.directory}\\n請 5 分鐘內回 好 執行，取消 取消` } }];"
+      },
+      "id": "d3d15edd-b00b-4dfe-84bc-455e444e6dbc",
+      "name": "Save pending",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3312,
+        2096
+      ],
+      "notes": "舊版存 pending（已停用，現由 Format Preview or Answer 直接存）。保留僅供參考。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst s = $getWorkflowStaticData('global');\nconst p = s.pending;\nif (!p) return [{ json: { userId: j.userId, valid: false, output: '沒有待確認事項，直接傳訊息即可。' } }];\nif (p.userId !== j.userId) return [{ json: { userId: j.userId, valid: false, output: '那筆待確認不是你的，已忽略。' } }];\nif (Date.now() - p.createdAt > 5*60*1000) { delete s.pending; return [{ json: { userId: j.userId, valid: false, output: '已超過5分鐘，請重傳一次需求。' } }]; }\ndelete s.pending;\nreturn [{ json: { userId: j.userId, valid: true, prompt: p.prompt, directory: p.directory, output: '' } }];"
+      },
+      "id": "533db303-4b0a-402a-9d4e-11c5d1e4eac6",
+      "name": "Load pending",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        2240
+      ],
+      "notes": "自然確認：驗同一人 + 5分鐘內，順便清掉避免重複執行。"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6dadb54c-db54-4dd1-ad58-ba51e5d98038",
+      "name": "Is Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3120,
+        2240
+      ],
+      "notes": "true 才打 opencode，false 直接推原因。"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4096/session",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"title\": {{ JSON.stringify('LINE run: ' + ($json.prompt ?? '').slice(0, 30)) }}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "840994db-dc62-4e12-a7fb-d980a98ece1f",
+      "name": "Create session run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3312,
+        2240
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "確認通過才跑（回 好）。標題帶內容前30字，方便分辨。目錄由 serve 啟動位置決定。"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:4096/session/{{ $json.id }}/message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"agent\": \"build\", \"model\": {\"providerID\": \"opencode\", \"modelID\": \"muse-spark-1.3-contributor-free\"}, \"parts\": [{\"type\": \"text\", \"text\": {{ JSON.stringify($('Load pending').item.json.prompt ?? '') }}}]}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 300000
+        }
+      },
+      "id": "a08d1f2f-50ca-4d79-bbe9-ea3697e08e63",
+      "name": "Prompt session run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3520,
+        2240
+      ],
+      "onError": "continueErrorOutput",
+      "notes": "寫檔操作用 build agent。model 明確指定，避免解析到無效預設。text 用 JSON.stringify 跳脫。timeout 300秒。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const first = $input.first().json;\nlet uid = '';\ntry { uid = $('Parse LINE').first().json.userId ?? ''; } catch(e) {}\nconst parts = first.parts ?? [];\nlet txt = '';\nif (Array.isArray(parts)) { txt = parts.filter(p => p && p.type === 'text' && p.text).map(p => p.text).join('\\n'); }\nif (!txt) { txt = (first.output ?? first.text ?? JSON.stringify(first)).toString(); }\ntxt = txt.slice(0, 4800) || '執行完成';\nreturn [{ json: { userId: uid, output: `執行完成:\\n${txt}` } }];"
+      },
+      "id": "b9d44003-f989-4821-ad57-278c1183809e",
+      "name": "Format Run Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        2160
+      ],
+      "notes": "解析 /message 回傳 parts 陣列取 text，截斷到 LINE 4800 字，帶 userId 給 Push。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const first = $input.first().json;\nlet orig = '';\nlet uid = '';\ntry { orig = $('Detect intent').first().json.prompt ?? ''; } catch(e) {}\ntry { uid = $('Detect intent').first().json.userId ?? ''; } catch(e) {}\nif (!uid) { try { uid = $('Parse LINE').first().json.userId ?? ''; } catch(e) {} }\nconst parts = first.parts ?? [];\nlet txt = '';\nif (Array.isArray(parts)) { txt = parts.filter(p => p && p.type === 'text' && p.text).map(p => p.text).join('\\n'); }\nif (!txt) { txt = (first.output ?? first.text ?? JSON.stringify(first)).toString(); }\ntxt = txt.slice(0, 4400);\nconst s = $getWorkflowStaticData('global');\nif (/^【改程式】/.test(txt)) {\n  const DIR = 'C:\\\\Users\\\\ryan\\\\Desktop\\\\opencode';\n  const bad = [/rm\\s+-rf\\s+[\\/~.]/i, /remove-item\\b.*(-recurse|\\/s)/i, /\\bdel\\s+\\/[sfq]/i, /\\bformat\\s+[a-z]:/i, /\\b(rd|rmdir)\\s+\\/s/i, /\\.env/i, /NGROK_AUTHTOKEN/i, /CHANNEL_ACCESS_TOKEN/i, /OPENCODE_SERVER_PASSWORD/i, /\\.git[\\/\\\\]/i, /\\bgit\\s+push\\b/i, /\\bgit\\s+reset\\s+--hard\\b/i, /\\bnpm\\s+publish\\b/i, /\\b(shutdown|taskkill|stop-process|stop-computer)\\b/i, /\\breg\\s+delete\\b/i, /\\b(ssh|scp|plink)\\b/i, /\\|\\s*(ba|z)?sh\\b/i, /\\b(invoke-webrequest|invoke-restmethod|iwr|curl)\\b/i, /base64\\s+-d/i];\n  const hit = bad.find(r => r.test(orig));\n  if (hit) { delete s.pending; return [{ json: { userId: uid, output: '已擋下高風險字 (' + hit + ')，請換說法或本機處理。' } }]; }\n  s.pending = { userId: uid, prompt: orig, directory: DIR, createdAt: Date.now() };\n  return [{ json: { userId: uid, output: `${txt}\\n\\n回 好 執行（5分鐘內），取消 取消` } }];\n}\ndelete s.pending;\ntxt = txt.replace(/^【問答】\\s*/, '');\nreturn [{ json: { userId: uid, output: txt.slice(0, 4800) || '收到' } }];"
+      },
+      "id": "9f30de57-cbae-49d8-9a82-6e6a2cb8a46f",
+      "name": "Format Preview or Answer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3312,
+        1808
+      ],
+      "notes": "自然對話分流：【改程式】含高風險檢查+存 pending+補確認提示，【問答】直接回並清舊 pending。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nlet uid = '';\ntry { uid = $('Parse LINE').first().json.userId ?? ''; } catch(e) {}\nlet msg = '';\nif (j && j.error) { msg = j.error.message || j.error.description || JSON.stringify(j.error); }\nelse { msg = j.message || JSON.stringify(j); }\nmsg = String(msg).slice(0, 1000);\nreturn [{ json: { userId: uid, output: `執行失敗:\\n${msg}\\n\\n請確認桌機已啟動 opencode serve（0.0.0.0:4096）後再試。` } }];"
+      },
+      "id": "de189f3d-8d3b-4e1e-a6c3-32acdb3331be",
+      "name": "Format Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3312,
+        2368
+      ],
+      "notes": "任何 opencode 節點失敗時集中處理，回覆明確原因而不是靜默。"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst text = (j.prompt ?? j.text ?? '').trim();\nconst s = $getWorkflowStaticData('global');\nif (/取消|不要了|算了|不用了|別做|停止|cancel/i.test(text)) { delete s.pending; return [{ json: { userId: j.userId, output: '已取消，不會執行。直接傳新訊息即可。' } }]; }\nif (s.pending) { delete s.pending; return [{ json: { userId: j.userId, output: '已取消待確認事項。直接傳新訊息即可。' } }]; }\nreturn [{ json: { userId: j.userId, output: '直接傳訊息即可，不用指令。\\n問答會直接回，改程式會先給預覽，你回 好 才執行，取消 就取消。' } }];"
+      },
+      "id": "d29bfa5f-17b1-4dd3-a6c5-92ec925da7b9",
+      "name": "Handle fallback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        2368
+      ],
+      "notes": "自然取消+說明：含取消字就清 pending，其他回自然對話說明。"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/push",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer /uBD5ytFdOjMmPmisllB1MSW1/NAkXduNwjzhlVNKiSCjfz6ebny01Ut3PI1HP4MobiRTw/PGcaNso1+Pn//RIor5acuAGCXpBcVxlg65s7HpS0EU/oSsue/NofujSuhpmzoeeob/MFfMRQ18OJruAdB04t89/1O/w1cDnyilFU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.userId }}\",\n  \"messages\": [{ \"type\": \"text\", \"text\": {{ JSON.stringify($json.output) }} }]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "6d317801-ea6f-4a81-b5e2-b5ecdbc69aed",
+      "name": "Push LINE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3952,
+        2096
+      ],
+      "notes": "一律用 Push（replyToken 5分鐘易過期）。Token 吃 n8n 環境變數 LINE_CHANNEL_ACCESS_TOKEN。text 用 JSON.stringify 跳脫避免 body 壞掉。"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "LINE Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LINE": {
+      "main": [
+        [
+          {
+            "node": "Is Verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Verify": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Check whitelist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check whitelist": {
+      "main": [
+        [
+          {
+            "node": "Detect intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect intent": {
+      "main": [
+        [
+          {
+            "node": "Route command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route command": {
+      "main": [
+        [
+          {
+            "node": "Create session ask",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check opencode health",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load pending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create session ask": {
+      "main": [
+        [
+          {
+            "node": "Prompt session ask",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt session ask": {
+      "main": [
+        [
+          {
+            "node": "Format Preview or Answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Preview or Answer": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check opencode health": {
+      "main": [
+        [
+          {
+            "node": "Prepare Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Status": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check dangerous": {
+      "main": [
+        [
+          {
+            "node": "Is Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Blocked": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save pending": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load pending": {
+      "main": [
+        [
+          {
+            "node": "Is Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Valid": {
+      "main": [
+        [
+          {
+            "node": "Create session run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create session run": {
+      "main": [
+        [
+          {
+            "node": "Prompt session run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt session run": {
+      "main": [
+        [
+          {
+            "node": "Format Run Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Run Result": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Error": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle fallback": {
+      "main": [
+        [
+          {
+            "node": "Push LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "2558f0ad-67b0-4667-a61c-93842cab1244",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "94d90db65590328b359dcb902bc887cbaf19a6a50060b45353a48d1715007106"
+  },
+  "nodeGroups": [],
+  "id": "mcCi4FA1n38zHod6",
+  "tags": []
+}
