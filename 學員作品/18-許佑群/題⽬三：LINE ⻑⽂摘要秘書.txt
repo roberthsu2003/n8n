@@ -1,0 +1,314 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_line_bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        144
+      ],
+      "id": "7d53fdd9-8371-4ab6-8393-9e3dba8a6122",
+      "name": "接受訊息",
+      "webhookId": "67b4fe9b-27ad-4f32-b528-5a97e7c65bad"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "40cf2c7e-f3bf-4a2d-9321-fcbfc4ef522a",
+      "name": "回應訊息"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d781191d-06f1-430d-ba93-4385496e7fd7",
+              "name": "訊息",
+              "type": "string",
+              "value": "={{ $json.body.events[0].message.text }}"
+            },
+            {
+              "id": "a2c4e6f8-1234-4abc-9def-000000000001",
+              "name": "replyToken",
+              "type": "string",
+              "value": "={{ $json.body.events[0].replyToken }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        0,
+        192
+      ],
+      "id": "03cf9546-efd6-41f5-8bd2-a2b3f377ff9e",
+      "name": "取得敘述文字"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c1a2b3c4-0001-4abc-9def-000000000001",
+              "leftValue": "={{ $json.body.events[0].message.text.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 300
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "72b4d736-964f-4d69-ac28-90156261f1d7",
+      "name": "判斷是否為文字訊息",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -240,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ replyToken: $json.body.events[0].replyToken, messages: [{ type: 'text', text: '訊息太短!' }] }) }}",
+        "options": {}
+      },
+      "id": "10f5e4df-ea2c-464d-baa8-4b8fe240bebc",
+      "name": "回覆訊息太短",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        32,
+        416
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "41LXZSfDkY9OrxaS",
+          "name": "line_tvdi_cer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ replyToken: $('取得敘述文字').item.json.replyToken, messages: [{ type: 'text', text: '📝 重點摘要：\\n\\n' + $json.output.text }] }) }}",
+        "options": {}
+      },
+      "id": "7d704a2e-4b8a-48ef-992e-2571bec4439b",
+      "name": "回覆摘要結果",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1024,
+        192
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "41LXZSfDkY9OrxaS",
+          "name": "line_tvdi_cer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkSize": 5000,
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "summarizationMethod": "stuff",
+              "prompt": "= {{ $json['訊息'] }}\n\n取得主旨當成文字標題\n\n請將內容依照下列條件做摘要，\n1.四個項目分別為摘要、代辦事項、相關人員\n摘要:三項要點\n代辦事項：\n相關人員：\n\n【回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。"
+            }
+          }
+        }
+      },
+      "id": "53d21825-879c-4fa8-98c9-b2e230fa2776",
+      "name": "摘要長文",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        464
+      ],
+      "id": "dfcd1f8d-8e37-4886-8710-f8cdaccde023",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OCVA91npyDAUzBm2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "bluesrock7825@gmail.com",
+        "subject": "=[LINE摘要]{{ $now.toFormat('yyyy-MM-dd') }}{{ $json.output.text.substring(0, 20) }}",
+        "emailType": "text",
+        "message": "={{ $json.output.text }}\n\n原文:\n{{ $('取得敘述文字').item.json['訊息'] }}",
+        "options": {}
+      },
+      "id": "09f444ab-0178-4bca-a037-8e14705ec277",
+      "name": "以Gmail寄送摘要文件",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        368
+      ],
+      "webhookId": "1f27f675-aadf-4660-934b-4260bebd4aa9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "r5s6AANlGr6YS3KR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "接受訊息": {
+      "main": [
+        [
+          {
+            "node": "回應訊息",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "判斷是否為文字訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "取得敘述文字": {
+      "main": [
+        [
+          {
+            "node": "摘要長文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷是否為文字訊息": {
+      "main": [
+        [
+          {
+            "node": "取得敘述文字",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回覆訊息太短",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "摘要長文": {
+      "main": [
+        [
+          {
+            "node": "回覆摘要結果",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "以Gmail寄送摘要文件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "摘要長文",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "ed886e85dc386a034b408ced13cf5f21c5a65cdf5cc05cc6e0450f2d3772209b"
+  }
+}

@@ -1,0 +1,728 @@
+{
+  "name": "題⽬五：LINE 部⾨知識庫問答 Pro",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        864
+      ],
+      "id": "385c45c9-8cec-4cee-a633-c82fdc8f1af4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        864
+      ],
+      "id": "4bfa4e7a-b82c-498d-918a-d0774f5733aa",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        1104
+      ],
+      "id": "4af43a09-d2da-4695-ad30-ee591ee56c30",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.policy_text }}",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        1104
+      ],
+      "id": "dd3bc18e-d971-4672-838c-c0940fb42bb5",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        1312
+      ],
+      "id": "d0ea68a8-bca5-41b4-88a9-ff16c15bddec",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_line_bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        256
+      ],
+      "id": "4e22ea07-f12c-4fd1-8b88-1466a55228bb",
+      "name": "Webhook",
+      "webhookId": "cc659814-0bcb-4e03-84b3-84d479f0b96d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.events[0].message.text }}\n\n請根據檢索到的「員工請假辦法」、「差旅費報支規定」、「資訊安全政策」回答使用者問題。\n\n【LINE 回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。\n4. 回覆建議格式：\n📌 重點答案\n• 項目一\n• 項目二\n\n💡 補充說明\n簡短說明必要的條件或注意事項。\n5. 如果使用者詢問請假天數、條件、假別日數、申請期限等資訊，請直接列出數字與條件，不要只給概括描述。\n6. 不要輸出「根據提供的資料」這類冗長開場白，直接回答問題。\n7. 回覆結尾附上「資料來源：xxxx.txt (檢索到的文件檔名)」。\n8. 如果資料中沒有答案，請明確說「目前提供的資料中沒有這項資訊」，不要自行編造。",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.7,
+      "position": [
+        0,
+        256
+      ],
+      "id": "cf54f3dc-6f5f-4a8d-b72d-d297ce4f4d12",
+      "name": "Question and Answer Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        416
+      ],
+      "id": "5f0b2d68-7399-4830-94d6-0b91e9c728a6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        80,
+        416
+      ],
+      "id": "3807f197-3782-40a9-be75-d07def2de766",
+      "name": "Vector Store Retriever"
+    },
+    {
+      "parameters": {
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        560
+      ],
+      "id": "daab5a44-ce7d-4261-8fe5-13b5d5c39433",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        672
+      ],
+      "id": "91201f6b-a026-4d76-aa99-670794f8abe0",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        544,
+        256
+      ],
+      "id": "4f239019-dcc0-46ac-8836-8f9c3e9cde4e",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ylqhXXp1aRUWxGS7",
+          "name": "line_tvdi_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -176,
+        128
+      ],
+      "id": "1428c6e3-cda4-4d07-8c31-f97f9f525e82",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "3d543996-7572-47ec-b1e7-05022f2692ff",
+      "name": "LINE美化回覆",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "20260915",
+        "filter": {},
+        "options": {}
+      },
+      "id": "c944d68e-97bc-4332-ba76-ae56ddac09ec",
+      "name": "搜尋資料夾",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -112,
+        864
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EaLhtwh0GybNTHkr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "={{ $('搜尋資料夾').item.json.id }}"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "id": "2b6c28ec-9f44-48ab-8ede-3e02c5ead24a",
+      "name": "搜尋檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        112,
+        864
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EaLhtwh0GybNTHkr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('搜尋檔案').item.json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "2cfa63bb-daea-49e5-8561-e00d44e1716d",
+      "name": "下載檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        336,
+        864
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EaLhtwh0GybNTHkr",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "policy_text",
+        "options": {}
+      },
+      "id": "4edac0bd-810f-4fec-8551-531f7f9e33db",
+      "name": "擷取檔案內容",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "content": "A 線：建⽴知識庫（⼿動觸發，先跑這條）",
+        "height": 96
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        880
+      ],
+      "id": "7abece41-a16b-4b45-8db3-c9d3e3a232ee",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0c6add1-05b9-4d5b-bd91-f4a16d36dd8b",
+              "name": "policy_text",
+              "value": "={{ $json.policy_text }}",
+              "type": "string"
+            },
+            {
+              "id": "daddb2a6-67a1-4856-90ca-437fe45c5b2e",
+              "name": "file_name",
+              "value": "={{ $('下載檔案').item.json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        784,
+        864
+      ],
+      "id": "6271faec-7b2f-424a-a04a-daa4f6c9ecb9",
+      "name": "⽂件載⼊保留檔名"
+    },
+    {
+      "parameters": {
+        "content": "B 線：LINE 問答",
+        "height": 80
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        256
+      ],
+      "id": "9e1f9baf-c166-4264-9647-99d016be64b0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "885226e6-0456-47fd-953f-372fcf5d6ed2",
+              "leftValue": "={{ $json.body.events[0].message.type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        288
+      ],
+      "id": "bc1bbc3e-7e21-438c-858f-14d6bdb1d82f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eefdfd70-12aa-4c4f-8fe8-1069c396d9d3",
+              "name": "response",
+              "value": "⽬前我只看得懂⽂字訊息喔 !",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -208,
+        528
+      ],
+      "id": "0378890b-94a7-4732-8a05-ad4e85db9d8b",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "basically-fall-mom.ngrok-free.dev",
+            "user-agent": "LineBotWebhook/2.0",
+            "content-length": "897",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "147.92.150.195",
+            "x-forwarded-host": "basically-fall-mom.ngrok-free.dev",
+            "x-forwarded-proto": "https",
+            "x-line-signature": "So0tiU1PQZKUR6h0nt6FVvVcYegyPHDTYGtEsC2dmms=",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "destination": "U4c0c02e58a1ca95dc6a173ee2ff448dc",
+            "events": [
+              {
+                "type": "message",
+                "message": {
+                  "type": "sticker",
+                  "id": "631875232944357759",
+                  "quoteToken": "9g8zNuLPdbGTzyuEA4etojEDgeKxK5ovj-hfKreqOWau_15Nn1k9zamdOpYXKT37VLRpmgAg7_Wo7GiOnduD9MXDuLgtqLAdSxxgSA-bBk7OVrEgihRk-bVJHO2WEP0JIaZ3AxupCk_v-TOXZ97-9Q",
+                  "markAsReadToken": "LFVPG7A32oZqKdGWEG14zLnSVHuEtv_Z6BWdtdgediLlz_97hUfdIiGG4RyOFqb1MgSvFs7VJjTOKYhJS5-2pfV4ni5daV6zPIhZDxl0hefdttH1ExzDlrC1mTYTNuvFdYWDRnQ8Ez0C07q07fJ4xW1-wq5LaAhCCg1ukciTr09lOq4sN5jy5rGdAwoZVg8gBFcErFII334YysciH1VF_g",
+                  "stickerId": "1691913",
+                  "packageId": "1040299",
+                  "stickerResourceType": "STATIC",
+                  "keywords": [
+                    "Hmm",
+                    "Ugh",
+                    "Speechless"
+                  ]
+                },
+                "webhookEventId": "01M2J0D7Y1WKVY5A5ZYV55BPE2",
+                "deliveryContext": {
+                  "isRedelivery": false
+                },
+                "timestamp": 1789458292164,
+                "source": {
+                  "type": "user",
+                  "userId": "U487701bd6d067f06fe4f3b2b2f35911a"
+                },
+                "replyToken": "87ea4304385b4ae489b7d806d1b96cc3",
+                "mode": "active"
+              }
+            ]
+          },
+          "webhookUrl": "https://basically-fall-mom.ngrok-free.dev/webhook/tvdi_line_bot",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "搜尋資料夾",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question and Answer Chain": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "搜尋資料夾": {
+      "main": [
+        [
+          {
+            "node": "搜尋檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "搜尋檔案": {
+      "main": [
+        [
+          {
+            "node": "下載檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下載檔案": {
+      "main": [
+        [
+          {
+            "node": "擷取檔案內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "擷取檔案內容": {
+      "main": [
+        [
+          {
+            "node": "⽂件載⼊保留檔名",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "⽂件載⼊保留檔名": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "400efd03-f15c-412c-961f-e21d85d908e9",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "867239724087771d612928d247521bfd87903ca3b85e86f55b95f9fe3b1cef19"
+  },
+  "nodeGroups": [],
+  "id": "0lZXKsxTqasyA3fI",
+  "tags": []
+}

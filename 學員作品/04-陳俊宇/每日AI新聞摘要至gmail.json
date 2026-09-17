@@ -1,0 +1,620 @@
+{
+  "name": "每日AI新聞摘要至gmail",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -224,
+        464
+      ],
+      "id": "af0dd5d3-7651-4cd3-a5a3-a598e4aab484"
+    },
+    {
+      "parameters": {
+        "url": "https://openai.com/blog/rss.xml",
+        "options": {}
+      },
+      "name": "RSS - OpenAI Blog",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        256
+      ],
+      "id": "25469569-a2e9-4cc6-93c9-c1353ab3dd95"
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+        "options": {}
+      },
+      "name": "RSS - MIT Tech Review",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        400
+      ],
+      "id": "bc22f1b9-4d14-400c-8325-ad6920c14e55"
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+        "options": {}
+      },
+      "name": "RSS - The Verge AI",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        544
+      ],
+      "id": "714b9736-c9df-40fd-81d9-eb6721b3b565"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/features",
+        "options": {}
+      },
+      "name": "RSS - Ars Technica",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        688
+      ],
+      "id": "c3295efd-a8b6-4e3c-b364-f99d1a2b1f95"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "name": "Merge All RSS",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        896,
+        416
+      ],
+      "id": "6050b0ae-7e52-4307-bd20-adea5499a266"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare RSS data in small batches for reliable long-form AI summaries\nconst allItems = $input.all();\nconst config = $node[\"Config\"].json;\nconst maxItems = config.max_items_total || 30;\nconst batchSize = 4;\n\nconst articles = allItems\n  .slice(0, maxItems)\n  .map((item, i) => {\n    const json = item.json;\n    return {\n      id: i + 1,\n      title: json.title || 'Untitled',\n      link: json.link || '',\n      content: (json.contentSnippet || json.description || json.content || '').slice(0, 1200),\n      pubDate: json.pubDate || json.isoDate || '',\n      source: json.creator || json['dc:creator'] || 'Unknown'\n    };\n  });\n\nconst batches = [];\nfor (let i = 0; i < articles.length; i += batchSize) {\n  const batchArticles = articles.slice(i, i + batchSize);\n  const articlesText = batchArticles.map(a =>\n    `[${a.id}] ${a.title}\\nContent: ${a.content}\\nSource: ${a.source}`\n  ).join('\\n\\n');\n\n  batches.push({\n    json: {\n      articles: batchArticles,\n      articlesText,\n      count: batchArticles.length,\n      batchIndex: batches.length + 1,\n      generatedAt: new Date().toISOString()\n    }\n  });\n}\n\nreturn batches;"
+      },
+      "name": "Prepare Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        448
+      ],
+      "id": "ca0b58e3-3886-4f2f-91df-3826bc7d8f5c"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是資深科技新聞編輯與繁體中文翻譯專家。請根據提供的新聞內容，讓讀者不用只看一句標題，也能掌握事件脈絡與重要細節。為每篇文章提供：\n\n1. **濃縮報導（summary_zh）** - 以繁體中文寫成 140-220 字、2-4 句的新聞短文。第一句交代核心事件，接著補充主體、做法、關鍵數字或時間、背景、目前結果與可能影響；不可只寫成一句標題。\n2. **關鍵細節（translated_content）** - 將原文中尚未在濃縮報導清楚呈現的重要資訊翻譯並整理成 80-160 字，避免與濃縮報導重複。若原文很短，可依資訊量縮短。\n3. **評論（comment）** - 以資深科技媒體編輯角度，寫 50-80 字的繁體中文評論，說明值得關注的原因、風險或後續觀察點。評論須與事實分開，不要空泛讚美。\n4. **重要性評分（importance）** - 1-5 分（5=重大突破／必讀，1=一般資訊）。\n5. **標籤（tags）** - 2-3 個精確的繁體中文關鍵字。\n\n寫作與事實規則：\n- 僅使用提供的 title、content 與 source，不引用外部資料，不補造原文沒有的事實。\n- 保留人名、公司、產品、數字、時間、比較結果與限制條件；若是當事人說法或尚未證實的主張，必須明確標示。\n- 原文資訊不足時，忠實寫短，不為達字數而猜測或重複。\n- 使用自然、可閱讀的新聞敘事，不使用條列符號、誇張標題或『本文介紹』『值得注意的是』等空泛套話。\n- 每篇輸出的 id 必須與輸入編號完全一致。\n- articles 陣列必須包含本批輸入的每一篇新聞，筆數須與本批輸入相同；不得只回傳第一篇、不得省略任何 id。\n\n評分標準：\n- 5分：重大產品發布、突破性研究、產業重大變動\n- 4分：重要更新、有影響力的趨勢\n- 3分：值得關注的一般新聞\n- 2分：次要更新、小功能發布\n- 1分：一般資訊、舊聞整理\n\n{format_instructions}\n\n新聞列表：\n{{ $json.articlesText }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1600,
+        448
+      ],
+      "id": "dafb074f-571e-4b12-a18d-953c01532abe"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        720
+      ],
+      "id": "b87694a0-2047-46e5-894d-f86bd337abaa",
+      "credentials": {
+        "openAiApi": {
+          "id": "1PuUa90QM3VcNy98",
+          "name": "Openrouter API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"articles\": [\n    {\n      \"id\": 1,\n      \"summary_zh\": \"OpenAI 發布新一代 GPT 模型，主打更強的推理與多步驟任務能力，並鎖定企業工作場景。官方表示新模型在複雜任務與可靠性方面有所提升，但實際效果仍需等待第三方測試與真實部署結果驗證。\",\n      \"translated_content\": \"發布內容也說明模型的主要改進方向、適用情境與目前限制，企業導入時仍應評估成本、資料安全及輸出可信度。\",\n      \"comment\": \"這項更新可能改變企業採用生成式 AI 的速度，後續應觀察實測表現、定價與安全機制能否符合宣稱。\",\n      \"importance\": 5,\n      \"tags\": [\n        \"OpenAI\",\n        \"語言模型\",\n        \"企業AI\"\n      ]\n    },\n    {\n      \"id\": 2,\n      \"summary_zh\": \"Google 調整 Gemini API 的收費結構，針對大量使用者提供新的折扣方案。此舉反映雲端 AI 服務競爭加劇，也可能改變開發團隊在不同模型與平台之間的成本評估。\",\n      \"translated_content\": \"新方案的實際影響取決於使用量、模型版本與計費級距，開發者需要重新估算長期使用成本。\",\n      \"comment\": \"定價不只是促銷，也是平台爭取開發者的重要工具，應比較整體成本而非單次呼叫價格。\",\n      \"importance\": 3,\n      \"tags\": [\n        \"Google\",\n        \"Gemini\",\n        \"API定價\"\n      ]\n    },\n    {\n      \"id\": 3,\n      \"summary_zh\": \"一項新研究提出降低大型語言模型幻覺的方法，核心是加強檢索與驗證流程，讓模型在回答前取得並核對相關證據。研究結果顯示錯誤輸出可望減少，但是否能在不同領域與實際產品中穩定運作仍待驗證。\",\n      \"translated_content\": \"研究聚焦於資訊檢索、證據比對與回答生成之間的協作方式，並討論方法的適用範圍與限制。\",\n      \"comment\": \"若能被可靠重現，這類方法有助於 AI 進入高風險場景；關鍵仍是成本、延遲與可稽核性。\",\n      \"importance\": 4,\n      \"tags\": [\n        \"AI研究\",\n        \"幻覺\",\n        \"可靠性\"\n      ]\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1664,
+        624
+      ],
+      "id": "8b3a0a76-9899-4d37-b926-5ce14b89847d"
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiArticles = $input.all().flatMap(item => {\n  const output = item.json.output || item.json;\n  return Array.isArray(output.articles) ? output.articles : [];\n});\n\nconst originalArticles = $items(\"Prepare Data\").flatMap(item => item.json.articles || []);\nconst aiById = new Map(aiArticles.map(article => [Number(article.id), article]));\n\nconst enrichedArticles = originalArticles.map(article => {\n  const aiData = aiById.get(Number(article.id)) || {};\n  return {\n    ...article,\n    summary_zh: aiData.summary_zh || article.content,\n    translated_content: aiData.translated_content || '',\n    comment: aiData.comment || '',\n    importance: Number(aiData.importance) || 3,\n    tags: Array.isArray(aiData.tags) ? aiData.tags : []\n  };\n});\n\nenrichedArticles.sort((a, b) => b.importance - a.importance);\n\nconst byImportance = {\n  '必讀': enrichedArticles.filter(a => a.importance === 5),\n  '重要': enrichedArticles.filter(a => a.importance === 4),\n  '一般': enrichedArticles.filter(a => a.importance <= 3)\n};\n\nreturn [{\n  json: {\n    articles: enrichedArticles,\n    byImportance,\n    totalCount: enrichedArticles.length,\n    processedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "name": "Merge AI Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        448
+      ],
+      "id": "02219c86-2e93-4478-9faa-33940c83d8d0"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n  const { byImportance, totalCount, processedAt } = data;\n\n  const levelConfig = {\n    '必讀': { icon: '◆', color: '#c62828', bgAccent: '#fff0f1' },\n    '重要': { icon: '◇', color: '#9a6700', bgAccent: '#fff7e0' },\n    '一般': { icon: '○', color: '#486a43', bgAccent: '#eef6ec' }\n  };\n\n  let sections = '';\n\n  ['必讀', '重要', '一般'].forEach(level => {\n    const articles = byImportance[level];\n    if (!articles?.length) return;\n\n    const { icon, color, bgAccent } = levelConfig[level];\n\n    let rows = '';\n    articles.forEach(article => {\n      const tags = article.tags.map(t =>\n        `<span style=\"display: inline-block; background-color: ${bgAccent}; color: ${color}; padding: 4px 10px; border-radius: 2px; font-size: 11px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin-right: 6px; margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase;\">${t}</span>`\n      ).join(' ');\n\n      rows += `\n        <tr>\n          <td style=\"padding: 0 0 24px 0;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"background-color: #ffffff; border-left: 3px solid ${color}; padding: 20px 24px;\">\n                  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                    <tr>\n                      <td style=\"padding-bottom: 12px;\">\n                        <a href=\"${article.link}\" style=\"color: #111827; text-decoration: none; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.4; font-weight: normal;\">${article.title}</a>\n                      </td>\n                    </tr>\n                    <tr>\n                      <td style=\"padding-bottom: 14px;\">\n                        <p style=\"margin: 0; color: #4b5563; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6;\">${article.summary_zh}</p>\n                      </td>\n                    </tr>\n                    <tr>\n                      <td style=\"padding-bottom: 16px;\">\n                        <p style=\"margin: 0; color: #374151; font-family: Georgia, 'Times New Roman', serif; font-size: 14px; line-height: 1.8;\">${article.translated_content}</p>\n                      </td>\n                    </tr>\n                    <tr>\n                      <td style=\"padding-bottom: 12px;\">${tags}</td>\n                    </tr>\n                    <tr>\n                      <td style=\"padding-bottom: 14px;\">\n                        <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                          <tr>\n                            <td style=\"background-color: ${bgAccent}; border-left: 2px solid ${color}; padding: 12px 16px;\">\n                              <p style=\"margin: 0 0 6px 0; color: ${color}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;\">編輯評論</p>\n                              <p style=\"margin: 0; color: #374151; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; line-height: 1.6;\">${article.comment}</p>\n                            </td>\n                          </tr>\n                        </table>\n                      </td>\n                    </tr>\n                    <tr>\n                      <td>\n                        <span style=\"color: #6b7280; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;\">${article.source}</span>\n                      </td>\n                    </tr>\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n      `;\n    });\n\n    sections += `\n      <tr>\n        <td style=\"padding: 32px 0 20px 0;\">\n          <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n            <tr>\n              <td style=\"font-family: Georgia, 'Times New Roman', serif; font-size: 13px; color: ${color}; text-transform: uppercase; letter-spacing: 3px; padding-bottom: 8px;\">\n                ${icon} ${level}\n              </td>\n            </tr>\n            <tr>\n              <td style=\"border-bottom: 1px solid #d9dee7; padding-bottom: 0;\"></td>\n            </tr>\n          </table>\n        </td>\n      </tr>\n      ${rows}\n    `;\n  });\n\n  const dateStr = new Date().toLocaleDateString('zh-TW', {\n    year: 'numeric',\n    month: 'long',\n    day: 'numeric',\n    weekday: 'long'\n  });\n\n  const html = `\n  <!DOCTYPE html>\n  <html lang=\"zh-TW\">\n  <head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n    <title>AI 新聞日報</title>\n    <!--[if mso]>\n    <style type=\"text/css\">\n      table { border-collapse: collapse; }\n      td { font-family: Arial, sans-serif; }\n    </style>\n    <![endif]-->\n  </head>\n  <body style=\"margin: 0; padding: 0; background-color: #f3f6fa; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;\">\n    <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: #f3f6fa;\">\n      <tr>\n        <td align=\"center\" style=\"padding: 40px 20px;\">\n          <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width: 600px; width: 100%;\">\n\n            <!-- Accent Line -->\n            <tr>\n              <td style=\"background: linear-gradient(90deg, #c62828 0%, #9a6700 50%, #486a43 100%); height: 3px; font-size: 0; line-height: 0;\">&nbsp;</td>\n            </tr>\n\n            <!-- Header -->\n            <tr>\n              <td style=\"background-color: #f8fafc; padding: 48px 40px 40px 40px;\">\n                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                  <tr>\n                    <td style=\"font-family: Georgia, 'Times New Roman', serif; font-size: 32px; color: #111827; letter-spacing: -0.5px; padding-bottom: 8px;\">\n                      AI 新聞日報\n                    </td>\n                  </tr>\n                  <tr>\n                    <td style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 2px;\">\n                      ${dateStr}\n                    </td>\n                  </tr>\n                  <tr>\n                    <td style=\"padding-top: 24px;\">\n                      <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                        <tr>\n                          <td style=\"background-color: #ffffff; padding: 12px 20px; border-radius: 2px;\">\n                            <span style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; color: #4b5563;\">\n                              本期收錄 <strong style=\"color: #111827;\">${totalCount}</strong> 篇精選文章\n                            </span>\n                          </td>\n                        </tr>\n                      </table>\n                    </td>\n                  </tr>\n                </table>\n              </td>\n            </tr>\n\n            <!-- Content -->\n            <tr>\n              <td style=\"background-color: #f8fafc; padding: 0 40px 40px 40px;\">\n                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                  ${sections}\n                </table>\n              </td>\n            </tr>\n\n            <!-- Footer -->\n            <tr>\n              <td style=\"background-color: #eef2f6; padding: 32px 40px; border-top: 1px solid #d9dee7;\">\n                <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                  <tr>\n                    <td align=\"center\" style=\"font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px;\">\n                      Curated by n8n × OpenAI\n                    </td>\n                  </tr>\n                </table>\n              </td>\n            </tr>\n\n          </table>\n        </td>\n      </tr>\n    </table>\n  </body>\n  </html>\n  `;\n\n  return [{\n    json: {\n      html,\n      subject: `AI 新聞日報 — ${new Date().toLocaleDateString('zh-TW', { month: 'long', day: 'numeric' })}`,\n      totalCount\n    }\n  }];"
+      },
+      "name": "Generate HTML Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        448
+      ],
+      "id": "3323ffe2-cdf8-4ae6-a47c-541bf3649b58"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $node[\"Config\"].json.to_email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {
+          "senderName": "={{ $node[\"Config\"].json.from_name }}"
+        }
+      },
+      "name": "Gmail Send",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2304,
+        448
+      ],
+      "id": "160cbe7d-d8ab-481c-bd16-910dfd950f08",
+      "webhookId": "b9b721fc-9a6d-4a8e-ad55-7e1ef44a12cc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xjH1cCEEgECWtAm1",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "isoDate",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {
+          "disableDotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        464,
+        256
+      ],
+      "id": "abe787e7-5436-407b-9966-e6f899578a44",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        640,
+        256
+      ],
+      "id": "afd88cad-cf43-47c0-b0a4-0609c5e425fd",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "title",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        448
+      ],
+      "id": "b4fe5b4c-6101-4b73-877e-189f16ae11e4",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "772b2af8-cb76-4ad7-b59c-af274db286e3",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $today.minus(1, \"days\") }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        448
+      ],
+      "id": "24eaaa3e-0e49-4176-a0c6-08dd4971b557",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "content": "## 可替換成自己需要的 rss 來源",
+        "height": 672,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        160
+      ],
+      "id": "a932daec-e9d4-4b77-b3cb-fe938f68986a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 1.設定 Email 相關資訊",
+        "height": 304,
+        "width": 208,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        336
+      ],
+      "id": "6a9b3d7f-3e1d-4551-aea2-5747de5015a9",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config-email",
+              "name": "to_email",
+              "type": "string",
+              "value": "robinwaterice@gmail.com"
+            },
+            {
+              "id": "config-from",
+              "name": "from_name",
+              "type": "string",
+              "value": "AI News Bot"
+            },
+            {
+              "id": "config-subject",
+              "name": "subject_prefix",
+              "type": "string",
+              "value": "Daily AI News Digest"
+            },
+            {
+              "id": "config-max",
+              "name": "max_items_total",
+              "type": "number",
+              "value": 30
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32,
+        464
+      ],
+      "id": "f9e59e3c-6276-4943-a094-b800f02f32e2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        768
+      ],
+      "id": "e5ccefff-b986-40a1-8f78-04869aba0ae6",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - OpenAI Blog": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS - MIT Tech Review": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "RSS - The Verge AI": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "RSS - Ars Technica": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge All RSS": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Data": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge AI Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge AI Results": {
+      "main": [
+        [
+          {
+            "node": "Generate HTML Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HTML Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Merge All RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "RSS - Ars Technica",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS - The Verge AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS - MIT Tech Review",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS - OpenAI Blog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "86b7ff0c-284f-4147-8b74-535e3dfa8561",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0f3d1a1c506778c59c17fa5145a00e83af27d5dfb17cf3b0557d629daf9571af"
+  },
+  "nodeGroups": [],
+  "id": "puITj4yXRFvxoGAI",
+  "tags": []
+}

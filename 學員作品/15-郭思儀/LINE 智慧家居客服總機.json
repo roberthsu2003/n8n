@@ -1,0 +1,1073 @@
+{
+  "name": "LINE 智慧客服總機",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_line_bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ea3cf462-ed58-4cbd-b956-41b991f8aece",
+      "name": "LINE Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        304
+      ],
+      "webhookId": "9ffce715-8ccd-42dd-97e3-65d4183ce78c"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "3c620519-efce-4354-8e07-e520a9351240",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "n1",
+              "name": "userMessage",
+              "value": "={{ $json.body?.events?.[0]?.message?.text ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "n2",
+              "name": "replyToken",
+              "value": "={{ $json.body?.events?.[0]?.replyToken ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "n3",
+              "name": "userId",
+              "value": "={{ $json.body?.events?.[0]?.source?.userId ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "n4",
+              "name": "eventType",
+              "value": "={{ $json.body?.events?.[0]?.type ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "n5",
+              "name": "messageType",
+              "value": "={{ $json.body?.events?.[0]?.message?.type ?? \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2f644bec-4a2d-4385-98ae-e479105aead4",
+      "name": "Normalize LINE Event",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.userMessage }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "產品諮詢",
+              "description": "詢問商品資訊，例如材質、尺寸、顏色、庫存、保固或商品特色等相關問題"
+            },
+            {
+              "category": "費用問題",
+              "description": "詢問商品價格、優惠折扣、付款方式、運費或發票等費用相關問題"
+            },
+            {
+              "category": "訂單物流查詢",
+              "description": "詢問訂單進度、到貨時間、配送方式、退換貨等相關需求"
+            },
+            {
+              "category": "客訴抱怨",
+              "description": "對商品品質、服務態度、配送延遲或購物體驗表達不滿或投訴"
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other",
+          "systemPromptTemplate": "請將使用者的訊息分類到最符合的類別。這是一間居家生活家具用品門市的LINE客服。如果訊息內容不屬於任何類別，請不要勉強分類。"
+        }
+      },
+      "id": "565c371a-73e0-415c-9f38-8795fcbb6c43",
+      "name": "意圖分類",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1,
+      "position": [
+        384,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "nvidia/nemotron-3-super-120b-a12b:free",
+          "mode": "list",
+          "cachedResultName": "nvidia/nemotron-3-super-120b-a12b:free"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "f2d718d5-f469-4307-9e4b-bdfe68b3f220",
+      "name": "Classifier Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        736
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "amAD67cFQy3DtYYP",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是「居家生活館」的LINE智慧客服，負責回答「產品諮詢」問題。請根據下方提供的商品資料庫內容，用親切、專業的繁體中文回覆使用者關於商品材質、尺寸、顏色、庫存或保固等問題；若資料庫中查無符合的商品，請誠實告知並請使用者提供更明確的商品名稱。請直接輸出可傳送給使用者的純文字回覆，不要使用Markdown格式，也不要提及「資料庫」或「JSON」等技術用語。\n\n商品資料庫：\n{{ JSON.stringify($json.products) }}\n\n使用者訊息：{{ $(\"Normalize LINE Event\").item.json.userMessage }}"
+      },
+      "id": "afb020c8-1850-40b5-9b7e-c916710b3a2d",
+      "name": "LLM Chain A - 產品諮詢",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1296,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "nvidia/nemotron-3-super-120b-a12b:free",
+          "mode": "list",
+          "cachedResultName": "nvidia/nemotron-3-super-120b-a12b:free"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "c7ceee95-24ce-4b01-a221-eff585371f09",
+      "name": "Reply Generation Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        1088
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "amAD67cFQy3DtYYP",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "replyText",
+              "value": "={{ $json.text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3305a9e4-cfbf-48c9-9315-24ec6f3f0e40",
+      "name": "清洗 A",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"replyToken\": {{ JSON.stringify($(\"Normalize LINE Event\").item.json.replyToken) }}, \"messages\": [ { \"type\": \"text\", \"text\": {{ JSON.stringify($json.replyText) }} } ] }",
+        "options": {}
+      },
+      "id": "7ddb0427-9a78-441c-86e1-51dd7c456e10",
+      "name": "HTTP Request A - 回覆產品諮詢",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1824,
+        112
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xEAc6chIpKr57PvO",
+          "name": "Header Auth account_line_tvdi_憑證"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是「居家生活館」的LINE智慧客服，負責回答「費用問題」。請根據下方提供的商品資料庫內容，用親切、清楚的繁體中文回覆使用者關於價格、優惠折扣、運費或付款方式等問題；若資料庫中查無符合的商品或價格資訊，請誠實告知並請使用者提供更明確的商品名稱。請直接輸出可傳送給使用者的純文字回覆，不要使用Markdown格式，也不要提及「資料庫」或「JSON」等技術用語。\n\n商品資料庫：\n{{ JSON.stringify($json.products) }}\n\n使用者訊息：{{ $(\"Normalize LINE Event\").item.json.userMessage }}"
+      },
+      "id": "88d4715c-07d0-487e-b335-128ff8ea6c90",
+      "name": "LLM Chain B - 費用問題",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1280,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "replyText",
+              "value": "={{ $json.text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dfddf2d2-072d-4621-8901-2cabf12caff9",
+      "name": "清洗 B",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"replyToken\": {{ JSON.stringify($(\"Normalize LINE Event\").item.json.replyToken) }}, \"messages\": [ { \"type\": \"text\", \"text\": {{ JSON.stringify($json.replyText) }} } ] }",
+        "options": {}
+      },
+      "id": "2f7ade05-70f8-4591-8f26-dfad116774c8",
+      "name": "HTTP Request B - 回覆費用問題",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1824,
+        304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xEAc6chIpKr57PvO",
+          "name": "Header Auth account_line_tvdi_憑證"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是「居家生活館」的LINE智慧客服，負責處理「訂單/物流查詢」需求。請用親切、有效率的繁體中文回覆，主動請使用者提供訂單編號或訂購時的姓名與電話，並說明查詢到貨進度、配送時間或退換貨流程的後續處理方式。請直接輸出可傳送給使用者的純文字回覆，不要使用Markdown格式。\n\n使用者訊息：{{ $(\"Normalize LINE Event\").item.json.userMessage }}"
+      },
+      "id": "3b977e5a-e4d5-4ecb-8f88-08357854a626",
+      "name": "LLM Chain C - 訂單物流查詢",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        704,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c1",
+              "name": "replyText",
+              "value": "={{ $json.text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6eb9da0a-8fd7-4693-be07-b77c8cb820de",
+      "name": "清洗 C",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"replyToken\": {{ JSON.stringify($(\"Normalize LINE Event\").item.json.replyToken) }}, \"messages\": [ { \"type\": \"text\", \"text\": {{ JSON.stringify($json.replyText) }} } ] }",
+        "options": {}
+      },
+      "id": "568d39d3-5fe0-468e-97d4-592832ba1f9e",
+      "name": "HTTP Request C - 回覆訂單物流查詢",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        512
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xEAc6chIpKr57PvO",
+          "name": "Header Auth account_line_tvdi_憑證"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是「居家生活館」的LINE智慧客服，負責處理「客訴抱怨」。請先誠懇致歉並展現同理心，簡短說明會將問題轉交專人儘速處理與回覆，並詢問是否方便留下訂單編號、聯絡方式或更多細節以利跟進。語氣需誠懇、繁體中文，不要使用Markdown格式。\n\n使用者訊息：{{ $(\"Normalize LINE Event\").item.json.userMessage }}"
+      },
+      "id": "0dd669cc-b9cb-4660-a957-3f6ac96e78bc",
+      "name": "LLM Chain D - 客訴抱怨",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        704,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1",
+              "name": "replyText",
+              "value": "={{ $json.text.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "189d14fc-cfbd-43b5-a8c3-71f225c3a95f",
+      "name": "清洗 D",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"replyToken\": {{ JSON.stringify($(\"Normalize LINE Event\").item.json.replyToken) }}, \"messages\": [ { \"type\": \"text\", \"text\": {{ JSON.stringify($json.replyText) }} } ] }",
+        "options": {}
+      },
+      "id": "75435c1f-e097-411a-a2bb-a5177f570e07",
+      "name": "HTTP Request D - 回覆客訴抱怨",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        704
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xEAc6chIpKr57PvO",
+          "name": "Header Auth account_line_tvdi_憑證"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "replyText",
+              "value": "您好，感謝您的訊息！我們已收到您的問題，將由專人盡快為您服務，謝謝您的耐心等候 😊",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9a53a440-b9bc-4e54-bc0c-a7e849686cea",
+      "name": "Set 罐頭回覆",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"replyToken\": {{ JSON.stringify($(\"Normalize LINE Event\").item.json.replyToken) }}, \"messages\": [ { \"type\": \"text\", \"text\": {{ JSON.stringify($json.replyText) }} } ] }",
+        "options": {}
+      },
+      "id": "ca58ef03-26d9-4631-9a54-9fa9943f6c1f",
+      "name": "HTTP Request E - 罐頭回覆",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        992,
+        912
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xEAc6chIpKr57PvO",
+          "name": "Header Auth account_line_tvdi_憑證"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## LINE 智慧客服總機（居家門市版）\n1) Webhook 立即回 200 給 LINE\n2) 正規化事件內容\n3) 意圖分類（產品諮詢/費用問題/訂單物流查詢/客訴抱怨/Other）\n4) 產品諮詢、費用問題會先從 Google 試算表讀取商品資料再交給 LLM 生成回覆\n5) 生成回覆 → 清洗 → 呼叫 LINE Reply API",
+        "color": 4
+      },
+      "id": "b00cbcad-88db-4341-96af-6b683092dd71",
+      "name": "Sticky Note 7c85dd71",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "13k5LJ-VmWs88JYyo0Qsh38SbJSjV-3Acgr3SQZr-wXI",
+          "mode": "list",
+          "cachedResultName": "LINE智慧客服_商品與費用資料範例",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13k5LJ-VmWs88JYyo0Qsh38SbJSjV-3Acgr3SQZr-wXI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 726247230,
+          "mode": "list",
+          "cachedResultName": "產品諮詢",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13k5LJ-VmWs88JYyo0Qsh38SbJSjV-3Acgr3SQZr-wXI/edit#gid=726247230"
+        },
+        "options": {}
+      },
+      "id": "3c5373e5-4ef6-43be-965d-8a32017d88bf",
+      "name": "讀取商品資料-產品諮詢",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        704,
+        64
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qDU49NzZ2oJlyBbt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "products",
+        "options": {}
+      },
+      "id": "6b7316a9-d5c4-45f9-afb7-2b9bb7fc53ef",
+      "name": "整理商品資料-產品諮詢",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        992,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "13k5LJ-VmWs88JYyo0Qsh38SbJSjV-3Acgr3SQZr-wXI",
+          "mode": "list",
+          "cachedResultName": "LINE智慧客服_商品與費用資料範例",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13k5LJ-VmWs88JYyo0Qsh38SbJSjV-3Acgr3SQZr-wXI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 426814230,
+          "mode": "list",
+          "cachedResultName": "費用問題",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13k5LJ-VmWs88JYyo0Qsh38SbJSjV-3Acgr3SQZr-wXI/edit#gid=426814230"
+        },
+        "options": {}
+      },
+      "id": "1b54d19b-b023-4ba0-a8d1-63204679d31b",
+      "name": "讀取商品資料-費用問題",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        704,
+        272
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qDU49NzZ2oJlyBbt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "products",
+        "options": {}
+      },
+      "id": "d6995438-5d61-4e45-9c43-a86db0cc506c",
+      "name": "整理商品資料-費用問題",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        992,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.products }}",
+              "operator": {
+                "operation": "notEmpty",
+                "type": "array"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "defd05bf-d951-481c-b9a4-fd061fe41f3e",
+      "name": "檢查商品資料-產品諮詢",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.products }}",
+              "operator": {
+                "operation": "notEmpty",
+                "type": "array"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          }
+        },
+        "options": {}
+      },
+      "id": "6bd9e6b2-56a3-4514-baeb-b819cd1a8237",
+      "name": "檢查商品資料-費用問題",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fa1",
+              "name": "replyText",
+              "type": "string",
+              "value": "很抱歉，目前商品資料查詢發生異常，建議您稍後再試，或提供想詢問的商品名稱，我們將由專人為您查詢，謝謝！"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9c6c1f03-b78d-47f4-8a88-ef6af2bce20d",
+      "name": "防呆回覆-產品查無資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fb1",
+              "name": "replyText",
+              "type": "string",
+              "value": "很抱歉，目前無法查詢到相關商品的價格資訊，建議您稍後再試，或提供想詢問的商品名稱，我們將由專人為您確認費用，謝謝！"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "186e606a-2047-4b94-a796-8eb18796d967",
+      "name": "防呆回覆-費用查無資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        464
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "LINE Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Normalize LINE Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize LINE Event": {
+      "main": [
+        [
+          {
+            "node": "意圖分類",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "意圖分類": {
+      "main": [
+        [
+          {
+            "node": "讀取商品資料-產品諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "讀取商品資料-費用問題",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM Chain C - 訂單物流查詢",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM Chain D - 客訴抱怨",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set 罐頭回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classifier Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "意圖分類",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Generation Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Chain A - 產品諮詢",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "LLM Chain B - 費用問題",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "LLM Chain C - 訂單物流查詢",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "LLM Chain D - 客訴抱怨",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清洗 A": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request A - 回覆產品諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Chain B - 費用問題": {
+      "main": [
+        [
+          {
+            "node": "清洗 B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清洗 B": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request B - 回覆費用問題",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清洗 C": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request C - 回覆訂單物流查詢",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Chain D - 客訴抱怨": {
+      "main": [
+        [
+          {
+            "node": "清洗 D",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "清洗 D": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request D - 回覆客訴抱怨",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 罐頭回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request E - 罐頭回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Chain A - 產品諮詢": {
+      "main": [
+        [
+          {
+            "node": "清洗 A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Chain C - 訂單物流查詢": {
+      "main": [
+        [
+          {
+            "node": "清洗 C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取商品資料-產品諮詢": {
+      "main": [
+        [
+          {
+            "node": "整理商品資料-產品諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取商品資料-費用問題": {
+      "main": [
+        [
+          {
+            "node": "整理商品資料-費用問題",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理商品資料-產品諮詢": {
+      "main": [
+        [
+          {
+            "node": "檢查商品資料-產品諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "檢查商品資料-產品諮詢": {
+      "main": [
+        [
+          {
+            "node": "LLM Chain A - 產品諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "防呆回覆-產品查無資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "防呆回覆-產品查無資料": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request A - 回覆產品諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理商品資料-費用問題": {
+      "main": [
+        [
+          {
+            "node": "檢查商品資料-費用問題",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "檢查商品資料-費用問題": {
+      "main": [
+        [
+          {
+            "node": "LLM Chain B - 費用問題",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "防呆回覆-費用查無資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "防呆回覆-費用查無資料": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request B - 回覆費用問題",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "ca453243-81e6-4be9-84a2-44d09941d711",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df09aef5593eb0db71962581e2d7551d949e5be342a4692896fd7ce466ba761b"
+  },
+  "nodeGroups": [],
+  "id": "KVUZTCAKOgEE3KZH",
+  "tags": []
+}

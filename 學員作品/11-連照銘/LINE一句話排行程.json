@@ -1,0 +1,353 @@
+{
+  "name": "LINE一句話排行程_OK",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n_robot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        16
+      ],
+      "id": "8023b1ec-2145-4712-862e-388e79074db8",
+      "name": "Webhook",
+      "webhookId": "aca5f1ea-63f5-45da-8284-b204bc8abd07"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        496,
+        16
+      ],
+      "id": "b47c7537-1926-4341-a5a2-bbd68a7c984f",
+      "name": "回應line_連線是ok的"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Webhook').item.json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": {{ JSON.stringify($json.line_reply ?? $json.text ?? '') }}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1424,
+        400
+      ],
+      "id": "db0508f8-4fa2-4bab-8079-b193f6608245",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.body.events[0].message.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "title",
+              "description": "必填",
+              "required": true
+            },
+            {
+              "name": "start_datetime",
+              "description": "ISO 8601 格式",
+              "required": true
+            },
+            {
+              "name": "duration_minutes",
+              "type": "number",
+              "description": "預設 60"
+            },
+            {
+              "name": "location",
+              "description": "可空"
+            },
+            {
+              "name": "is_all_day",
+              "type": "boolean",
+              "description": "預設 false"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "=你是一個行事曆資訊擷取助手。\n\n現在時間（台北時區 Asia/Taipei）：{{ $now.setZone('Asia/Taipei').toISO() }}\n\n請從使用者訊息中擷取行事曆資訊。\n\n規則：\n1. title：擷取行程名稱。\n2. start_datetime：擷取開始日期與時間，必須輸出 ISO 8601 格式。\n3. duration_minutes：如果使用者沒有提供，預設為 60。\n4. location：如果沒有提供，留空。\n5. is_all_day：如果只有日期而沒有時間，設定為 true；否則設定為 false。\n6. 「今天」、「明天」、「後天」、「下週五」等相對日期，必須以上方提供的台北現在時間為基準換算。\n7. 如果使用者的訊息不是行程或預約，例如「今天是美好的一天」，不要自行猜測日期或時間。\n8. 如果沒有足夠資訊建立行程，請不要產生虛假的 start_datetime。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        160
+      ],
+      "id": "532d81da-1b70-4ff4-83d5-318b8f8125fc",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0e1396d1-6b36-4986-b56c-ab42b59f72b8",
+              "leftValue": "={{ $json.body.events[0].message.type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        176
+      ],
+      "id": "0a47b273-28b8-4056-b059-b2739990189e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3.5-lightning:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        672,
+        384
+      ],
+      "id": "1c1ca5e0-d8af-456e-b803-e2c5bb2c9e6a",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const start = new Date($json.output.start_datetime);\nconst mins = $json.output.duration_minutes ?? 60;\nconst end = new Date(start.getTime() + mins * 60000);\nreturn [{ json: { ...$json.output, end_datetime: end.toISOString() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        160
+      ],
+      "id": "d28dc3d5-cc28-4612-bc8a-9110a1387593",
+      "name": "算結束時間"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "cm.lien.go@gmail.com"
+        },
+        "start": "={{ $json.start_datetime }}",
+        "end": "={{ $json.end_datetime }}",
+        "additionalFields": {
+          "allday": "={{ $json.is_all_day ? 'yes' : 'no' }}",
+          "location": "={{ $json.location || '' }}",
+          "summary": "={{ $json.title }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        400
+      ],
+      "id": "e6b3bc38-417d-4289-90a6-24cbeea07820",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "rERGId67ozPbk3iL",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const title = $json.summary ?? $json.title ?? '行程';\nconst start = $json.start?.dateTime ?? $json.start?.date ?? $json.start_datetime ?? '';\nconst end = $json.end?.dateTime ?? $json.end?.date ?? $json.end_datetime ?? '';\nconst location = $json.location ?? '';\n\nconst formatDateTime = (value) => {\n  if (!value) return '';\n  const d = new Date(value);\n  if (Number.isNaN(d.getTime())) return String(value);\n  return d.toLocaleString('zh-TW', {\n    timeZone: 'Asia/Taipei',\n    year: 'numeric', month: '2-digit', day: '2-digit',\n    hour: '2-digit', minute: '2-digit', hour12: false\n  });\n};\n\nlet text = `✅ 行事曆已建立\\n行程：${title}`;\nif (start) text += `\\n開始：${formatDateTime(start)}`;\nif (end) text += `\\n結束：${formatDateTime(end)}`;\nif (location) text += `\\n地點：${location}`;\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "45dff929-b3af-4e34-a30a-ffa5aa54dae0",
+      "name": "LINE美化回覆1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Webhook').item.json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"目前只支援文字訊息。\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        400,
+        400
+      ],
+      "id": "eedd78a4-4c98-472f-bee6-ec68403630a5",
+      "name": "回應非文字訊息",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "回應line_連線是ok的",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回應非文字訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "算結束時間",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "算結束時間": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "e171ad5e-ba14-4865-bd81-a0ee8f9b944e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "31fc0902b8f24c97ddbe6971c301f3c5c81b7aaf3e047d3a9fb1446d4a25fece"
+  },
+  "nodeGroups": [],
+  "id": "7CnWiF9ceDimwI7h",
+  "tags": []
+}

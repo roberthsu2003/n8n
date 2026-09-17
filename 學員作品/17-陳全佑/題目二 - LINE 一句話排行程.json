@@ -1,0 +1,400 @@
+{
+  "name": "題目二 - LINE 一句話排行程",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-calendar",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "3777362d-68c6-42e5-94b4-ca164413024b",
+      "name": "LINE Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        416
+      ],
+      "webhookId": "a1000000-0000-4000-8000-0000000000ff"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {}
+      },
+      "id": "485bc758-f4e5-41d6-8ff6-c64c71c23750",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.events[0].type }}",
+              "rightValue": "message",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.body.events[0].message.type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "322ce201-584b-422e-9989-5b050cd0ecaa",
+      "name": "IF 是文字訊息嗎",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.body.events[0].message.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"description\": \"事件標題，只放事件名稱，例如『廠商會議』『客戶簡報』『教育訓練』，不要包含時間或地點文字\"\n    },\n    \"start_datetime\": {\n      \"type\": \"string\",\n      \"description\": \"開始時間，必須是帶 +08:00 時區偏移的 ISO 8601 字串，例如 2026-09-17T10:00:00+08:00\"\n    },\n    \"duration_minutes\": {\n      \"type\": \"number\",\n      \"description\": \"活動長度（分鐘）。使用者沒有說明時長時填 60\"\n    },\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"地點。使用者沒有提到地點時填空字串，絕對不要自己編造\"\n    },\n    \"is_all_day\": {\n      \"type\": \"boolean\",\n      \"description\": \"是否為全天事件。使用者說『全天』『整天』『一整天』時為 true，否則為 false\"\n    }\n  },\n  \"required\": [\"title\", \"start_datetime\", \"duration_minutes\", \"location\", \"is_all_day\"]\n}",
+        "options": {
+          "systemPromptTemplate": "=你是一個行事曆助理，負責把使用者的口語句子抽成結構化欄位。\n\n【時間基準｜非常重要】\n現在時間是 {{ $now.setZone('Asia/Taipei').toISO() }}（台北時間，今天是 {{ $now.setZone('Asia/Taipei').toFormat('yyyy-MM-dd') }} 星期{{ ['一','二','三','四','五','六','日'][$now.setZone('Asia/Taipei').weekday - 1] }}）。\n請一律以這個時間為基準計算「今天」「明天」「後天」「這週五」「下週五」「下個月」等相對時間。不要使用你自己記憶中的日期。\n\n【抽取規則】\n1. start_datetime 必須輸出帶 +08:00 偏移的 ISO 8601，例如 2026-09-17T10:00:00+08:00。\n2. 口語時間換算：「早上十點」=10:00、「中午十二點」=12:00、「下午兩點半」=14:30、「晚上八點」=20:00。\n3. 時長換算：「一小時」=60、「一個半小時」=90、「兩小時」=120、「半小時」=30。沒講時長就填 60。\n4. 沒有提到地點 → location 填空字串 \"\"，不可編造。\n5. 「全天」「整天」→ is_all_day = true，start_datetime 用該日 00:00:00+08:00，duration_minutes 填 1440。\n6. 只講日期、沒講時間、也不是全天 → 預設當天 09:00。\n7. 「下週五」指下一個星期的星期五；若本週的該星期幾已經過了，「這週五」視為最近的未來那個星期五。\n8. 只有年份沒寫（例如「9/25」）時，取離現在最近的未來那一年。\n\n只輸出符合 schema 的欄位，不要加任何解釋文字。"
+        }
+      },
+      "id": "5d5a8380-3129-43ed-8ce7-a7f7ac1cf730",
+      "name": "Information Extractor",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        256,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 把 Information Extractor 抽到的欄位補齊、驗證，並算出結束時間\nconst TZ = 'Asia/Taipei';\nconst out = [];\n\nfor (const item of $input.all()) {\n  const d = item.json.output ?? item.json;\n\n  const title = (d.title && String(d.title).trim()) || '未命名事件';\n  const location = d.location ? String(d.location).trim() : '';   // 沒講地點 → 空字串，流程不會壞\n  const isAllDay = d.is_all_day === true;\n  const mins = Number(d.duration_minutes) > 0 ? Number(d.duration_minutes) : 60; // 預設值 60\n\n  // 防呆一：模型沒抽到開始時間\n  if (!d.start_datetime) {\n    out.push({ json: { ok: false, reason: '我看不出你說的時間，可以再講一次嗎？例如「明天早上十點開會」', title } });\n    continue;\n  }\n\n  // 防呆二：抽到的不是合法時間字串\n  const start = DateTime.fromISO(String(d.start_datetime), { zone: TZ });\n  if (!start.isValid) {\n    out.push({ json: { ok: false, reason: `時間格式看不懂（${d.start_datetime}），可以換個講法嗎？`, title } });\n    continue;\n  }\n\n  let startISO, endISO;\n  if (isAllDay) {\n    // 全天事件：當天 00:00 到隔天 00:00\n    startISO = start.setZone(TZ).startOf('day').toISO();\n    endISO = start.setZone(TZ).startOf('day').plus({ days: 1 }).toISO();\n  } else {\n    startISO = start.setZone(TZ).toISO();\n    endISO = start.setZone(TZ).plus({ minutes: mins }).toISO();\n  }\n\n  out.push({\n    json: {\n      ok: true,\n      title,\n      location,\n      is_all_day: isAllDay,\n      duration_minutes: isAllDay ? 1440 : mins,\n      start_datetime: startISO,\n      end_datetime: endISO,\n    },\n  });\n}\n\nreturn out;"
+      },
+      "id": "eecb9141-e743-401e-b042-b7e9ccac6ae9",
+      "name": "Code 算結束時間",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c3",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "d49ce3af-1674-4ea5-8134-2dd1b7e61003",
+      "name": "IF 擷取成功嗎",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "primary"
+        },
+        "start": "={{ $json.start_datetime }}",
+        "end": "={{ $json.end_datetime }}",
+        "additionalFields": {
+          "allday": "={{ $json.is_all_day ? 'yes' : 'no' }}",
+          "description": "=由 LINE 一句話排行程自動建立",
+          "location": "={{ $json.location }}",
+          "repeatUntil": "",
+          "summary": "={{ $json.title }}"
+        }
+      },
+      "id": "04c4468f-b9b5-4bff-b2bc-19f50332c86d",
+      "name": "Google Calendar 建立事件",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        448
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ZsHxeG8OLhy3oShx",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 清洗：把 Google Calendar 回傳的事件整理成給人看的 LINE 訊息（覆述結果）\nconst TZ = 'Asia/Taipei';\nconst WD = ['日', '一', '二', '三', '四', '五', '六'];\n\nconst g = $json;                                   // Google Calendar 回傳的事件\nconst src = $('Code 算結束時間').first().json;      // 我們自己算好的乾淨欄位\nconst replyToken = $('LINE Webhook').first().json.body.events[0].replyToken;\n\nconst start = DateTime.fromISO(g.start?.dateTime || g.start?.date || src.start_datetime).setZone(TZ);\nconst end = DateTime.fromISO(g.end?.dateTime || g.end?.date || src.end_datetime).setZone(TZ);\n\nlet timeText;\nif (src.is_all_day) {\n  timeText = `${start.toFormat('M/d')}(${WD[start.weekday % 7]}) 全天`;\n} else {\n  timeText = `${start.toFormat('M/d')}(${WD[start.weekday % 7]}) ${start.toFormat('HH:mm')} - ${end.toFormat('HH:mm')}`;\n}\n\nconst lines = [\n  '✅ 已幫您排入行事曆',\n  '',\n  `📌 ${g.summary || src.title}`,\n  `🕒 ${timeText}`,\n];\nif (src.location) lines.push(`📍 ${src.location}`);   // 沒地點就不顯示這行\nlines.push('', '有錯的話再講一次就好～');\n\nreturn [{ json: { replyToken, messages: [{ type: 'text', text: lines.join('\\n') }] } }];"
+      },
+      "id": "c5becbf4-9b3e-47e5-b478-98e38610d69f",
+      "name": "Code 組成功回覆",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 擷取失敗時的回覆，一樣走同一個 HTTP Request 節點\nconst replyToken = $('LINE Webhook').first().json.body.events[0].replyToken;\nconst reason = $json.reason || '我沒聽懂，可以再說一次嗎？';\n\nreturn [{\n  json: {\n    replyToken,\n    messages: [{ type: 'text', text: `⚠️ ${reason}` }],\n  },\n}];"
+      },
+      "id": "6650d4fd-002d-4706-b14e-ca6910e2b2c5",
+      "name": "Code 組失敗回覆",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer sH/R0n93GjRc24/l0iipXL+CbU0+dKnYaJFKVo/T044Car1/rXqbbU+7gNKJ1/1T+yMBZRx74GcmYMC1LXuPRuH7TwdF+fL7vTd4xlAQIBE70EIPX8rNEbT6fxprew9YndaA6v9Oo6lGT8CWAU7oiwdB04t89/1O/w1cDnyilFU="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ replyToken: $json.replyToken, messages: $json.messages }) }}",
+        "options": {}
+      },
+      "id": "b12c2496-11be-4514-b950-6ac588307159",
+      "name": "HTTP Request 回覆 LINE",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1456,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 一句話排行程\n**測試句子**\n- 明天早上十點和廠商開會，在會議室 A，大概一小時\n- 下週五下午兩點半 客戶簡報 兩小時\n- 9/25 全天 教育訓練\n\n**要填的三個憑證**\n1. OpenAI Chat Model → OpenAI API Key\n2. Google Calendar → OAuth2\n3. HTTP Request → Header 的 Bearer Token 換成 LINE Channel Access Token",
+        "height": 280,
+        "width": 380
+      },
+      "id": "50d4b8e9-8c3c-4937-b037-8c521d595bd7",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        784
+      ],
+      "id": "96e28502-0cdb-4c3b-94fe-b1fac2a7333b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "z6bkdYpVxuCrBGww",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "LINE Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF 是文字訊息嗎",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 是文字訊息嗎": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Code 算結束時間",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 算結束時間": {
+      "main": [
+        [
+          {
+            "node": "IF 擷取成功嗎",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF 擷取成功嗎": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar 建立事件",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code 組失敗回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar 建立事件": {
+      "main": [
+        [
+          {
+            "node": "Code 組成功回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 組成功回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request 回覆 LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 組失敗回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request 回覆 LINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "7e45cdc7-7746-4c5c-b1d3-9121dd446396",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8ae9c73f4563b2675b73bf583c3890aa824c8e059e5f8c3f21ff33fc4c128fb5"
+  },
+  "nodeGroups": [],
+  "id": "waUzD6hHEhcAP0yt",
+  "tags": []
+}

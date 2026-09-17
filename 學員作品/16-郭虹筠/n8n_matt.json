@@ -1,0 +1,254 @@
+{
+  "name": "n8n_matt",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_matt",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "44226e7e-af5b-4a58-a742-646a3e07df53",
+      "name": "Line Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        112
+      ],
+      "webhookId": "aeb4ad43-0e1f-42ad-ac6e-e8ebad2acd12"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "id": "66e98a43-4a80-47d2-a1ca-424d09a5aad4",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-text",
+              "name": "text",
+              "value": "={{ $json.body.events[0].message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "reply-token",
+              "name": "replyToken",
+              "value": "={{ $json.body.events[0].replyToken }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "119e8140-42b1-4a98-8103-7f1bdab12008",
+      "name": "ParseMessage",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "={{ \"你是一位馬太福音專家。以下是馬太福音的完整內容：\\n\\n\" + $json.text + \"\\n\\n請根據以上馬太福音的內容回答用戶的問題。回答時請引用具體的章節和節數，用繁體中文詳細說明。\" }}"
+        }
+      },
+      "id": "c7b9ae01-e544-4250-b913-49f22bd1630d",
+      "name": "馬太福音 AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "10bc07fb-053e-425c-bded-b508fc9d1df7",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        752,
+        336
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "J8n7HaWgX9t9kOUL",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $(\"ParseMessage\").item.json.replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": {{JSON.stringify($json.output)}}\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "98f1dbfa-6900-473b-914f-52d339a0c5a6",
+      "name": "Send to Line",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1024,
+        112
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "VLXFioEhixu3jcnb",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n/matt.pdf",
+        "options": {}
+      },
+      "id": "83e857e0-a792-4cd4-8dd4-909c151b0ad7",
+      "name": "Read PDF File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        208
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7c42dc77-3ab9-44a0-bd55-56526f64fcd1",
+      "name": "Extract PDF Text",
+      "type": "n8n-nodes-base.readPDF",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Line Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "ParseMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "馬太福音 AI": {
+      "main": [
+        [
+          {
+            "node": "Send to Line",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "馬太福音 AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ParseMessage": {
+      "main": [
+        [
+          {
+            "node": "馬太福音 AI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read PDF File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read PDF File": {
+      "main": [
+        [
+          {
+            "node": "Extract PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract PDF Text": {
+      "main": [
+        [
+          {
+            "node": "馬太福音 AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "52d9f89b-10ee-4cc5-9b6a-19f1fb8bf8f5",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "3e5e89c3f6521b9d253911286894ea2f73df2acd30cb1cf3d72d236f6a841ca2"
+  },
+  "nodeGroups": [],
+  "id": "5bcYR8MKd67jB6Jk",
+  "tags": []
+}

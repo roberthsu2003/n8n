@@ -1,0 +1,351 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_line_bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        144
+      ],
+      "id": "742da4bb-7044-4a1c-9112-b69d883a3d5c",
+      "name": "接受訊息",
+      "webhookId": "67b4fe9b-27ad-4f32-b528-5a97e7c65bad"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        304,
+        0
+      ],
+      "id": "184a9b4f-0bbd-4371-9c14-69cb22416061",
+      "name": "回應訊息"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json['訊息'] }};{{ $now.setZone('Asia/Taipei').toISO() }}，",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "title",
+              "description": "請填入適合的標題",
+              "required": true
+            },
+            {
+              "name": "start_datetime",
+              "description": "ISO 8601 格式  會議開始日期",
+              "required": true
+            },
+            {
+              "name": "duration_minutes",
+              "type": "number",
+              "description": "預設 60 如果沒有說會議時長，預設為60分鐘"
+            },
+            {
+              "name": "location",
+              "description": "會議地點"
+            },
+            {
+              "name": "is_all_day",
+              "type": "boolean",
+              "description": "預設 false"
+            },
+            {
+              "name": "end_datetime",
+              "description": "ISO 8601 格式 請依據start_datetime以及duration_minutes幫我計算時間"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        192
+      ],
+      "id": "d96fdb73-2ff7-4df9-b62f-5c9642abf437",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        416
+      ],
+      "id": "1fd9efb6-18af-463d-b58f-801856cf8c84",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "OCVA91npyDAUzBm2",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "cachedResultName": "bluesrock7825@gmail.com",
+          "mode": "list",
+          "value": "bluesrock7825@gmail.com"
+        },
+        "start": "={{ $json.output.start_datetime }}",
+        "end": "={{ $json.output.end_datetime }}",
+        "additionalFields": {
+          "allday": "={{ $json.output.is_all_day ? 'yes' : 'no' }}",
+          "location": "={{ $json.output.location }}",
+          "summary": "={{ $json.output.title }}"
+        }
+      },
+      "id": "b2ddbd1e-3d3c-4ecf-b6b9-f1b8f008626f",
+      "name": "建立 Google 日曆行程",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        192
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "IFepaDksVkLjFcMS",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ replyToken: $('取得敘述文字').item.json.replyToken, messages: [{ type: 'text', text: '✅ 已為您建立行程\\n\\n▸ 主題：' + $('Information Extractor').item.json.output.title + '\\n▸ 時間：' + DateTime.fromISO($('Information Extractor').item.json.output.start_datetime).setZone('Asia/Taipei').toFormat('yyyy/MM/dd HH:mm') + ' - ' + DateTime.fromISO($('Information Extractor').item.json.output.end_datetime).setZone('Asia/Taipei').toFormat('HH:mm') + '\\n▸ 地點：' + ($('Information Extractor').item.json.output.location || '未指定') }] }) }}",
+        "options": {}
+      },
+      "id": "db8d6170-dcc1-4abf-b4ae-41565c863455",
+      "name": "回覆LINE確認訊息",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        192
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "41LXZSfDkY9OrxaS",
+          "name": "line_tvdi_cer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d781191d-06f1-430d-ba93-4385496e7fd7",
+              "name": "訊息",
+              "type": "string",
+              "value": "={{ $json.body.events[0].message.text }}"
+            },
+            {
+              "id": "a2c4e6f8-1234-4abc-9def-000000000001",
+              "name": "replyToken",
+              "type": "string",
+              "value": "={{ $json.body.events[0].replyToken }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        304,
+        192
+      ],
+      "id": "3c2ca077-4720-496c-b4b7-91f5d99845e9",
+      "name": "取得敘述文字"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c1a2b3c4-0001-4abc-9def-000000000001",
+              "leftValue": "={{ $json.body.events[0].message.type }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "text"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "22ea2283-c7f4-4659-9c90-641cf5551378",
+      "name": "判斷是否為文字訊息",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ replyToken: $json.body.events[0].replyToken, messages: [{ type: 'text', text: '目前我只看得懂文字訊息喔!' }] }) }}",
+        "options": {}
+      },
+      "id": "63c1df0e-c41f-47a3-bc8d-59f8b0af391f",
+      "name": "回覆非文字提示",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        336,
+        416
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "41LXZSfDkY9OrxaS",
+          "name": "line_tvdi_cer"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "接受訊息": {
+      "main": [
+        [
+          {
+            "node": "回應訊息",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "判斷是否為文字訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "建立 Google 日曆行程",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立 Google 日曆行程": {
+      "main": [
+        [
+          {
+            "node": "回覆LINE確認訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "取得敘述文字": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷是否為文字訊息": {
+      "main": [
+        [
+          {
+            "node": "取得敘述文字",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回覆非文字提示",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "ed886e85dc386a034b408ced13cf5f21c5a65cdf5cc05cc6e0450f2d3772209b"
+  }
+}

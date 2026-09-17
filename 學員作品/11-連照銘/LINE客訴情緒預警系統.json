@@ -1,0 +1,657 @@
+{
+  "name": "LINE客訴情緒預警系統",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n_robot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -256,
+        32
+      ],
+      "id": "85ba1dea-be7b-4c97-891c-a1c63533cbc6",
+      "name": "Webhook",
+      "webhookId": "9e3a3d39-242e-46a3-b296-178bb9510755"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        368
+      ],
+      "id": "16500093-32a4-4f7b-953d-abcc08c2b239",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qz95hxqHJpaSuhH0",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -80,
+        -96
+      ],
+      "id": "eb1db2fe-158c-4093-b70c-b84bed5a4e0c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '你是課程顧問。使用者剛剛傳來的訊息帶著正面、滿意的情緒（例如稱讚、感謝、開心的回饋）。請先真誠地回應並呼應對方的正面情緒，語氣熱情友善、自然不生硬。接著可視情況簡短邀請對方預約試聽課程或了解更多課程資訊，但不要過度推銷。\\n\\n使用者訊息：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        -192
+      ],
+      "id": "d2876069-8880-4df7-8e5d-d010fb88eaf0",
+      "name": "Basic LLM Chain A"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆1').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        -192
+      ],
+      "id": "7bd7e840-2d19-4fa6-b493-d945d72b67d3",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "4b91ebe1-c59e-4e60-828b-513dc1eb573d",
+      "name": "LINE美化回覆1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆2').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "b7348750-feff-4196-8a9d-803fef92d2ef",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "772798d6-2edc-4481-bcdb-1c0ceb08c404",
+      "name": "LINE美化回覆2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '你是課程顧問。使用者傳來的訊息語氣中立（例如一般詢問、單純陳述事實，沒有明顯的情緒起伏）。請用清楚、專業且友善的語氣直接回答問題，不需要過度熱情或刑意安撫。如果問題涉及費用、課程內容等細節但資料不足，請說明需要進一步確認的地方，不要自行捐造。回答後可視情況簡短提供下一步（例如留下聯絡方式），但不要勉強推銷。\\n\\n使用者訊息：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "93fa208d-e4c4-46b7-9482-a528aaa6fe19",
+      "name": "Basic LLM Chain B"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '你是客服人員。使用者剛剛傳來的訊息帶有負面情緒（例如不滿、抱怡、生氣、失望）。請先真誠表達同理與歉意，安撫對方的情緒，語氣誠懇、不要辩解或推卸責任。接著簡要說明已經將此問題轉交專人處理，會盡快與對方聯繫，並詢問方便聯絡的時段或方式。不要在這裡嘗試解決複雜問題或承諾具體賠償，僅先安撫並轉交。\\n\\n使用者訊息：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "1. 先同理（「⾮常抱歉造成您的困擾」） 2. 不辯解（禁⽌說「因為系統問題」「這是規定」） 3. 給明確下⼀步（「主管將在⼀⼩時內與您聯繫」） 反例：「很抱歉，但這是我們的規定。」 正例：「真的很抱歉讓您有這樣的經驗 我已經將這件事回報主管，⼀⼩時內會有專⼈與您聯繫。」"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        144
+      ],
+      "id": "3be527b8-7d7c-4d77-a5b1-ab1ed7dbc111",
+      "name": "Basic LLM Chain C"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "8cdd46da-ba06-4470-b40b-3b6d870a1792",
+      "name": "LINE美化回覆3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆3').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        144
+      ],
+      "id": "c6b0c7b5-3f1b-48cd-b53a-52b29b2c475b",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {
+          "temperature": 0.8,
+          "topP": 0.9
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -80
+      ],
+      "id": "e5f1e792-6ea4-41b6-ae68-7e93e9863aa8",
+      "name": "OpenRouter Chat Model A",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {
+          "temperature": 1,
+          "topP": 0.9
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        96
+      ],
+      "id": "37b6e90b-1e3c-4af6-b6a4-525503821778",
+      "name": "OpenRouter Chat Model B",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        688,
+        256
+      ],
+      "id": "1b60b73c-471e-4873-972e-0b84708914f5",
+      "name": "OpenRouter Chat Model C",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.body.events[0].message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        128
+      ],
+      "id": "7d66667b-4078-4391-94eb-82314a38a661",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "sendTo": "cm.lien.go@gmail.com",
+        "subject": "⚠️ LINE客訴情緒預警：收到負面情緒訊息",
+        "emailType": "text",
+        "message": "={{ '系統偵測到一則帶有負面情緒的 LINE 訊息，請盡快處理。\\n\\n使用者訊息：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "options": {}
+      },
+      "id": "2199c934-cd40-4c75-bfd4-b505268b5833",
+      "name": "客訴通知 Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        496
+      ],
+      "webhookId": "989842f8-db9e-4f6e-bdf5-3badb308253c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dCE0GxLfn1dIpFj5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "record",
+              "type": "string",
+              "value": "={{ '【客訴記錄】\\n時間：' + $now.toISO() + '\\n\\n使用者訊息：\\n' + $('Webhook').item.json.body.events[0].message.text + '\\n\\nAI 安撫回覆：\\n' + $json.line_reply }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "90ec1075-a7e5-4609-8f4a-8f0a0302c791",
+      "name": "整理客訴記錄",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1104,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "record",
+        "options": {
+          "fileName": "={{ '客訴_' + $now.format('yyyyLLdd_HHmmss') + '.txt' }}"
+        }
+      },
+      "id": "9d2ef5db-1b8a-4615-9453-4b7589dfc23b",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1264,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ '客訴_' + $now.format('yyyyLLdd_HHmmss') + '.txt' }}",
+        "driveId": {
+          "__rl": true,
+          "cachedResultName": "My Drive",
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "14GitzspuZm9IAtnGGUc3-LzckjD1GpKZ"
+        },
+        "options": {}
+      },
+      "id": "5d1724c0-c5ed-437c-9e56-a68cf92751ba",
+      "name": "Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1424,
+        304
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "J2rU9RMAooUSe9B7",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "traps-panoramic-replace.ngrok-free.dev",
+            "user-agent": "LineBotWebhook/2.0",
+            "content-length": "812",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "147.92.150.198",
+            "x-forwarded-host": "traps-panoramic-replace.ngrok-free.dev",
+            "x-forwarded-proto": "https",
+            "x-line-signature": "t2zqNx3+AV8C5inhFTOHC7g6Tr3ouzmVK/WEuRlnnHs=",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "destination": "Uc934e7cb6afb095b14cf790023a858ca",
+            "events": [
+              {
+                "type": "message",
+                "message": {
+                  "type": "text",
+                  "id": "631847083611259072",
+                  "quoteToken": "uI9LYtGfrn-GGf4GVrLsInD9YRk-2RbaUKILqIO1-3Ch28P2yqu0aVrAT4UguMMd0hsgxXtWak49khBOkZVMOVAq_yxwkWOqKWR9HQL7qiky8Uye2kpkCtiibRCCyH6XA14KOcfY3ttJsKtAkjGNNw",
+                  "markAsReadToken": "5wm8L7ItkllHguu_oJBGM3zxiDPTsnyswrBYIDeJiJNq7lslmYUnnz30OPaptYjKDiOQdoBfjgWqH1Bx0A7EhaI52gGam37wcizEV4qouRAIAXVbQ0917tF0P3J1h0q0itW5Bi1x3ab2jALSGFwz8cy3AvpNC2ho1ntR451t-eL6E5vGL-ge71_T0gl0x6mw3SyFnIjxvQsYgrJddFYZZQ",
+                  "text": "學費如何計算？"
+                },
+                "webhookEventId": "01M2HGD6EQ6PQPK33ZEW87AZ46",
+                "deliveryContext": {
+                  "isRedelivery": false
+                },
+                "timestamp": 1789441513901,
+                "source": {
+                  "type": "user",
+                  "userId": "Ua574a2e5d5005fcac832bf4e48f0d985"
+                },
+                "replyToken": "7ef89af5e11d472fba2a416a9991d8f7",
+                "mode": "active"
+              }
+            ]
+          },
+          "webhookUrl": "https://traps-panoramic-replace.ngrok-free.dev/webhook/n8n_robot",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain A": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain B": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain C": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "整理客訴記錄",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model A": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain A",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model B": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain B",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model C": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain C",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain A",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain B",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain C",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "客訴通知 Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理客訴記錄": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "1690ac8e-be75-40e2-8efc-15e5402b8006",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "31fc0902b8f24c97ddbe6971c301f3c5c81b7aaf3e047d3a9fb1446d4a25fece"
+  },
+  "nodeGroups": [],
+  "id": "lCRpd3aeIVExFm3k",
+  "tags": []
+}

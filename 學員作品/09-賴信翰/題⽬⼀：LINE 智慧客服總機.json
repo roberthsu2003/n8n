@@ -1,0 +1,609 @@
+{
+  "name": "題⽬⼀：LINE 智慧客服總機",
+  "nodes": [
+    {
+      "parameters": {
+        "inputText": "={{ $json.body.events[0].message.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "course_inquiry",
+              "description": "課程諮詢"
+            },
+            {
+              "category": "tuition_issue",
+              "description": "費用問題"
+            },
+            {
+              "category": "make-up_class",
+              "description": "請假補課"
+            },
+            {
+              "category": "complaint",
+              "description": "客訴抱怨"
+            }
+          ]
+        },
+        "options": {
+          "fallback": "other"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        256
+      ],
+      "id": "8a5e6f1a-1a03-4561-945b-126839fa2add",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=預計10月1日開課。\n請將以下顧客留言以優雅流暢的繁體中文（台灣習慣用語），熱情友善的態度回答並主動邀請預約試聽。\n顧客原文：\n{{ $('Webhook').item.json.body.events[0].message.text }}\n\n【LINE 回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "039380e7-f83e-4ce9-aec5-e5d8488dffd3",
+      "name": "課程諮詢"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=⼀期學費20000元，可刷卡分期，或付現；開課後如欲退費只能退七成。\n請將以下顧客留言以簡潔的繁體中文（台灣習慣用語），直接給數字與條件，不要模糊帶過。\n顧客原文：\n{{ $('Webhook').item.json.body.events[0].message.text }}\n\n【LINE 回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        272,
+        144
+      ],
+      "id": "70db64f0-28a2-4646-9a91-0271432130a9",
+      "name": "費⽤問題"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=因故無法上課，請於隔週相同時段參加補課。\n請將以下顧客留言以步驟化、明確流程的繁體中文（台灣習慣用語）回答，⽤「① ② ③」列出流程步驟。\n顧客原文：\n{{ $('Webhook').item.json.body.events[0].message.text }}\n\n【LINE 回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -32,
+        304
+      ],
+      "id": "62337702-5db4-4a45-94ef-0142762d58cc",
+      "name": "請假補課"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=請將以下顧客留言用繁體中文（台灣習慣用語），以先同理 → 不辯解 → 承諾具體下⼀步的方式回答，禁⽌說「這是規定」。\n顧客原文：\n{{ $('Webhook').item.json.body.events[0].message.text }}\n\n【LINE 回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        272,
+        592
+      ],
+      "id": "1df3db6c-9bff-4389-948e-108829b0226a",
+      "name": "客訴抱怨"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "267a7e28-14f3-4d56-8420-85897e41a298",
+              "name": "text",
+              "value": "=不好意思，我看不太懂您的問題\n您可以問我：課程時間、學費、請假補課等問題喔！",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        80,
+        704
+      ],
+      "id": "46ef894f-aaf3-48eb-8e74-508701d90de4",
+      "name": "罐頭回覆"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        496
+      ],
+      "id": "cf884b89-581c-4c2b-a8c5-4fc75b2e723a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        736
+      ],
+      "id": "5ac4980b-e042-4c21-908b-86033e12cf50",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        368,
+        288
+      ],
+      "id": "1fa93260-39cc-4afd-9112-b862184fd7dc",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        48,
+        128
+      ],
+      "id": "c207017f-16ed-4bfa-8955-0813ffdf1124",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        448
+      ],
+      "id": "164d84e2-b2b9-450d-b65e-5a361e366407",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "S46k7tHNmQnWFI7J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_line_bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -832,
+        304
+      ],
+      "id": "64cebbff-b002-43ad-a7f6-9e53aa26cff0",
+      "name": "Webhook",
+      "webhookId": "cc659814-0bcb-4e03-84b3-84d479f0b96d"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "b3417dd7-f846-4601-9c85-8731b74ac33b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $json.text}] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        704,
+        144
+      ],
+      "id": "34e60f94-aa45-438a-a261-d8125d244c62",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ylqhXXp1aRUWxGS7",
+          "name": "line_tvdi_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "885226e6-0456-47fd-953f-372fcf5d6ed2",
+              "leftValue": "={{ $json.body.events[0].message.type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -608,
+        304
+      ],
+      "id": "c77a6950-ba0b-4454-bc40-a0d53215a4ab",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eefdfd70-12aa-4c4f-8fe8-1069c396d9d3",
+              "name": "text",
+              "value": "⽬前我只看得懂⽂字訊息喔 ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -576,
+        656
+      ],
+      "id": "0493e4d9-319c-41ee-8a0b-09467a793363",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "basically-fall-mom.ngrok-free.dev",
+            "user-agent": "LineBotWebhook/2.0",
+            "content-length": "830",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "147.92.150.195",
+            "x-forwarded-host": "basically-fall-mom.ngrok-free.dev",
+            "x-forwarded-proto": "https",
+            "x-line-signature": "BerVDngWQPBRPG2gAsrW6qvCn6/wiiMs9HQM+MJfidY=",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "destination": "U4c0c02e58a1ca95dc6a173ee2ff448dc",
+            "events": [
+              {
+                "type": "message",
+                "message": {
+                  "type": "text",
+                  "id": "631864483110716082",
+                  "quoteToken": "QQRy54gmgdUiGFrWx0jx49Ui9BQ05ghHqQBUOB4kwCoF66MmYfY12AGYJE3PCT_O2ga9eLRv-2bQlFPJSDSeCIdJQw2sT2NGEZ8E3I_aRN3261fpizFDJh8sm00s4vwmvbV68ht5xeypfbLHRvvi5Q",
+                  "markAsReadToken": "uErZNyM_3iKM1kW880U0ZxwOUGu93nJFsyirVuc7CB1X5WLoxNec8hsvJQR7SD3zoM8fTKJJ5JY4stEePXf4ddrEDOIJY1EUAkGg2FnvKo8SCzk0zMM_hINj--GXhxYxwjRiw7qAIs2ppo5pgvbVofcqZAlMKOJr3DO9hnWMhbuaVm9wsCu_nCOZqUa8ovMxwx53qWc-P-iFzIx7s8K3IA",
+                  "text": "這週六要出遊，可以補課嗎？"
+                },
+                "webhookEventId": "01M2HT9PM6AMWK5ST6XP4YS7W4",
+                "deliveryContext": {
+                  "isRedelivery": false
+                },
+                "timestamp": 1789451884822,
+                "source": {
+                  "type": "user",
+                  "userId": "U487701bd6d067f06fe4f3b2b2f35911a"
+                },
+                "replyToken": "edca662f2cc548d4a83ff5f9b3f9a5aa",
+                "mode": "active"
+              }
+            ]
+          },
+          "webhookUrl": "https://basically-fall-mom.ngrok-free.dev/webhook/tvdi_line_bot",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "課程諮詢",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "費⽤問題",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "請假補課",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "客訴抱怨",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "罐頭回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "客訴抱怨",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "費⽤問題",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "課程諮詢",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "請假補課",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "課程諮詢": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "費⽤問題": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "客訴抱怨": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "請假補課": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "罐頭回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8b080c8c-066b-4f84-929a-4de204219299",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "867239724087771d612928d247521bfd87903ca3b85e86f55b95f9fe3b1cef19"
+  },
+  "nodeGroups": [],
+  "id": "3KIwvR8QCatRU0Hm",
+  "tags": []
+}

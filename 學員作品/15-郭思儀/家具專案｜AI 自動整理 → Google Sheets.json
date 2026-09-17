@@ -1,0 +1,581 @@
+{
+  "name": "家具專案｜AI 自動整理 → Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "家具／專案需求輸入",
+        "formDescription": "輸入專案名稱與家具需求，系統會保存原始資料並由 AI 整理成結構化欄位。",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "專案名稱",
+              "fieldName": "projectName",
+              "placeholder": "例如：宏國大道城 李公館",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "家具需求描述",
+              "fieldType": "textarea",
+              "fieldName": "requestText",
+              "placeholder": "例如：客廳需要 1 張 240cm 米白色布沙發，預算約 8 萬；另需胡桃木茶几 1 張。",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "送出需求",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "需求已送出，系統將自動整理資料。"
+            }
+          },
+          "useWorkflowTimezone": true
+        }
+      },
+      "id": "e3e82b42-7872-4c4c-ab84-b19ee8fe3af6",
+      "name": "家具需求表單",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "a017c822-aba8-44cc-a675-90a06738ddfd"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "MGySpMSbWiZKK78Z",
+          "cachedResultName": "家具專案_原始表單資料"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submittedAt": "={{ $json.submittedAt }}",
+            "projectName": "={{ $json.projectName }}",
+            "rawText": "={{ $json.requestText }}",
+            "quantity": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "projectName",
+              "displayName": "projectName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "area",
+              "displayName": "area",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "furnitureType",
+              "displayName": "furnitureType",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "itemName",
+              "displayName": "itemName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "material",
+              "displayName": "material",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "color",
+              "displayName": "color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "rawText",
+              "displayName": "rawText",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "25e8ad02-731c-44e3-bb30-4b5379b99ae7",
+      "name": "保存原始資料",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $(\"家具需求表單\").item.json.requestText }}",
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"properties\":{\"items\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"area\":{\"type\":\"string\"},\"furnitureType\":{\"type\":\"string\"},\"itemName\":{\"type\":\"string\"},\"size\":{\"type\":\"string\"},\"quantity\":{\"type\":\"number\"},\"material\":{\"type\":\"string\"},\"color\":{\"type\":\"string\"},\"budget\":{\"type\":\"string\"},\"notes\":{\"type\":\"string\"}},\"required\":[\"area\",\"furnitureType\",\"itemName\",\"size\",\"quantity\",\"material\",\"color\",\"budget\",\"notes\"]}}},\"required\":[\"items\"]}",
+        "options": {
+          "systemPromptTemplate": "你是家具專案資料整理助理。把使用者描述中的每一個獨立家具品項拆成 items 陣列的一筆。只根據原文，不可自行補造。未知文字欄位填空字串；數量未提及時填 1。相同家具但不同尺寸、材質、顏色或空間視為不同品項。notes 只放該品項的風格、功能、交期或其他條件。"
+        }
+      },
+      "id": "1384a0b1-451b-45b5-918d-25cfde173faa",
+      "name": "AI 整理多項家具",
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "nvidia/nemotron-3-super-120b-a12b:free",
+          "mode": "list",
+          "cachedResultName": "nvidia/nemotron-3-super-120b-a12b:free"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "9b38d053-d758-44eb-b9c0-fc2956c1e8fa",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        640,
+        672
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "amAD67cFQy3DtYYP",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1RP1fIM_hlPpq9vtRg5PO5DryyoaYRtt3AuNc5dzU1QQ",
+          "mode": "list",
+          "cachedResultName": "家具需求整理",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RP1fIM_hlPpq9vtRg5PO5DryyoaYRtt3AuNc5dzU1QQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "家具需求整理",
+          "cachedResultName": "家具需求整理"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submittedAt": "={{ $(\"家具需求表單\").item.json.submittedAt }}",
+            "projectName": "={{ $(\"家具需求表單\").item.json.projectName }}",
+            "area": "={{ $json.area }}",
+            "furnitureType": "={{ $json.furnitureType }}",
+            "itemName": "={{ $json.itemName }}",
+            "size": "={{ $json.size }}",
+            "quantity": "={{ $json.quantity }}",
+            "material": "={{ $json.material }}",
+            "color": "={{ $json.color }}",
+            "budget": "={{ $json.budget }}",
+            "notes": "={{ $json.notes }}",
+            "rawText": "={{ $(\"家具需求表單\").item.json.requestText }}"
+          },
+          "schema": [
+            {
+              "id": "submittedAt",
+              "displayName": "submittedAt",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "projectName",
+              "displayName": "projectName",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "area",
+              "displayName": "area",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "furnitureType",
+              "displayName": "furnitureType",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "itemName",
+              "displayName": "itemName",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "quantity",
+              "displayName": "quantity",
+              "display": true,
+              "type": "number"
+            },
+            {
+              "id": "material",
+              "displayName": "material",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "color",
+              "displayName": "color",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "display": true,
+              "type": "string"
+            },
+            {
+              "id": "rawText",
+              "displayName": "rawText",
+              "display": true,
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "id": "d5b4be2f-c14f-49c5-9aee-caf97b53be76",
+      "name": "寫入 Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        368
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qDU49NzZ2oJlyBbt",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 啟用前只要完成 3 件事\n1. 在 **OpenAI Chat Model** 連接 OpenAI API 憑證。\n2. 在 **寫入 Google Sheets** 連接 Google 帳號並選擇試算表。\n3. 試算表建立工作表 **家具需求整理**，第一列欄名依序可用：submittedAt、projectName、area、furnitureType、itemName、size、quantity、material、color、budget、notes、rawText。\n\n原始表單內容會先保存到 n8n 內建資料表 **家具專案_原始表單資料**。",
+        "height": 400,
+        "color": 5
+      },
+      "id": "79163888-889c-4450-a44e-b10a01da5429",
+      "name": "Sticky Note 955bee78",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst furnitureItems = input.output?.items ?? [];\nreturn furnitureItems.map((furniture) => ({ json: furniture }));"
+      },
+      "id": "2ff2e8a2-90c0-4599-83d0-775a7ed551f2",
+      "name": "拆成多列",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "5a064855-95c0-4009-a36b-2408815ef272",
+      "name": "網路商品與趨勢搜尋",
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        992,
+        624
+      ],
+      "credentials": {
+        "serpApi": {
+          "id": "tZabk0vFW1HyVF9F",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"productName\": \"IKEA EKTORP 三人座布沙發\", \"productPrice\": \"NT$19,999\", \"productLink\": \"https://www.ikea.com.tw/zh/p/example\", \"productImage\": \"https://www.ikea.com.tw/example.jpg\", \"marketNotes\": \"近期沙發設計趨勢偏好...\" }"
+      },
+      "id": "0067b807-a2a7-4995-8974-439f0ee5739e",
+      "name": "商品資訊結構化",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=品項描述：\n空間：{{ $json.area }}\n家具類型：{{ $json.furnitureType }}\n品名：{{ $json.itemName }}\n尺寸：{{ $json.size }}\n數量：{{ $json.quantity }}\n材質：{{ $json.material }}\n顏色：{{ $json.color }}\n預算：{{ $json.budget }}\n備註：{{ $json.notes }}\n\n請上網搜尋符合這項需求的實際商品，並整理相關設計趨勢或規格知識。",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "你是家具採購助理。針對單一家具品項，使用網路搜尋工具尋找：(1) 符合需求的實際商品（品名、價格、購買連結，若能取得圖片網址也一併提供）；(2) 與此類家具相關的設計趨勢或材質/規格知識，整理成簡短建議。只根據搜尋結果整理，找不到資料時該欄位留空字串，不可虛構商品、連結或價格。"
+        }
+      },
+      "id": "b3fc9e6a-1006-4ccd-b499-4c8b68922643",
+      "name": "家具商品與趨勢 AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1104,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        576
+      ],
+      "id": "c1a4e1e2-2407-41f3-83b4-f18a0ab9de77",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "gVSIHzkvT8YDdWLo",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "家具需求表單": {
+      "main": [
+        [
+          {
+            "node": "保存原始資料",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI 整理多項家具",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "AI 整理多項家具": {
+      "main": [
+        [
+          {
+            "node": "拆成多列",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "拆成多列": {
+      "main": [
+        [
+          {
+            "node": "家具商品與趨勢 AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "家具商品與趨勢 AI": {
+      "main": [
+        [
+          {
+            "node": "寫入 Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "網路商品與趨勢搜尋": {
+      "ai_tool": [
+        [
+          {
+            "node": "家具商品與趨勢 AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "商品資訊結構化": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "家具商品與趨勢 AI",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 整理多項家具",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "家具商品與趨勢 AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "63e7bb67-b321-4bc5-9d87-3ffdfd477be8",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df09aef5593eb0db71962581e2d7551d949e5be342a4692896fd7ce466ba761b"
+  },
+  "nodeGroups": [],
+  "id": "kRaDVynO0S5rl23k",
+  "tags": []
+}

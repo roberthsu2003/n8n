@@ -1,0 +1,727 @@
+{
+  "name": "LINE智慧客服總機_OK",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "n8n_robot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -256,
+        32
+      ],
+      "id": "9b54061b-73f2-441e-8e67-0aa8843fac26",
+      "name": "Webhook",
+      "webhookId": "1ebe3595-9388-445f-8d33-556dad063c67"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        416
+      ],
+      "id": "c20708b8-ede1-4d99-92a8-386eb0c69166",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qz95hxqHJpaSuhH0",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -80,
+        -96
+      ],
+      "id": "195a6a50-1961-4320-bf3f-066b0dcfe6cb",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.body.events[0].message.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "課程諮詢",
+              "description": "使用者詢問課程安排，上課課表，上課時間等任何和上課課程相關問題"
+            },
+            {
+              "category": "費用問題",
+              "description": "使用者詢問學費金額，繳費方式，刷卡分期，退費條件，收據發票，獎學金減免等任何與金錢有關問題"
+            },
+            {
+              "category": "請假補課",
+              "description": "使用者詢問請假方式，課後補課等任何請假相關問題"
+            },
+            {
+              "category": "客訴抱怨",
+              "description": "使用者提出質疑，抱怨等客訴相關問題"
+            },
+            {
+              "category": "其他",
+              "description": "使用者詢問不在Categories 1-4範圍內的問題"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        192
+      ],
+      "id": "75c55084-de1b-4701-b321-71f7351ca546",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '你是課程顧問，語氣要熱情友善。回答完使用者的問題後，主動邀請對方預約試聽課程，並提供簡短的下一步行動（例如留下姓名和方便時段）。\\n\\n使用者問題：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        -192
+      ],
+      "id": "06c719b9-9c23-432a-8481-3760524a6d1e",
+      "name": "Basic LLM Chain A"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆1').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        -192
+      ],
+      "id": "5ea4abe7-bf88-49e1-ba7d-48736c72ccf6",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "97f6debc-0c18-48a0-a08d-6acb5adb1b93",
+      "name": "LINE美化回覆1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆2').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        -16
+      ],
+      "id": "9c5e30f0-9d01-4831-8c6f-dcd550d5bda4",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "c2b8b754-4313-495c-bd9d-6a0d751c848f",
+      "name": "LINE美化回覆2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '你是課程費用顧問，請用繁體中文、熱情且清楚地回答使用者關於學費、繳費方式、刷卡分期、退費、收據發票、獎學金或減免的問題。若資料不足，請說明需要確認的資訊，不要自行捏造金額。回答後可簡短邀請使用者留下姓名與方便聯絡時段，以便安排專人說明。\\n\\n使用者問題：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "4f56914e-e718-41cd-908f-513edf828133",
+      "name": "Basic LLM Chain B"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '若回答內容包含流程或步驟說明，請使用「①②③」條列步驟，每個步驟一行，簡潔明確。\\n\\n使用者問題：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        144
+      ],
+      "id": "3c6b0b86-045e-45af-92b7-a8b722cce7c8",
+      "name": "Basic LLM Chain C"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ '你是客服專員，負責處理客訴。請依序：① 先同理使用者的感受，不急著解釋；② 不辯解、不反駁使用者的說法；③ 承諾具體下一步行動，例如由誰、何時跟進處理。禁止使用「這是規定」「按照規定」等說法。請用繁體中文、禮貌且真誠地回答。\\n\\n使用者問題：' + $('Webhook').item.json.body.events[0].message.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        432,
+        320
+      ],
+      "id": "97a39cd2-ce1e-4444-8058-022085e28df8",
+      "name": "Basic LLM Chain D"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "4343aa4e-bcc5-42db-a4a2-ac89f55c1cce",
+      "name": "LINE美化回覆4",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.text ?? $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "7fdd46f3-afe6-4998-ba38-393bfa0375a7",
+      "name": "LINE美化回覆3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('SET回覆').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        528
+      ],
+      "id": "1e39117f-7e6c-4d13-a847-d93972d8711d",
+      "name": "HTTP Request5",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆4').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        320
+      ],
+      "id": "40f7cff9-99c1-4b90-9074-c591a568d424",
+      "name": "HTTP Request4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆3').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1104,
+        144
+      ],
+      "id": "6ca4a07f-f060-4d7b-845a-3bc151ee4856",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "thUXLt6Aq5QRZjZ5",
+          "name": "line_Auth_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-0001-4000-8000-000000000001",
+              "name": "line_reply",
+              "type": "string",
+              "value": "不好意思，我看不太懂您的問題\n您可以問我：課程時間、學費、請假補課等問題喔！"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        432,
+        528
+      ],
+      "id": "f3cc48f7-dbf6-4f70-abd0-db4d77c767eb",
+      "name": "SET回覆"
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {
+          "temperature": 1.1,
+          "topP": 0.95
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        -80
+      ],
+      "id": "75a9daee-9714-4890-9354-bf4f3306c335",
+      "name": "OpenRouter Chat Model A",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {
+          "temperature": 1,
+          "topP": 0.9
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        96
+      ],
+      "id": "8b7d7c43-5e73-44cb-8fff-5b81413a9e18",
+      "name": "OpenRouter Chat Model B",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        256
+      ],
+      "id": "edae1564-43fa-49e9-9045-64133cc16387",
+      "name": "OpenRouter Chat Model C",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        784,
+        432
+      ],
+      "id": "a6fc6158-0336-466a-84c4-96db70f1edf1",
+      "name": "OpenRouter Chat Model D",
+      "credentials": {
+        "openRouterApi": {
+          "id": "KLi84vxlhFYyU8aL",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "traps-panoramic-replace.ngrok-free.dev",
+            "user-agent": "LineBotWebhook/2.0",
+            "content-length": "812",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "147.92.150.198",
+            "x-forwarded-host": "traps-panoramic-replace.ngrok-free.dev",
+            "x-forwarded-proto": "https",
+            "x-line-signature": "t2zqNx3+AV8C5inhFTOHC7g6Tr3ouzmVK/WEuRlnnHs=",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "destination": "Uc934e7cb6afb095b14cf790023a858ca",
+            "events": [
+              {
+                "type": "message",
+                "message": {
+                  "type": "text",
+                  "id": "631847083611259072",
+                  "quoteToken": "uI9LYtGfrn-GGf4GVrLsInD9YRk-2RbaUKILqIO1-3Ch28P2yqu0aVrAT4UguMMd0hsgxXtWak49khBOkZVMOVAq_yxwkWOqKWR9HQL7qiky8Uye2kpkCtiibRCCyH6XA14KOcfY3ttJsKtAkjGNNw",
+                  "markAsReadToken": "5wm8L7ItkllHguu_oJBGM3zxiDPTsnyswrBYIDeJiJNq7lslmYUnnz30OPaptYjKDiOQdoBfjgWqH1Bx0A7EhaI52gGam37wcizEV4qouRAIAXVbQ0917tF0P3J1h0q0itW5Bi1x3ab2jALSGFwz8cy3AvpNC2ho1ntR451t-eL6E5vGL-ge71_T0gl0x6mw3SyFnIjxvQsYgrJddFYZZQ",
+                  "text": "學費如何計算？"
+                },
+                "webhookEventId": "01M2HGD6EQ6PQPK33ZEW87AZ46",
+                "deliveryContext": {
+                  "isRedelivery": false
+                },
+                "timestamp": 1789441513901,
+                "source": {
+                  "type": "user",
+                  "userId": "Ua574a2e5d5005fcac832bf4e48f0d985"
+                },
+                "replyToken": "7ef89af5e11d472fba2a416a9991d8f7",
+                "mode": "active"
+              }
+            ]
+          },
+          "webhookUrl": "https://traps-panoramic-replace.ngrok-free.dev/webhook/n8n_robot",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain A",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain B",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain C",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain D",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SET回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain A": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain B": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain C": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain D": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model A": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain A",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model B": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain B",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model C": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain C",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model D": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain D",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "e7305d11-b028-4aba-afd1-f2852dfea180",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "31fc0902b8f24c97ddbe6971c301f3c5c81b7aaf3e047d3a9fb1446d4a25fece"
+  },
+  "nodeGroups": [],
+  "id": "gwqSHTRVFfTZQwDk",
+  "tags": []
+}

@@ -1,0 +1,368 @@
+{
+  "name": "基礎_Question_and_Answer_Chain",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 基礎 6：Question & Answer Chain（RAG 規章知識庫問答）\n\n📌 關鍵觀念：**寫入**與**查詢**必須是「兩顆」Vector Store，靠相同的記憶體向量庫架構串起來。\nInsert 模式才有 Document 插槽；Retrieve 模式只有 Embedding 插槽 —— 一顆節點做不到兩件事。\n\n1. 主流程（Main）：【Manual Trigger】➔【載入售後規章知識庫】(policy_text) ➔【寫入向量資料庫 (Insert)】➔【模擬顧客提問】(user_question) ➔【QA Chain】➔【整理與輸出政策解答】\n2. 寫入端：寫入向量資料庫 ➔ 底部接 Embedding*（向量模型）與 Document（文件載入器）\n   Default Data Loader ➔ Type 選 JSON、Mode 選 Expression、jsonData: {{ $json.policy_text }}；底部接 Text Splitter*\n3. 查詢端：QA Chain ➔ 底部接 Model* 與 Retriever*；Vector Store Retriever ➔ 底部接 Vector Store；In-Memory Vector Store (Retrieve) ➔ 底部接 Embedding*（與寫入端同一顆模型，維度才對得上）\n\n⚠️ In-Memory 資料存在記憶體，n8n 重啟即消失，所以每次都必須從 Manual Trigger 完整跑一次。",
+        "height": 360,
+        "width": 1000
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "186b9163-b32f-4c0c-9684-309057dfd5f0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        224
+      ],
+      "id": "bdfda44f-1675-4238-81d7-ec17d4e97797",
+      "name": "執行工作流 (Manual Trigger)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-policy",
+              "name": "policy_text",
+              "value": "【TechCorp 數位智能 產品售後服務與保固政策總規章（2026年版）】\n\n一、 原廠保固範圍與期限\n1. 凡購買本公司全系列正品，憑購買發票、電子訂單憑證或產品保固卡，享有自簽收日起算「1 年（12 個月）原廠有限保固服務」。\n2. 保固期內，若屬非人為因素引起之硬體功能故障、晶片瑕疵或零組件異常，本公司提供免費檢測與免費維修更換服務。\n\n二、 人為損壞與除外條款（非免費保固項目）\n以下情況均不在免費保固範圍內，本公司將依檢測情況酌收零件工本費與檢測服務費（基本檢測費 500 元）：\n1. 液體滲入損壞：產品因進水、受潮、浸泡液體、飲料潑灑或汗水侵蝕導致之機板短路與零件鏽蝕。\n2. 物理外力撞擊：因重摔、擠壓、撞擊導致外殼破裂、螢幕碎裂或內部結構損毀。\n3. 非原廠拆修：未經原廠授權私自拆解、改裝、更換副廠零件或刷除非官方韌體者。\n4. 天災不可抗力：因雷擊、水災、火災、地震等天然災害造成之損壞。\n\n三、 7 天猶豫期與退貨規範\n1. 猶豫期計算：依照消費者保護法規定，線上通路訂購之商品享有自收件次日起算「7 天猶豫期（鑑賞期）」。\n2. 猶豫期非試用期：辦理退貨之商品必須保持全新未拆封狀態，包含主機、配件、原廠包裝盒、說明書、發票及贈品皆需完整無缺。\n3. 退貨運費負擔：在 7 天猶豫期內提出合規退貨申請，由本公司委派物流免費到府取件。\n\n四、 退款時程與作業天數\n1. 驗收時效：本公司售後中心於收到退回包裹後，將於 1 個工作天內完成商品完整性驗收。\n2. 款項返還：\n   - 信用卡付款：確認驗收無誤後，將於「3 個工作天內」完成信用卡線上刷退。\n   - ATM / 貨到付款：將於「5 個工作天內」將款項全額匯入買方指定之銀行帳戶。\n\n五、 新品不良（DOA）換貨規範\n1. 若商品於收件後「15 天內」發生非人為之功能性故障，本公司將免費提供原箱換新機服務。\n\n六、 客服諮詢專線\n- 客服專線：0800-888-999（週一至週五 09:00 - 18:00）\n- 線上報修：https://service.techcorp.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        224
+      ],
+      "id": "70901e41-6251-46e4-beb0-f3aa15260f26",
+      "name": "載入售後規章知識庫"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-question",
+              "name": "user_question",
+              "value": "請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        224
+      ],
+      "id": "157bb590-3335-4f1c-9e01-1360821a77e9",
+      "name": "模擬顧客提問",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_question }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.4,
+      "position": [
+        560,
+        224
+      ],
+      "id": "7bd98b3d-141e-4848-8f15-dd9aa8e1a528",
+      "name": "Question and Answer Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "meta-llama/llama-3.3-70b-instruct",
+          "mode": "list",
+          "cachedResultName": "meta-llama/llama-3.3-70b-instruct"
+        },
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        416
+      ],
+      "id": "09ef11f4-f150-4439-b9a4-5dabd33c7fd3",
+      "name": "NVIDIA NIM / OpenRouter (OpenAI Chat Model)",
+      "credentials": {
+        "openAiApi": {
+          "id": "Yu16sSnBT0JCtSZF",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        672,
+        416
+      ],
+      "id": "153d77ff-c0f5-43b4-9414-5773aec54c51",
+      "name": "Vector Store Retriever"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [
+        672,
+        592
+      ],
+      "id": "bf9251ff-d239-41d5-8fdd-21a2de325bb9",
+      "name": "In-Memory Vector Store"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.policy_text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        112,
+        416
+      ],
+      "id": "f98d7b82-1571-468e-a9b4-560af6861206",
+      "name": "預載售後政策規章 (Default Data Loader)"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        624
+      ],
+      "id": "803cc34b-e6b7-41e0-85b8-27a4dc84eedb",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-answer",
+              "name": "rag_answer",
+              "value": "={{ $json.text || $json.response?.text || $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        224
+      ],
+      "id": "988a20cc-3e21-4d57-99c7-25bbfb9d8dd2",
+      "name": "整理與輸出政策解答"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1,
+      "position": [
+        96,
+        224
+      ],
+      "id": "57a737c4-6647-4606-bdb1-50a0266df8cf",
+      "name": "寫入向量資料庫 (Insert)"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        336,
+        752
+      ],
+      "id": "4d36ae9a-7685-4f09-8dc5-bb6737191c39",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cPpX9X9rbVFM0ebl",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "執行工作流 (Manual Trigger)": {
+      "main": [
+        [
+          {
+            "node": "載入售後規章知識庫",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "載入售後規章知識庫": {
+      "main": [
+        [
+          {
+            "node": "寫入向量資料庫 (Insert)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "寫入向量資料庫 (Insert)": {
+      "main": [
+        [
+          {
+            "node": "模擬顧客提問",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "模擬顧客提問": {
+      "main": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question and Answer Chain": {
+      "main": [
+        [
+          {
+            "node": "整理與輸出政策解答",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA NIM / OpenRouter (OpenAI Chat Model)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In-Memory Vector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "預載售後政策規章 (Default Data Loader)": {
+      "ai_document": [
+        [
+          {
+            "node": "寫入向量資料庫 (Insert)",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "預載售後政策規章 (Default Data Loader)",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "寫入向量資料庫 (Insert)",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "In-Memory Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1056371c-9163-429a-8ccf-7699c4615b80",
+  "meta": {
+    "instanceId": "561d07a6133576637742fc45e74ee5b99a29ea8a6a95e7e450d673e2803b5e7c"
+  },
+  "nodeGroups": [],
+  "id": "nJEqwxcTcIXnoD5S",
+  "tags": []
+}

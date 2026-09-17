@@ -1,0 +1,302 @@
+{
+  "name": "LINE Calendar",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-calendar-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        544,
+        528
+      ],
+      "id": "a3b33b4b-e123-4e2a-a043-a45050e31ed6",
+      "name": "Webhook1",
+      "webhookId": "66cf5d3d-4802-427d-97bd-81a27ceec887"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-text",
+              "leftValue": "={{ $('Webhook1').first().json.body.events[0].message.type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        992,
+        528
+      ],
+      "id": "b9a377c7-156e-4ab4-a52d-1d94d0cebcfd",
+      "name": "IF(是文字嗎)1"
+    },
+    {
+      "parameters": {
+        "text": "={{ $('Webhook1').first().json.body.events[0].message.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"description\": \"事件標題 (必填)\"\n    },\n    \"start_datetime\": {\n      \"type\": \"string\",\n      \"description\": \"開始時間，必須為 ISO 8601 格式，例如 2026-09-16T10:00:00+08:00\"\n    },\n    \"duration_minutes\": {\n      \"type\": \"number\",\n      \"description\": \"活動時長，單位為分鐘。若未提及預設為 60\",\n      \"default\": 60\n    },\n    \"location\": {\n      \"type\": \"string\",\n      \"description\": \"開會或活動地點，若無則為空字串\"\n    },\n    \"is_all_day\": {\n      \"type\": \"boolean\",\n      \"description\": \"是否為全天事件，預設為 false\",\n      \"default\": false\n    }\n  },\n  \"required\": [\"title\", \"start_datetime\"]\n}",
+        "options": {
+          "systemPromptTemplate": "你是一個行程解析助手。請從使用者的輸入中擷取以下資訊：\n- title: 行程名稱（精簡摘要）\n- start_datetime: 開始時間 (必須為 ISO 8601 格式，例如 2026-09-16T09:00:00+08:00)\n- duration_minutes: 活動時長（單位為分鐘，若未提及預設為 60）\n- location: 開會或活動地點（若無則留空）\n- is_all_day: 是否為全天事件（預設為 false）\n\n當前基準時間（台北時區）：{{ $now.setZone('Asia/Taipei').toFormat('yyyy-MM-dd HH:mm') }}\n時區一律使用 Asia/Taipei (+08:00)。\n\n注意事項：\n- 若提及「明天」、「下週三」或「9/16」，請以當前基準時間推算正確年份與日期，必須是未來時間，若算出來是過去則往後推一年/一週。\n- 時間格式務必包含 +08:00 時區標示，例如 2026-09-16T10:00:00+08:00。\n- 若未提及年份，一律假設為最接近的未來日期。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        528
+      ],
+      "id": "643c9116-3785-4456-b295-bb513b12fc6c",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "model": "=gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        736
+      ],
+      "id": "8106bdf8-352e-412e-8861-a1dc7ada720d",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "5jPm6BaQPmts5sb3",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// FIX: 保留 +08:00 時區，避免 end.toISOString() 變成 UTC 導致 LINE 顯示差 8 小時\nconst data = $json.output || $json;\n\nif (!data.start_datetime) {\n  throw new Error('Information Extractor 沒有回傳 start_datetime，原始資料: ' + JSON.stringify(data));\n}\n\nconst start = new Date(data.start_datetime);\nif (isNaN(start.getTime())) {\n  throw new Error('start_datetime 無法解析: ' + data.start_datetime);\n}\n\nconst mins = Number(data.duration_minutes ?? 60) || 60;\nconst end = new Date(start.getTime() + mins * 60000);\n\n// 轉成 Asia/Taipei (+08:00) 的 ISO 格式，例如 2026-09-16T11:00:00+08:00\nfunction toTaipeiISO(d) {\n  const pad = (n) => String(n).padStart(2, '0');\n  const t = new Date(d.getTime() + 8 * 60 * 60 * 1000);\n  return `${t.getUTCFullYear()}-${pad(t.getUTCMonth() + 1)}-${pad(t.getUTCDate())}T${pad(t.getUTCHours())}:${pad(t.getUTCMinutes())}:${pad(t.getUTCSeconds())}+08:00`;\n}\n\n// start 也正規化成 +08:00，避免模型偶爾回傳 Z 或無時區\nconst title = (data.title || '未命名行程').trim();\nconst location = (data.location || '').trim();\nconst is_all_day = Boolean(data.is_all_day ?? false);\n\nreturn [{\n  json: {\n    title,\n    start_datetime: toTaipeiISO(start),\n    end_datetime: toTaipeiISO(end),\n    duration_minutes: mins,\n    location,\n    is_all_day\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        528
+      ],
+      "id": "d9d1c99f-b1c5-4c37-baa1-b4cca6860591",
+      "name": "Code 算結束時間1"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "Primary"
+        },
+        "start": "={{ $json.start_datetime }}",
+        "end": "={{ $json.end_datetime }}",
+        "additionalFields": {
+          "description": "=由 LINE 一句話排行程建立：{{ $('Webhook1').first().json.body.events[0].message.text }}",
+          "location": "={{ $json.location }}",
+          "summary": "={{ $json.title }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        528
+      ],
+      "id": "f4a5ff0d-b3fe-4ed7-9223-e1f430269323",
+      "name": "Google Calendar 建立事件1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "uyTPPaB4rkiVd3I3",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 1eNg78b7elLxsTYyeVGcT1CChzhQI2xMolEPgTOihoJ+F1Is6sRJjeHh4BquKUliv+BQKD+HBogsHNvcIRf8UCYHQXWhZfky6ZnaVZCfQgcgFssQz8WX+iNsm65gjde7wRrbBMxnEdXiFkwCfOLG+QdB04t89/1O/w1cDnyilFU="
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Webhook1').first().json.body.events[0].replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"📅 已幫您排入 Google 日曆！\\n\\n📌 標題：{{ $('Code 算結束時間1').first().json.title }}\\n⏰ 開始：{{ $('Code 算結束時間1').first().json.start_datetime }}\\n⌛ 結束：{{ $('Code 算結束時間1').first().json.end_datetime }}\\n📍 地點：{{ $('Code 算結束時間1').first().json.location || '未提供' }}\"\n    }\n  ]\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1904,
+        528
+      ],
+      "id": "6e64887b-90cb-4697-b310-90e45c79d6f6",
+      "name": "HTTP Request 回覆 LINE1"
+    }
+  ],
+  "pinData": {
+    "Webhook1": [
+      {
+        "json": {
+          "headers": {
+            "host": "slacked-freight-monsieur.ngrok-free.dev",
+            "user-agent": "LineBotWebhook/2.0",
+            "content-length": "813",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "147.92.149.166",
+            "x-forwarded-host": "slacked-freight-monsieur.ngrok-free.dev",
+            "x-forwarded-proto": "https",
+            "x-line-signature": "3MvJXiLgTnNE2zdtMhC0N1p7M9uRHG0HiScgH0OdE1Y=",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "destination": "U5afe799afef34bcb87c3e73684b6ac02",
+            "events": [
+              {
+                "type": "message",
+                "message": {
+                  "type": "text",
+                  "id": "632057674313236999",
+                  "quoteToken": "gHR2_q0nUYfkbNWz0SvI1igw6Fs5SKFyHq-CTi0ZUzTrgDXEslvwTzqKYFGbWFLbywz3Hs5__3u6lE9-TfJ8o39adaAmQXqdkmUFcUCMLNgmdZsZ9XUPSA7RcW6TdwTGKPK7_Z7REAObEdX_ndXH-w",
+                  "markAsReadToken": "72wws6_TRb1_ilJwWBHyeOlTcBsEX_HWxd61XUlH98Hc7evZmJAF-oQRK5rKTfzvrrYqKHXnRNEUk0PYc0v5LmIdXD7m1MiQP8tXYeBFrkNbeikXw4DErq5cC0oxe1J2YExkUxB-rcWxmqvhCMampoJ2ZQb7fxohoTfgLMh-Q7EqoshGjR5AjpBY5_gsOJmflFPMvg3ZdnaL2VEHPiKB0w",
+                  "text": "明天早上9點開會"
+                },
+                "webhookEventId": "01M2N83TNCKFGZCDTVVWNFX2XV",
+                "deliveryContext": {
+                  "isRedelivery": false
+                },
+                "timestamp": 1789567035566,
+                "source": {
+                  "type": "user",
+                  "userId": "Ue1a41340eb5ecb57e5fbf829eb1ba545"
+                },
+                "replyToken": "4cf0796ba4e44edbb86f1bfb4e41db2f",
+                "mode": "active"
+              }
+            ]
+          },
+          "webhookUrl": "https://slacked-freight-monsieur.ngrok-free.dev/webhook/line-calendar-webhook",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "IF(是文字嗎)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF(是文字嗎)1": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "Code 算結束時間1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code 算結束時間1": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar 建立事件1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar 建立事件1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request 回覆 LINE1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6ecfcba0-2bac-4cff-9410-c21eba5ff298",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "89125ea5be1116d00fa4772c3d494315e9a203c1d4de95c520edb1fdeb57e581"
+  },
+  "nodeGroups": [],
+  "id": "Nw7eqgjAqAlVZGYg",
+  "tags": []
+}
