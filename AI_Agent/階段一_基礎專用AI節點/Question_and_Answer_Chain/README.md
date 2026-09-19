@@ -44,7 +44,7 @@ flowchart TD
         Question --> QAChain["❓ Question and Answer Chain<br/>(RAG 總指揮核心)"]
         QAChain --> Answer["🎯 整理與輸出政策解答<br/>(Set: 提取 rag_answer)"]
         
-        ChatModel["🧠 Chat Model<br/>(NVIDIA NIM / OpenRouter)"] -.->|Model| QAChain
+        ChatModel["🧠 Google Gemini Chat Model<br/>(models/gemini-3.8-flash)"] -.->|Model| QAChain
         Retriever["🔍 Vector Store Retriever<br/>(檢索適配器)"] -.->|Retriever| QAChain
         RetrieveVS["🗄️ In-Memory Vector Store<br/>(Retrieve 模式)"] -.->|Vector Store| Retriever
     end
@@ -53,10 +53,12 @@ flowchart TD
     SharedEmbed -.->|Embedding| RetrieveVS
 ```
 
-> ⚠️ **新手必備心法**：
+> 🌟 **生態系優勢**：本範例全面採用 **Google Gemini 生態系**（語言模型 `Google Gemini Chat Model` 搭配向量模型 `Embeddings Google Gemini`），只需申請一組 Google AI Studio API Key 即可完成所有配置，極速響應且零門檻！
+>
+> 📌 **畫布便箋（Sticky Note）重點提醒**：
 > 1. **為什麼要有兩顆 Vector Store？**
->    - `Insert 模式` 才有 `Document` 插槽（負責收錄規章）。
->    - `Retrieve 模式` 只有 `Embedding` 插槽（負責提供檢索）。
+>    - `Insert 模式` 才有 `Document` 插槽（負責切片收錄規章）。
+>    - `Retrieve 模式` 只有 `Embedding` 插槽（負責提供語意檢索）。
 >    - 一顆節點無法同時兼具兩種插槽，所以必須分開成寫入與查詢兩顆！
 > 2. **資料生命週期**：In-Memory 資料存在 RAM 記憶體中，n8n 重啟即會清空。因此每次測試請由 `Manual Trigger` 完整執行一遍。
 
@@ -117,7 +119,7 @@ Question and Answer Chain ───────┐ (Retriever* 懸空亮紅燈�
 | **3. 智慧切片** | Text Splitter | 將厚手冊撕成一張張重點「便利貼」 | 依語意標點分割成 600 字小區塊 |
 | **4. 向量化** | Embeddings Gemini | 幫每張便利貼編上「語意空間座標」 | 將文字轉為 768 維數學向量數值 |
 | **5. 儲存檢索** | Vector Store (雙節點) | 把便利貼收進抽屜；提問時撈出最相關的幾張 | 記憶體索引儲存與語意相似度計算 |
-| **6. 組織生成** | QA Chain + Chat Model | 看著撈出來的便利貼，親切寫出白話解答 | 結合問題與規章片段，生成零幻覺回覆 |
+| **6. 組織生成** | QA Chain + Gemini Chat Model | 看著撈出來的便利貼，親切寫出白話解答 | 結合問題與規章片段，生成零幻覺回覆 |
 
 ---
 
@@ -141,7 +143,7 @@ Question and Answer Chain ───────┐ (Retriever* 懸空亮紅燈�
 - **實務延伸**：實務上可改由 Google Drive、Notion、資料庫或 HTTP Request 節點動態讀取文件。
 
 #### 3. 💬 模擬顧客提問 (Set / Edit Fields)
-- **用途**：建立 `user_question` 欄位，模擬進線顧客提出的口語問題。
+- **用途**：建立 `user_question` 欄位，模擬進線顧客提出的口語問題。目前預設為測試設備潑水受潮與基本檢測費條款。
 
 #### 4. 🎯 整理與輸出政策解答 (Set / Edit Fields)
 - **用途**：提取 RAG 最終解答文字，設定欄位 `rag_answer`：`={{ $json.text || $json.response?.text || $json.output }}`。
@@ -181,9 +183,13 @@ Question and Answer Chain ───────┐ (Retriever* 懸空亮紅燈�
   2. 自動將片段與問題組裝進內建 Prompt 模板。
   3. 呼叫 Chat Model 組織成流暢易懂的繁體中文解答。
 
-#### 9. 🧠 NVIDIA NIM / OpenRouter (OpenAI Chat Model)
-- **建議設定**：`temperature: 0.1`（低溫確保嚴格忠於規章，杜絕自由發揮）。
-- **推薦模型**：`meta/llama-3.3-70b-instruct`。
+#### 9. 🧠 Google Gemini Chat Model（語言模型）
+- **節點類型**：`@n8n/n8n-nodes-langchain.lmChatGoogleGemini`
+- **模型名稱（Model Name）**：`models/gemini-3.8-flash`
+- **憑證（Credentials）**：`Google Gemini(PaLM) Api account`
+- **教學亮點**：
+  - **最新 Flash 模型架構**：具備低延遲、高吞吐量與優異的長文本推理能力，能精確消化檢索出的多個規章段落，給予流暢且不失真的白話繁中解答。
+  - **一組 API Key 到底**：與下方的 `Embeddings Google Gemini` 完美配套，完全免去註冊不同 AI 平台的複雜度。
 
 #### 10. 🔍 Vector Store Retriever（檢索適配器）
 - **用途**：介面轉接頭。將 Vector Store 包裝成 QA Chain 要求的 Retriever 介面。
@@ -223,32 +229,32 @@ Question and Answer Chain ───────┐ (Retriever* 懸空亮紅燈�
 
 ## 🎯 八、測試題庫（工作流程預設題 + 5 道防幻覺驗證題）
 
-測試時，請將以下問題複製至「模擬顧客提問」節點的 `user_question` 欄位進行驗證：
+測試時，工作流程已預設帶入題庫第 1 題。若要測試其他情境，請將以下問題複製至「模擬顧客提問」節點的 `user_question` 欄位進行驗證：
 
 ### 🌟 工作流程預設測試題（開箱即測）
 
 - 💬 **預設提問（`user_question`）**：
   ```text
-  請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？
+  如果我的設備不小心潑到飲料受潮壞掉，原廠保固可以免費修嗎？如果不行的話基本檢測費是多少？
   ```
 - 🎯 **標準答案與規章條文拆解**：
-  1. **進水是否免費保固**：**不提供免費保固**。（規章第 2 條：進水屬人為除外項目，需酌收零件費與**基本檢測費 500 元**）
-  2. **退貨需要多久時間**：享 **7 天猶豫期（鑑賞期）**；收到退貨包裹後於 **1 個工作天內** 完成驗收；信用卡於 **3 個工作天內** 刷退，ATM / 貨到付款於 **5 個工作天內** 匯入指定帳戶。（規章第 3、4 條）
-- 🔍 **檢驗要點**：AI 必須同時回答「進水不保固（收 500 檢測費）」與「7天退貨 / 驗收 1 天 / 刷退 3 天 / 匯款 5 天」，兩者皆有憑有據。
+  1. **潑水受潮是否免費保固**：**不能免費保固**。（規章第 2 條：產品因進水、受潮、浸泡液體、飲料潑灑或汗水侵蝕導致之機板短路與零件鏽蝕，屬人為損壞與除外條款，不在免費保固範圍內）
+  2. **收費標準**：依檢測情況酌收零件工本費與檢測服務費，**基本檢測費為 500 元**。
+- 🔍 **檢驗要點**：AI 必須明確指出「飲料潑灑/受潮屬人為除外項目，不享免費維修」，並精確報出「基本檢測費 500 元（零件費另計）」。
 
 ---
 
 ### 🧪 延伸 5 道防幻覺驗證測試題
 
-#### 題 1：新品不良換新判定（測試條款天數精準度）
+#### 題 1：保固除外與退貨退款時效綜合題（測試多條款交叉檢索）
+- 💬 **問題**：`請問如果商品不小心進水了，原廠有提供免費保固維修嗎？另外退貨需要多久時間？`
+- 🎯 **標準答案**：**進水不免費保固**（屬除外項目，收 500 元檢測費）；退貨享 **7 天猶豫期（鑑賞期）**，收到退貨後 **1 個工作天內** 驗收，信用卡 **3 個工作天內** 刷退，ATM 於 **5 個工作天內** 匯入指定帳戶。（規章第 2、3、4 條）
+- 🔍 **檢驗要點**：AI 必須同時回答「進水不保固（收 500 檢測費）」與「7天退貨 / 驗收 1 天 / 刷退 3 天 / 匯款 5 天」，兩者皆有憑有據。
+
+#### 題 2：新品不良換新判定（測試條款天數精準度）
 - 💬 **問題**：`請問我買的耳機在收件第 10 天突然開不了機（非人為摔到），可以免費換一台全新的給我嗎？`
 - 🎯 **標準答案**：**可以免費換新**。（規章第 5 條：收件後 15 天內非人為故障提供「原箱換新機」服務，第 10 天仍在 DOA 保障期內）
 - 🔍 **檢驗要點**：精準回答「15 天內」與「原箱換新機」，不可誤判為 7 天猶豫期或只能送修。
-
-#### 題 2：人為進水損壞與收費標準（測試除外責任與金額）
-- 💬 **問題**：`如果我的設備不小心潑到飲料受潮壞掉，原廠保固可以免費修嗎？如果不行的話基本檢測費是多少？`
-- 🎯 **標準答案**：**不能免費維修**。（規章第 2 條：液體滲入屬人為除外責任，需酌收零件工本費與**基本檢測費 500 元**）
-- 🔍 **檢驗要點**：明確拒絕免費保固，並精準報出「基本檢測費 500 元」。
 
 #### 題 3：鑑賞期退貨條件與運費負擔（測試規則細節理解）
 - 💬 **問題**：`我在官網買了商品，目前在 7 天鑑賞期內想退貨。請問我已經拆封試用過還能退嗎？退貨運費要我自己出嗎？`
@@ -336,10 +342,9 @@ Question and Answer Chain ───────┐ (Retriever* 懸空亮紅燈�
 
 1. **匯入流程**：將 [`Question_and_Answer_Chain.json`](./Question_and_Answer_Chain.json) 複製並貼上至 n8n 畫布中。
 2. **綁定 API 憑證**：
-   - 在 **Chat Model** 節點中選取您的 NVIDIA NIM、OpenRouter 或 OpenAI 憑證。
-   - 在 **Embeddings Model** 節點中選取您的 Google Gemini 或 OpenAI 向量模型憑證。
+   - 在 **Google Gemini Chat Model** 與 **Embeddings Google Gemini** 節點中，選取您的 `Google Gemini(PaLM) Api account` 憑證（只需一組 Google AI Studio 金鑰即可驅動兩顆節點）。
 3. **執行測試**：點擊畫布下方的「**Execute Workflow**」或在 `Manual Trigger` 點擊測試。
-4. **檢視成果**：點擊最後一個「**整理與輸出政策解答**」節點，查看 AI 是否嚴格依據規章回答「進水不屬免費保固」與「退款時效詳情」。
+4. **檢視成果**：點擊最後一個「**整理與輸出政策解答**」節點，查看 AI 是否嚴格依據規章回答「飲料潑灑受潮不屬免費保固，基本檢測費為 500 元」。
 
 ---
 
