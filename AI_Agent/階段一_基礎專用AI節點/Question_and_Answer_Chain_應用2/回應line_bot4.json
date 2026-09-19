@@ -1,0 +1,519 @@
+{
+  "name": "回應line_bot4",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        432
+      ],
+      "id": "a2d14fc6-0814-4a53-88ff-862515540533",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        432
+      ],
+      "id": "bd55758e-fce8-4549-bfcf-ca32bf5d9eb9",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        528,
+        672
+      ],
+      "id": "fcebe4b0-de18-4904-a4f3-296d4d9d73e8",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YYMuwsahHBXIq65f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.policy_text }}",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        656,
+        672
+      ],
+      "id": "6dd34758-1ea3-4eae-8a6b-e845d67b5586",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        736,
+        880
+      ],
+      "id": "3dafa08d-f91a-4f29-adbb-26340d047ee0",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tvdi_line_bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -608,
+        -560
+      ],
+      "id": "aa3a84aa-4b12-4cad-a6f5-bf4edd5c1e26",
+      "name": "Webhook",
+      "webhookId": "ba9a5418-063a-40e6-aa53-6e9abefe1400"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Webhook').item.json.body.events[0].message.text }}\n\n請根據檢索到的信用卡資料回答使用者問題。\n\n【LINE 回覆格式要求】\n1. 回覆必須適合直接顯示在 LINE 聊天室，請使用清楚、自然、好閱讀的繁體中文。\n2. 禁止使用 Markdown 語法，包括 #、##、**粗體**、*斜體*、- 清單、`程式碼`、> 引用、[連結](網址) 等。\n3. 請使用 emoji、換行與「•」項目符號來增加可讀性。\n4. 回覆建議格式：\n📌 重點答案\n• 項目一\n• 項目二\n\n💡 補充說明\n簡短說明必要的條件或注意事項。\n5. 如果使用者詢問費用、條件、比例、期限等資訊，請直接列出數字與條件，不要只給概括描述。\n6. 不要輸出「根據提供的資料」這類冗長開場白，直接回答問題。\n7. 如果資料中沒有答案，請明確說「目前提供的資料中沒有這項資訊」，不要自行編造。",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.7,
+      "position": [
+        -352,
+        -624
+      ],
+      "id": "f812f1d8-e1fc-4041-8f0c-55af0aeda245",
+      "name": "Question and Answer Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.8-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -384,
+        -400
+      ],
+      "id": "ed6808d3-8bb3-4eee-bb17-a3579e833761",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YYMuwsahHBXIq65f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -400
+      ],
+      "id": "ab43680a-2857-4ff6-a5e4-d64ddf88a7bf",
+      "name": "Vector Store Retriever"
+    },
+    {
+      "parameters": {
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -192
+      ],
+      "id": "8c7e82fb-ec12-4648-877a-05ae5f3c9a6e",
+      "name": "Simple Vector Store1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        32
+      ],
+      "id": "b7550476-2e25-4d68-b7b1-d8d99a6a75d6",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YYMuwsahHBXIq65f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { replyToken: $('Webhook').item.json.body.events[0].replyToken, messages: [{ type: 'text', text: $('LINE美化回覆').item.json.line_reply }] } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        336,
+        -304
+      ],
+      "id": "1d88d120-c4f1-48c6-b003-43ca0c4e06de",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "FqutWVN69LyeeJnm",
+          "name": "line_tvdi_憑證"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"ok\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        -816
+      ],
+      "id": "3c9cfdc3-7789-4227-9d48-2c0d11cc9697",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $json.response ?? '';\n\nlet text = String(response)\n  .replace(/\\r\\n/g, '\\n')\n  .replace(/^\\s*#{1,6}\\s*/gm, '')\n  .replace(/\\*\\*(.*?)\\*\\*/g, '$1')\n  .replace(/__(.*?)__/g, '$1')\n  .replace(/~~(.*?)~~/g, '$1')\n  .replace(/`([^`]+)`/g, '$1')\n  .replace(/(?<!\\w)\\*([^*\\n]+)\\*(?!\\w)/g, '$1')\n  .replace(/(?<!\\w)_([^_\\n]+)_(?!\\w)/g, '$1')\n  .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '$1（$2）')\n  .replace(/^\\s*[-*+]\\s+/gm, '• ')\n  .replace(/^\\s*>\\s?/gm, '')\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .trim();\n\nreturn [{ json: { ...$json, line_reply: text } }];"
+      },
+      "id": "8bf41adf-a26e-47a1-b8a0-2561cf6cb48d",
+      "name": "LINE美化回覆",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "信用卡權益說明",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1dWMpOAD9OIwtoLd0BhiRCOY_F0exRSaF"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "id": "df39930b-c247-4e6c-958e-9bd5172ddd5d",
+      "name": "Google Drive 搜尋檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -384,
+        432
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "mJgeh233xqavhXNq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "894d11a1-4e88-4689-aae1-e91f538260d7",
+      "name": "Google Drive 下載檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -160,
+        432
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "mJgeh233xqavhXNq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "e3142158-4695-4747-9a89-5c86346e236f",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "policy-text-1",
+              "name": "policy_text",
+              "type": "string",
+              "value": "={{ $json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5b4f8b96-e353-4a77-a07b-daeab276012c",
+      "name": "Set 整理欄位",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        288,
+        432
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever": {
+      "ai_retriever": [
+        [
+          {
+            "node": "Question and Answer Chain",
+            "type": "ai_retriever",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Question and Answer Chain": {
+      "main": [
+        [
+          {
+            "node": "LINE美化回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE美化回覆": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Drive 搜尋檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive 搜尋檔案": {
+      "main": [
+        [
+          {
+            "node": "Google Drive 下載檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive 下載檔案": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Set 整理欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 整理欄位": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": true
+  },
+  "versionId": "fc2542bd-bd2a-4897-9be8-bc60f4809f48",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "c803ca8a26bf45bc3f88f1f78c91d96677081380780467fcefe6b6050eab3548"
+  },
+  "nodeGroups": [],
+  "id": "hY1jvaW20HikZXYR",
+  "tags": []
+}

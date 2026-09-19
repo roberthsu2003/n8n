@@ -49,6 +49,8 @@
   4. [**Text Classifier**](./階段一_基礎專用AI節點/Text_Classifier/README.md)：文字意圖分類與多路業務派工路由
   5. [**Summarization Chain**](./階段一_基礎專用AI節點/Summarization_Chain/README.md)：長篇大論、會議記錄與文章智慧濃縮
   6. [**Question & Answer Chain**](./階段一_基礎專用AI節點/Question_and_Answer_Chain/README.md)：基礎文件檢索問答鏈（RAG 入門）
+  7. [**Question & Answer Chain 應用 1（LINE 智能客服）**](./階段一_基礎專用AI節點/Question_and_Answer_Chain_應用1/README.md)：整合 LINE Messaging API，打造手機端信用卡權益諮詢機器人
+  8. [**Question & Answer Chain 應用 2（Google Drive + LINE 高可用客服）**](./階段一_基礎專用AI節點/Question_and_Answer_Chain_應用2/README.md)：Google Drive 規章動態同步與 Respond to Webhook 防超時雙軌架構
 
 👉 **[進入階段一完整教學 ➔](./階段一_基礎專用AI節點/README.md)**
 

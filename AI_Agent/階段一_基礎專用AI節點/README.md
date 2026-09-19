@@ -21,6 +21,8 @@ flowchart TD
     Q -->|多意圖分類 ➔ 動態多端口業務派工| C4["4. Text Classifier"]
     Q -->|長篇報告 / 會議記錄智慧分塊濃縮| C5["5. Summarization Chain"]
     Q -->|企業規章 / 政策手冊 RAG 精準問答| C6["6. Question & Answer Chain"]
+    C6 -.->|對接手機通訊軟體| App1["7. 應用 1：LINE 智慧客服"]
+    C6 -.->|動態雲端同步 + 防超時雙軌| App2["8. 應用 2：Google Drive + LINE 客服"]
 ```
 
 ---
@@ -64,6 +66,20 @@ flowchart TD
 *標準 6 階層 RAG 知識庫落地！讓 AI 嚴格根據指定的企業規章文件檢索回答，徹底杜絕幻覺。*
 - **學習重點**：6 階層標準 RAG 架構、Vector Store Retriever 適配器、Embeddings 向量化原理。
 - **附帶樣版**：[`Question_and_Answer_Chain.json`](./Question_and_Answer_Chain/Question_and_Answer_Chain.json)、[`售後服務與保固政策規章.txt`](./Question_and_Answer_Chain/售後服務與保固政策規章.txt)
+
+---
+
+### 7. [範例 7：Question & Answer Chain 應用 1（LINE 智能客服整合）](./Question_and_Answer_Chain_應用1/README.md)
+*落地真實通訊平台！整合 LINE Messaging API Webhook，透過 Prompt 約束與 Code 節點清除 Markdown，打造排版優美的手機端信用卡權益諮詢機器人。*
+- **學習重點**：LINE Webhook 串接、LINE 專屬繁中排版 Prompt、Code 節點 Regex Markdown 清洗、LINE Reply API 呼叫。
+- **附帶樣版**：[`line_bot回應_2.json`](./Question_and_Answer_Chain_應用1/line_bot回應_2.json)、[`信用卡權益說明.txt`](./Question_and_Answer_Chain_應用1/信用卡權益說明.txt)
+
+---
+
+### 8. [範例 8：Question & Answer Chain 應用 2（Google Drive 動態同步 + LINE 高可用客服）](./Question_and_Answer_Chain_應用2/README.md)
+*企業級雲端維護與高可用架構！規章從 Google Drive 動態搜尋、下載、提取純文字並自動向量化；並以 Respond to Webhook 雙軌架構秒級響應，消滅 LINE 重複發送惡夢。*
+- **學習重點**：Google Drive 檔案搜尋與下載、Extract from File 文字解析、Respond to Webhook 非同步雙軌防重送設計。
+- **附帶樣版**：[`回應line_bot4.json`](./Question_and_Answer_Chain_應用2/回應line_bot4.json)、[`信用卡權益說明.txt`](./Question_and_Answer_Chain_應用2/信用卡權益說明.txt)
 
 ---
 
