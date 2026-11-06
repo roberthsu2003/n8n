@@ -176,7 +176,7 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 
 ### 5. [範例：DataTable 簡單操作](./DataTable/README.md)
 
-學習如何使用 n8n 內建 DataTable 進行永久性資料存儲、統計運算與條件邏輯判斷。
+學習如何使用 n8n 內建 DataTable 進行**永久性資料存儲**、**統計運算**與**條件邏輯判斷**。
 
 **學習重點**：
 - n8n 內建 DataTable 基本概念與 CSV 批次匯入
@@ -229,10 +229,6 @@ JSON 是自動化流程的資料核心。透過這個互動式實作範例，您
 - n8n 內建 Form Trigger 節點欄位設計與回應模式
 - 使用 Switch 節點進行分數範圍檢查 (0~100 分) 與合規分流
 - 自動將表單資料寫入「學生成績表格」DataTable (欄位：`name`, `class_id`, `chinese`, `english`, `math`)
-
-**影音參考**：
-- [YouTube 內建表單參考影片 1](https://youtu.be/yGm0X6YtME4?si=HGcvQFlu4LdA2B8o)
-- [YouTube 內建表單參考影片 2](https://youtu.be/HPIfP_IN95o?si=81ag2Cuw9u-DKqUR)
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
