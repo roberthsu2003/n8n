@@ -3,7 +3,13 @@
 
 ### 📚 工作流程說明
 
-這個 n8n 工作流程是專為初學者設計的第一個 Webhook 範例。您**完全不需要安裝 Postman 或撰寫任何程式碼**，只要將瀏覽器當作測試客戶端，在網址列輸入網址與參數（例如 `?name=小明`），就能立刻觸發 n8n 工作流程，並在瀏覽器畫面上即時看到 n8n 處理並回傳的結構化 JSON 問候資料！這能幫助您秒懂 Webhook 觸發、網址參數（Query Parameters）與即時回應的基本運作原理。
+第一個 Webhook 範例，**不用安裝任何工具**：在瀏覽器網址列輸入網址，就能觸發 n8n 工作流程，並馬上看到 n8n 回傳的結果。
+
+同一個網址可以回傳兩種結果：
+- `/webhook/hello?name=小明` ➔ 回傳 **JSON**（給程式看的資料）
+- `/webhook/hello?name=小明&format=html` ➔ 回傳 **HTML 網頁**（給人看的畫面）
+
+學會「讓 n8n 回傳網頁」之後，後面的範例都會用這個技巧，讓 n8n 變成手機打得開的小網站。
 
 ---
 
@@ -11,10 +17,11 @@
 
 ```mermaid
 flowchart LR
-    A["🌐 瀏覽器開啟網址 /webhook/hello?name=小明"] --> B["⚡ Webhook 觸發器 (HTTP GET)"]
-    B --> C["📝 提取 Query 參數與整理問候 (Set 節點)"]
-    C --> D["📤 Respond to Webhook (即時回傳 JSON)"]
-    D --> E["🖥️ 瀏覽器即時顯示 JSON 回應結果"]
+    A["🌐 瀏覽器開啟<br/>/webhook/hello?name=小明"] --> B["⚡ Webhook (GET)"]
+    B --> C["📝 整理問候資料<br/>Set"]
+    C --> D{"要回傳網頁嗎？<br/>format = html"}
+    D -- 是 --> E["🖼️ 回傳 HTML 問候卡片"]
+    D -- 否 --> F["📦 回傳 JSON 結果"]
 ```
 
 ---
@@ -25,92 +32,114 @@ flowchart LR
 
 ---
 
-#### 📋 節點詳細說明
+### ⚠️ 先搞懂：Test URL 與 Production URL
 
-1. **📝 流程說明（Sticky Note）**
-   - **功能**：畫布備忘錄，標記 Webhook 端點設定與資料提取步驟。
+Webhook 節點有兩個網址，這是初學者最常卡關的地方：
 
-2. **⚡ 接收 GET Webhook 請求（Webhook Node）**
-   - **功能**：監聽外部 HTTP GET 請求。
-   - **設定要點**：
-     - **HTTP Method**：`GET`（瀏覽器網址列預設使用的請求方式）
-     - **Path**：`hello`
-     - **Response Mode**：`Using 'Respond to Webhook' Node`（等待流程處理完畢後回傳自訂內容）
+| | Test URL | Production URL |
+| :--- | :--- | :--- |
+| 網址 | `https://你的網址/webhook-test/hello` | `https://你的網址/webhook/hello` |
+| 什麼時候能用 | 在編輯器按 **Listen for test event** 之後，**只接收一次** | 工作流右上角切換為 **Active** 之後，**一直都能用** |
+| 執行結果 | 直接顯示在畫布上，方便除錯 | 到左側 **Executions** 查看 |
+| 適合 | 開發、測試 | 正式給別人使用 |
 
-3. **📝 整理問候資料（Edit Fields / Set Node）**
-   - **功能**：從網址查詢參數（Query）中取得訪客姓名與伺服器當前資訊：
-     - `userName`：`={{ $json.query.name || '親愛的朋友' }}`
-     - `welcomeMessage`：`=👋 哈囉 {{ $json.query.name || '親愛的朋友' }}！恭喜您成功觸發第一個 n8n Webhook！`
-     - `serverTime`：`={{ $now.format('yyyy-MM-dd HH:mm:ss') }}`
-     - `clientIp`：`={{ $json.headers['x-forwarded-for'] || $json.headers['host'] }}`
-
-4. **📤 即時回傳 JSON 結果（Respond to Webhook Node）**
-   - **功能**：將整理好的問候訊息與時間戳記組合成 JSON 格式回傳給瀏覽器。
-   - **設定要點**：
-     - **Respond With**：`JSON`
-     - **Response Body**：回傳包含 `status`、`message`、`visitor`、`server_time` 的結構化物件。
+> 💡 **口訣**：開發用 `webhook-test` + Listen；給別人用 `webhook` + Active。
+> 本章從範例 2 開始，網頁裡的表單、按鈕都會呼叫 `/webhook/...`（Production URL），所以**一定要切換為 Active**。
 
 ---
 
-#### 🧪 測試與驗證方法
+### 📋 節點詳細說明
 
-##### 方式一：直接使用瀏覽器網址列（推薦，超直覺！）
+1. **⚡ 接收 GET Webhook 請求（Webhook）**
+   - **HTTP Method**：`GET`（瀏覽器網址列預設就是 GET）
+   - **Path**：`hello`
+   - **Respond**：`Using 'Respond to Webhook' Node`（流程跑完才由 Respond 節點決定回傳什麼）
 
-1. 將 n8n 右上角開關切換為 **Active（已啟用）**。
-2. 點開 Webhook 節點，複製 **Production URL**（例如：`https://<你的網域>/webhook/hello`）。
-3. 打開瀏覽器分頁，在網址列貼上並附加 `?name=小明`：
+2. **📝 整理問候資料（Edit Fields / Set）**
+
+   | 欄位 | 值 | 說明 |
+   | :--- | :--- | :--- |
+   | `userName` | `={{ $json.query.name \|\| '親愛的朋友' }}` | 網址的 `?name=` 參數，沒填就用預設值 |
+   | `safeName` | `userName` 經過 HTML 跳脫 | 放進網頁前先把 `<`、`>` 換掉，見下方說明 |
+   | `welcomeMessage` | `👋 哈囉 {{ ... }}！` | |
+   | `serverTime` | `={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}` | |
+   | `clientIp` | 從 `x-forwarded-for` Header 取得 | 訪客 IP |
+   | `format` | `={{ String($json.query.format \|\| 'json').toLowerCase() }}` | 要回傳 html 還是 json |
+
+3. **要回傳網頁嗎？（IF）**：`format` 等於 `html`
+
+4. **🖼️ 回傳 HTML 問候卡片（Respond to Webhook）**
+   - **Respond With**：Text，**Response Body**：一段 HTML，用 `{{ $json.safeName }}` 帶入姓名
+   - **Options ➔ Response Headers**：`Content-Type` = `text/html; charset=utf-8`
+   - 💡 少了這個 Header，瀏覽器會把 HTML 原始碼當成純文字顯示。
+
+5. **📦 回傳 JSON 結果（Respond to Webhook）**
+   - **Respond With**：JSON
+   - **Response Body**：`={{ JSON.stringify({ status: 'success', message: $json.welcomeMessage, ... }) }}`
+   - 用 `JSON.stringify` 組 JSON，名字裡有引號 `"` 也不會讓 JSON 格式壞掉。
+
+---
+
+### 🧪 測試與驗證方法
+
+1. 將右上角切換為 **Active**，複製 Webhook 節點的 **Production URL**。
+2. 瀏覽器開啟（JSON 版）：
    ```text
-   https://<你的網域>/webhook/hello?name=小明
+   https://<你的網址>/webhook/hello?name=小明
    ```
-4. 按下 Enter，瀏覽器畫面將立即出現：
    ```json
    {
      "status": "success",
      "message": "👋 哈囉 小明！恭喜您成功觸發第一個 n8n Webhook！",
      "visitor": "小明",
-     "server_time": "2026-08-30 20:30:00",
-     "tip": "🎉 您可以直接在網址列修改 ?name=您的名字 來測試不同的問候！"
+     "server_time": "2026-11-20 20:30:00",
+     "client_ip": "1.2.3.4",
+     "tip": "🎉 在網址加上 &format=html，改看網頁版！"
    }
    ```
-5. 試著把網址改為 `?name=王老師` 或 `?name=Alice`，觀察網頁畫面的即時變化！
+3. 網址後面加上 `&format=html`，畫面變成一張問候卡片。
+4. 用手機打開同一個網址（需要外部網址，見 [ngrok 安裝](../../ngrok安裝/) 或 [Cloudflare Tunnel](../../cloudflare_tunnel/)）。
 
-##### 方式二：使用 curl 指令測試
+---
 
-```bash
-curl -X GET "https://<你的網域>/webhook/hello?name=小明"
+### 🛡️ 為什麼要做 HTML 跳脫？
+
+試試看這個網址：
+
+```text
+/webhook/hello?format=html&name=<h1 style="color:red">我是駭客</h1>
 ```
 
----
+如果直接把 `name` 放進網頁，瀏覽器會把它當成 HTML 執行，畫面就被別人改掉了。更危險的是放進 `<script>`，就能在別人的瀏覽器執行程式，這叫做 **XSS（跨網站指令碼攻擊）**。
 
-#### 🎯 學習重點
-
-- **Webhook GET 方法應用**：理解 GET 請求如何透過 URL 查詢字串傳遞資料。
-- **Query 參數解析**：學會使用 `{{ $json.query.參數名 }}` 提取網址上的變數。
-- **Respond to Webhook 即時回傳**：掌握讓調用端同步收到運算結果的配置方式。
-- **預設值保護（Fallback）**：使用 `|| '預設值'` 避免用戶未傳入參數時發生錯誤。
+`safeName` 把 `<` 換成 `&lt;`、`>` 換成 `&gt;`，瀏覽器就只會把它當成文字顯示。**只要是使用者輸入、要放進網頁的內容，都要先跳脫。**
 
 ---
 
-#### 💡 實際應用場景
+### 🎯 學習重點
 
-- **健康檢查端點 (Health Check API)**：提供外部監控服務定時發送 GET 請求檢查 n8n 與伺服器是否正常運行。
-- **簡單資料查詢 API**：透過 GET 參數傳入產品編號或學號，即時回傳資料庫查詢結果。
-- **驗證碼與啟用連結**：使用者在 Email 中點擊啟用連結時，透過 GET Webhook 自動完成帳號開通。
+- **Webhook GET 方法**：瀏覽器網址列就是最簡單的測試工具
+- **Query 參數**：`{{ $json.query.參數名 }}`
+- **Respond to Webhook 回傳 JSON 或 HTML**：`Content-Type` 決定瀏覽器怎麼顯示
+- **Test URL 與 Production URL 的差別**
+- **預設值**：`|| '預設值'` 避免沒傳參數時出錯
+- **HTML 跳脫**：防止 XSS
 
 ---
 
 <details>
 <summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-> 💡 **任務目標**：透過 MCP 連線，讓 AI 擴充此流程，依據傳入的城市名稱自動查詢並回傳當地天氣問候。
+> 💡 **任務目標**：讓問候卡片依照時間顯示早安／午安／晚安，並加上當地天氣。
 
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
-請幫我在目前的「GET 請求與即時問候」工作流程中進行延伸升級：
-1. 保持 Webhook 觸發器（GET /hello），允許接收 city 參數（如 ?name=小明&city=taipei）。
-2. 在「整理問候資料」後串接一個 HTTP Request 節點，呼叫公開天氣 API（或模擬天氣資料）取得該城市的即時氣溫與天氣狀態。
-3. 將問候訊息擴充為：「哈囉 {{ $json.userName }}！目前 {{ $json.cityName }} 的天氣是 {{ $json.weather }}，氣溫 {{ $json.temp }}°C，祝您有美好的一天！」。
-4. 最後透過 Respond to Webhook 回傳完整的 JSON 資料。
-請幫我配置相關節點與表達式！
+請幫我升級「GET 請求與瀏覽器即時問候」工作流程：
+1. 保持 Webhook（GET /hello），新增 city 參數（例如 ?name=小明&city=Taipei&format=html）。
+2. 在「整理問候資料」之後新增 HTTP Request 節點，呼叫 https://wttr.in/{{ city }}?format=j1 取得目前氣溫與天氣描述。
+3. 新增 Code 節點依台灣時間判斷問候語：05:00–11:59 早安、12:00–17:59 午安、其他時間晚安。
+4. HTML 問候卡片改為顯示「早安，小明！台北現在 23°C，多雲」，背景顏色依早／午／晚變化。
+5. JSON 回應也加上 greeting、city、temperature、weather 欄位。
+請幫我建立節點、設定表達式並完成連線！
 ```
 </details>

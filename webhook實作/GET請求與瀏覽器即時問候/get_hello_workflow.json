@@ -3,18 +3,18 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 🔗 範例 1：GET 請求與瀏覽器即時問候\n\n1. **Webhook 觸發器**：設定為 GET 方法，Path 為 `hello`。\n2. **Edit Fields (Set)**：從 `$json.query` 中取得網址傳入的 `name` 參數。\n3. **Respond to Webhook**：將個人化歡迎訊息以 JSON 格式即時回傳至瀏覽器畫面。",
-        "height": 220,
-        "width": 380
+        "content": "## 🔗 範例 1：GET 請求與瀏覽器即時問候\n\n1. **Webhook**：GET，Path `hello`\n2. **整理問候資料**：從 `$json.query` 取得 `name`、`format`\n3. **要回傳網頁嗎？**\n   - `?format=html` ➔ 回傳 HTML 問候卡片（瀏覽器顯示成網頁）\n   - 其他 ➔ 回傳 JSON\n\n試試看：\n- `/webhook/hello?name=小明`\n- `/webhook/hello?name=小明&format=html`",
+        "height": 300,
+        "width": 460
       },
+      "id": "7e98cb21-a3d5-50f9-b93a-c9910b93e58e",
+      "name": "流程說明",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -200,
-        140
-      ],
-      "id": "get-hello-note",
-      "name": "流程說明"
+        -260,
+        60
+      ]
     },
     {
       "parameters": {
@@ -22,73 +22,146 @@
         "responseMode": "responseNode",
         "options": {}
       },
+      "id": "4e3361ab-f5e1-5b44-b36b-6c808a2e9b53",
+      "name": "接收 GET Webhook 請求",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -160,
-        380
+        -220,
+        420
       ],
-      "id": "get-webhook-trigger",
-      "name": "接收 GET Webhook 請求",
-      "webhookId": "hello-webhook"
+      "webhookId": "2538b8d0-79e2-5fbe-b979-047c33d0ed1c"
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
             {
-              "id": "query-name",
+              "id": "dac64005-ec60-579f-b7e3-3f9ab8964a7c",
               "name": "userName",
               "value": "={{ $json.query.name || '親愛的朋友' }}",
               "type": "string"
             },
             {
-              "id": "welcome-msg",
+              "id": "234038a1-3993-5d50-b004-4f641397196c",
+              "name": "safeName",
+              "value": "={{ String($json.query.name || '親愛的朋友').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]) }}",
+              "type": "string"
+            },
+            {
+              "id": "3acb85fd-6dcd-5527-9f8b-b59d252cc740",
               "name": "welcomeMessage",
               "value": "=👋 哈囉 {{ $json.query.name || '親愛的朋友' }}！恭喜您成功觸發第一個 n8n Webhook！",
               "type": "string"
             },
             {
-              "id": "server-time",
+              "id": "7dffa30b-ca32-5502-b3e3-8c871af4d74f",
               "name": "serverTime",
-              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "value": "={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}",
               "type": "string"
             },
             {
-              "id": "client-ip",
+              "id": "f16ca35f-22be-507d-aacd-6e594c66e4e1",
               "name": "clientIp",
-              "value": "={{ $json.headers['x-forwarded-for'] || $json.headers['host'] }}",
+              "value": "={{ ($json.headers['x-forwarded-for'] || '').split(',')[0] || $json.headers.host }}",
+              "type": "string"
+            },
+            {
+              "id": "2f517260-c3aa-50c0-ac0f-8677bca22dec",
+              "name": "format",
+              "value": "={{ String($json.query.format || 'json').toLowerCase() }}",
               "type": "string"
             }
           ]
         },
         "options": {}
       },
+      "id": "38a0ce11-e2a6-5d59-a220-68a337e336d1",
+      "name": "整理問候資料",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        100,
-        380
-      ],
-      "id": "prepare-greeting-response",
-      "name": "整理問候資料"
+        20,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d3ad84f6-5a87-5841-869c-cd41f1a0f71f",
+              "leftValue": "={{ $json.format }}",
+              "rightValue": "html",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "246182a5-1e9c-549f-a6f7-7fdfb6ca1b60",
+      "name": "要回傳網頁嗎？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>哈囉！</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\" style=\"text-align:center\"><div class=\"big\">👋</div><h1>哈囉，{{ $json.safeName }}！</h1><p class=\"muted\">這個網頁是 n8n 工作流產生的 🎉</p><p style=\"background:#eef2ff;border-radius:12px;padding:14px\">伺服器時間：{{ $json.serverTime }}</p><p class=\"muted\" style=\"font-size:14px\">把網址的 <b>name=</b> 改成別的名字，重新整理看看！</p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "3c01b1f1-83ec-5d31-a69e-b1a6ed24362c",
+      "name": "回傳 HTML 問候卡片",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        520,
+        320
+      ]
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"status\": \"success\",\n  \"message\": \"{{ $json.welcomeMessage }}\",\n  \"visitor\": \"{{ $json.userName }}\",\n  \"server_time\": \"{{ $json.serverTime }}\",\n  \"client_ip\": \"{{ $json.clientIp }}\",\n  \"tip\": \"🎉 您可以直接在網址列修改 ?name=您的名字 來測試不同的問候！\"\n}",
-        "options": {}
+        "responseBody": "={{ JSON.stringify({ status: 'success', message: $json.welcomeMessage, visitor: $json.userName, server_time: $json.serverTime, client_ip: $json.clientIp, tip: '🎉 在網址加上 &format=html，改看網頁版！' }) }}",
+        "options": {
+          "responseCode": 200
+        }
       },
+      "id": "8c69ec23-4be6-5d2d-a717-ccc29aea2e87",
+      "name": "回傳 JSON 結果",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
-        360,
-        380
-      ],
-      "id": "respond-to-browser",
-      "name": "即時回傳 JSON 結果"
+        520,
+        520
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
     "接收 GET Webhook 請求": {
       "main": [
@@ -105,7 +178,25 @@
       "main": [
         [
           {
-            "node": "即時回傳 JSON 結果",
+            "node": "要回傳網頁嗎？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "要回傳網頁嗎？": {
+      "main": [
+        [
+          {
+            "node": "回傳 HTML 問候卡片",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回傳 JSON 結果",
             "type": "main",
             "index": 0
           }
@@ -113,5 +204,13 @@
       ]
     }
   },
-  "pinData": {}
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
 }

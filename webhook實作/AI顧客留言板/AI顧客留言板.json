@@ -1,0 +1,488 @@
+{
+  "name": "Webhook 範例 6：AI 顧客留言板",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ☕ 範例 6：AI 顧客留言板\n\n**流程 A** `GET /guestbook`：讀取 DataTable 的歷史留言 ➔ 產生留言板網頁\n\n**流程 B** `POST /guestbook-api`（網頁用 fetch 呼叫的 JSON API）：\n檢查留言 ➔ Gemini 分析情緒、分數、分類、摘要並寫店長回覆 ➔ 存進 DataTable ➔ 回傳 JSON\n\n⚙️ 使用前：建立 DataTable **顧客留言**（customer_name、message、sentiment、category、summary、reply 為 String，score 為 Number），設定 Gemini 憑證，切換為 **Active** 後打開 `/webhook/guestbook`",
+        "height": 400,
+        "width": 620
+      },
+      "id": "b20ab4f2-4534-5537-93e1-129a5616396f",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "path": "guestbook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "10ed586c-8b8a-50ac-bd42-c1e674558419",
+      "name": "開啟留言板",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -60
+      ],
+      "webhookId": "9f9fe0f2-85d9-5f56-8012-a661843cdb48"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "顧客留言"
+        },
+        "limit": 20,
+        "orderBy": true,
+        "orderByColumn": "createdAt",
+        "orderByDirection": "DESC"
+      },
+      "id": "27e38fe4-5783-549b-85d7-8754e5df5b74",
+      "name": "讀取最近留言",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        20,
+        -60
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 產生留言板網頁：上方留言表單（用 fetch 呼叫 API）、統計、歷史留言\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nconst rows = $input.all().map(i => i.json).filter(r => r.message);\nconst color = { 正面: '#16a34a', 中立: '#64748b', 負面: '#dc2626' };\nconst count = s => rows.filter(r => r.sentiment === s).length;\nconst items = rows.map(r => `\n  <div class=\"msg\"><div><b>${esc(r.customer_name)}</b>\n    <span class=\"tag\" style=\"background:${color[r.sentiment] || '#64748b'}\">${esc(r.sentiment)} ${esc(r.score)} 分</span>\n    <span class=\"tag\" style=\"background:#6366f1\">${esc(r.category)}</span></div>\n    <p>${esc(r.message)}</p>\n    <p class=\"reply\">☕ 店長回覆：${esc(r.reply)}</p></div>`).join('');\n\nconst html = `<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>午後咖啡館留言板</title><style>\n*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#fdf8f3;color:#3b2f2f;padding:20px}\n.card{background:#fff;max-width:640px;margin:16px auto;padding:24px;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.06)}\ninput,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:8px;border:1px solid #e7d8c9;border-radius:12px;font-family:inherit}\ntextarea{min-height:90px}button{background:#8b5e3c;color:#fff;border:0;font-weight:700;cursor:pointer}\n.tag{display:inline-block;color:#fff;font-size:12px;padding:2px 8px;border-radius:999px;margin-left:6px}\n.msg{border-top:1px solid #f1e6db;padding:14px 0}.reply{background:#fdf3e7;border-radius:10px;padding:10px;font-size:15px}\n.stats{display:flex;gap:10px;text-align:center}.stats div{flex:1;background:#fdf3e7;border-radius:12px;padding:10px}\n#result{display:none;margin-top:16px;padding:16px;border-radius:12px;background:#eef2ff}\n</style></head><body>\n<div class=\"card\"><h1 style=\"margin-top:0\">☕ 午後咖啡館留言板</h1>\n  <input id=\"name\" placeholder=\"您的暱稱\"><textarea id=\"message\" placeholder=\"想對我們說什麼？好吃、難吃、建議都歡迎！\"></textarea>\n  <button id=\"send\">送出留言</button><div id=\"result\"></div></div>\n<div class=\"card\"><div class=\"stats\">\n  <div>😊 正面<br><b>${count('正面')}</b></div><div>😐 中立<br><b>${count('中立')}</b></div><div>😠 負面<br><b>${count('負面')}</b></div></div>\n  ${items || '<p>還沒有留言，成為第一位吧！</p>'}</div>\n<script>\nconst btn = document.getElementById('send'), box = document.getElementById('result');\nconst e = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nbtn.onclick = async () => {\n  const body = { name: document.getElementById('name').value, message: document.getElementById('message').value };\n  btn.disabled = true; btn.textContent = '🤖 AI 分析中…';\n  try {\n    const res = await fetch('/webhook/guestbook-api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });\n    const data = await res.json();\n    box.style.display = 'block';\n    box.innerHTML = res.ok\n      ? '<b>AI 分析結果</b><br>情緒：' + e(data.analysis.sentiment) + '（' + e(data.analysis.score) + ' 分）<br>分類：' + e(data.analysis.category)\n        + '<br>摘要：' + e(data.analysis.summary) + '<br><br>☕ 店長回覆：' + e(data.analysis.reply) + '<br><br><a href=\"\">重新整理看留言牆</a>'\n      : '⚠️ ' + e(data.error);\n  } catch (e) { box.style.display = 'block'; box.textContent = '⚠️ 連線失敗：' + e.message; }\n  btn.disabled = false; btn.textContent = '送出留言';\n};\n</script></body></html>`;\nreturn [{ json: { html } }];"
+      },
+      "id": "e8b1c678-2065-51b7-ba93-09d603ad498e",
+      "name": "產生留言板網頁",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "051c52b2-7895-59b8-a91f-d3489ddafa62",
+      "name": "顯示留言板",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "guestbook-api",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "879215df-74ee-53eb-945a-c0c86fb81e89",
+      "name": "接收留言 API",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        260
+      ],
+      "webhookId": "cd4afb47-270c-571e-907c-2c97ca9aa833"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "500d7637-6abf-52da-823b-cbc393eb189c",
+              "name": "customer_name",
+              "value": "={{ String($json.body.name || '').trim() || '匿名顧客' }}",
+              "type": "string"
+            },
+            {
+              "id": "6c63c14f-bcfc-58cd-b3e9-e2c515e8102b",
+              "name": "message",
+              "value": "={{ String($json.body.message || '').trim().slice(0, 500) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2e2be7d0-3079-56e9-9fce-c5ef98ac42ba",
+      "name": "整理留言",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        20,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "82b9c4f3-0add-5eb8-869f-7412281e05e4",
+              "leftValue": "={{ $json.message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "707ece18-3c1e-5511-9b62-febfaf75c532",
+      "name": "有留言內容嗎？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, error: '留言內容不能是空的' }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "dc930edb-835b-5d8d-9d72-d12c68427cbe",
+      "name": "回傳 400 錯誤",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "hasOutputParser": true,
+        "text": "=你是「午後咖啡館」的店長，請分析以下顧客留言，並寫一段回覆。\n\n顧客暱稱：{{ $json.customer_name }}\n留言內容：{{ $json.message }}\n\n規則：\n- sentiment 只能是「正面」「中立」「負面」其中之一\n- score 是 1～5 的整數（5 最滿意）\n- category 從「餐點」「飲品」「服務」「環境」「價格」「其他」選一個\n- summary 用 20 字以內摘要\n- reply 用繁體中文、親切真誠、60 字以內；負面留言要先道歉並說明改善方式",
+        "messages": {}
+      },
+      "id": "61a6a721-cd70-5f75-b6c7-22c05b8d2d2b",
+      "name": "AI 分析留言",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        460,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "d134be27-b301-5ec3-b10d-9a028bf50c6a",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"sentiment\": \"負面\",\n  \"score\": 2,\n  \"category\": \"服務\",\n  \"summary\": \"等餐太久且店員態度冷淡\",\n  \"reply\": \"非常抱歉讓您久等了！我們會加強尖峰時段人力，期待再次為您服務。\"\n}"
+      },
+      "id": "efc629f6-52ba-5cc8-ab5b-4026d7800eb5",
+      "name": "輸出格式",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        580,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "顧客留言"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_name": "={{ $('整理留言').first().json.customer_name }}",
+            "message": "={{ $('整理留言').first().json.message }}",
+            "sentiment": "={{ $json.output.sentiment }}",
+            "score": "={{ $json.output.score }}",
+            "category": "={{ $json.output.category }}",
+            "summary": "={{ $json.output.summary }}",
+            "reply": "={{ $json.output.reply }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reply",
+              "displayName": "reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e906ccf3-81f6-5a8a-9134-c71d5b356510",
+      "name": "儲存留言",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        780,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, analysis: $('AI 分析留言').first().json.output }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "7099907f-9d09-562a-9c7c-c6518f71d787",
+      "name": "回傳分析結果",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        220
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "開啟留言板": {
+      "main": [
+        [
+          {
+            "node": "讀取最近留言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取最近留言": {
+      "main": [
+        [
+          {
+            "node": "產生留言板網頁",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "產生留言板網頁": {
+      "main": [
+        [
+          {
+            "node": "顯示留言板",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收留言 API": {
+      "main": [
+        [
+          {
+            "node": "整理留言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理留言": {
+      "main": [
+        [
+          {
+            "node": "有留言內容嗎？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "有留言內容嗎？": {
+      "main": [
+        [
+          {
+            "node": "AI 分析留言",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回傳 400 錯誤",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 分析留言",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "輸出格式": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI 分析留言",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 分析留言": {
+      "main": [
+        [
+          {
+            "node": "儲存留言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "儲存留言": {
+      "main": [
+        [
+          {
+            "node": "回傳分析結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

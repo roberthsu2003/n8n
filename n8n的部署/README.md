@@ -65,7 +65,7 @@ flowchart TD
 
 因此，我們採用業界標準的 **「計算與儲存分離」** 架構：
 1. **運算引擎（n8n）**：跑在免費雲端容器上（處理 Webhook 與流程運算）。
-2. **資料庫儲存**：連線至前面章節學過的 **[Supabase 免費雲端 PostgreSQL](../雲端資料庫整合/Supabase/README.md)**。
+2. **資料庫儲存**：連線至前面章節學過的 **[Supabase 免費雲端 PostgreSQL](../雲端資料庫整合/Supabase設定/README.md)**。
 
 ```mermaid
 flowchart LR

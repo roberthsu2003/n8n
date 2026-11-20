@@ -1,0 +1,414 @@
+{
+  "name": "Webhook 自製訂便當網站",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🍱 Webhook 自製訂便當網站\n\n**流程 A（GET）**：打開網址 ➔ 從 Google Drive 下載菜單 Excel ➔ Code 產生 HTML 網頁 ➔ 回傳給瀏覽器\n\n**流程 B（POST）**：網頁送出訂單 ➔ 累積今天所有訂單 ➔ 轉成 Excel ➔ 上傳／更新到 Google Drive ➔ 回傳成功頁面\n\n⚠️ 一定要切換為 **Active**，用 **Production URL** 測試：\n- 網頁表單送出到 `/webhook/order-lunch-submit`\n- `$getWorkflowStaticData` 只有正式執行才會保存",
+        "height": 340,
+        "width": 560
+      },
+      "id": "9c1d0a8e-7f3b-4c55-9d7e-1a2b3c4d5e60",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        -460
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "請貼上「便當店菜單.xlsx」的 Google Drive 檔案 ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -224,
+        -64
+      ],
+      "id": "1eb5cc61-d83c-4b36-9f58-54a64dfc5dad",
+      "name": "下載便當店菜單"
+    },
+    {
+      "parameters": {
+        "path": "order-lunch",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "13729d27-0cc3-43cb-82f9-0a4ac6278d3e",
+      "name": "開啟訂便當頁面",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -64
+      ],
+      "webhookId": "96d981e0-8e3d-4e79-9eda-746b0ec86058"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items.map(i => i.json);\nconst escapeHtml = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\nconst first = rows[0] || {};\nconst keys = Object.keys(first);\nconst shopKey = keys.find(k => /便當店名稱|商家名稱|店家名稱/.test(k)) || keys[1];\nconst mealKey = keys.find(k => /餐點名稱|品項名稱|餐點/.test(k)) || keys[3];\nconst priceKey = keys.find(k => /價格|單價/.test(k)) || keys[4];\nconst statusKey = keys.find(k => /供應狀態|狀態/.test(k));\nconst available = rows.filter(r => !statusKey || !/暫停|停售|停供/.test(String(r[statusKey] ?? '')));\nconst shops = [...new Set(available.map(r => String(r[shopKey] ?? '')).filter(Boolean))];\nconst mealData = available.map(r => ({shop:String(r[shopKey] ?? ''), meal:String(r[mealKey] ?? ''), price:r[priceKey] ?? ''}));\nconst html = `<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>訂便當系統</title><style>body{font-family:Arial,sans-serif;max-width:680px;margin:30px auto;padding:20px}label{display:block;margin-top:14px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;margin-top:6px;box-sizing:border-box;font-size:16px}textarea{min-height:70px}button{margin-top:24px;cursor:pointer}.price{font-size:20px;margin-top:12px;font-weight:bold}</style></head><body><h1>🍱 公司訂便當系統</h1><form method=\"post\" action=\"/webhook/order-lunch-submit\"><label>姓名<input name=\"姓名\" required></label><label>便當店<select name=\"便當店\" id=\"shop\" required><option value=\"\">請選擇便當店</option>${shops.map(s=>`<option value=\"${escapeHtml(s)}\">${escapeHtml(s)}</option>`).join('')}</select></label><label>餐點<select name=\"餐點名稱\" id=\"meal\" required><option value=\"\">請先選擇便當店</option></select></label><div class=\"price\">單價：NT$ <span id=\"price\">0</span></div><input type=\"hidden\" name=\"單價\" id=\"priceInput\"><label>數量<input type=\"number\" name=\"數量\" id=\"qty\" min=\"1\" value=\"1\" required></label><div class=\"price\">總金額：NT$ <span id=\"total\">0</span></div><input type=\"hidden\" name=\"總金額\" id=\"totalInput\"><label>訂購備註<textarea name=\"訂購備註\" placeholder=\"例如：飯少一點、不加香菜\"></textarea><button type=\"submit\">送出訂單</button></form><script>const data=${JSON.stringify(mealData)};const shop=document.getElementById('shop'),meal=document.getElementById('meal'),price=document.getElementById('price'),pi=document.getElementById('priceInput'),qty=document.getElementById('qty'),total=document.getElementById('total'),ti=document.getElementById('totalInput');function updateMeals(){const list=data.filter(x=>x.shop===shop.value);meal.innerHTML='<option value=\"\">請選擇餐點</option>'+list.map(x=>'<option value=\"'+x.meal+'\" data-price=\"'+x.price+'\">'+x.meal+'（NT$ '+x.price+'）</option>').join('');updatePrice()}function updatePrice(){const o=meal.options[meal.selectedIndex];const p=Number(o?.dataset.price||0);price.textContent=p;pi.value=p;const t=p*Number(qty.value||1);total.textContent=t;ti.value=t}shop.addEventListener('change',updateMeals);meal.addEventListener('change',updatePrice);qty.addEventListener('input',updatePrice);</script></body></html>`;\nreturn [{json:{html}}];"
+      },
+      "id": "183047d0-c9a5-4b59-a4e4-9a35d564ab4b",
+      "name": "建立動態訂購表單",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "fc462903-781b-46fe-b108-4611568af303",
+      "name": "顯示訂購表單",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        288,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        -64
+      ],
+      "id": "f04a72ea-d77d-4b7f-aa63-bf0932c839ba",
+      "name": "取出便當店資料"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "order-lunch-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "receive-lunch-order",
+      "name": "接收訂單資料",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        224
+      ],
+      "webhookId": "28a9cc44-90c7-4911-8c97-3953621299fe"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>訂購成功</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial,'Microsoft JhengHei',sans-serif;background:linear-gradient(135deg,#fff7ed,#f0fdf4);padding:24px}.card{background:#fff;width:min(520px,100%);padding:48px 36px;border-radius:24px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.12)}.icon{width:82px;height:82px;margin:0 auto 22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#dcfce7;font-size:42px}h1{margin:0 0 14px;color:#166534;font-size:30px}p{color:#4b5563;line-height:1.8;font-size:17px;margin:0 0 26px}.info{background:#f8fafc;border-radius:14px;padding:16px;color:#64748b;font-size:14px}.food{font-size:28px;margin-bottom:12px}</style></head><body><main class=\"card\"><div class=\"icon\">✓</div><div class=\"food\">🍱</div><h1>訂購成功！</h1><p>您的便當訂單已經成功送出。<br>我們已為您儲存訂購資料，請安心等待美味午餐！</p><div class=\"info\">感謝您的訂購<br>祝您用餐愉快 😊</div></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "=text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-lunch-success",
+      "name": "顯示訂購成功",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        864,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = items[0].json.body || items[0].json;\nconst date = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });\nconst store = $getWorkflowStaticData('global');\nif (store.orderDate !== date) { store.orderDate = date; store.orders = []; store.fileId = ''; }\nstore.orders = store.orders || [];\nstore.orders.push({訂購日期:date,姓名:b['姓名']||'',便當店:b['便當店']||'',餐點名稱:b['餐點名稱']||'',單價:b['單價']||'',數量:b['數量']||'',總金額:b['總金額']||'',訂購備註:b['訂購備註']||''});\nconst fileName = `便當訂單_${date}.xlsx`;\nreturn store.orders.map(order => ({json:{...order,檔案名稱:fileName,現有檔案ID:store.fileId||''}}));"
+      },
+      "id": "accumulate-daily-orders",
+      "name": "累積當日訂單",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "={{ $json.檔案名稱 }}",
+          "sheetName": "訂單"
+        }
+      },
+      "id": "create-daily-xlsx",
+      "name": "建立當日訂單 Excel",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.現有檔案ID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-daily-file",
+      "name": "判斷是否已有今日檔案",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        320,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.檔案名稱 }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "請貼上存放訂單的 Google Drive 資料夾 ID"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "id": "upload-new-daily-file",
+      "name": "建立今日訂單檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        544,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const store = $getWorkflowStaticData('global');\nstore.fileId = items[0].json.id;\nreturn items;"
+      },
+      "id": "store-daily-file-id",
+      "name": "記錄今日檔案ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.現有檔案ID }}"
+        },
+        "changeFileContent": true,
+        "newUpdatedFileName": "={{ $json.檔案名稱 }}",
+        "options": {
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "id": "update-daily-file",
+      "name": "更新今日訂單檔案",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        560,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "開啟訂便當頁面": {
+      "main": [
+        [
+          {
+            "node": "下載便當店菜單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立動態訂購表單": {
+      "main": [
+        [
+          {
+            "node": "顯示訂購表單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "取出便當店資料": {
+      "main": [
+        [
+          {
+            "node": "建立動態訂購表單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收訂單資料": {
+      "main": [
+        [
+          {
+            "node": "累積當日訂單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "累積當日訂單": {
+      "main": [
+        [
+          {
+            "node": "建立當日訂單 Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立當日訂單 Excel": {
+      "main": [
+        [
+          {
+            "node": "判斷是否已有今日檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷是否已有今日檔案": {
+      "main": [
+        [
+          {
+            "node": "更新今日訂單檔案",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "建立今日訂單檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立今日訂單檔案": {
+      "main": [
+        [
+          {
+            "node": "記錄今日檔案ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "記錄今日檔案ID": {
+      "main": [
+        [
+          {
+            "node": "顯示訂購成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "更新今日訂單檔案": {
+      "main": [
+        [
+          {
+            "node": "顯示訂購成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下載便當店菜單": {
+      "main": [
+        [
+          {
+            "node": "取出便當店資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

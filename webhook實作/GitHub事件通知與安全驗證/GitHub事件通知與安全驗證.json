@@ -1,0 +1,492 @@
+{
+  "name": "Webhook 範例 5：GitHub 事件通知與安全驗證",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🐙 範例 5：GitHub 事件通知與安全驗證\n\nGitHub 專案有動靜時（推送程式碼、開 Issue、按星星），GitHub 主動呼叫 n8n，n8n 寄 Email 通知你。\n\n1. **驗證密鑰**：網址要帶 `?token=` 且和「設定」節點相同，否則回傳 401\n2. **Switch**：依 Header `x-github-event` 分流\n3. 每種事件整理成不同內容的信件 ➔ Gmail ➔ 回傳 200\n\n⚙️ 修改「設定」節點的 `secret_token` 與 `notify_email`；GitHub 需要連得到你的 n8n（ngrok / Cloudflare Tunnel / n8n Cloud）",
+        "height": 380,
+        "width": 600
+      },
+      "id": "5e86ade3-ee54-5a3e-8179-df20fcd6c0b2",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -520
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "github-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0b1de2be-7434-57be-a2ae-86ce8f2d7a31",
+      "name": "收到 GitHub 事件",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        120
+      ],
+      "webhookId": "3602dc53-9373-564c-b381-4bf704e59d54"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ecc5ffa5-c61e-5178-ac7b-d5c19ad37ee0",
+              "name": "secret_token",
+              "value": "請改成你自己的密鑰-2026",
+              "type": "string"
+            },
+            {
+              "id": "40985ab3-5f27-5281-a7b2-deebf97ffcd7",
+              "name": "notify_email",
+              "value": "YOUR_EMAIL@gmail.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {},
+        "includeOtherFields": true
+      },
+      "id": "0249ee88-0f90-5636-9e80-f48893122166",
+      "name": "設定",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        20,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "961c77a2-bcb8-53b5-89ab-bd5e60a0277a",
+              "leftValue": "={{ $json.query.token }}",
+              "rightValue": "={{ $json.secret_token }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "13cd1c2a-af6b-5010-82bd-f0a77be4259e",
+      "name": "密鑰正確嗎？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, error: 'Unauthorized：token 錯誤或沒有提供' }) }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "f65b464d-3a9e-5bfc-a2c8-bbb19970c04c",
+      "name": "回傳 401 未授權",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-ping",
+                    "leftValue": "={{ $json.headers['x-github-event'] }}",
+                    "rightValue": "ping",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ping 連線測試"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-push",
+                    "leftValue": "={{ $json.headers['x-github-event'] }}",
+                    "rightValue": "push",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "push 推送程式碼"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-issues",
+                    "leftValue": "={{ $json.headers['x-github-event'] }}",
+                    "rightValue": "issues",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "issues 議題"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-watch",
+                    "leftValue": "={{ $json.headers['x-github-event'] }}",
+                    "rightValue": "watch",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "watch 按星星"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "其他事件"
+        }
+      },
+      "id": "aa93b9e5-5269-54f3-a794-8c9faf0b0516",
+      "name": "依事件類型分流",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        460,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $('收到 GitHub 事件').first().json.body;\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nreturn [{ json: {\n  subject: `✅ GitHub Webhook 設定成功：${e.repository?.full_name || ''}`,\n  html: `<h2>✅ GitHub 已經連上 n8n 了</h2><p>${esc(e.zen)}</p><p>接下來到專案按星星、開 Issue 或推送程式碼，就會收到通知。</p>`,\n} }];"
+      },
+      "id": "2b8ff7ae-24c7-5a60-8916-60e16ed69acc",
+      "name": "整理：連線測試",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $('收到 GitHub 事件').first().json.body;\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nconst branch = String(e.ref || '').replace('refs/heads/', '');\nconst commits = (e.commits || []).map(c =>\n  `<li><b>${esc(c.author?.name)}</b>：${esc(c.message.split('\\n')[0])} <a href=\"${esc(c.url)}\">查看</a></li>`).join('');\nreturn [{ json: {\n  subject: `🚀 ${e.pusher?.name} 推送了 ${(e.commits || []).length} 個 commit 到 ${e.repository?.name}/${branch}`,\n  html: `<h2>🚀 有新的程式碼推送</h2><p>專案：<b>${esc(e.repository?.full_name)}</b>　分支：<b>${esc(branch)}</b></p>\n         <ul>${commits || '<li>（沒有 commit）</li>'}</ul><p><a href=\"${esc(e.compare)}\">查看變更內容</a></p>`,\n} }];"
+      },
+      "id": "2226f359-95fe-55bb-ad87-4cb57cd6442c",
+      "name": "整理：推送程式碼",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $('收到 GitHub 事件').first().json.body;\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nconst actions = { opened: '開了新的', closed: '關閉了', reopened: '重新開啟了', edited: '編輯了' };\nconst act = actions[e.action] || e.action;\nreturn [{ json: {\n  subject: `🐛 ${e.sender?.login} ${act} Issue：${e.issue?.title}`,\n  html: `<h2>🐛 Issue 動態</h2><p><b>${esc(e.sender?.login)}</b> ${esc(act)} Issue #${e.issue?.number}</p>\n         <p style=\"font-size:18px\"><b>${esc(e.issue?.title)}</b></p>\n         <blockquote style=\"color:#555\">${esc((e.issue?.body || '').slice(0, 300))}</blockquote>\n         <p><a href=\"${esc(e.issue?.html_url)}\">到 GitHub 查看</a></p>`,\n} }];"
+      },
+      "id": "1ac55b8e-0d8e-50bd-8cfc-d1ef060e81dd",
+      "name": "整理：Issue 動態",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $('收到 GitHub 事件').first().json.body;\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nreturn [{ json: {\n  subject: `⭐ ${e.sender?.login} 幫 ${e.repository?.name} 按了星星！（目前 ${e.repository?.stargazers_count} 顆）`,\n  html: `<h2>⭐ 有人幫你按星星了！</h2><p><img src=\"${esc(e.sender?.avatar_url)}\" width=\"64\" style=\"border-radius:50%\"></p>\n         <p><b>${esc(e.sender?.login)}</b> 幫 <b>${esc(e.repository?.full_name)}</b> 按了星星</p>\n         <p>目前總共 <b>${e.repository?.stargazers_count}</b> 顆星 🎉</p>`,\n} }];"
+      },
+      "id": "129221ff-835a-5389-884e-811da24aa613",
+      "name": "整理：按星星",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const e = $('收到 GitHub 事件').first().json.body;\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nconst type = $('收到 GitHub 事件').first().json.headers['x-github-event'];\nreturn [{ json: {\n  subject: `📬 收到 GitHub 事件：${type}`,\n  html: `<h2>📬 收到 ${esc(type)} 事件</h2><p>這個事件還沒有專屬的處理流程，可以在 Switch 節點新增一條規則。</p>`,\n} }];"
+      },
+      "id": "f9471097-86a5-50c7-9638-9eb12115b635",
+      "name": "整理：其他事件",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('設定').first().json.notify_email }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:560px\">{{ $json.html }}</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "20cc130e-2a79-51ce-9fad-4c9ba92a52a3",
+      "name": "寄送通知信",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, event: $('收到 GitHub 事件').first().json.headers['x-github-event'] }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "59be93fa-153f-5eb4-b638-e143e559e07d",
+      "name": "回傳 200 已處理",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1180,
+        120
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "依事件類型分流": {
+      "main": [
+        [
+          {
+            "node": "整理：連線測試",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "整理：推送程式碼",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "整理：Issue 動態",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "整理：按星星",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "整理：其他事件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理：連線測試": {
+      "main": [
+        [
+          {
+            "node": "寄送通知信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理：推送程式碼": {
+      "main": [
+        [
+          {
+            "node": "寄送通知信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理：Issue 動態": {
+      "main": [
+        [
+          {
+            "node": "寄送通知信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理：按星星": {
+      "main": [
+        [
+          {
+            "node": "寄送通知信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理：其他事件": {
+      "main": [
+        [
+          {
+            "node": "寄送通知信",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "收到 GitHub 事件": {
+      "main": [
+        [
+          {
+            "node": "設定",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "設定": {
+      "main": [
+        [
+          {
+            "node": "密鑰正確嗎？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "密鑰正確嗎？": {
+      "main": [
+        [
+          {
+            "node": "依事件類型分流",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "回傳 401 未授權",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "寄送通知信": {
+      "main": [
+        [
+          {
+            "node": "回傳 200 已處理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

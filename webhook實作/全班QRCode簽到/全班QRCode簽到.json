@@ -1,0 +1,692 @@
+{
+  "name": "Webhook 範例 2：全班 QR Code 簽到",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📋 範例 2：全班 QR Code 簽到\n\n**流程 A｜老師看板** `GET /checkin-board`\n投影在教室：顯示簽到 QR Code 與即時名單（每 5 秒更新）\n\n**流程 B｜簽到頁** `GET /checkin`\n學生掃 QR Code 打開的網頁\n\n**流程 C｜送出簽到** `POST /checkin-submit`\n檢查資料 ➔ 今天簽到過了嗎？ ➔ 寫入 DataTable ➔ 回傳結果頁\n\n⚙️ 使用前：建立 DataTable **簽到紀錄**（欄位 class_date、checkin_time、student_id、name，全部 String），切換為 **Active**，並準備學生手機連得到的網址（ngrok / Cloudflare Tunnel / n8n Cloud）",
+        "height": 420,
+        "width": 600
+      },
+      "id": "8fe37748-1120-508f-aa96-46418c61214f",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -520
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 流程 A：老師簽到看板",
+        "height": 300,
+        "width": 1160,
+        "color": 7
+      },
+      "id": "13788846-ef74-5380-80f4-dcc06e63e6df",
+      "name": "A",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 流程 B：學生簽到頁",
+        "height": 220,
+        "width": 1160,
+        "color": 6
+      },
+      "id": "b8dad8f3-6ce3-5ba3-8f93-4509b5b247cf",
+      "name": "B",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 流程 C：送出簽到",
+        "height": 520,
+        "width": 1640,
+        "color": 5
+      },
+      "id": "14e1f980-545b-54db-bcbd-b3c97f7a49c9",
+      "name": "C",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "path": "checkin-board",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5e8035d0-1dcf-5f37-b37e-be7965e9cc35",
+      "name": "老師簽到看板",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        80
+      ],
+      "webhookId": "99bddf45-46f3-580d-8e0e-0435097e46b3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cc6ddf96-3ca4-59e1-b64d-81c8d0cbfbff",
+              "name": "class_name",
+              "value": "n8n 自動化實作",
+              "type": "string"
+            },
+            {
+              "id": "70dcd4b6-6736-505f-bdc6-e635e6885145",
+              "name": "today",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c33d240b-f5c3-52b9-8e34-6a62528918cc",
+      "name": "設定",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        20,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "簽到紀錄"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "class_date",
+              "condition": "eq",
+              "keyValue": "={{ $json.today }}"
+            }
+          ]
+        },
+        "returnAll": true,
+        "orderBy": true,
+        "orderByColumn": "createdAt",
+        "orderByDirection": "ASC"
+      },
+      "id": "165209b4-caab-5ba8-9bee-8365d6c70d68",
+      "name": "讀取今天的簽到名單",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        80
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 老師看板：產生簽到 QR Code + 今天的簽到名單（每 5 秒自動重新整理）\nconst cfg = $('設定').first().json;\nconst req = $('老師簽到看板').first().json;\nconst host  = (req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0];\nconst proto = (req.headers['x-forwarded-proto'] || (/^(localhost|127\\.)/.test(host) ? 'http' : 'https')).split(',')[0];\nconst checkinUrl = `${proto}://${host}/webhook/checkin`;\nconst qr = 'https://quickchart.io/qr?size=360&margin=1&text=' + encodeURIComponent(checkinUrl);\n\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\n// DataTable 沒有資料時會輸出一筆空資料（Always Output Data），要先過濾掉\nconst rows = $input.all().map(i => i.json).filter(r => r.student_id);\n\nconst list = rows.map((r, i) => `\n  <tr><td>${i + 1}</td><td>${esc(r.student_id)}</td><td>${esc(r.name)}</td><td>${esc(r.checkin_time)}</td></tr>`).join('');\n\nconst html = `<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta http-equiv=\"refresh\" content=\"5\">\n<title>簽到看板</title><style>\nbody{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#0f172a;color:#f8fafc;padding:24px}\n.wrap{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;align-items:flex-start}\n.qr{background:#fff;padding:20px;border-radius:24px;text-align:center;color:#0f172a}\n.qr img{width:min(360px,80vw);height:auto}\n.count{font-size:96px;font-weight:800;line-height:1;color:#facc15}\ntable{border-collapse:collapse;min-width:min(420px,90vw);font-size:18px}\ntd,th{padding:8px 12px;border-bottom:1px solid #334155;text-align:left}\n</style></head><body>\n<h1 style=\"text-align:center;margin-top:0\">📋 ${esc(cfg.class_name)}｜${cfg.today} 簽到</h1>\n<div class=\"wrap\">\n  <div class=\"qr\"><img src=\"${qr}\" alt=\"簽到 QR Code\"><div style=\"margin-top:8px;font-size:14px\">${esc(checkinUrl)}</div></div>\n  <div>\n    <div class=\"count\">${rows.length}</div><div style=\"color:#94a3b8;margin-bottom:16px\">人已簽到（每 5 秒自動更新）</div>\n    <table><tr><th>#</th><th>學號</th><th>姓名</th><th>時間</th></tr>${list || '<tr><td colspan=\"4\">還沒有人簽到，快拿出手機掃描 QR Code！</td></tr>'}</table>\n  </div>\n</div></body></html>`;\n\nreturn [{ json: { html } }];"
+      },
+      "id": "ba96789a-b44d-5aac-92a2-442f1fd4dd51",
+      "name": "產生看板網頁",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "2ce71a90-8094-51ba-ae23-784d657ea23a",
+      "name": "顯示看板",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "path": "checkin",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "97484af0-d6f3-550e-89c5-62a012f1bfba",
+      "name": "學生簽到頁",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        360
+      ],
+      "webhookId": "3eacc557-467b-5474-8f66-95e75550671a"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>課堂簽到</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\"><div class=\"big\">📱</div><h1>課堂簽到</h1>\n<p class=\"muted\">填寫學號與姓名，按下簽到即可。</p>\n<form method=\"post\" action=\"/webhook/checkin-submit\">\n<label>學號<input name=\"student_id\" id=\"sid\" required autocomplete=\"off\" placeholder=\"例如 B11205001\"></label>\n<label>姓名<input name=\"name\" id=\"nm\" required autocomplete=\"off\"></label>\n<button type=\"submit\">✅ 簽到</button></form></main>\n<script>\n// 記住上次輸入的學號與姓名，下次簽到不用再打字\nconst sid=document.getElementById('sid'),nm=document.getElementById('nm');\ntry{sid.value=localStorage.getItem('sid')||'';nm.value=localStorage.getItem('nm')||'';}catch(e){}\ndocument.querySelector('form').addEventListener('submit',()=>{try{localStorage.setItem('sid',sid.value);localStorage.setItem('nm',nm.value);}catch(e){}});\n</script></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7517b13f-9573-5178-9f40-045654b9ba2f",
+      "name": "顯示簽到表單",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        40,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "checkin-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ec6095c5-5d8a-52a9-b635-00ea6efa9f3d",
+      "name": "接收簽到資料",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        700
+      ],
+      "webhookId": "d32ebafc-2095-5044-bc00-541d73ac8643"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02088fd7-af3a-5b88-8b99-fcf07ce365c3",
+              "name": "student_id",
+              "value": "={{ String($json.body.student_id || '').trim().toUpperCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "40aa81e4-c0c4-51f4-b5dc-c05338a5e17d",
+              "name": "name",
+              "value": "={{ String($json.body.name || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "219306bd-d62d-59f0-9ccd-a5f107b2955e",
+              "name": "safe_name",
+              "value": "={{ String($json.body.name || '').trim().replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]) }}",
+              "type": "string"
+            },
+            {
+              "id": "6644538a-d533-5536-bcf0-433972a06ed7",
+              "name": "class_date",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "7ba49221-e42b-53c2-8859-e6f310c8f683",
+              "name": "checkin_time",
+              "value": "={{ $now.toFormat('HH:mm:ss') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d460945-c942-5419-8895-4f979c4b54a6",
+      "name": "整理簽到資料",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        20,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5a8045fe-ea99-570d-bb43-4a165dc0190c",
+              "leftValue": "={{ $json.student_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "edbead49-bce3-5d7c-af04-06579cb73266",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "fc7df775-5958-51f0-88ca-225ece584904",
+      "name": "資料完整嗎？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>簽到失敗</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\" style=\"text-align:center\"><div class=\"big\">⚠️</div><h1>資料不完整</h1><p class=\"muted\">學號和姓名都要填寫喔！</p><p><a href=\"/webhook/checkin\">回簽到頁</a></p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          },
+          "responseCode": 400
+        }
+      },
+      "id": "5b8fc56b-1576-5147-91df-cf91f7540d89",
+      "name": "顯示：資料不完整",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "簽到紀錄"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "class_date",
+              "condition": "eq",
+              "keyValue": "={{ $json.class_date }}"
+            },
+            {
+              "keyName": "student_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.student_id }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "id": "7b696076-d68d-5ab9-bb15-e6fee4f6ac06",
+      "name": "今天簽到過了嗎？",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        640
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6c8ddf56-ac48-5687-8868-133161636cbe",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "03dd9dc2-ae3a-5838-975a-888ae29912ed",
+      "name": "已經簽到過？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        680,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>已經簽到過了</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\" style=\"text-align:center\"><div class=\"big\">😉</div><h1>{{ $('整理簽到資料').first().json.safe_name }}，你今天已經簽到過了</h1><p class=\"muted\">簽到時間：{{ $json.checkin_time }}</p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "2256c7b6-e4b5-53b5-a94d-950b4d713fc0",
+      "name": "顯示：重複簽到",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "簽到紀錄"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "class_date": "={{ $('整理簽到資料').first().json.class_date }}",
+            "checkin_time": "={{ $('整理簽到資料').first().json.checkin_time }}",
+            "student_id": "={{ $('整理簽到資料').first().json.student_id }}",
+            "name": "={{ $('整理簽到資料').first().json.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "class_date",
+              "displayName": "class_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "checkin_time",
+              "displayName": "checkin_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "student_id",
+              "displayName": "student_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "279d37e0-0b12-5369-87d6-9c6ebd6cc7d8",
+      "name": "寫入簽到紀錄",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>簽到成功</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\" style=\"text-align:center\"><div class=\"big\">🎉</div><h1>簽到成功！</h1><p style=\"font-size:20px\">{{ $('整理簽到資料').first().json.safe_name }}（{{ $('整理簽到資料').first().json.student_id }}）</p><p class=\"muted\">{{ $('整理簽到資料').first().json.class_date }} {{ $('整理簽到資料').first().json.checkin_time }}</p><p class=\"muted\">抬頭看看投影幕，你的名字已經出現了 👀</p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "51b8c6a7-53d6-5b69-8d4b-e5f34c0d0d80",
+      "name": "顯示：簽到成功",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1160,
+        760
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "老師簽到看板": {
+      "main": [
+        [
+          {
+            "node": "設定",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "設定": {
+      "main": [
+        [
+          {
+            "node": "讀取今天的簽到名單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "讀取今天的簽到名單": {
+      "main": [
+        [
+          {
+            "node": "產生看板網頁",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "產生看板網頁": {
+      "main": [
+        [
+          {
+            "node": "顯示看板",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "學生簽到頁": {
+      "main": [
+        [
+          {
+            "node": "顯示簽到表單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收簽到資料": {
+      "main": [
+        [
+          {
+            "node": "整理簽到資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整理簽到資料": {
+      "main": [
+        [
+          {
+            "node": "資料完整嗎？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "資料完整嗎？": {
+      "main": [
+        [
+          {
+            "node": "今天簽到過了嗎？",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "顯示：資料不完整",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "今天簽到過了嗎？": {
+      "main": [
+        [
+          {
+            "node": "已經簽到過？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "已經簽到過？": {
+      "main": [
+        [
+          {
+            "node": "顯示：重複簽到",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "寫入簽到紀錄",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "寫入簽到紀錄": {
+      "main": [
+        [
+          {
+            "node": "顯示：簽到成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -77,7 +77,7 @@
 - LINE Official Account Manager 回應模式與自動回應設定
 - 在 n8n 建立 LINE 憑證與測試驗證流程
 
-#### ✈️ 10. [Telegram Bot 申請與前置設定指南](../通訊軟體整合/Telegram/README.md#️-前置設定指南)
+#### ✈️ 10. [Telegram Bot 申請與前置設定指南](../通訊軟體整合/Telegram/README.md#telegram-setup)
 **重點內容**：
 - 向官方 `@BotFather` 發送 `/newbot` 取得專屬 Bot Token
 - 設定 `/setprivacy` (Disable) 確保機器人在群組能正常接收訊息
@@ -88,14 +88,14 @@
 
 ### 🗄️ 四、雲端資料庫與向量資料庫平台註冊
 
-#### 🐘 11. [Supabase 雲端資料庫註冊與連線指南 (免信用卡)](../雲端資料庫整合/Supabase/README.md)
+#### 🐘 11. [Supabase 雲端資料庫註冊與連線指南 (免信用卡)](../雲端資料庫整合/Supabase設定/README.md)
 **重點內容**：
 - Supabase 官方帳號註冊（完全免信用卡）
 - 建立免費 PostgreSQL 專案與設定資料庫密碼
 - 取得 Session Pooler IPv4 連線主機與 Port 6543
 - 在 n8n 中配置 Postgres / Supabase 憑證與 SSL 連線
 
-#### 🌲 12. [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](../雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
+#### 🌲 12. [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](../雲端資料庫整合/Pinecone設定/README.md)
 **重點內容**：
 - Pinecone 官方免費帳號註冊（Serverless Starter Plan，免信用卡）
 - 取得 API Key 與環境主機位置

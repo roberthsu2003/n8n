@@ -34,7 +34,7 @@ flowchart LR
 
 ### 工作流程樣版下載
 
-- [📥 Pinecone 雲端向量資料庫工作流程樣版 (06_pinecone_vector_rag.json)](./06_pinecone_vector_rag.json)
+- [📥 Pinecone 雲端向量資料庫工作流程樣版 (07_pinecone_vector_rag.json)](./07_pinecone_vector_rag.json)
 
 ---
 

@@ -45,9 +45,9 @@
 * 🐳 **容器與本機安裝**：[Docker 安裝指南](./docker安裝/README.md) ｜ [n8n 獨立容器安裝與啟動](./n8n簡介與安裝/README.md)
 * 🌐 **外網通道平台註冊**：[ngrok 帳號註冊與 AuthToken 設定](./ngrok安裝/README.md) ｜ [Cloudflare 帳號註冊與 Tunnel 安全通道](./cloudflare_tunnel/README.md)
 * ⭐ **一鍵容器化整合推薦**：[n8n + ngrok 雙容器方案 (快速開發測試)](./n8n_ngrok/README.md) ｜ [n8n + Cloudflare 雙容器方案 (自訂網域生產級)](./n8n_cloudflare/README.md)
-* 💬 **通訊軟體開發者註冊**：[LINE Developers 註冊與 Messaging API 設定](./line設定/README.md) ｜ [Telegram BotFather 機器人申請與憑證設定](./通訊軟體整合/Telegram/README.md#️-前置設定指南)
+* 💬 **通訊軟體開發者註冊**：[LINE Developers 註冊與 Messaging API 設定](./line設定/README.md) ｜ [Telegram BotFather 機器人申請與憑證設定](./通訊軟體整合/Telegram/README.md#telegram-setup)
 * ☁️ **Google 雲端平台註冊**：[Google Cloud Platform (GCP) 專案建立與 API 啟用](./google_cloud設定/README.md) ｜ [OAuth 2.0 開放授權概念解析](./OAuth/README.md)
-* 🗄️ **雲端資料庫平台註冊**：[Supabase 雲端資料庫註冊與連線設定 (免信用卡)](./雲端資料庫整合/Supabase/README.md) ｜ [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](./雲端資料庫整合/06_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
+* 🗄️ **雲端資料庫平台註冊**：[Supabase 雲端資料庫註冊與連線設定 (免信用卡)](./雲端資料庫整合/Supabase設定/README.md) ｜ [Pinecone 向量資料庫註冊與索引設定 (免信用卡)](./雲端資料庫整合/Pinecone設定/README.md)
 * 🤖 **AI 助手與模型註冊**：[NVIDIA NIM 微服務模型串接](./nvidia_nim/README.md) ｜ [OpenRouter 多模型聚合平台 (資安合規)](./openrouter/README.md) ｜ [n8n Chat Hub 企業級對話中心](./chat_hub/README.md) ｜ [n8n MCP 協議設定 (Claude / OpenAI / Gemini)](./n8n_mcp/README.md) ｜ [Ollama 本機模型整合](./ollama安裝/README.md)
 * 🛡️ **資料維運與備份**：[n8n 資料備份與還原指南](./n8n的備份方式/README.md)
 
@@ -72,6 +72,7 @@
 4. **檔案上傳與自動資料統計**：接收 Multipart 二進位 CSV 成績單，自動計算國英數平均分報表。
 5. **API 金鑰驗證與多事件分流**：Header API Key 401 阻斷防護與 Switch 多路業務路由器。
 6. **Webhook 整合 AI 文字分析微服務**：傳入顧客評論，AI 自動評估情緒、滿意度並產出客服建議回信。
+7. **Webhook 自製訂便當網站**：n8n 自己當網站，從 Google Drive 菜單 Excel 動態產生訂購網頁，訂單自動累積成當日 Excel。
 
 ---
 
@@ -105,16 +106,15 @@
 
 ---
 
-### 🗄️ 7. [雲端資料庫與向量知識庫：PostgreSQL, Supabase & Pinecone](./雲端資料庫整合/README.md)
-關聯式資料庫與專用向量資料庫實戰，提供**完全免綁信用卡方案**：
-1. **Postgres 基礎 CRUD**：參數化查詢防 SQL 注入與 `RETURNING *` 技巧
-2. **Supabase Low-Code 表格存取**：免寫 SQL，透過視覺化介面讀寫資料表
-3. **電商訂單 Upsert 與關聯統計**：`ON CONFLICT` 防重複下單與跨表 JOIN 分組報表
-4. **資料庫變更即時偵測與推播**：定時排程監控 pending 訂單，Telegram 發送即時告警
-5. **Supabase pgvector 向量知識庫**：關聯式資料庫與 RAG 向量一體化檢索（含切塊上傳與 Drive 同步）
-6. **RAG 檢索策略與來源過濾**：自然語言意圖識別、動態 Metadata Filter 注入與 Postgres 對話記憶
-7. **Pinecone 雲端向量資料庫 RAG**：Serverless 專用向量庫毫秒級高併發語意搜尋
-8. **Pinecone 與 Ollama 金融客服 RAG**：Google Drive 檔案自動讀取切塊、Hugging Face 多語言嵌入與 Ollama 私有模型問答雙軌實戰
+### 🗄️ 7. [雲端資料庫整合：Supabase & Pinecone](./雲端資料庫整合/README.md)
+七個生活化情境範例，皆附自動產生的測試資料，提供**完全免綁信用卡方案**：
+1. **社團活動報名系統**：Supabase 節點免寫 SQL 完成 CRUD，View 即時計算剩餘名額、防重複報名
+2. **早餐店每日營收日報**：Postgres 參數化查詢、`JOIN` / `GROUP BY` 統計，每天自動寄出 HTML 日報
+3. **圖書館逾期還書提醒**：日期運算與 `json_agg`，一人一封提醒信並回寫狀態防止重複寄送
+4. **網拍小賣家 AI 資料助理**：AI Agent + Postgres Tool 自己寫 SQL 回答問題，唯讀帳號保護資料
+5. **公司員工手冊問答機器人**：Pinecone RAG 入門，切塊、Gemini Embedding 與 Namespace
+6. **餐廳菜單智慧推薦**：CSV 每列向量化，Metadata Filter 精準篩選素食、辣度與過敏原
+7. **維修中心客服信自動回覆**：Gmail 讀信 ➔ Pinecone 查 FAQ ➔ 建立回覆草稿 ➔ Supabase 記錄工單
 
 ---
 

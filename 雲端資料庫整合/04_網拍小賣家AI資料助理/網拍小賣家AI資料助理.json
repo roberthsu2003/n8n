@@ -1,0 +1,151 @@
+{
+  "name": "04 網拍小賣家 AI 資料助理",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛍️ 範例 04：網拍小賣家 AI 資料助理\n\n用聊天的方式問問題，AI Agent 會**自己寫 SQL** 查 Supabase，再用白話回答。\n\n試試看：\n- 上個月哪個商品賣最好？\n- 哪些商品庫存低於 10 個？\n- 各銷售通路的營收比例？\n- 台北市的顧客最常買什麼？\n- 毛利最高的分類是哪一個？\n\n⚠️ **安全**：Postgres Tool 要選用「唯讀帳號 ai_readonly」建立的憑證，AI 就算寫錯 SQL 也改不到資料。",
+        "height": 420,
+        "width": 560
+      },
+      "id": "9a50e650-a06d-544b-9ca4-0a8c2588457f",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9fbfb9c6-ad78-57b8-a05a-1396c22ff991",
+      "name": "聊天視窗",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "c14cfdfe-b1ea-5684-bddf-7d777dbc0339"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=你是「小日子選物店」的資料分析助理，負責幫老闆查詢 PostgreSQL 資料庫並用繁體中文回答。\n今天日期是 {{ $now.toFormat('yyyy-MM-dd') }}。\n\n## 你可以使用的資料表\n\n1. shop_order_details（最常用！訂單明細檢視表，已經 JOIN 好）\n   - order_id, order_date（日期）, status（已完成／已取消／退貨）, channel（蝦皮／官網／IG 私訊／市集）\n   - product_name, category（文具／杯具／香氛／包袋／居家）\n   - quantity（數量）, unit_price（成交單價）, amount（金額 = 數量 × 單價）, profit（毛利）\n   - customer_name, city（顧客縣市）\n2. shop_products：id, name, category, price（售價）, cost（成本）, stock（目前庫存）\n3. shop_customers：id, name, city, joined_at（加入日期）\n\n## 規則\n- 一律使用「query_database」工具查詢真實資料，不可以自己編數字。\n- 只能寫 SELECT 查詢，絕對不要 INSERT、UPDATE、DELETE、DROP。\n- 計算銷售額、銷售量時，只算 status = '已完成' 的訂單。\n- 「上個月」指上一個完整的月份；「最近 30 天」指 order_date >= CURRENT_DATE - 30。\n- 查詢結果很多時，用 LIMIT 限制在 20 筆以內。\n- 回答時先給結論，再用 Markdown 表格列出數據，金額加上千分位與「元」。\n- 如果查詢出錯，閱讀錯誤訊息後修正 SQL 再試一次。"
+        }
+      },
+      "id": "bad33892-d436-5ace-8891-7d73a0f3098a",
+      "name": "AI 資料助理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        300,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "b93bb07f-9537-5d18-a3fe-9e7a51f0fc50",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "8d64f8fd-0f5d-5b5d-ba97-0c8371f4f458",
+      "name": "對話記憶",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        340,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "對商店的 PostgreSQL 資料庫執行一段 SELECT 查詢，回傳查詢結果。可查詢的資料表：shop_order_details、shop_products、shop_customers。",
+        "operation": "executeQuery",
+        "query": "={{ $fromAI('sql', '要執行的 PostgreSQL SELECT 查詢語句，只能是 SELECT', 'string') }}",
+        "options": {}
+      },
+      "id": "d15d7109-2c01-5dc1-98c0-6101a506aa0e",
+      "name": "query_database",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        520,
+        240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "聊天視窗": {
+      "main": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "對話記憶": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "query_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

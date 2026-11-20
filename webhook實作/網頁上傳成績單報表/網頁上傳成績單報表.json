@@ -1,0 +1,261 @@
+{
+  "name": "Webhook 範例 4：網頁上傳成績單報表",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📊 範例 4：網頁上傳成績單報表\n\n**流程 A** `GET /grade-upload`：顯示上傳網頁\n\n**流程 B** `POST /grade-report`：接收檔案 ➔ 解析 CSV ➔ Code 自動找出科目欄位並統計 ➔ 回傳 HTML 報表\n\n不用 curl，用瀏覽器選檔案就能測試。可以拿自己班上的成績單 CSV 來試！\n\n⚙️ 切換為 **Active** 後打開 `/webhook/grade-upload`",
+        "height": 320,
+        "width": 560
+      },
+      "id": "54b2cd80-3932-54fa-9676-af0eb49836d3",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "path": "grade-upload",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b30b6557-ba52-52a2-a3df-ceec60eeb189",
+      "name": "開啟上傳頁面",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -40
+      ],
+      "webhookId": "a6a48053-b514-5eb7-a9e6-29ec71811b8b"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>上傳成績單</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\"><div class=\"big\">📊</div><h1>成績單分析</h1>\n<p class=\"muted\">上傳 CSV 成績單，n8n 會自動算出各科平均、及格率、前五名與需要補救的同學。</p>\n<form method=\"post\" action=\"/webhook/grade-report\" enctype=\"multipart/form-data\">\n<label>選擇 CSV 檔案<input type=\"file\" name=\"file\" accept=\".csv\" required></label>\n<button type=\"submit\">開始分析</button></form>\n<p class=\"muted\" style=\"font-size:14px\">CSV 第一列是欄位名稱，例如：姓名,學號,國文,英文,數學（請存成 UTF-8 編碼）</p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "86c9d978-38c1-5c6f-9351-d80170c3ab70",
+      "name": "顯示上傳表單",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        40,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "grade-report",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a7fcdf58-53e2-5d71-9a21-58c19cb4fe8d",
+      "name": "接收成績單檔案",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        240
+      ],
+      "webhookId": "23136756-a5cd-5f2d-9383-41d06556c1a7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d4cc2f16-a208-5e8d-94b3-2fc6912bd4f8",
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "2d0794a5-d7ea-528c-9753-3eefb9b36217",
+      "name": "有上傳檔案嗎？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        20,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>錯誤</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}</style></head><body><main class=\"card\"><h1>⚠️ 沒有收到檔案</h1><p><a href=\"/webhook/grade-upload\">重新上傳</a></p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          },
+          "responseCode": 400
+        }
+      },
+      "id": "c0843a33-d6e4-5164-aad4-dae6685be7f0",
+      "name": "顯示：沒有檔案",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "={{ Object.keys($binary)[0] }}",
+        "options": {}
+      },
+      "id": "aa1b5dfa-e314-5204-af83-27ff31476beb",
+      "name": "解析 CSV",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        240,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 自動判斷欄位：姓名欄（非數字）、科目欄（全部是數字，排除學號／座號）\nconst rows = $input.all().map(i => i.json);\nconst esc = s => String(s ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'})[c]);\nconst isNum = v => v !== '' && v !== null && v !== undefined && !isNaN(Number(v));\nconst cols = Object.keys(rows[0] || {});\nconst idLike = /學號|座號|編號|^id$|^no$/i;\nconst nameCol = cols.find(c => !rows.every(r => isNum(r[c]))) || cols[0];\nconst subjects = cols.filter(c => c !== nameCol && !idLike.test(c) && rows.length && rows.every(r => isNum(r[c])));\n\nif (!rows.length || !subjects.length) {\n  return [{ json: { ok: false, html: '<p>找不到成績欄位，請確認 CSV 第一列是欄位名稱，且成績都是數字。</p>' } }];\n}\n\nconst round1 = n => Math.round(n * 10) / 10;\nconst stats = subjects.map(s => {\n  const v = rows.map(r => Number(r[s]));\n  return { s, avg: round1(v.reduce((a, b) => a + b, 0) / v.length), max: Math.max(...v), min: Math.min(...v),\n           pass: Math.round(v.filter(x => x >= 60).length / v.length * 100) };\n});\nconst students = rows.map(r => {\n  const total = subjects.reduce((a, s) => a + Number(r[s]), 0);\n  return { name: r[nameCol], total, avg: round1(total / subjects.length), fails: subjects.filter(s => Number(r[s]) < 60) };\n}).sort((a, b) => b.total - a.total);\n\nconst bar = (pct, color) => `<div style=\"background:#e2e8f0;border-radius:8px;height:14px\"><div style=\"width:${pct}%;background:${color};height:14px;border-radius:8px\"></div></div>`;\nconst statRows = stats.map(t => `<tr><td><b>${esc(t.s)}</b></td><td>${t.avg}</td><td>${t.max}</td><td>${t.min}</td>\n  <td style=\"min-width:120px\">${bar(t.pass, t.pass >= 80 ? '#22c55e' : '#f59e0b')}<small>${t.pass}%</small></td></tr>`).join('');\nconst medal = ['🥇', '🥈', '🥉', '4', '5'];\nconst top = students.slice(0, 5).map((s, i) => `<tr><td>${medal[i]}</td><td>${esc(s.name)}</td><td>${s.total}</td><td>${s.avg}</td></tr>`).join('');\nconst fails = students.filter(s => s.fails.length);\nconst failList = fails.length\n  ? fails.map(s => `<li>${esc(s.name)}：${s.fails.map(esc).join('、')}</li>`).join('')\n  : '<li>全部及格，太棒了 🎉</li>';\n\nconst html = `<h1>📊 成績分析報表</h1><p class=\"muted\">共 ${rows.length} 位學生、${subjects.length} 個科目（${subjects.map(esc).join('、')}）</p>\n<h2>各科統計</h2><table><tr><th>科目</th><th>平均</th><th>最高</th><th>最低</th><th>及格率</th></tr>${statRows}</table>\n<h2>總分前五名</h2><table><tr><th></th><th>姓名</th><th>總分</th><th>平均</th></tr>${top}</table>\n<h2>需要補救教學（${fails.length} 人）</h2><ul>${failList}</ul>`;\nreturn [{ json: { ok: true, html } }];"
+      },
+      "id": "157f0eff-69e2-5903-8c35-cef38178f3ac",
+      "name": "計算統計並產生報表",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!doctype html><html lang=\"zh-Hant\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>成績分析報表</title><style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,'Segoe UI','Microsoft JhengHei',Arial,sans-serif;background:#f1f5f9;color:#0f172a;padding:20px}.card{background:#fff;max-width:560px;margin:24px auto;padding:28px;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.08)}h1{margin:0 0 8px;font-size:26px}.muted{color:#64748b}label{display:block;margin-top:16px;font-weight:600}input,textarea,button{width:100%;font-size:17px;padding:12px;margin-top:6px;border:1px solid #cbd5e1;border-radius:12px;font-family:inherit}button{background:#4f46e5;color:#fff;border:0;margin-top:22px;font-weight:700;cursor:pointer}.big{font-size:56px;text-align:center;margin:8px 0}.card{max-width:760px}table{width:100%;border-collapse:collapse;margin-bottom:8px}td,th{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left}h2{font-size:19px;margin-top:28px}</style></head><body><main class=\"card\">{{ $json.html }}<p><a href=\"/webhook/grade-upload\">⬅ 再分析一份</a></p></main></body></html>",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "232a63d4-d3ec-5e75-9317-bf48677a0aca",
+      "name": "顯示分析報表",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "開啟上傳頁面": {
+      "main": [
+        [
+          {
+            "node": "顯示上傳表單",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收成績單檔案": {
+      "main": [
+        [
+          {
+            "node": "有上傳檔案嗎？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "有上傳檔案嗎？": {
+      "main": [
+        [
+          {
+            "node": "解析 CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "顯示：沒有檔案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 CSV": {
+      "main": [
+        [
+          {
+            "node": "計算統計並產生報表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "計算統計並產生報表": {
+      "main": [
+        [
+          {
+            "node": "顯示分析報表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

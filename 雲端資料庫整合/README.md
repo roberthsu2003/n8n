@@ -1,185 +1,261 @@
-# 🗄️ 雲端資料庫與向量知識庫整合（PostgreSQL, Supabase & Pinecone 實戰）
+# 雲端資料庫整合
 
-歡迎來到 **n8n 雲端資料庫與向量知識庫整合教學**！在現代企業自動化系統中，資料庫是用來**持久化儲存業務數據**、**維護工單狀態機**、**跨系統資料同步**以及**為 AI 提供私有向量知識庫（RAG / Vector Store）**的核心基礎設施。
+歡迎來到 n8n 雲端資料庫整合教學！工作流執行完資料就消失了，想要「記住」報名名單、訂單、借閱紀錄，或讓 AI 讀懂公司文件，就需要資料庫。本章前半段使用 **Supabase（PostgreSQL）** 儲存與統計業務資料，後半段使用 **Pinecone 向量資料庫** 打造會查文件的 AI 助理。
 
-本章節涵蓋全球最受歡迎的開源關聯式資料庫 **PostgreSQL**、雲端全端資料庫平台 **Supabase (pgvector)**，以及業界標準的免費用量無伺服器向量資料庫 **Pinecone**，帶領您由淺至深掌握資料庫操作與企業級 RAG 語意檢索技術。
+每個範例都是一個生活化的情境，並附上**自動產生的測試資料**（SQL 腳本、CSV、知識文件），不需要自己準備任何資料，匯入就能動手做。
 
-> 💡 **AI 協作時代學習法**：在完成基礎節點設定並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製各範例中的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt 提詞，由 AI 助理替您在畫布上全自動建構與擴充進階邏輯！
+> 💡 **AI 協作時代學習法**：在學習完基礎節點操作並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製每個範例下方的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt，交由 AI 助理替您在畫布上全自動建構與擴充進階邏輯！
+
+## 🔑 前置準備
+
+本章使用的服務都有免費方案，**不需要綁信用卡**：
+
+1. [🐘 Supabase 註冊與 n8n 連線設定](./Supabase設定/README.md)（範例 01～04、07）
+2. [🌲 Pinecone 註冊與 n8n 連線設定](./Pinecone設定/README.md)（範例 05～07）
+3. [🤖 Gemini 與 Gmail 憑證設定](./Gemini與Gmail憑證/README.md)（AI 與寄信）
+
+## 📚 範例導覽
+
+本教學提供七個完整的實作範例，從免寫 SQL 的資料表操作、SQL 統計報表、排程提醒，到讓 AI 查資料庫、查文件，最後整合兩種資料庫完成自動客服：
+
+| 範例 | 情境 | 資料庫 | 核心技術 |
+| :---: | :--- | :--- | :--- |
+| 01 | 社團活動報名系統 | 🐘 Supabase | Supabase 節點 CRUD、View、表單 |
+| 02 | 早餐店每日營收日報 | 🐘 Supabase | SQL JOIN／GROUP BY、參數化查詢、HTML 郵件 |
+| 03 | 圖書館逾期還書提醒 | 🐘 Supabase | 日期運算、json_agg、狀態回寫防重複 |
+| 04 | 網拍小賣家 AI 資料助理 | 🐘 Supabase | AI Agent + Postgres Tool、唯讀帳號 |
+| 05 | 公司員工手冊問答機器人 | 🌲 Pinecone | RAG、切塊、Embedding、Namespace |
+| 06 | 餐廳菜單智慧推薦 | 🌲 Pinecone | CSV 向量化、Metadata Filter |
+| 07 | 維修中心客服信自動回覆 | 🌲 + 🐘 | Gmail Trigger、結構化輸出、草稿審核、Upsert |
 
 ---
 
-## 📌 前置準備與連線設定
+## 第一部分：Supabase（PostgreSQL）
 
-在開始實作以下範例前，請先完成資料庫專案建立與連線憑證設定（皆為**完全免費、免綁信用卡**方案）：
+### 1. [範例：社團活動報名系統](./01_社團活動報名系統/README.md)
 
-> 🔑 **完整設定指南**：
-> 1. [🐘 Supabase 註冊、OAuth 與連線參數設定指南](./Supabase/README.md)
-> 2. [📜 Supabase 一鍵建表 SQL 腳本 (schema.sql)](./Supabase/schema.sql)（包含客戶表、訂單表與 pgvector 向量表）
-> 3. [🌲 Pinecone 免費 Starter 方案與 Serverless 索引建立指南](./07_Pinecone雲端向量資料庫與AI檢索/README.md#免費建立-pinecone不用花錢步驟指南)
+學生用表單報名社團活動，系統即時檢查剩餘名額與是否重複報名，有名額才寫入資料庫並寄出確認信。全程使用 Supabase 節點，**不用寫 SQL**。
 
----
+**學習重點**：
+- 使用 Supabase 節點 Create／Get Many／Delete 操作資料表
+- 用 Filters 設定查詢條件（Equals、多條件 AND）
+- 用資料庫 View 即時計算剩餘名額
+- Always Output Data 處理「查無資料」的情況
+- n8n Form 的多種結果頁（成功、額滿、重複）
 
-## 🧭 資料庫整合核心架構
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-```mermaid
-flowchart TD
-    subgraph Client_Trigger["觸發來源"]
-        Webform["🌐 網頁表單 / Webhook"]
-        Timer["⏰ 定時排程 (Schedule)"]
-        Chat["💬 AI 對話 (Chat Trigger)"]
-    end
+> 💡 **任務目標**：額滿時不再直接拒絕，改為加入候補名單；有人取消報名時，自動寄信通知第一順位候補者。
 
-    subgraph n8n_Core["n8n 自動化流程引擎"]
-        PostgresNode["🐘 Postgres 節點 (原生 SQL / 連線池)"]
-        SupabaseNode["⚡ Supabase 節點 (REST API Low-Code)"]
-        SupabaseVector["🧠 Supabase pgvector (關聯式向量知識庫)"]
-        FilterStrategy["🔍 RAG 檢索策略 (Metadata 來源過濾)"]
-        PineconeVector["🌲 Pinecone Vector Store (專用向量資料庫)"]
-    end
-
-    subgraph Cloud_Databases["雲端資料庫儲存層"]
-        CustomersTable[("👥 Supabase: customers (客戶表)")]
-        OrdersTable[("📦 Supabase: orders (訂單表 - JSONB)")]
-        SupabaseVectorTable[("📚 Supabase: documents (pgvector)")]
-        PineconeIndex[("🌲 Pinecone: Serverless Index (向量庫)")]
-    end
-
-    Webform --> SupabaseNode
-    Timer --> PostgresNode
-    Chat --> SupabaseVector
-    Chat --> FilterStrategy
-    Chat --> PineconeVector
-
-    PostgresNode <--> CustomersTable
-    PostgresNode <--> OrdersTable
-    SupabaseNode <--> CustomersTable
-    SupabaseVector <--> SupabaseVectorTable
-    FilterStrategy <--> SupabaseVectorTable
-    PineconeVector <--> PineconeIndex
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我擴充目前的「01 社團活動報名系統」工作流程，加入候補名單功能：
+1. 我會先在 Supabase 建立資料表 club_waitlist（id, activity_id, student_name, email, created_at）。
+2. 修改報名流程：「還有名額？」IF 節點的 False 分支，不要直接顯示名額已滿，改為：
+   - 使用 Supabase 節點（Create）把報名者寫入 club_waitlist。
+   - 使用 Supabase 節點（Get Many）查詢該活動目前有幾位候補，算出他是第幾順位。
+   - Form Ending 顯示「名額已滿，您已列入候補第 N 位，有空位時會寄信通知您」。
+3. 修改取消報名流程：「有刪除到資料？」為 True 時：
+   - 用 Supabase 節點查詢該活動 club_waitlist 中 created_at 最早的一筆（Limit 1）。
+   - 如果有候補者，用 Gmail 寄信通知他「目前有空位，請在 24 小時內重新報名」。
+4. 請幫我在畫布上建立所需節點、設定 Filters 與表達式，並完成連線！
 ```
+</details>
 
 ---
 
-## 📚 實作範例導覽（由淺至深 8 大範例）
+### 2. [範例：早餐店每日營收日報](./02_早餐店每日營收日報/README.md)
 
-本教學規劃了八個循序漸進、兼具理論與實務價值的實作範例：
+每天早上 8 點自動統計早餐店昨天的營收、熱銷前五名與各時段營收，整理成 HTML 日報寄給老闆。測試資料用 SQL 自動產生 30 天、約 1,700 筆擬真訂單。
 
----
+**學習重點**：
+- Postgres 節點 Execute Query
+- 參數化查詢 `$1` 防止 SQL Injection
+- `JOIN` 多表關聯、`GROUP BY` 分組統計、`COUNT(*) FILTER` 條件計數
+- Execute Once 避免重複查詢
+- Code 節點整合多個查詢結果，用 HTML 製作郵件報表
 
-### 1. [範例 1：Postgres 基礎 CRUD 與資料讀寫（SQL 增刪查改）](./01_Postgres基礎CRUD與資料讀寫/README.md)
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
 
-**難度**：入門 🟢 ｜ **核心技術**：Postgres Node (SQL)
+> 💡 **任務目標**：在日報中加入 Gemini 撰寫的「今日營運建議」，讓數字變成老闆看得懂的行動建議。
 
-學習如何在 n8n 中使用 Postgres 節點執行標準 SQL 語句，透過安全的參數化查詢（`$1, $2, ...`）完成客戶資料的新增、查詢、VIP 等級更新與刪除。
-
-- **學習重點**：PostgreSQL 連線配置、參數化防注入、`RETURNING *` 技巧、標準 CRUD 生命週期。
-- **附帶樣版**：[`01_postgres_crud.json`](./01_Postgres基礎CRUD與資料讀寫/01_postgres_crud.json)
-
----
-
-### 2. [範例 2：Supabase Low-Code 節點與資料表自動化（免寫 SQL 快速存取）](./02_Supabase節點與資料表存取/README.md)
-
-**難度**：初級 🟢 ｜ **核心技術**：Supabase Node (REST API)
-
-免寫 SQL 也能操作雲端資料庫！透過 Supabase REST API 節點，以視覺化下拉選單挑選資料表與欄位，快速完成表單資料寫入與特定條件過濾。
-
-- **學習重點**：Project URL 與 API Key 授權、視覺化新增/讀取資料列、過濾器（Filters: `vip_level eq Gold`）。
-- **附帶樣版**：[`02_supabase_lowcode.json`](./02_Supabase節點與資料表存取/02_supabase_lowcode.json)
-
----
-
-### 3. [範例 3：電商訂單 Upsert 與跨表關聯統計報表（防重複與大數據聚合）](./03_電商訂單Upsert與關聯統計/README.md)
-
-**難度**：初中級 🟡 ｜ **核心技術**：PostgreSQL `ON CONFLICT` 與 `LEFT JOIN`
-
-實戰企業級防重複寫入與多表關聯運算！使用 `ON CONFLICT (email) DO UPDATE` 自動更新客戶資料，並執行 `LEFT JOIN ... GROUP BY` 即時產出客戶消費排行榜。
-
-- **學習重點**：Upsert 防重複與 Race Condition、跨表 JOIN 關聯查詢、資料庫端高效率聚合運算。
-- **附帶樣版**：[`03_ecommerce_upsert_analytics.json`](./03_電商訂單Upsert與關聯統計/03_ecommerce_upsert_analytics.json)
-
----
-
-### 4. [範例 4：資料庫變更即時偵測與 Telegram/LINE 告警推播（狀態監控與通知閉環）](./04_資料庫變更偵測與即時推播/README.md)
-
-**難度**：中級 🟡 ｜ **核心技術**：Schedule Trigger + Postgres + Telegram
-
-監控資料庫最新異動！每分鐘排程自動撈取 `status = 'pending'` 的待處理新訂單，透過 Telegram 發送富文本通知，並自動回寫狀態為 `processing`，形成防重複閉環。
-
-- **學習重點**：定時輪詢監控模式、Telegram Markdown 富文本排版、狀態機更新閉環。
-- **附帶樣版**：[`04_db_trigger_notification.json`](./04_資料庫變更偵測與即時推播/04_db_trigger_notification.json)
-
----
-
-### 5. [範例 5：Supabase pgvector 向量知識庫與 RAG 智能問答（PostgreSQL 變身 AI 大腦）](./05_Supabase_pgvector向量知識庫/README.md)
-
-**難度**：進階 🔴 ｜ **核心技術**：pgvector + Embeddings + AI Agent (RAG)
-
-將 PostgreSQL 升級為 AI 向量知識庫！啟用 `pgvector` 擴充套件，透過 n8n Supabase Vector Store 節點與 Embeddings 模型，實現零幻覺的企業私有知識庫問答系統（包含本機文件切塊寫入與 Google Drive 同步範例）。
-
-- **學習重點**：`pgvector` 向量擴充與 1536 維向量欄位、Embeddings 語意轉換、LangChain Vector Store Retriever、AI Agent 知識庫問答。
-- **附帶樣版**：[`Supabase_RAG_智能問答.json`](./05_Supabase_pgvector向量知識庫/Supabase_RAG_智能問答.json)
-
----
-
-### 6. [範例 6：RAG 檢索策略與 Metadata 來源過濾（精準語意搜尋）](./06_RAG檢索策略與來源過濾/README.md)
-
-**難度**：進階 🔴 ｜ **核心技術**：自然語言意圖識別 + 動態 Metadata Filter + Postgres Memory
-
-單純語意相似度不夠用？實戰高階 Metadata Filtering！使用者提問「從 Google Drive 查...」或「從本機檔案找...」時，系統自動偵測來源並動態注入 JSONB 過濾條件，兼具 Postgres 連續對話歷史記憶。
-
-- **學習重點**：自然語言關鍵字識別、動態注入 `where: { source: ... }` 結構、Postgres Chat Memory 對話狀態持久化。
-- **附帶樣版**：[`RAG_進階檢索_來源過濾.json`](./06_RAG檢索策略與來源過濾/RAG_進階檢索_來源過濾.json)
-
----
-
-### 7. [範例 7：Pinecone 雲端向量資料庫與 AI 檢索（免費 Serverless 專用向量庫）](./07_Pinecone雲端向量資料庫與AI檢索/README.md)
-
-**難度**：進階 🔴 ｜ **核心技術**：Pinecone Serverless + Google Drive + AI Agent
-
-使用業界最熱門的專用雲端向量資料庫 **Pinecone**（免費 Starter 方案），建立 Serverless 向量索引，體驗毫秒級高併發向量檢索與零維護成本的 RAG 智慧問答。
-
-- **學習重點**：Pinecone Serverless 索引建立、維度匹配、Pinecone Vector Store 節點串接、專用向量庫架構選型。
-- **附帶樣版**：[`06_pinecone_vector_rag.json`](./07_Pinecone雲端向量資料庫與AI檢索/06_pinecone_vector_rag.json)
-
----
-
-### 8. [範例 8：Pinecone 向量庫與 Ollama 本地模型——信用卡權益客服 RAG 雙軌實戰](./08_Pinecone與Ollama信用卡客服RAG實戰/README.md)
-
-**難度**：進階 🔴 ｜ **核心技術**：Google Drive 自動同步 + Hugging Face (1024維) + Pinecone + Ollama 本地模型
-
-打造企業金融級信用卡客服！在單一工作流中整合「雲端硬碟檔案搜尋下載 ➔ 多語言切塊向量化」的自動索引管道，以及「Ollama 私有模型 ➔ Pinecone 知識庫檢索」的無幻覺客服問答管道。
-
-- **學習重點**：Google Drive 檔案動態搜尋下載、Split in Batches 批次向量化、Hugging Face `multilingual-e5-large` 嵌入、Ollama 私有模型串接與嚴格計算 Prompt 設計。
-- **附帶樣版**：[`08_pinecone_ollama_rag.json`](./08_Pinecone與Ollama信用卡客服RAG實戰/08_pinecone_ollama_rag.json)、[`信用卡權益說明.txt`](./08_Pinecone與Ollama信用卡客服RAG實戰/信用卡權益說明.txt)
-
----
-
-## 📊 資料庫與向量檢索方案評估比較
-
-| 評估維度 | 🐘 Supabase (PostgreSQL) | 🌲 Pinecone (Serverless) |
-| :--- | :--- | :--- |
-| **資料庫類型** | 關聯式資料庫 + pgvector 擴充 | 專用向量資料庫 (Vector-Native) |
-| **免費方案額度** | 500 MB 儲存空間、50,000 月活躍用戶 | 1 個 Index、2 GB 儲存、每月免費查詢額度 |
-| **信用卡綁定** | **完全無需信用卡** | **完全無需信用卡** |
-| **核心優勢** | 單一資料庫搞定「業務表 + 訂單 + 向量」 | 毫秒級高併發檢索、Serverless 零運維 |
-| **適用場景** | 全端自動化、電商 CRM、中小企業一站式方案 | 大規模知識庫、專業 AI 搜尋、高併發 RAG 應用 |
-
----
-
-## 🎯 學習路徑建議
-
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我升級「02 早餐店每日營收日報」工作流程：
+1. 新增一個 Postgres 節點「最近 7 天每日營收」（Execute Once），SQL 查詢 bf_orders 最近 7 天每天的訂單數與營收（以報表日期為基準）。
+2. 在「組合 HTML 日報」之前，新增 Basic LLM Chain 節點並連接 Google Gemini Chat Model（models/gemini-2.5-flash）。
+3. Prompt 內容：提供「營收總覽」「熱銷前五名」「各時段營收」「最近 7 天每日營收」四份資料（用 JSON.stringify 帶入），
+   請 AI 以早餐店顧問的角度，用繁體中文寫出 3 點、每點 40 字以內的營運建議（例如備料、人力安排、促銷）。
+4. 修改 Code 節點，把 AI 建議放在日報最下方「💡 今日營運建議」區塊。
+5. 請幫我建立節點、設定表達式並完成連線！
 ```
-【第一階段：關聯式資料庫基礎】
-1. Postgres 基礎 CRUD ➔ 掌握原生 SQL 語法與防注入參數化查詢
-2. Supabase Low-Code 節點 ➔ 掌握 REST API 無程式碼表格存取
+</details>
 
-【第二階段：業務邏輯與狀態機】
-3. 電商訂單 Upsert 與跨表統計 ➔ 掌握 ON CONFLICT 防重複與多表 JOIN 聚合
-4. 資料庫變更偵測與推播 ➔ 掌握定時輪詢監控與通訊軟體通知閉環
+---
 
-【第三階段：RAG 向量知識庫旗艦實戰】
-5. Supabase pgvector 向量知識庫 ➔ 掌握 PostgreSQL 向量化儲存與 RAG 檢索
-6. RAG 檢索策略與來源過濾 ➔ 掌握自然語言意圖識別與動態 Metadata 過濾
-7. Pinecone 雲端向量資料庫 ➔ 掌握專用 Serverless 向量資料庫架構
-8. Pinecone 與 Ollama 雙軌實戰 ➔ 掌握雲端同步、多語言 Embedding 與私有化 LLM 客服
+### 3. [範例：圖書館逾期還書提醒](./03_圖書館逾期還書提醒/README.md)
+
+每天早上找出逾期未還的讀者，一人一封信列出所有逾期的書與罰款，依逾期天數自動調整語氣，寄出後回寫提醒日期，同一天不會重複寄。
+
+**學習重點**：
+- PostgreSQL 日期運算 `CURRENT_DATE - due_date`
+- `IS NULL` 判斷空值
+- `json_agg` 把多列合併成 JSON 陣列
+- Code 節點 Run Once for Each Item
+- 寄信後 `UPDATE` 回寫狀態，避免重複通知
+- `$('節點').item` 取得配對的資料
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：加入「到期前提醒」與「館員彙整通知」，讓提醒系統更完整。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我擴充「03 圖書館逾期還書提醒」工作流程：
+1. 從「設定」節點拉出第二條分支「到期前提醒」：
+   - Postgres 節點查詢 lib_loans 中 returned_at IS NULL 且 due_date = CURRENT_DATE + 2 的借閱，JOIN lib_members 與 lib_books。
+   - 用 Gmail 寄出「您借閱的《書名》將於 2 天後到期」的提醒信（收件人用設定節點的 test_email）。
+2. 在原本「更新提醒紀錄」之後，新增彙整通知：
+   - 使用 Aggregate 節點（或 Code 節點）把今天所有被提醒、且 max_overdue_days >= 30 的讀者整理成一份清單。
+   - 若清單不是空的，用 Gmail 寄一封「嚴重逾期讀者清單」給館員，以 HTML 表格列出姓名、電話、逾期書名與天數。
+3. 請幫我建立節點、撰寫 SQL 並完成連線！
 ```
+</details>
+
+---
+
+### 4. [範例：網拍小賣家 AI 資料助理](./04_網拍小賣家AI資料助理/README.md)
+
+不會 SQL 也能查資料庫！用聊天的方式問「上個月哪個商品賣最好？」「哪些快沒庫存？」，AI Agent 自己寫 SQL 查 Supabase 並用表格回答。AI 使用唯讀帳號，就算寫錯也改不到資料。
+
+**學習重點**：
+- AI Agent 搭配 Postgres Tool，讓 AI 自己寫 SQL
+- `$fromAI()` 讓 AI 填入工具參數
+- System Prompt 中描述資料表結構與商業規則
+- 建立唯讀資料庫角色，在資料庫層級保護資料
+- 用 View 簡化資料結構，提高 AI 查詢正確率
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：讓 AI 資料助理能把查詢結果畫成圖表，並把助理搬到 Telegram 上隨時使用。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我升級「04 網拍小賣家 AI 資料助理」工作流程：
+1. 新增一個 HTTP Request Tool 節點，命名為 make_chart，連接到 AI Agent 的 Tool：
+   - 呼叫 https://quickchart.io/chart，以 GET 方式帶入參數 c（Chart.js 設定 JSON）。
+   - c 的值使用 $fromAI('chart_config', 'Chart.js 的設定 JSON 字串，包含 type、data.labels、data.datasets', 'string')。
+   - 工具描述：「把數據畫成圖表，回傳圖片網址」。
+2. 在 AI Agent 的 System Message 最後加上規則：「使用者要求看趨勢、比較或比例時，先查詢資料，再呼叫 make_chart 產生圖表，並在回答中附上圖片網址。」
+3. 測試問題：「畫出最近 6 個月每月營收的長條圖」。
+請幫我建立節點、設定參數並完成連線！
+```
+</details>
+
+---
+
+## 第二部分：Pinecone 向量資料庫
+
+### 5. [範例：公司員工手冊問答機器人](./05_公司員工手冊問答機器人/README.md)
+
+把員工手冊放進 Pinecone，新人用自己的話問「年假有幾天？」「出差住宿可以報多少？」，AI 從手冊找到相關段落後回答，並註明依據的章節。
+
+**學習重點**：
+- RAG（檢索增強生成）的運作原理
+- 文件切塊（Chunk Size、Overlap、Markdown 切分）
+- Gemini Embedding 與 Pinecone Index 維度必須一致（3072）
+- Namespace 區隔不同知識庫，Clear Namespace 避免重複資料
+- Pinecone 檢索工具搭配 AI Agent，工具節點需用英文命名
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：HR 只要更新 Google Drive 裡的手冊，知識庫就自動重建，不用再手動上傳。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我修改「05 公司員工手冊問答機器人」的流程 A（建立知識庫）：
+1. 新增 Google Drive Trigger 節點，監控「HR 文件」資料夾，事件為 File Updated 與 File Created，每 5 分鐘檢查一次。
+2. 串接 Google Drive 節點（Download file），下載觸發的檔案；若是 Google 文件，轉換為純文字（text/plain）格式下載。
+3. 將下載的檔案接到原本的「寫入 Pinecone」節點（namespace: handbook，Clear Namespace 開啟），沿用原本的 Data Loader、Text Splitter 與 Gemini Embeddings。
+4. 寫入完成後，用 Gmail 寄一封通知給 HR：「員工手冊知識庫已更新：檔名、更新時間、寫入段落數」。
+5. 保留原本的表單上傳流程作為備用。請幫我建立節點並完成連線！
+```
+</details>
+
+---
+
+### 6. [範例：餐廳菜單智慧推薦](./06_餐廳菜單智慧推薦/README.md)
+
+40 道菜的菜單 CSV 一鍵上架到 Pinecone，每道菜帶有價格、辣度、素食、過敏原標籤。客人說「不吃辣、吃素、預算 250」，AI 就能精準推薦並算好總價。
+
+**學習重點**：
+- 把表格資料（CSV）的每一列轉成一筆向量
+- Default Data Loader 自訂文字內容與 Metadata
+- Metadata Filter：先精確篩選、再語意搜尋
+- 一個 AI Agent 搭配多個檢索工具
+- 在 System Prompt 中處理飲食限制與預算計算
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：新增「不吃辣」專用工具，並把客人最後決定的點餐內容記錄到 Supabase。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我擴充「06 餐廳菜單智慧推薦」工作流程：
+1. 複製「search_vegetarian_menu」節點，命名為 search_mild_menu：
+   - Metadata Filter 改為 spicy = 0。
+   - 工具描述：「只搜尋完全不辣的菜色，客人說不吃辣、怕辣、帶小孩時使用」。
+   - 連接同一個 Gemini Embeddings 與 AI Agent。
+2. 新增一個 Postgres Tool 節點，命名為 save_order，讓 AI 在客人說「就點這些」時呼叫：
+   - 執行 INSERT INTO menu_orders (dishes, total_price, note) VALUES ($1, $2, $3)，參數由 $fromAI 提供。
+   - 我會先在 Supabase 建立 menu_orders 資料表（id, dishes text, total_price int, note text, created_at）。
+3. 更新 AI Agent 的 System Message，說明兩個新工具的使用時機。
+請幫我建立節點、設定參數並完成連線！
+```
+</details>
+
+---
+
+### 7. [範例：維修中心客服信自動回覆](./07_維修中心客服信自動回覆/README.md)
+
+本章總結範例。Gmail 收到客服信後，AI 查 Pinecone 的維修 FAQ 寫好回覆並存成草稿，同時在 Supabase 建立客服工單。Pinecone 負責「找答案」，Supabase 負責「記錄與統計」。
+
+**學習重點**：
+- Gmail Trigger 自動讀信、Gmail 建立草稿與標記已讀
+- Structured Output Parser 讓 AI 回傳固定格式 JSON
+- 讓 AI 同時做分類、判斷緊急程度、撰寫回覆
+- Human-in-the-loop：只建草稿、由真人審核
+- Postgres Insert or Update（Upsert）避免重複工單
+- 向量資料庫與關聯式資料庫的分工
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：依分類自動加上 Gmail 標籤，緊急件即時通知店長，並每天寄出待處理工單清單。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我擴充「07 維修中心客服信自動回覆」工作流程：
+1. 在「標記為已讀」之後新增 Gmail 節點（Message ➔ Add Label），依 $('AI 客服').item.json.output.category 加上對應標籤（例如「維修/費用」「維修/保固」），標籤我會先在 Gmail 建立好。
+2. 新增 IF 節點判斷 urgency 是否為「緊急」，若是則用 Gmail 寄一封通知給店長，主旨「🚨 緊急維修件：{{summary}}」，內容包含客人 Email 與原信內容。
+3. 另外建立一條排程分支（每天 18:00）：
+   - Postgres 查詢 repair_tickets 中今天建立、status 為「需人工處理」或「草稿待審」的工單。
+   - 用 HTML 表格整理後，以 Gmail 寄給客服主管。
+請幫我建立所需節點、設定表達式並完成連線！
+```
+</details>
+
+---
+
+## 📁 其他資料夾
+
+- [共用知識庫文件](./共用知識庫文件/)：更多可以拿來練習 RAG 的文件（家電手冊、健保指南、租屋契約等），可替換範例 05 的員工手冊做練習。
+- [舊版範例](./舊版範例/README.md)：改版前的範例，僅供參考。
+
+**🎓 完成這些範例後，您將能夠用資料庫保存與分析業務資料，並打造會查文件、會查資料庫的 AI 助理！**

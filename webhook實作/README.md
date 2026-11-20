@@ -50,7 +50,7 @@ flowchart LR
 
 ## 📚 實作範例導覽（由淺至深）
 
-本教學規劃了六個循序漸進、讓學生動手超有感的實作範例，從瀏覽器網址列直接測試、互動式網頁表單，到電商運算、實體檔案上傳、生產級安全閘道以及 AI 微服務 API：
+本教學規劃了七個循序漸進的實作範例，從瀏覽器網址列直接測試、互動式網頁表單，到電商運算、實體檔案上傳、生產級安全閘道、AI 微服務 API，最後讓 n8n 自己當網站做出訂便當系統：
 
 ---
 
@@ -244,6 +244,38 @@ flowchart LR
 3. 在 True 分支連接 Telegram 節點（或 LINE Push 節點），發送緊急通知：「🚨 收到來自 {{ $json.customer_name }} 的高風險客訴！摘要：{{ $json.analysis.summary }}，請立即處理！」。
 4. 無論是否觸發警報，最後皆連接至 Respond to Webhook 正常回傳 200 JSON 給呼叫端。
 請幫我建立相關節點與條件連線！
+```
+</details>
+
+---
+
+### 7. [範例 7：Webhook 自製訂便當網站（綜合實戰）](./Webhook自製訂便當網站/README.md)
+
+**難度**：高級 🔴 ｜ **亮點**：n8n 自己當網站！手機打開網址就能訂便當，菜單來自 Google Drive 的 Excel，訂單自動累積成今天的 Excel 檔！
+
+用兩個 Webhook 組成一個完整網站：GET 從 Google Drive 讀取菜單、產生互動式訂購網頁；POST 接收訂單、累積當日訂單並上傳／更新到 Google Drive。
+
+**學習重點**：
+- Respond to Webhook 回傳 HTML 網頁（`Content-Type: text/html`）
+- 一個網站 = 兩個 Webhook（GET 顯示頁面、POST 接收表單）
+- Code 節點依 Excel 菜單動態產生網頁，瀏覽器端 JavaScript 即時計算金額
+- `$getWorkflowStaticData` 跨執行保存當日訂單
+- Google Drive 檔案「新增或更新」判斷
+
+- **附帶樣版**：[`訂便當網站.json`](./Webhook自製訂便當網站/訂便當網站.json)、[`便當店菜單.xlsx`](./Webhook自製訂便當網站/便當店菜單.xlsx)
+
+<details>
+<summary>🤖 <strong>AI 賦能延伸實作（附 Prompt 提詞）</strong></summary>
+
+> 💡 **任務目標**：修正「價格可被竄改」的安全問題，加上每日截止時間，並在 10:30 自動寄出訂單彙整。
+
+**可直接複製給 AI 的 Prompt 提詞**：
+```text
+請幫我改進「Webhook 自製訂便當網站」工作流程：
+1. 後端驗證價格：在「累積當日訂單」之前重新下載便當店菜單.xlsx，依 便當店 + 餐點名稱 找出正確價格並重算 單價 與 總金額，找不到或已停售時回傳 400 錯誤頁面。
+2. 截止時間：在兩個 Webhook 之後各加一個 IF 節點，台灣時間超過 10:30 時回傳「今日訂餐已截止」的 HTML 頁面。
+3. 每日彙整：新增 Schedule Trigger（每天 10:30），讀取 Workflow Static Data 中今天的訂單，依便當店分組統計，用 Gmail 寄出 HTML 表格給行政人員。
+請幫我建立節點、撰寫程式碼並完成連線！
 ```
 </details>
 

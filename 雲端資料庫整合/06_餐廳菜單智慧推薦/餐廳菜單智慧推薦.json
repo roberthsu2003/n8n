@@ -1,0 +1,434 @@
+{
+  "name": "06 餐廳菜單智慧推薦",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🍜 範例 06：餐廳菜單智慧推薦\n\n**流程 A：菜單上架**\n上傳 CSV ➔ 每道菜變成一筆文件，並附上 **Metadata**（分類、價格、辣度、素食、過敏原）➔ 存進 Pinecone（namespace: `menu`）\n\n**流程 B：點餐推薦**\nAI 有兩個工具：\n- `search_menu`：搜尋全部菜單\n- `search_vegetarian_menu`：搜尋素食菜單（用 Metadata Filter `vegetarian = 是` 先過濾）\n\n試試看：「我不吃辣，想吃素，預算 250 有什麼推薦？」「天氣好冷想吃熱的」「我對花生過敏」",
+        "height": 440,
+        "width": 600
+      },
+      "id": "fa302075-aa33-57ec-bc1d-0c62499bcbd1",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 流程 A：菜單上架（上傳一次即可）",
+        "height": 560,
+        "width": 1120,
+        "color": 7
+      },
+      "id": "7b0edc48-8acf-58ee-b485-f391f2b9b178",
+      "name": "A",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "content": "### 流程 B：點餐推薦",
+        "height": 560,
+        "width": 1120,
+        "color": 5
+      },
+      "id": "9c0f6733-d168-5cec-8c65-e2abc379781e",
+      "name": "B",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "📤 上傳菜單",
+        "formDescription": "上傳巷弄食堂菜單.csv，系統會清空舊菜單後重新上架。",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "檔案",
+              "fieldType": "file",
+              "requiredField": true,
+              "multipleFiles": false,
+              "acceptFileTypes": ".csv"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "上傳並建立知識庫"
+        }
+      },
+      "id": "ee594cbd-cb14-5e5d-a630-29958051c5fe",
+      "name": "上傳菜單 CSV",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        80
+      ],
+      "webhookId": "b2e82b78-d31a-5d5b-8d07-8151e15ae62b"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "={{ Object.keys($binary)[0] }}",
+        "options": {}
+      },
+      "id": "1237cf3a-350a-591a-825e-2e25bb1bc3ce",
+      "name": "解析 CSV",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        220,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-course",
+          "mode": "list",
+          "cachedResultName": "n8n-course"
+        },
+        "options": {
+          "pineconeNamespace": "menu",
+          "clearNamespace": true
+        }
+      },
+      "id": "0cc59604-0f7d-5404-987b-ed47c31a58aa",
+      "name": "寫入 Pinecone",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        460,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "id": "4814ed20-b8e4-5dba-b6ce-cfd498319a89",
+      "name": "Gemini Embeddings（寫入）",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        380,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "=菜名：{{ $json.name }}\n分類：{{ $json.category }}\n價格：{{ $json.price }} 元\n辣度：{{ $json.spicy }}（0 不辣～3 大辣）\n素食：{{ $json.vegetarian }}\n過敏原：{{ $json.allergens }}\n介紹：{{ $json.description }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "dish_id",
+                "value": "={{ $json.dish_id }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json.name }}"
+              },
+              {
+                "name": "category",
+                "value": "={{ $json.category }}"
+              },
+              {
+                "name": "price",
+                "value": "={{ $json.price }}"
+              },
+              {
+                "name": "spicy",
+                "value": "={{ $json.spicy }}"
+              },
+              {
+                "name": "vegetarian",
+                "value": "={{ $json.vegetarian }}"
+              },
+              {
+                "name": "allergens",
+                "value": "={{ $json.allergens }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "4319c60a-f2b0-5b11-8ade-8b22db7a1ad8",
+      "name": "每道菜一筆文件",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "37018de5-e5f2-53dc-8d0d-4891e960cbf4",
+      "name": "客人提問",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        700
+      ],
+      "webhookId": "8b36666a-218e-5f54-a6da-6d4c2f948d91"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是「巷弄食堂」的點餐推薦小幫手，幫客人依照口味、飲食限制和預算推薦餐點。\n\n可以使用的工具：\n- 「search_menu」：搜尋所有菜色。\n- 「search_vegetarian_menu」：只會搜尋到素食菜色。客人提到吃素、素食、不吃肉時，一定要用這個工具。\n\n規則：\n1. 推薦前一定要先用工具搜尋菜單，只能推薦搜尋結果裡真的有的菜，價格以搜尋結果為準。\n2. 注意每道菜的「辣度」（0 不辣～3 大辣）、「素食」、「過敏原」：\n   - 客人說不吃辣 ➔ 只推薦辣度 0 的菜。\n   - 客人說全素／純素 ➔ 排除介紹裡寫「蛋奶素」或過敏原含蛋、乳製品的菜。\n   - 客人說對某種食物過敏 ➔ 排除過敏原含有該食物的菜，並提醒「如有嚴重過敏請告知店員」。\n3. 有預算時，幫客人算出總金額，不可以超過預算。\n4. 推薦 2～4 道菜，每道寫出：菜名、價格、一句推薦理由。最後列出總金額。\n5. 使用繁體中文，語氣像親切的店員。"
+        }
+      },
+      "id": "e4105b8c-fd00-5498-ba3a-6e9735a106da",
+      "name": "點餐推薦小幫手",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        300,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "id": "ba473dd3-7b7f-5fdd-ab03-f3a50cdb9c2d",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        60,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 8
+      },
+      "id": "d892629a-ce23-5231-90e7-d9942ab5c5c9",
+      "name": "對話記憶",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        220,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "搜尋巷弄食堂的全部菜單，輸入客人想吃的口味或描述，例如「熱湯」「下飯的肉類」。",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-course",
+          "mode": "list",
+          "cachedResultName": "n8n-course"
+        },
+        "topK": 8,
+        "options": {
+          "pineconeNamespace": "menu"
+        }
+      },
+      "id": "50760717-ca66-5a36-b95a-4f4db01c01e1",
+      "name": "search_menu",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        420,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "只搜尋巷弄食堂的素食菜色（包含全素與蛋奶素）。客人吃素時使用。",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "n8n-course",
+          "mode": "list",
+          "cachedResultName": "n8n-course"
+        },
+        "topK": 8,
+        "options": {
+          "pineconeNamespace": "menu",
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "vegetarian",
+                "value": "是"
+              }
+            ]
+          }
+        }
+      },
+      "id": "717a791c-1ef7-52c8-a9a2-99a4e2de7c3a",
+      "name": "search_vegetarian_menu",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        700,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "id": "d66fd947-29ca-533e-b2f9-90c6376089f4",
+      "name": "Gemini Embeddings（查詢）",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        1080
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "上傳菜單 CSV": {
+      "main": [
+        [
+          {
+            "node": "解析 CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析 CSV": {
+      "main": [
+        [
+          {
+            "node": "寫入 Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embeddings（寫入）": {
+      "ai_embedding": [
+        [
+          {
+            "node": "寫入 Pinecone",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "每道菜一筆文件": {
+      "ai_document": [
+        [
+          {
+            "node": "寫入 Pinecone",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "客人提問": {
+      "main": [
+        [
+          {
+            "node": "點餐推薦小幫手",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "點餐推薦小幫手",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "對話記憶": {
+      "ai_memory": [
+        [
+          {
+            "node": "點餐推薦小幫手",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_menu": {
+      "ai_tool": [
+        [
+          {
+            "node": "點餐推薦小幫手",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_vegetarian_menu": {
+      "ai_tool": [
+        [
+          {
+            "node": "點餐推薦小幫手",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Embeddings（查詢）": {
+      "ai_embedding": [
+        [
+          {
+            "node": "search_menu",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "search_vegetarian_menu",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
