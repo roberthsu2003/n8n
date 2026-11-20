@@ -113,7 +113,7 @@ graph LR
 
 ## ⚙️ 使用前準備
 
-1. **建立 Supabase 專案與憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase API** 憑證。
+1. **建立 Supabase 專案與憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase API** 憑證（本範例只使用 **(2) Supabase 節點用：Data API + Secret Key**，**不需要**設定 **(1) Postgres 資料庫連線參數**；注意 API 的 Secret Key 與 DBeaver 連線用的資料庫密碼是不同的東西）。
 2. **建立資料表**：Supabase ➔ **SQL Editor**，貼上 [`setup.sql`](./setup.sql) 全部內容並執行。
 3. **建立 Gmail 憑證**：參考 [Gemini 與 Gmail 憑證設定](../Gemini與Gmail憑證/README.md)。
 4. **匯入工作流**：n8n 右上角 **⋯** ➔ **Import from File**，選擇 [`社團活動報名系統.json`](./社團活動報名系統.json)。

@@ -38,7 +38,19 @@ graph LR
 
 ## 🔑 第二步：取得連線參數
 
-### (1) Postgres 節點用：資料庫連線參數
+> ⚠️ **重要觀念：這兩種連線用的「密碼／金鑰」完全不同，切勿混用！**
+>
+> | 連線方式 | 使用場景 | 驗證用的密碼／金鑰 | 取得位置 |
+> | :--- | :--- | :--- | :--- |
+> | **(1) 資料庫直連（PostgreSQL）** | **DBeaver**、n8n **Postgres 節點**（範例 02～04、07） | **資料庫密碼（Database Password）**，即建立專案時設定的密碼 | 專案上方 **Connect** ➔ **Session pooler** |
+> | **(2) Data API（HTTP）** | n8n **Supabase 節點**（範例 01） | **API Secret Key**（`sb_secret_...` 金鑰） | **Integrations ➔ Data API** 與 **Project Settings ➔ API Keys** |
+>
+> - 透過 **DBeaver** 或 **Postgres 節點** 連線時，用的是「**資料庫密碼**」。
+> - 透過 **Supabase 節點（Data API）** 連線時，用的是「**Secret Key**（`sb_secret_...`）」，與資料庫密碼是**完全不同的東西**。
+
+### (1) Postgres 節點用：資料庫連線參數（範例 02、03、04、07 與 DBeaver 使用）
+
+> 💡 **做範例 01（社團活動報名系統）用不到這一段**，可直接跳到下方的 **(2) Supabase 節點用：API 參數**。
 
 1. 在專案頁面上方點選 **Connect** 按鈕。
 2. 切換到 **Connection String** 分頁，Method 選 **Session pooler**（支援 IPv4，大部分網路環境都能連）。
@@ -50,14 +62,14 @@ graph LR
 | **Port** | `5432` | Session pooler 使用 5432 |
 | **Database** | `postgres` | 固定 |
 | **User** | `postgres.abcdefghijklmnop` | `postgres.` 後面接您的專案代碼 |
-| **Password** | 建立專案時的密碼 | 忘記可到 Project Settings ➔ Database 重設 |
+| **Password** | 建立專案時的資料庫密碼 | 與 **DBeaver** 連線用的是同一組密碼；忘記可到 Project Settings ➔ Database 重設 |
 
-### (2) Supabase 節點用：API 參數
+### (2) Supabase 節點用：API 參數（範例 01 使用）
 
-1. 點選左側 **Project Settings**（齒輪圖示）➔ **Data API**，複製 **Project URL**（例如 `https://abcdefghijklmnop.supabase.co`）。
-2. 點選 **Project Settings** ➔ **API Keys**，複製 **service_role** 金鑰（或新版的 **Secret key**，以 `sb_secret_` 開頭）。
+1. 點選左側 **Integrations** ➔ **Data API**（或在 **Project Settings** 左側的 **INTEGRATIONS** 區塊點 **Data API**），複製 **URL**（例如 `https://abcdefghijklmnop.supabase.co`；**若複製到的網址結尾有 `/rest/v1` 或 `/rest/v1/`，填入 n8n 時務必刪除**）。
+2. 點選左側 **Project Settings**（齒輪圖示）➔ **API Keys**，在 **Secret keys** 區塊複製 **default** 金鑰（以 `sb_secret_` 開頭；勿複製上方的 **Publishable key**。若需要舊版 `service_role` 金鑰，可點上方 **View legacy API keys**）。
 
-> ⚠️ **service_role / Secret key 擁有最高權限**，可以略過資料表的 RLS 安全規則。只能放在 n8n 憑證裡，**絕對不要貼到網頁前端或公開的 GitHub**。
+> ⚠️ **這裡用的是 API Secret Key（`sb_secret_...`），不是 DBeaver／建立專案時的資料庫密碼！** Secret key（及舊版 service_role）擁有最高 API 權限，可以略過資料表的 RLS 安全規則。只能放在 n8n 憑證裡，**絕對不要貼到網頁前端或公開的 GitHub**。
 
 ---
 
@@ -74,9 +86,11 @@ graph LR
 
 ### 憑證 B：Supabase API（範例 01 使用）
 
-1. **Add Credential** ➔ 搜尋 **Supabase**。
-2. **Host** 貼上 Project URL，**Service Role Secret** 貼上 service_role 金鑰。
-3. 憑證名稱改為 `Supabase API`，點 **Save**。
+1. **Add Credential** ➔ 搜尋 **Supabase**，右上角驗證方式保持 **Secret Key**。
+2. 填入第二步 (2) 的參數：
+   - **Host**：貼上 Project URL（例如 `https://abcdefghijklmnop.supabase.co`；**設定時不要有結尾的 `/rest/v1` 或 `/rest/v1/`**，只保留到 `.supabase.co`）。
+   - **Secret Key**（舊版 n8n 顯示為 Service Role Secret）：貼上 **Secret key**（`sb_secret_` 開頭，或舊版 `service_role` 金鑰）。
+3. 憑證名稱改為 `Supabase API`，點 **Save**，出現 `Connection tested successfully` 即成功。
 
 ---
 
@@ -102,3 +116,4 @@ graph LR
 | **SSL / self-signed certificate 錯誤** | SSL 設定問題 | SSL 選 **Require** 並開啟 **Ignore SSL Issues** |
 | **relation "xxx" does not exist** | 還沒執行該範例的 `setup.sql` | 到 SQL Editor 執行 `setup.sql` |
 | **專案連不上、控制台顯示 Paused** | 免費專案 7 天未使用被暫停 | 按 **Restore project** |
+| **Supabase API 連線失敗（404 / 測試不過）** | Host 結尾多了 `/rest/v1` 或 `/rest/v1/` | 刪除結尾的 `/rest/v1`（`/rest/v1/`），只保留 `https://專案代碼.supabase.co` |
