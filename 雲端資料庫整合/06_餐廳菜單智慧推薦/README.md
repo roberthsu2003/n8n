@@ -9,7 +9,7 @@
 - ✅ **CSV 一鍵上架**：上傳菜單 CSV，每道菜自動變成一筆向量
 - ✅ **Metadata 標籤**：分類、價格、辣度、素食、過敏原跟著每道菜存進 Pinecone
 - ✅ **語意推薦**：「天氣好冷想吃熱的」也能找到鍋物和湯品
-- ✅ **Metadata Filter**：素食專用工具只會搜尋 `vegetarian = 是` 的菜
+- ✅ **Metadata Filter**：素食專用工具只會搜尋 `素食 = 是` 的菜
 - ✅ **預算計算**：AI 幫客人算總金額，不超過預算
 - ✅ **過敏提醒**：排除含過敏原的菜色
 
@@ -21,14 +21,14 @@
 
 | 欄位 | 範例 | 說明 |
 | :--- | :--- | :--- |
-| `dish_id` | D01 | 編號 |
-| `name` | 招牌滷肉飯 | 菜名 |
-| `category` | 主食 | 主食／鍋物／小菜／湯品／飲料／甜點 |
-| `price` | 60 | 價格 |
-| `spicy` | 0 | 辣度：0 不辣、1 微辣、2 小辣、3 大辣 |
-| `vegetarian` | 否 | 是／否（「是」包含全素與蛋奶素，介紹中會註明） |
-| `allergens` | 大豆 | 過敏原，用「、」分隔 |
-| `description` | 手切五花肉以醬油、冰糖慢滷 6 小時… | 菜色介紹（語意搜尋主要靠這欄） |
+| `編號` | D01 | 菜色編號 |
+| `菜名` | 招牌滷肉飯 | |
+| `類別` | 主食 | 主食／鍋物／小菜／湯品／飲料／甜點 |
+| `價格` | 60 | |
+| `辣度` | 0 | 0 不辣、1 微辣、2 小辣、3 大辣 |
+| `素食` | 否 | 是／否（「是」包含全素與蛋奶素，介紹中會註明） |
+| `過敏原` | 大豆 | 用「、」分隔 |
+| `介紹` | 手切五花肉以醬油、冰糖慢滷 6 小時… | 菜色介紹（語意搜尋主要靠這欄） |
 
 ---
 
@@ -40,12 +40,12 @@
 ┌───────────────────────────── 一筆向量 ─────────────────────────────┐
 │ 文字內容（轉成向量，用來做語意搜尋）                                    │
 │   菜名：番茄蔬菜燉飯                                                   │
-│   分類：主食  價格：190 元  辣度：0  素食：是  過敏原：乳製品             │
+│   類別：主食  價格：190 元  辣度：0  素食：是  過敏原：乳製品             │
 │   介紹：新鮮番茄熬煮醬汁，加入櫛瓜、甜椒、蘑菇與帕瑪森起司，屬蛋奶素。       │
 ├────────────────────────────────────────────────────────────────────┤
 │ Metadata（不轉向量，用來精確篩選）                                      │
-│   dish_id: D05   category: 主食   price: 190   spicy: 0             │
-│   vegetarian: 是   allergens: 乳製品                                │
+│   編號: D05   菜名: 番茄蔬菜燉飯   類別: 主食   價格: 190            │
+│   辣度: 0   素食: 是   過敏原: 乳製品                               │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -54,7 +54,7 @@
 | **語意搜尋** | 比對「意思」有多接近 | 「想吃熱的」「下飯的」「清爽的」 |
 | **Metadata Filter** | 先用標籤**精確**篩選，再做語意搜尋 | 「一定要素食」這種不能出錯的條件 |
 
-> 💡 為什麼素食要用 Filter？只靠語意搜尋，「素食」可能會找到「麻婆豆腐飯」（有豆腐，看起來很素），但它其實有豬絞肉。用 `vegetarian = 是` 先過濾，就保證不會推薦到葷食。
+> 💡 為什麼素食要用 Filter？只靠語意搜尋，「素食」可能會找到「麻婆豆腐飯」（有豆腐，看起來很素），但它其實有豬絞肉。用 `素食 = 是` 先過濾，就保證不會推薦到葷食。
 
 ---
 
@@ -73,7 +73,7 @@ graph LR
         G[Gemini Chat Model] -.-> AG
         M[對話記憶] -.-> AG
         T1[search_menu<br/>全部菜單] -.-> AG
-        T2[search_vegetarian_menu<br/>Filter: vegetarian=是] -.-> AG
+        T2[search_vegetarian_menu<br/>Filter: 素食=是] -.-> AG
         E2[Gemini Embeddings] -.-> T1
         E2 -.-> T2
     end
@@ -97,15 +97,15 @@ graph LR
 - **Mode**：Load Specific Data
 - **Data**：把欄位組成一段文字（這段文字會被轉成向量）
   ```text
-  菜名：{{ $json.name }}
-  分類：{{ $json.category }}
-  價格：{{ $json.price }} 元
-  辣度：{{ $json.spicy }}（0 不辣～3 大辣）
-  素食：{{ $json.vegetarian }}
-  過敏原：{{ $json.allergens }}
-  介紹：{{ $json.description }}
+  菜名：{{ $json.菜名 }}
+  類別：{{ $json.類別 }}
+  價格：{{ $json.價格 }} 元
+  辣度：{{ $json.辣度 }}（0 不辣～3 大辣）
+  素食：{{ $json.素食 }}
+  過敏原：{{ $json.過敏原 }}
+  介紹：{{ $json.介紹 }}
   ```
-- **Options ➔ Metadata**：`dish_id`、`name`、`category`、`price`、`spicy`、`vegetarian`、`allergens`
+- **Options ➔ Metadata**：`編號`、`菜名`、`類別`、`價格`、`辣度`、`素食`、`過敏原`（CSV 的欄位名稱直接當成 Metadata 名稱）
 - 每道菜不到 200 字，不需要額外切塊，一道菜剛好一筆向量
 
 **5. Gemini Embeddings（寫入）**：`models/gemini-embedding-001`
@@ -126,7 +126,7 @@ System Message 重點：
 
 **9. search_vegetarian_menu**（Pinecone：Retrieve Documents (As Tool)）
 - Namespace：`menu`，Limit：`8`
-- **Options ➔ Metadata Filter**：Name `vegetarian`，Value `是`
+- **Options ➔ Metadata Filter**：Name `素食`，Value `是`
 
 ---
 
@@ -164,6 +164,6 @@ System Message 重點：
 ---
 
 **💡 進階應用**：
-- 新增「不吃辣專用工具」：Metadata Filter `spicy = 0`
+- 新增「不吃辣專用工具」：Metadata Filter `辣度 = 0`
 - 把菜單放到 Google Sheets，店家改價格後自動重新上架
 - 推薦完成後，用 Supabase 記錄客人點了什麼，累積「熱門推薦」資料

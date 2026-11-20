@@ -3,47 +3,46 @@
 -- 在 Supabase ➔ SQL Editor 貼上全部內容並執行 (Run)
 -- 會產生「最近 180 天」約 1,000 筆訂單，可重複執行
 -- ⚠️ 執行前請先把第 7 段的密碼 'ChangeMe_2026!' 改成自己的密碼
+-- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
 
-DROP VIEW  IF EXISTS public.shop_order_details;
-DROP TABLE IF EXISTS public.shop_orders;
-DROP TABLE IF EXISTS public.shop_customers;
-DROP TABLE IF EXISTS public.shop_products;
+DROP VIEW  IF EXISTS public.網拍訂單明細;
+DROP TABLE IF EXISTS public.網拍訂單;
+DROP TABLE IF EXISTS public.網拍顧客;
+DROP TABLE IF EXISTS public.網拍商品;
 
 -- 1. 商品（文青選物小店）
-CREATE TABLE public.shop_products (
-    id         SERIAL PRIMARY KEY,
-    name       TEXT NOT NULL UNIQUE,
-    category   TEXT NOT NULL,            -- 文具 / 杯具 / 香氛 / 包袋 / 居家
-    price      INT  NOT NULL,            -- 售價
-    cost       INT  NOT NULL,            -- 進貨成本
-    stock      INT  NOT NULL,            -- 目前庫存
-    weight     INT  NOT NULL DEFAULT 1   -- 熱門程度（產生假資料用）
+CREATE TABLE public.網拍商品 (
+    編號      SERIAL PRIMARY KEY,
+    商品名稱  TEXT NOT NULL UNIQUE,
+    類別      TEXT NOT NULL,            -- 文具 / 杯具 / 香氛 / 包袋 / 居家
+    售價      INT  NOT NULL,
+    成本      INT  NOT NULL,            -- 進貨成本
+    庫存      INT  NOT NULL,            -- 目前庫存數量
+    熱門權重  INT  NOT NULL DEFAULT 1   -- 產生假資料用，數字越大越常被買
 );
-COMMENT ON TABLE  public.shop_products IS '商品資料';
-COMMENT ON COLUMN public.shop_products.stock IS '目前庫存數量';
 
 -- 2. 顧客
-CREATE TABLE public.shop_customers (
-    id         SERIAL PRIMARY KEY,
-    name       TEXT NOT NULL,
-    city       TEXT NOT NULL,
-    joined_at  DATE NOT NULL
+CREATE TABLE public.網拍顧客 (
+    編號      SERIAL PRIMARY KEY,
+    姓名      TEXT NOT NULL,
+    縣市      TEXT NOT NULL,
+    加入日期  DATE NOT NULL
 );
 
 -- 3. 訂單（為了讓 AI 好寫 SQL，一筆訂單只買一種商品）
-CREATE TABLE public.shop_orders (
-    id           SERIAL PRIMARY KEY,
-    order_date   DATE NOT NULL,
-    customer_id  INT  NOT NULL REFERENCES public.shop_customers(id),
-    product_id   INT  NOT NULL REFERENCES public.shop_products(id),
-    quantity     INT  NOT NULL,
-    unit_price   INT  NOT NULL,          -- 成交單價（有時會打折）
-    channel      TEXT NOT NULL,          -- 蝦皮 / 官網 / IG 私訊 / 市集
-    status       TEXT NOT NULL           -- 已完成 / 已取消 / 退貨
+CREATE TABLE public.網拍訂單 (
+    編號      SERIAL PRIMARY KEY,
+    訂單日期  DATE NOT NULL,
+    顧客編號  INT  NOT NULL REFERENCES public.網拍顧客(編號),
+    商品編號  INT  NOT NULL REFERENCES public.網拍商品(編號),
+    數量      INT  NOT NULL,
+    成交單價  INT  NOT NULL,          -- 有時會打折
+    銷售通路  TEXT NOT NULL,          -- 蝦皮 / 官網 / IG 私訊 / 市集
+    訂單狀態  TEXT NOT NULL           -- 已完成 / 已取消 / 退貨
 );
 
-INSERT INTO public.shop_products (name, category, price, cost, stock, weight) VALUES
+INSERT INTO public.網拍商品 (商品名稱, 類別, 售價, 成本, 庫存, 熱門權重) VALUES
     ('手帳本 A5 點陣',         '文具', 380, 150, 42, 8),
     ('手帳本 A6 方格',         '文具', 320, 120, 7,  6),
     ('黃銅原子筆',             '文具', 590, 260, 15, 4),
@@ -78,7 +77,7 @@ INSERT INTO public.shop_products (name, category, price, cost, stock, weight) VA
 SELECT setseed(0.88);
 
 -- 4. 顧客：60 位，分布在各縣市
-INSERT INTO public.shop_customers (name, city, joined_at)
+INSERT INTO public.網拍顧客 (姓名, 縣市, 加入日期)
 SELECT
     (ARRAY['陳','林','黃','張','李','王','吳','劉','蔡','楊','許','鄭','謝','郭','洪'])[1 + floor(random()*15)::INT]
   || (ARRAY['怡君','雅婷','家豪','志明','佳穎','宗翰','欣妤','冠廷','詩涵','柏宇','雅雯','俊賢','思妤','子晴','承恩'])[1 + floor(random()*15)::INT],
@@ -87,13 +86,13 @@ SELECT
 FROM generate_series(1, 60);
 
 -- 5. 訂單：最近 180 天，越接近現在訂單越多（生意越來越好），週末較多
-INSERT INTO public.shop_orders (order_date, customer_id, product_id, quantity, unit_price, channel, status)
+INSERT INTO public.網拍訂單 (訂單日期, 顧客編號, 商品編號, 數量, 成交單價, 銷售通路, 訂單狀態)
 SELECT
-    o.order_date,
+    o.訂單日期,
     1 + floor(random() * 60)::INT,
-    p.id,
+    p.編號,
     CASE WHEN random() < 0.8 THEN 1 WHEN random() < 0.7 THEN 2 ELSE 3 END,
-    CASE WHEN random() < 0.15 THEN round(p.price * 0.9) ELSE p.price END,
+    CASE WHEN random() < 0.15 THEN round(p.售價 * 0.9) ELSE p.售價 END,
     CASE
         WHEN random() < 0.50 THEN '蝦皮'
         WHEN random() < 0.70 THEN '官網'
@@ -106,7 +105,7 @@ SELECT
         ELSE '退貨'
     END
 FROM (
-    SELECT d::DATE AS order_date, n
+    SELECT d::DATE AS 訂單日期, n
     FROM generate_series(CURRENT_DATE - 180, CURRENT_DATE - 1, INTERVAL '1 day') AS d
     CROSS JOIN LATERAL generate_series(
         1,
@@ -116,31 +115,31 @@ FROM (
     ) AS n
 ) AS o
 CROSS JOIN LATERAL (
-    SELECT sp.id, sp.price
-    FROM public.shop_products sp
-    WHERE o.n IS NOT NULL AND o.order_date IS NOT NULL   -- 參照外層欄位，每筆訂單都重新抽
-    ORDER BY -ln(random()) / sp.weight
+    SELECT sp.編號, sp.售價
+    FROM public.網拍商品 sp
+    WHERE o.n IS NOT NULL AND o.訂單日期 IS NOT NULL   -- 參照外層欄位，每筆訂單都重新抽
+    ORDER BY -ln(random()) / sp.熱門權重
     LIMIT 1
 ) AS p;
 
 -- 6. 方便 AI 查詢的檢視表：每筆訂單直接帶出商品名稱、分類、顧客縣市、金額與毛利
-CREATE VIEW public.shop_order_details AS
+CREATE VIEW public.網拍訂單明細 AS
 SELECT
-    o.id            AS order_id,
-    o.order_date,
-    o.status,
-    o.channel,
-    p.name          AS product_name,
-    p.category,
-    o.quantity,
-    o.unit_price,
-    o.quantity * o.unit_price                AS amount,
-    o.quantity * (o.unit_price - p.cost)     AS profit,
-    c.name          AS customer_name,
-    c.city
-FROM public.shop_orders o
-JOIN public.shop_products  p ON p.id = o.product_id
-JOIN public.shop_customers c ON c.id = o.customer_id;
+    o.編號                          AS 訂單編號,
+    o.訂單日期,
+    o.訂單狀態,
+    o.銷售通路,
+    p.商品名稱,
+    p.類別,
+    o.數量,
+    o.成交單價,
+    o.數量 * o.成交單價             AS 金額,
+    o.數量 * (o.成交單價 - p.成本)  AS 毛利,
+    c.姓名                          AS 顧客姓名,
+    c.縣市
+FROM public.網拍訂單 o
+JOIN public.網拍商品 p ON p.編號 = o.商品編號
+JOIN public.網拍顧客 c ON c.編號 = o.顧客編號;
 
 -- 7. 建立「唯讀」資料庫帳號給 AI 使用：只能 SELECT，不能新增、修改、刪除
 --    ⚠️ 請把密碼改成自己的，並記下來（n8n 建立第二個 Postgres 憑證時要用）
@@ -154,12 +153,12 @@ ALTER ROLE ai_readonly PASSWORD 'ChangeMe_2026!';                -- 每次執行
 ALTER ROLE ai_readonly SET default_transaction_read_only = on;  -- 連線預設為唯讀交易
 ALTER ROLE ai_readonly SET statement_timeout = '10s';           -- 防止 AI 寫出跑太久的查詢
 GRANT USAGE  ON SCHEMA public TO ai_readonly;
-GRANT SELECT ON public.shop_products, public.shop_customers, public.shop_orders, public.shop_order_details TO ai_readonly;
+GRANT SELECT ON public.網拍商品, public.網拍顧客, public.網拍訂單, public.網拍訂單明細 TO ai_readonly;
 
 -- 8. 驗證：最近 30 天銷售額前 5 名商品
-SELECT product_name, SUM(quantity) AS 銷售數量, SUM(amount) AS 銷售額
-FROM public.shop_order_details
-WHERE status = '已完成' AND order_date >= CURRENT_DATE - 30
-GROUP BY product_name
+SELECT 商品名稱, SUM(數量) AS 銷售數量, SUM(金額) AS 銷售額
+FROM public.網拍訂單明細
+WHERE 訂單狀態 = '已完成' AND 訂單日期 >= CURRENT_DATE - 30
+GROUP BY 商品名稱
 ORDER BY 銷售額 DESC
 LIMIT 5;

@@ -27,7 +27,7 @@
 | 檔案 | 說明 |
 | :--- | :--- |
 | [`快修通維修服務FAQ.md`](./快修通維修服務FAQ.md) | 26 題 FAQ：營業資訊、保固、送修流程、維修價目表、故障排除 |
-| [`setup.sql`](./setup.sql) | 建立 `repair_tickets` 工單表、`repair_ticket_summary` 統計檢視表，並放入 4 筆歷史工單 |
+| [`setup.sql`](./setup.sql) | 建立 `維修工單` 資料表、`維修工單統計` 檢視表，並放入 4 筆歷史工單 |
 | [`測試信件範例.md`](./測試信件範例.md) | 5 封測試信與預期結果，複製後寄給自己即可測試 |
 
 ---
@@ -68,12 +68,12 @@ graph LR
 **2. 整理信件**（Edit Fields / Set）
 | 欄位 | 值 |
 | :--- | :--- |
-| `gmail_id` | `={{ $json.id }}` |
-| `thread_id` | `={{ $json.threadId }}` |
-| `from_email` | `={{ $json.from.value[0].address }}` |
-| `from_name` | `={{ $json.from.value[0].name \|\| $json.from.value[0].address }}` |
-| `subject` | `={{ $json.subject }}` |
-| `body` | `={{ ($json.text \|\| '').slice(0, 3000) }}`（太長的信只取前 3000 字） |
+| `郵件編號` | `={{ $json.id }}` |
+| `對話串編號` | `={{ $json.threadId }}` |
+| `寄件人信箱` | `={{ $json.from.value[0].address }}` |
+| `寄件人姓名` | `={{ $json.from.value[0].name \|\| $json.from.value[0].address }}` |
+| `主旨` | `={{ $json.subject }}` |
+| `信件內容` | `={{ ($json.text \|\| '').slice(0, 3000) }}`（太長的信只取前 3000 字） |
 
 **3. AI 客服**（AI Agent）
 - **Source for Prompt**：Define below，把寄件人、主旨、內文組成提示
@@ -81,14 +81,14 @@ graph LR
 - System Message 規定：先用 `search_repair_faq` 查 FAQ ➔ 只根據 FAQ 回答 ➔ 輸出 5 個欄位
 
 **4. 輸出格式**（Structured Output Parser）
-- 用 JSON 範例定義格式，AI 的回答會被解析成物件，後面的節點可以直接用 `$json.output.category`：
+- 用 JSON 範例定義格式，AI 的回答會被解析成物件，後面的節點可以直接用 `$json.output.問題分類`：
 ```json
 {
-  "category": "維修費用",
-  "urgency": "一般",
-  "summary": "詢問 iPhone 14 換螢幕價格與時間",
-  "found_in_faq": true,
-  "reply": "您好，感謝您來信快修通 3C 維修中心。\n..."
+  "問題分類": "維修費用",
+  "緊急程度": "一般",
+  "問題摘要": "詢問 iPhone 14 換螢幕價格與時間",
+  "知識庫有答案": true,
+  "回覆內容": "您好，感謝您來信快修通 3C 維修中心。\n..."
 }
 ```
 
@@ -99,22 +99,24 @@ graph LR
 | 設定 | 值 |
 | :--- | :--- |
 | Subject | `=Re: {{ $('整理信件').item.json.subject }}` |
-| Message | `={{ $json.output.reply }}` |
-| Options ➔ Thread ID | `={{ $('整理信件').item.json.thread_id }}`（草稿會出現在原本的信件串裡） |
-| Options ➔ To Email | `={{ $('整理信件').item.json.from_email }}` |
+| Message | `={{ $json.output.回覆內容 }}` |
+| Options ➔ Thread ID | `={{ $('整理信件').item.json.對話串編號 }}`（草稿會出現在原本的信件串裡） |
+| Options ➔ To Email | `={{ $('整理信件').item.json.寄件人信箱 }}` |
 
 > 💡 **為什麼不直接寄出？** AI 偶爾會誤解問題或用錯語氣。讓 AI 做 90% 的工作、真人花 10 秒審核再按「傳送」，是企業導入 AI 客服最常見也最安全的做法（Human-in-the-loop）。
 
 **7. 建立客服工單**（Postgres：Insert or Update）
-- **Table**：`repair_tickets`
-- **Columns to match on**：`gmail_id`（同一封信再跑一次會更新而不是新增）
+- **Table**：`維修工單`
+- **Columns to match on**：`郵件編號`（同一封信再跑一次會更新而不是新增）
 - 欄位對應：
 
 | 欄位 | 值 |
 | :--- | :--- |
-| `gmail_id`、`customer_email`、`subject` | 來自「整理信件」 |
-| `category`、`urgency`、`summary`、`found_in_faq` | 來自 `$('AI 客服').item.json.output` |
-| `status` | `={{ ...found_in_faq ? '草稿待審' : '需人工處理' }}` |
+| `郵件編號`、`顧客信箱`、`主旨` | 來自「整理信件」 |
+| `問題分類`、`緊急程度`、`問題摘要`、`知識庫有答案` | 來自 `$('AI 客服').item.json.output` |
+| `處理狀態` | `={{ ...知識庫有答案 ? '草稿待審' : '需人工處理' }}` |
+
+> ⚠️ **中文欄位名稱裡不要混用大寫英文字母**：PostgreSQL 會把沒加引號的英文自動轉成小寫，例如建表時寫 `FAQ有答案`，實際欄位會變成 `faq有答案`，n8n 用原本的名稱就對不上。純中文（例如 `知識庫有答案`）沒有這個問題。
 
 **8. 標記為已讀**（Gmail：Message ➔ Mark as Read）
 - 處理完的信標記為已讀，Gmail Trigger 就不會再抓到它。
@@ -137,8 +139,8 @@ graph LR
 6. **測試**：
    - 點兩下「收到客服信」➔ **Fetch Test Event** 抓取最新的信，再按 **Execute workflow**。
    - 到 Gmail **草稿**查看 AI 寫的回覆。
-   - 到 Supabase **Table Editor** ➔ `repair_tickets` 查看新工單。
-   - 到 SQL Editor 執行 `SELECT * FROM repair_ticket_summary;` 看各分類統計。
+   - 到 Supabase **Table Editor** ➔ `維修工單` 查看新工單。
+   - 到 SQL Editor 執行 `SELECT * FROM 維修工單統計;` 看各分類統計。
 7. **正式啟用**：切換為 **Active**，之後每分鐘自動處理新信件。
 
 > ⚠️ **Gemini 免費額度**：每封信會呼叫 Gemini 數次（判斷、查詢、生成），一次寄很多封測試信可能遇到 `429 Too Many Requests`，請一封一封測試。
@@ -155,7 +157,7 @@ graph LR
 ---
 
 **💡 進階應用**：
-- 依 `category` 自動幫信件加上 Gmail 標籤（例如「維修/費用」「維修/緊急」）
-- `urgency = 緊急` 時，另外寄一封通知給店長
-- 每天下班前查詢 `status = '需人工處理'` 的工單，寄出待辦清單給客服主管
+- 依 `問題分類` 自動幫信件加上 Gmail 標籤（例如「維修/費用」「維修/緊急」）
+- `緊急程度 = 緊急` 時，另外寄一封通知給店長
+- 每天下班前查詢 `處理狀態 = '需人工處理'` 的工單，寄出待辦清單給客服主管
 - 客服按下傳送後，用另一個工作流把工單狀態更新為「已回覆」

@@ -20,10 +20,10 @@
 
 | 名稱 | 類型 | 說明 |
 | :--- | :--- | :--- |
-| `shop_products` | 資料表 | 30 項商品：售價、成本、**目前庫存**（有 11 項低於 10 個，1 項缺貨） |
-| `shop_customers` | 資料表 | 60 位顧客、所在縣市 |
-| `shop_orders` | 資料表 | 訂單：日期、商品、數量、成交價、通路、狀態（已完成／已取消／退貨） |
-| `shop_order_details` | 檢視表 | **給 AI 用的**：已經 JOIN 好商品名稱、分類、縣市，並算好金額 `amount` 與毛利 `profit` |
+| `網拍商品` | 資料表 | 30 項商品：`編號`、`商品名稱`、`類別`、`售價`、`成本`、**`庫存`**（有 11 項低於 10 個，1 項缺貨）、`熱門權重` |
+| `網拍顧客` | 資料表 | 60 位顧客：`編號`、`姓名`、`縣市`、`加入日期` |
+| `網拍訂單` | 資料表 | `編號`、`訂單日期`、`顧客編號`、`商品編號`、`數量`、`成交單價`、`銷售通路`、`訂單狀態`（已完成／已取消／退貨） |
+| `網拍訂單明細` | 檢視表 | **給 AI 用的**：已經 JOIN 好 `商品名稱`、`類別`、`顧客姓名`、`縣市`，並算好 `金額` 與 `毛利` |
 | `ai_readonly` | 資料庫角色 | 只能 SELECT 上面四個物件的唯讀帳號 |
 
 > 💡 **為什麼要特別做一個 View 給 AI？** AI 寫的 JOIN 越多越容易出錯。先用 View 把常用欄位組好，AI 大部分問題只要查一張表，正確率會高很多。
@@ -50,7 +50,7 @@ sequenceDiagram
     participant DB as query_database
     老闆->>Agent: 上個月哪個商品賣最好？
     Agent->>Agent: 對照 System Prompt 的資料表說明，寫出 SQL
-    Agent->>DB: SELECT product_name, SUM(amount) ... GROUP BY ... ORDER BY ... LIMIT 5
+    Agent->>DB: SELECT 商品名稱, SUM(金額) ... GROUP BY ... ORDER BY ... LIMIT 5
     DB-->>Agent: 查詢結果（JSON）
     Agent-->>老闆: 上個月銷售冠軍是「○○○」，銷售額 ○○ 元（附表格）
 ```
@@ -63,10 +63,12 @@ sequenceDiagram
 #### 2. **AI 資料助理**（AI Agent）
 System Message 是這個範例的靈魂，包含三個部分：
 1. **今天日期**：`{{ $now.toFormat('yyyy-MM-dd') }}`，AI 才知道「上個月」是哪個月
-2. **資料表說明**：每張表有哪些欄位、欄位代表什麼、可能的值（例如 status 只有「已完成／已取消／退貨」）
+2. **資料表說明**：每張表有哪些中文欄位、欄位代表什麼、可能的值（例如 `訂單狀態` 只有「已完成／已取消／退貨」）
 3. **規則**：只能 SELECT、銷售額只算「已完成」、結果超過 20 筆要 LIMIT、先講結論再列表格
 
-> 💡 System Prompt 寫得越清楚，AI 寫的 SQL 越準。試試看把「只算 status = '已完成'」這條規則刪掉，再問一次銷售額，會發現數字變大了（把取消和退貨也算進去）。
+> 💡 **中文欄位對 AI 也比較友善**：問題是中文、欄位也是中文，AI 比較不會猜錯欄位（例如「庫存」直接對到 `庫存` 欄位）。學生看 AI 寫出的 SQL 也一看就懂：`SELECT 商品名稱, 庫存 FROM 網拍商品 WHERE 庫存 < 10`。
+
+> 💡 System Prompt 寫得越清楚，AI 寫的 SQL 越準。試試看把「只算 訂單狀態 = '已完成'」這條規則刪掉，再問一次銷售額，會發現數字變大了（把取消和退貨也算進去）。
 
 #### 3. **Google Gemini Chat Model**
 - **Model**：`models/gemini-2.5-flash`
@@ -97,15 +99,15 @@ ALTER ROLE ai_readonly PASSWORD 'ChangeMe_2026!';
 ALTER ROLE ai_readonly SET default_transaction_read_only = on;  -- 預設唯讀交易
 ALTER ROLE ai_readonly SET statement_timeout = '10s';           -- 查詢最多跑 10 秒
 GRANT USAGE  ON SCHEMA public TO ai_readonly;
-GRANT SELECT ON public.shop_products, public.shop_customers,
-                public.shop_orders, public.shop_order_details TO ai_readonly;
+GRANT SELECT ON public.網拍商品, public.網拍顧客,
+                public.網拍訂單, public.網拍訂單明細 TO ai_readonly;
 ```
 
 | 嘗試 | 結果 |
 | :--- | :--- |
-| `SELECT * FROM shop_order_details` | ✅ 成功 |
-| `DELETE FROM shop_orders` | ❌ `cannot execute DELETE in a read-only transaction` |
-| `SELECT * FROM bf_orders`（其他範例的表） | ❌ `permission denied for table bf_orders` |
+| `SELECT * FROM 網拍訂單明細` | ✅ 成功 |
+| `DELETE FROM 網拍訂單` | ❌ `cannot execute DELETE in a read-only transaction` |
+| `SELECT * FROM 早餐訂單`（其他範例的表） | ❌ `permission denied for table 早餐訂單` |
 
 ---
 
@@ -149,10 +151,56 @@ GRANT SELECT ON public.shop_products, public.shop_customers,
 
 ---
 
+## 🔌 另一種做法：Supabase MCP
+
+**MCP（Model Context Protocol）** 可以想成給 AI 用的「工具箱插座」。Supabase 官方做好了一個工具箱（MCP Server），裡面有「列出資料表」「執行 SQL」「查文件」等工具，n8n 的 AI Agent 只要接上這個插座，就能直接使用這些工具。
+
+### 兩種做法比較
+
+| | 本範例的做法（Postgres Tool） | Supabase MCP |
+| :--- | :--- | :--- |
+| **n8n 節點** | Postgres Tool | MCP Client Tool |
+| **怎麼連線** | 資料庫帳號密碼（唯讀帳號 `ai_readonly`） | 登入 Supabase 帳號（OAuth 授權） |
+| **AI 怎麼知道有哪些資料表** | 我們在 System Prompt 裡寫清楚 | AI 自己呼叫 `list_tables` 去查 |
+| **權限控制** | 資料庫層級：只能 SELECT 指定的 4 個物件 | 網址參數：`read_only=true`、`project_ref=` |
+| **適合** | 正式上線、權限要嚴格控管 | 快速探索資料庫、資料表常常變動 |
+
+### 設定步驟
+
+匯入 [`網拍小賣家AI資料助理_MCP版.json`](./網拍小賣家AI資料助理_MCP版.json)（和本範例相同，只是把 `query_database` 換成 **Supabase MCP** 節點），然後：
+
+1. **取得專案代碼**：Supabase ➔ **Project Settings** ➔ **General** ➔ **Project ID**（就是網址 `https://xxxx.supabase.co` 中的 `xxxx`）。
+2. 打開 **Supabase MCP**（MCP Client Tool）節點：
+
+   | 欄位 | 值 |
+   | :--- | :--- |
+   | **Endpoint** | `https://mcp.supabase.com/mcp?project_ref=你的專案代碼&read_only=true&features=database` |
+   | **Server Transport** | HTTP Streamable |
+   | **Authentication** | MCP OAuth2 ➔ 建立憑證後按 **Connect**，在跳出的視窗登入 Supabase 並授權 |
+   | **Tools to Include** | Selected：只勾 `list_tables`、`execute_sql` |
+
+3. **System Prompt** 不用再寫每張表的欄位，改成「不確定有哪些資料表時，先用 list_tables 查看」（MCP 版工作流已寫好）。
+4. 打開聊天視窗問：「**我們的資料庫有哪些資料表？**」，到 Logs 觀察 AI 先呼叫 `list_tables`，再用 `execute_sql` 查詢。
+
+網址參數的意思：
+
+| 參數 | 作用 |
+| :--- | :--- |
+| `project_ref=你的專案代碼` | 只能操作這一個專案（不加的話，AI 看得到你帳號下所有專案） |
+| `read_only=true` | 只能讀取，不能新增、修改、刪除（Supabase 官方建議預設開啟） |
+| `features=database` | 只開放資料庫相關工具，不開放建立專案、部署函式等功能 |
+
+> ⚠️ **安全提醒**：MCP 是用「**你的 Supabase 帳號**」身分操作，權限比唯讀帳號 `ai_readonly` 大得多。網址**一定要保留** `read_only=true` 和 `project_ref=`，否則 AI 可能修改資料表結構、刪除資料，甚至操作其他專案。上課示範時請使用專門的練習專案。
+
+> 💡 有些 n8n 版本在節點面板搜尋「Supabase」時，會直接出現已經填好網址的 **Supabase MCP** 節點，只要登入授權即可；使用時一樣記得確認網址參數。若 n8n 不在本機（例如雲端主機），OAuth 登入失敗時，也可以改用 **Bearer Auth**：到 Supabase ➔ **Account** ➔ **Access Tokens** 產生個人存取權杖，貼到 Bearer Token 欄位。
+
+---
+
 ## 📥 相關檔案下載
 
 - [🚀 下載完整工作流 (JSON)](./網拍小賣家AI資料助理.json)
 - [📜 建表、測試資料與唯讀帳號 (setup.sql)](./setup.sql)
+- [🔌 Supabase MCP 版工作流 (JSON)](./網拍小賣家AI資料助理_MCP版.json)
 
 ---
 

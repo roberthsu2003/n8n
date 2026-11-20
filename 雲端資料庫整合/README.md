@@ -4,6 +4,8 @@
 
 每個範例都是一個生活化的情境，並附上**自動產生的測試資料**（SQL 腳本、CSV、知識文件），不需要自己準備任何資料，匯入就能動手做。
 
+**資料表與欄位都用繁體中文命名**（例如 `SELECT 品名, 單價 FROM 早餐品項`），SQL、Supabase 畫面和 n8n 節點輸出都看得懂，不用再對照英文欄位。
+
 > 💡 **AI 協作時代學習法**：在學習完基礎節點操作並透過 MCP 連線 AI（Gemini、ChatGPT 或 Claude）後，您可以直接複製每個範例下方的 **「AI 賦能延伸實作」** 折疊區塊（`<details>`）內的 Prompt，交由 AI 助理替您在畫布上全自動建構與擴充進階邏輯！
 
 ## 🔑 前置準備
@@ -51,13 +53,13 @@
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
 請幫我擴充目前的「01 社團活動報名系統」工作流程，加入候補名單功能：
-1. 我會先在 Supabase 建立資料表 club_waitlist（id, activity_id, student_name, email, created_at）。
+1. 我會先在 Supabase 建立資料表「社團候補」（欄位：編號, 活動編號, 姓名, 電子郵件, 候補時間），名稱都是中文。
 2. 修改報名流程：「還有名額？」IF 節點的 False 分支，不要直接顯示名額已滿，改為：
-   - 使用 Supabase 節點（Create）把報名者寫入 club_waitlist。
+   - 使用 Supabase 節點（Create）把報名者寫入「社團候補」。
    - 使用 Supabase 節點（Get Many）查詢該活動目前有幾位候補，算出他是第幾順位。
    - Form Ending 顯示「名額已滿，您已列入候補第 N 位，有空位時會寄信通知您」。
 3. 修改取消報名流程：「有刪除到資料？」為 True 時：
-   - 用 Supabase 節點查詢該活動 club_waitlist 中 created_at 最早的一筆（Limit 1）。
+   - 用 Supabase 節點查詢該活動「社團候補」中 候補時間 最早的一筆（Limit 1）。
    - 如果有候補者，用 Gmail 寄信通知他「目前有空位，請在 24 小時內重新報名」。
 4. 請幫我在畫布上建立所需節點、設定 Filters 與表達式，並完成連線！
 ```
@@ -84,7 +86,7 @@
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
 請幫我升級「02 早餐店每日營收日報」工作流程：
-1. 新增一個 Postgres 節點「最近 7 天每日營收」（Execute Once），SQL 查詢 bf_orders 最近 7 天每天的訂單數與營收（以報表日期為基準）。
+1. 新增一個 Postgres 節點「最近 7 天每日營收」（Execute Once），SQL 查詢 早餐訂單 資料表最近 7 天每天的訂單數與營收（欄位：下單時間、訂單金額）（以報表日期為基準）。
 2. 在「組合 HTML 日報」之前，新增 Basic LLM Chain 節點並連接 Google Gemini Chat Model（models/gemini-2.5-flash）。
 3. Prompt 內容：提供「營收總覽」「熱銷前五名」「各時段營收」「最近 7 天每日營收」四份資料（用 JSON.stringify 帶入），
    請 AI 以早餐店顧問的角度，用繁體中文寫出 3 點、每點 40 字以內的營運建議（例如備料、人力安排、促銷）。
@@ -100,7 +102,7 @@
 每天早上找出逾期未還的讀者，一人一封信列出所有逾期的書與罰款，依逾期天數自動調整語氣，寄出後回寫提醒日期，同一天不會重複寄。
 
 **學習重點**：
-- PostgreSQL 日期運算 `CURRENT_DATE - due_date`
+- PostgreSQL 日期運算 `CURRENT_DATE - 應還日期`
 - `IS NULL` 判斷空值
 - `json_agg` 把多列合併成 JSON 陣列
 - Code 節點 Run Once for Each Item
@@ -116,10 +118,10 @@
 ```text
 請幫我擴充「03 圖書館逾期還書提醒」工作流程：
 1. 從「設定」節點拉出第二條分支「到期前提醒」：
-   - Postgres 節點查詢 lib_loans 中 returned_at IS NULL 且 due_date = CURRENT_DATE + 2 的借閱，JOIN lib_members 與 lib_books。
-   - 用 Gmail 寄出「您借閱的《書名》將於 2 天後到期」的提醒信（收件人用設定節點的 test_email）。
+   - Postgres 節點查詢 借閱紀錄 中 歸還日期 IS NULL 且 應還日期 = CURRENT_DATE + 2 的借閱，JOIN 圖書館讀者 與 館藏書籍（資料表與欄位都是中文）。
+   - 用 Gmail 寄出「您借閱的《書名》將於 2 天後到期」的提醒信（收件人用設定節點的 測試信箱）。
 2. 在原本「更新提醒紀錄」之後，新增彙整通知：
-   - 使用 Aggregate 節點（或 Code 節點）把今天所有被提醒、且 max_overdue_days >= 30 的讀者整理成一份清單。
+   - 使用 Aggregate 節點（或 Code 節點）把今天所有被提醒、且 最多逾期天數 >= 30 的讀者整理成一份清單。
    - 若清單不是空的，用 Gmail 寄一封「嚴重逾期讀者清單」給館員，以 HTML 表格列出姓名、電話、逾期書名與天數。
 3. 請幫我建立節點、撰寫 SQL 並完成連線！
 ```
@@ -135,6 +137,7 @@
 - AI Agent 搭配 Postgres Tool，讓 AI 自己寫 SQL
 - `$fromAI()` 讓 AI 填入工具參數
 - System Prompt 中描述資料表結構與商業規則
+- 認識 Supabase MCP：讓 AI 自己探索資料庫，並比較兩種做法的權限差異
 - 建立唯讀資料庫角色，在資料庫層級保護資料
 - 用 View 簡化資料結構，提高 AI 查詢正確率
 
@@ -209,12 +212,12 @@
 ```text
 請幫我擴充「06 餐廳菜單智慧推薦」工作流程：
 1. 複製「search_vegetarian_menu」節點，命名為 search_mild_menu：
-   - Metadata Filter 改為 spicy = 0。
+   - Metadata Filter 改為 辣度 = 0。
    - 工具描述：「只搜尋完全不辣的菜色，客人說不吃辣、怕辣、帶小孩時使用」。
    - 連接同一個 Gemini Embeddings 與 AI Agent。
 2. 新增一個 Postgres Tool 節點，命名為 save_order，讓 AI 在客人說「就點這些」時呼叫：
-   - 執行 INSERT INTO menu_orders (dishes, total_price, note) VALUES ($1, $2, $3)，參數由 $fromAI 提供。
-   - 我會先在 Supabase 建立 menu_orders 資料表（id, dishes text, total_price int, note text, created_at）。
+   - 執行 INSERT INTO 點餐紀錄 (點了哪些菜, 總金額, 備註) VALUES ($1, $2, $3)，參數由 $fromAI 提供。
+   - 我會先在 Supabase 建立「點餐紀錄」資料表（編號, 點了哪些菜 text, 總金額 int, 備註 text, 建立時間），名稱都是中文。
 3. 更新 AI Agent 的 System Message，說明兩個新工具的使用時機。
 請幫我建立節點、設定參數並完成連線！
 ```
@@ -242,10 +245,10 @@
 **可直接複製給 AI 的 Prompt 提詞**：
 ```text
 請幫我擴充「07 維修中心客服信自動回覆」工作流程：
-1. 在「標記為已讀」之後新增 Gmail 節點（Message ➔ Add Label），依 $('AI 客服').item.json.output.category 加上對應標籤（例如「維修/費用」「維修/保固」），標籤我會先在 Gmail 建立好。
-2. 新增 IF 節點判斷 urgency 是否為「緊急」，若是則用 Gmail 寄一封通知給店長，主旨「🚨 緊急維修件：{{summary}}」，內容包含客人 Email 與原信內容。
+1. 在「標記為已讀」之後新增 Gmail 節點（Message ➔ Add Label），依 $('AI 客服').item.json.output.問題分類 加上對應標籤（例如「維修/費用」「維修/保固」），標籤我會先在 Gmail 建立好。
+2. 新增 IF 節點判斷 緊急程度 是否為「緊急」，若是則用 Gmail 寄一封通知給店長，主旨「🚨 緊急維修件：{{問題摘要}}」，內容包含客人 Email 與原信內容。
 3. 另外建立一條排程分支（每天 18:00）：
-   - Postgres 查詢 repair_tickets 中今天建立、status 為「需人工處理」或「草稿待審」的工單。
+   - Postgres 查詢 維修工單 中今天建立、處理狀態 為「需人工處理」或「草稿待審」的工單。
    - 用 HTML 表格整理後，以 Gmail 寄給客服主管。
 請幫我建立所需節點、設定表達式並完成連線！
 ```

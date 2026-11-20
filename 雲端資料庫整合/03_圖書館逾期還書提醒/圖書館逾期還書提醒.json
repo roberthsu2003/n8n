@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 📚 範例 03：圖書館逾期還書提醒\n\n每天早上 9 點找出「逾期未還」且「今天還沒提醒過」的讀者，每人寄一封提醒信（列出所有逾期的書），寄完後回寫提醒日期，**同一天不會重複寄**。\n\n依逾期天數自動調整語氣：\n- 1～6 天：溫馨提醒\n- 7～29 天：再次提醒\n- 30 天以上：最後通知\n\n⚙️ 使用前：執行 `setup.sql`，並在「設定」節點填入 `test_email`（測試期間所有信都寄給自己）",
+        "content": "## 📚 範例 03：圖書館逾期還書提醒\n\n每天早上 9 點找出「逾期未還」且「今天還沒提醒過」的讀者，每人寄一封提醒信（列出所有逾期的書），寄完後回寫提醒日期，**同一天不會重複寄**。\n\n依逾期天數自動調整語氣：\n- 1～6 天：溫馨提醒\n- 7～29 天：再次提醒\n- 30 天以上：最後通知\n\n⚙️ 使用前：執行 `setup.sql`，並在「設定」節點填入 `測試信箱`（測試期間所有信都寄給自己）",
         "height": 400,
         "width": 560
       },
@@ -40,20 +40,20 @@
         "assignments": {
           "assignments": [
             {
-              "id": "50d092c9-a195-5b69-80d1-d91e59792b05",
-              "name": "test_email",
+              "id": "6bfdab78-c995-5170-b106-41276244e6fa",
+              "name": "測試信箱",
               "value": "YOUR_EMAIL@gmail.com",
               "type": "string"
             },
             {
-              "id": "613e3d65-effd-52e2-97a6-b7a5b2b08354",
-              "name": "library_name",
+              "id": "1fb7696a-c749-5239-8516-a305d3154800",
+              "name": "圖書館名稱",
               "value": "星光市立圖書館",
               "type": "string"
             },
             {
-              "id": "d1551f00-1b46-5102-94c8-845eadeac29e",
-              "name": "fine_per_day",
+              "id": "71441098-b4d0-5679-823c-8a758a01fcde",
+              "name": "每日罰款",
               "value": 5,
               "type": "number"
             }
@@ -73,7 +73,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- 一位讀者一列，把他所有逾期的書合併成 JSON 陣列\nSELECT\n  m.id    AS member_id,\n  m.name,\n  m.email,\n  json_agg(json_build_object(\n    'title',        b.title,\n    'due_date',     to_char(l.due_date, 'YYYY-MM-DD'),\n    'overdue_days', CURRENT_DATE - l.due_date\n  ) ORDER BY l.due_date)          AS books,\n  MAX(CURRENT_DATE - l.due_date)  AS max_overdue_days,\n  SUM(CURRENT_DATE - l.due_date)  AS total_overdue_days\nFROM lib_loans l\nJOIN lib_members m ON m.id = l.member_id\nJOIN lib_books   b ON b.id = l.book_id\nWHERE l.returned_at IS NULL                       -- 還沒還\n  AND l.due_date < CURRENT_DATE                   -- 已經過了到期日\n  AND (l.last_reminded_at IS NULL\n       OR l.last_reminded_at < CURRENT_DATE)      -- 今天還沒寄過\nGROUP BY m.id, m.name, m.email\nORDER BY max_overdue_days DESC;",
+        "query": "-- 一位讀者一列，把他所有逾期的書合併成 JSON 陣列\nSELECT\n  m.編號 AS 讀者編號,\n  m.姓名,\n  m.電子郵件,\n  json_agg(json_build_object(\n    '書名',     b.書名,\n    '應還日期', to_char(l.應還日期, 'YYYY-MM-DD'),\n    '逾期天數', CURRENT_DATE - l.應還日期\n  ) ORDER BY l.應還日期)          AS 逾期書單,\n  MAX(CURRENT_DATE - l.應還日期)  AS 最多逾期天數,\n  SUM(CURRENT_DATE - l.應還日期)  AS 累計逾期天數\nFROM 借閱紀錄 l\nJOIN 圖書館讀者 m ON m.編號 = l.讀者編號\nJOIN 館藏書籍   b ON b.編號 = l.書籍編號\nWHERE l.歸還日期 IS NULL                     -- 還沒還\n  AND l.應還日期 < CURRENT_DATE              -- 已經過了應還日期\n  AND (l.最後提醒日期 IS NULL\n       OR l.最後提醒日期 < CURRENT_DATE)     -- 今天還沒寄過\nGROUP BY m.編號, m.姓名, m.電子郵件\nORDER BY 最多逾期天數 DESC;",
         "options": {}
       },
       "id": "d2cee1dd-047b-5939-980f-39dced1db200",
@@ -88,7 +88,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// 每位讀者執行一次（Mode: Run Once for Each Item）\nconst cfg = $('設定').first().json;\nconst r = $json;\nconst days = Number(r.max_overdue_days);\nconst fine = Number(r.total_overdue_days) * cfg.fine_per_day;\n\nlet level, color, intro;\nif (days >= 30) {\n  level = '最後通知'; color = '#dc2626';\n  intro = '您借閱的書籍已逾期超過 30 天，若 7 天內仍未歸還，將暫停您的借閱權利。';\n} else if (days >= 7) {\n  level = '再次提醒'; color = '#ea580c';\n  intro = '您借閱的書籍已逾期一段時間，其他讀者正在等候，請盡快歸還。';\n} else {\n  level = '溫馨提醒'; color = '#2563eb';\n  intro = '您借閱的書籍已經到期囉，記得找時間拿來歸還喔！';\n}\n\nconst rows = r.books.map(b => `\n  <tr>\n    <td style=\"padding:6px 8px\">${b.title}</td>\n    <td style=\"padding:6px 8px\">${b.due_date}</td>\n    <td style=\"padding:6px 8px;color:${color};text-align:right\">${b.overdue_days} 天</td>\n  </tr>`).join('');\n\nconst html = `\n<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto\">\n  <h2 style=\"color:${color}\">📚 ${cfg.library_name}｜還書${level}</h2>\n  <p>${r.name} 您好：</p>\n  <p>${intro}</p>\n  <table style=\"width:100%;border-collapse:collapse;font-size:14px\">\n    <tr style=\"background:#f3f4f6\"><th style=\"padding:6px 8px;text-align:left\">書名</th><th style=\"padding:6px 8px;text-align:left\">到期日</th><th style=\"padding:6px 8px;text-align:right\">逾期</th></tr>\n    ${rows}\n  </table>\n  <p>目前累計逾期罰款：<b>${fine} 元</b>（每本每天 ${cfg.fine_per_day} 元）</p>\n  <p style=\"color:#6b7280;font-size:13px\">若您已歸還，請忽略此信。</p>\n</div>`;\n\nreturn {\n  json: {\n    member_id: r.member_id,\n    to: cfg.test_email || r.email,   // 有填 test_email 就寄給自己測試\n    subject: `【${level}】${r.name} 您好，您有 ${r.books.length} 本書已逾期`,\n    html,\n  },\n};"
+        "jsCode": "// 每位讀者執行一次（Mode: Run Once for Each Item）\nconst cfg = $('設定').first().json;\nconst r = $json;\nconst days = Number(r.最多逾期天數);\nconst fine = Number(r.累計逾期天數) * cfg.每日罰款;\n\nlet level, color, intro;\nif (days >= 30) {\n  level = '最後通知'; color = '#dc2626';\n  intro = '您借閱的書籍已逾期超過 30 天，若 7 天內仍未歸還，將暫停您的借閱權利。';\n} else if (days >= 7) {\n  level = '再次提醒'; color = '#ea580c';\n  intro = '您借閱的書籍已逾期一段時間，其他讀者正在等候，請盡快歸還。';\n} else {\n  level = '溫馨提醒'; color = '#2563eb';\n  intro = '您借閱的書籍已經到期囉，記得找時間拿來歸還喔！';\n}\n\nconst rows = r.逾期書單.map(b => `\n  <tr>\n    <td style=\"padding:6px 8px\">${b.書名}</td>\n    <td style=\"padding:6px 8px\">${b.應還日期}</td>\n    <td style=\"padding:6px 8px;color:${color};text-align:right\">${b.逾期天數} 天</td>\n  </tr>`).join('');\n\nconst html = `\n<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto\">\n  <h2 style=\"color:${color}\">📚 ${cfg.圖書館名稱}｜還書${level}</h2>\n  <p>${r.姓名} 您好：</p>\n  <p>${intro}</p>\n  <table style=\"width:100%;border-collapse:collapse;font-size:14px\">\n    <tr style=\"background:#f3f4f6\"><th style=\"padding:6px 8px;text-align:left\">書名</th><th style=\"padding:6px 8px;text-align:left\">到期日</th><th style=\"padding:6px 8px;text-align:right\">逾期</th></tr>\n    ${rows}\n  </table>\n  <p>目前累計逾期罰款：<b>${fine} 元</b>（每本每天 ${cfg.每日罰款} 元）</p>\n  <p style=\"color:#6b7280;font-size:13px\">若您已歸還，請忽略此信。</p>\n</div>`;\n\nreturn {\n  json: {\n    讀者編號: r.讀者編號,\n    to: cfg.測試信箱 || r.電子郵件,   // 有填「測試信箱」 就寄給自己測試\n    subject: `【${level}】${r.姓名} 您好，您有 ${r.逾期書單.length} 本書已逾期`,\n    html,\n  },\n};"
       },
       "id": "eb798010-215f-5fb9-94a9-696f8cedbce7",
       "name": "產生提醒信內容",
@@ -121,9 +121,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- 把這位讀者今天提醒過的借閱紀錄，標記為「今天已提醒」\nUPDATE lib_loans\nSET last_reminded_at = CURRENT_DATE,\n    reminder_count   = reminder_count + 1\nWHERE member_id = $1\n  AND returned_at IS NULL\n  AND due_date < CURRENT_DATE\n  AND (last_reminded_at IS NULL OR last_reminded_at < CURRENT_DATE)\nRETURNING id, member_id, reminder_count;",
+        "query": "-- 把這位讀者今天提醒過的借閱紀錄，標記為「今天已提醒」\nUPDATE 借閱紀錄\nSET 最後提醒日期 = CURRENT_DATE,\n    提醒次數     = 提醒次數 + 1\nWHERE 讀者編號 = $1\n  AND 歸還日期 IS NULL\n  AND 應還日期 < CURRENT_DATE\n  AND (最後提醒日期 IS NULL OR 最後提醒日期 < CURRENT_DATE)\nRETURNING 編號, 讀者編號, 提醒次數;",
         "options": {
-          "queryReplacement": "={{ $('產生提醒信內容').item.json.member_id }}"
+          "queryReplacement": "={{ $('產生提醒信內容').item.json.讀者編號 }}"
         }
       },
       "id": "747f2236-970e-534a-a4de-3eba3abe61a8",

@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 🍜 範例 06：餐廳菜單智慧推薦\n\n**流程 A：菜單上架**\n上傳 CSV ➔ 每道菜變成一筆文件，並附上 **Metadata**（分類、價格、辣度、素食、過敏原）➔ 存進 Pinecone（namespace: `menu`）\n\n**流程 B：點餐推薦**\nAI 有兩個工具：\n- `search_menu`：搜尋全部菜單\n- `search_vegetarian_menu`：搜尋素食菜單（用 Metadata Filter `vegetarian = 是` 先過濾）\n\n試試看：「我不吃辣，想吃素，預算 250 有什麼推薦？」「天氣好冷想吃熱的」「我對花生過敏」",
+        "content": "## 🍜 範例 06：餐廳菜單智慧推薦\n\n**流程 A：菜單上架**\n上傳 CSV ➔ 每道菜變成一筆文件，並附上 **Metadata**（分類、價格、辣度、素食、過敏原）➔ 存進 Pinecone（namespace: `menu`）\n\n**流程 B：點餐推薦**\nAI 有兩個工具：\n- `search_menu`：搜尋全部菜單\n- `search_vegetarian_menu`：搜尋素食菜單（用 Metadata Filter `素食 = 是` 先過濾）\n\n試試看：「我不吃辣，想吃素，預算 250 有什麼推薦？」「天氣好冷想吃熱的」「我對花生過敏」",
         "height": 440,
         "width": 600
       },
@@ -131,37 +131,37 @@
     {
       "parameters": {
         "jsonMode": "expressionData",
-        "jsonData": "=菜名：{{ $json.name }}\n分類：{{ $json.category }}\n價格：{{ $json.price }} 元\n辣度：{{ $json.spicy }}（0 不辣～3 大辣）\n素食：{{ $json.vegetarian }}\n過敏原：{{ $json.allergens }}\n介紹：{{ $json.description }}",
+        "jsonData": "=菜名：{{ $json.菜名 }}\n類別：{{ $json.類別 }}\n價格：{{ $json.價格 }} 元\n辣度：{{ $json.辣度 }}（0 不辣～3 大辣）\n素食：{{ $json.素食 }}\n過敏原：{{ $json.過敏原 }}\n介紹：{{ $json.介紹 }}",
         "options": {
           "metadata": {
             "metadataValues": [
               {
-                "name": "dish_id",
-                "value": "={{ $json.dish_id }}"
+                "name": "編號",
+                "value": "={{ $json.編號 }}"
               },
               {
-                "name": "name",
-                "value": "={{ $json.name }}"
+                "name": "菜名",
+                "value": "={{ $json.菜名 }}"
               },
               {
-                "name": "category",
-                "value": "={{ $json.category }}"
+                "name": "類別",
+                "value": "={{ $json.類別 }}"
               },
               {
-                "name": "price",
-                "value": "={{ $json.price }}"
+                "name": "價格",
+                "value": "={{ $json.價格 }}"
               },
               {
-                "name": "spicy",
-                "value": "={{ $json.spicy }}"
+                "name": "辣度",
+                "value": "={{ $json.辣度 }}"
               },
               {
-                "name": "vegetarian",
-                "value": "={{ $json.vegetarian }}"
+                "name": "素食",
+                "value": "={{ $json.素食 }}"
               },
               {
-                "name": "allergens",
-                "value": "={{ $json.allergens }}"
+                "name": "過敏原",
+                "value": "={{ $json.過敏原 }}"
               }
             ]
           }
@@ -274,7 +274,7 @@
           "metadata": {
             "metadataValues": [
               {
-                "name": "vegetarian",
+                "name": "素食",
                 "value": "是"
               }
             ]

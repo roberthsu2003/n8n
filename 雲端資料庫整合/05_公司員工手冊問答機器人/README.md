@@ -97,7 +97,7 @@ graph LR
 - **Type of Data**：Binary（上傳的檔案）
 - **Data Format**：Text
 - **Text Splitting**：Custom（使用下方連接的 Text Splitter）
-- **Options ➔ Metadata**：`source` = `星橋數位員工手冊`（每一段都會帶上這個標籤）
+- **Options ➔ Metadata**：`來源` = `星橋數位員工手冊`（每一段都會帶上這個標籤）
 
 **5. 切成小段**（Recursive Character Text Splitter）
 | 設定 | 值 | 說明 |

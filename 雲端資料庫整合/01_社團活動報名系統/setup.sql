@@ -2,65 +2,66 @@
 -- 範例 01：社團活動報名系統
 -- 在 Supabase ➔ SQL Editor 貼上全部內容並執行 (Run)
 -- 可重複執行：會先刪除本範例的資料表再重建
+-- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
 
-DROP VIEW  IF EXISTS public.club_activity_seats;
-DROP TABLE IF EXISTS public.club_registrations;
-DROP TABLE IF EXISTS public.club_activities;
+DROP VIEW  IF EXISTS public.活動剩餘名額;
+DROP TABLE IF EXISTS public.社團報名;
+DROP TABLE IF EXISTS public.社團活動;
 
 -- 1. 活動資料表
-CREATE TABLE public.club_activities (
-    id          BIGSERIAL PRIMARY KEY,
-    title       TEXT        NOT NULL UNIQUE,   -- 活動名稱（表單下拉選單要一模一樣）
-    club        TEXT        NOT NULL,          -- 主辦社團
-    event_date  DATE        NOT NULL,          -- 活動日期
-    location    TEXT        NOT NULL,          -- 地點
-    capacity    INT         NOT NULL,          -- 名額上限
-    fee         INT         NOT NULL DEFAULT 0 -- 報名費
+CREATE TABLE public.社團活動 (
+    編號      BIGSERIAL PRIMARY KEY,
+    活動名稱  TEXT NOT NULL UNIQUE,     -- 表單下拉選單的文字要一模一樣
+    主辦社團  TEXT NOT NULL,
+    活動日期  DATE NOT NULL,
+    地點      TEXT NOT NULL,
+    名額上限  INT  NOT NULL,
+    報名費    INT  NOT NULL DEFAULT 0
 );
 
 -- 2. 報名資料表
-CREATE TABLE public.club_registrations (
-    id           BIGSERIAL PRIMARY KEY,
-    activity_id  BIGINT      NOT NULL REFERENCES public.club_activities(id) ON DELETE CASCADE,
-    student_name TEXT        NOT NULL,
-    student_id   TEXT        NOT NULL,
-    email        TEXT        NOT NULL,
-    department   TEXT,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (activity_id, email)                -- 同一個 Email 不能重複報名同一個活動
+CREATE TABLE public.社團報名 (
+    編號      BIGSERIAL PRIMARY KEY,
+    活動編號  BIGINT      NOT NULL REFERENCES public.社團活動(編號) ON DELETE CASCADE,
+    姓名      TEXT        NOT NULL,
+    學號      TEXT        NOT NULL,
+    電子郵件  TEXT        NOT NULL,
+    科系      TEXT,
+    報名時間  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (活動編號, 電子郵件)          -- 同一個 Email 不能重複報名同一個活動
 );
 
 -- 3. 檢視表 (View)：即時計算每個活動「已報名人數」與「剩餘名額」
 --    Supabase 節點可以像讀資料表一樣讀取 View
-CREATE VIEW public.club_activity_seats AS
+CREATE VIEW public.活動剩餘名額 AS
 SELECT
-    a.id,
-    a.title,
-    a.club,
-    a.event_date,
-    a.location,
-    a.capacity,
-    a.fee,
-    COUNT(r.id)::INT              AS registered,
-    (a.capacity - COUNT(r.id))::INT AS remaining
-FROM public.club_activities a
-LEFT JOIN public.club_registrations r ON r.activity_id = a.id
-GROUP BY a.id;
+    a.編號,
+    a.活動名稱,
+    a.主辦社團,
+    a.活動日期,
+    a.地點,
+    a.名額上限,
+    a.報名費,
+    COUNT(r.編號)::INT                AS 已報名人數,
+    (a.名額上限 - COUNT(r.編號))::INT AS 剩餘名額
+FROM public.社團活動 a
+LEFT JOIN public.社團報名 r ON r.活動編號 = a.編號
+GROUP BY a.編號;
 
 -- 4. 授權給 service_role（n8n Supabase 節點使用的金鑰），確保 REST API 可以存取
 --    （DO 區塊：在非 Supabase 的 PostgreSQL 執行時會自動略過）
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
-        GRANT SELECT, INSERT, UPDATE, DELETE ON public.club_activities, public.club_registrations TO service_role;
-        GRANT SELECT ON public.club_activity_seats TO service_role;
+        GRANT SELECT, INSERT, UPDATE, DELETE ON public.社團活動, public.社團報名 TO service_role;
+        GRANT SELECT ON public.活動剩餘名額 TO service_role;
         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;
     END IF;
 END $$;
 
 -- 5. 測試資料：5 個活動（日期以今天為基準往後排）
-INSERT INTO public.club_activities (title, club, event_date, location, capacity, fee) VALUES
+INSERT INTO public.社團活動 (活動名稱, 主辦社團, 活動日期, 地點, 名額上限, 報名費) VALUES
     ('陽明山夜衝看星星',     '天文社',   CURRENT_DATE + 7,  '陽明山擎天崗',     20, 150),
     ('手沖咖啡入門體驗',     '咖啡研究社', CURRENT_DATE + 10, '學生活動中心 301', 12, 200),
     ('街舞基礎 Breaking 課', '熱舞社',   CURRENT_DATE + 14, '體育館舞蹈教室',   25, 0),
@@ -70,9 +71,9 @@ INSERT INTO public.club_activities (title, club, event_date, location, capacity,
 -- 6. 測試資料：已經有人報名的狀況
 --    「桌遊之夜」名額 10 人、已報名 10 人 ➔ 用來測試「額滿」
 --    「手沖咖啡」名額 12 人、已報名 11 人 ➔ 只剩最後 1 位
-INSERT INTO public.club_registrations (activity_id, student_name, student_id, email, department)
-SELECT a.id, s.name, s.sid, s.email, s.dept
-FROM public.club_activities a
+INSERT INTO public.社團報名 (活動編號, 姓名, 學號, 電子郵件, 科系)
+SELECT a.編號, s.姓名, s.學號, s.電子郵件, s.科系
+FROM public.社團活動 a
 JOIN (VALUES
     ('桌遊之夜：狼人殺大會', '林冠宇', 'B11201001', 'guanyu.lin@example.com',   '資訊工程系'),
     ('桌遊之夜：狼人殺大會', '陳品妤', 'B11201002', 'pinyu.chen@example.com',   '企業管理系'),
@@ -100,7 +101,7 @@ JOIN (VALUES
     ('陽明山夜衝看星星',     '曾詠晴', 'B11203003', 'yungching.tseng@example.com','護理系'),
     ('街舞基礎 Breaking 課', '潘冠廷', 'B11204001', 'kuanting.pan@example.com', '體育系'),
     ('街舞基礎 Breaking 課', '簡郁婷', 'B11204002', 'yuting.chien@example.com', '應用外語系')
-) AS s(title, name, sid, email, dept) ON s.title = a.title;
+) AS s(活動名稱, 姓名, 學號, 電子郵件, 科系) ON s.活動名稱 = a.活動名稱;
 
 -- 7. 驗證：看看每個活動的剩餘名額
-SELECT title, capacity, registered, remaining FROM public.club_activity_seats ORDER BY id;
+SELECT 活動名稱, 名額上限, 已報名人數, 剩餘名額 FROM public.活動剩餘名額 ORDER BY 編號;

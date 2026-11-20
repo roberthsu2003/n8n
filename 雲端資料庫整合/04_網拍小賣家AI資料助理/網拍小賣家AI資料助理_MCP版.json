@@ -1,0 +1,155 @@
+{
+  "name": "04 網拍小賣家 AI 資料助理（Supabase MCP 版）",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🔌 範例 04（MCP 版）：用 Supabase MCP 讓 AI 查資料庫\n\n和原本的範例 04 相同，只是把 Postgres Tool 換成 **MCP Client Tool**，連到 Supabase 官方 MCP Server。\nAI 會自己用 `list_tables` 查看有哪些資料表，再用 `execute_sql` 查詢。\n\n⚙️ 使用前：\n1. 打開「Supabase MCP」節點，把網址裡的 `你的專案代碼` 換成自己的 Project ID\n2. Authentication 選 **MCP OAuth2**，按 Connect 登入 Supabase 並授權\n\n⚠️ 網址一定要保留 `read_only=true` 和 `project_ref=...`，AI 才不能修改資料、也看不到其他專案。",
+        "height": 440,
+        "width": 600
+      },
+      "id": "bfa57475-5591-5dd5-9d53-561e4077dd2a",
+      "name": "說明",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -500
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "410004c4-e3d8-5b74-8b20-01116a691548",
+      "name": "聊天視窗",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "18131dca-67d0-57fb-8cb4-67a414cd2339"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=你是「小日子選物店」的資料分析助理，負責幫老闆查詢 Supabase 資料庫並用繁體中文回答。\n今天日期是 {{ $now.toFormat('yyyy-MM-dd') }}。\n\n## 查詢步驟\n1. 不確定有哪些資料表或欄位時，先用「list_tables」工具查看（只看 public schema 中名稱以「網拍」開頭的資料表與檢視表）。\n2. 再用「execute_sql」工具執行 SELECT 查詢。資料表與欄位名稱都是中文，SQL 裡直接寫中文即可。\n3. 「網拍訂單明細」是已經 JOIN 好的檢視表（含商品名稱、類別、金額、毛利、顧客縣市），統計時優先使用。\n\n## 規則\n- 一律查詢真實資料，不可以自己編數字。\n- 只能寫 SELECT 查詢。\n- 計算銷售額、銷售量時，只算 訂單狀態 = '已完成' 的訂單。\n- 查詢結果很多時，用 LIMIT 限制在 20 筆以內。\n- 回答時先給結論，再用 Markdown 表格列出數據，金額加上千分位與「元」。"
+        }
+      },
+      "id": "395d4e14-9793-5ace-9a67-809d7d163001",
+      "name": "AI 資料助理",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        300,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "id": "fcbb2639-7a0e-5db1-a1dd-b37d55294bfe",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "532b712b-d8e2-528b-90a5-13626a15a5d6",
+      "name": "對話記憶",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        340,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.supabase.com/mcp?project_ref=你的專案代碼&read_only=true&features=database",
+        "serverTransport": "httpStreamable",
+        "authentication": "mcpOAuth2Api",
+        "include": "selected",
+        "includeTools": [
+          "list_tables",
+          "execute_sql"
+        ],
+        "options": {}
+      },
+      "id": "618a6873-8eee-5d7c-8163-1c21789d20b2",
+      "name": "Supabase MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        520,
+        240
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "聊天視窗": {
+      "main": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "對話記憶": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI 資料助理",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Taipei"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

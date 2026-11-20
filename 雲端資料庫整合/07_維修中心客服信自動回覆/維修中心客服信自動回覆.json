@@ -123,7 +123,7 @@
           "metadata": {
             "metadataValues": [
               {
-                "name": "source",
+                "name": "來源",
                 "value": "快修通維修服務FAQ"
               }
             ]
@@ -185,38 +185,38 @@
         "assignments": {
           "assignments": [
             {
-              "id": "87e1feb8-b3f3-538f-9e2e-b01f90fe0883",
-              "name": "gmail_id",
+              "id": "3aa8a677-0e99-55ea-b2e7-085a4a91c8be",
+              "name": "郵件編號",
               "value": "={{ $json.id }}",
               "type": "string"
             },
             {
-              "id": "3477951a-51f0-5e14-9e07-a78bc46c53cc",
-              "name": "thread_id",
+              "id": "2868ab4b-fda4-5044-bca7-b724619772d5",
+              "name": "對話串編號",
               "value": "={{ $json.threadId }}",
               "type": "string"
             },
             {
-              "id": "f0cd0b10-ffb9-55a2-acf6-22107f625c64",
-              "name": "from_email",
+              "id": "f1f5bddd-94db-5601-bd5e-7b9df1b43610",
+              "name": "寄件人信箱",
               "value": "={{ $json.from.value[0].address }}",
               "type": "string"
             },
             {
-              "id": "97942dba-f139-54c6-897b-b1071371d3ef",
-              "name": "from_name",
+              "id": "b3768f07-9413-55bb-9c88-5dcb3820491d",
+              "name": "寄件人姓名",
               "value": "={{ $json.from.value[0].name || $json.from.value[0].address }}",
               "type": "string"
             },
             {
-              "id": "1c3bc520-9837-517d-95e8-aa563032def7",
-              "name": "subject",
+              "id": "8a5b4986-cb4e-5cbe-9ae1-f18b493460bf",
+              "name": "主旨",
               "value": "={{ $json.subject }}",
               "type": "string"
             },
             {
-              "id": "bf5529e7-a5db-51ba-9387-84cd34e11c6e",
-              "name": "body",
+              "id": "6bf9a62c-d4f5-5d35-a742-ab08b51568d7",
+              "name": "信件內容",
               "value": "={{ ($json.text || '').slice(0, 3000) }}",
               "type": "string"
             }
@@ -236,10 +236,10 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=寄件人：{{ $json.from_name }} <{{ $json.from_email }}>\n主旨：{{ $json.subject }}\n\n信件內容：\n{{ $json.body }}",
+        "text": "=寄件人：{{ $json.寄件人姓名 }} <{{ $json.寄件人信箱 }}>\n主旨：{{ $json.主旨 }}\n\n信件內容：\n{{ $json.信件內容 }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "你是「快修通 3C 維修中心」的客服專員，負責閱讀客人來信、查詢 FAQ，並寫好回覆草稿給真人客服審核。\n\n步驟：\n1. 先使用「search_repair_faq」工具搜尋與客人問題相關的 FAQ（一封信有多個問題時，每個問題都要查）。\n2. 只能根據 FAQ 的內容回答，不可以自己編造價格、時間或政策。\n3. 依照以下格式輸出：\n   - category：從「保固查詢、維修費用、送修流程、故障排除、進度查詢、其他」選一個最符合的。\n   - urgency：手機進水、電池膨脹、冒煙等需要立即處理的狀況填「緊急」，其他填「一般」。\n   - summary：用一句話（30 字內）摘要客人的問題。\n   - found_in_faq：FAQ 裡有找到可以回答的內容填 true；完全找不到填 false。\n   - reply：給客人的回覆信內容（純文字），開頭「您好，感謝您來信快修通 3C 維修中心。」，\n     條列回答每個問題，結尾附上門市地址與客服電話 02-2311-0000，署名「快修通客服團隊」。\n     如果 found_in_faq 是 false，回覆「已收到您的問題，將由專人於 1 個工作天內回覆」。\n4. 一律使用繁體中文，語氣專業有禮。"
+          "systemMessage": "你是「快修通 3C 維修中心」的客服專員，負責閱讀客人來信、查詢 FAQ，並寫好回覆草稿給真人客服審核。\n\n步驟：\n1. 先使用「search_repair_faq」工具搜尋與客人問題相關的 FAQ（一封信有多個問題時，每個問題都要查）。\n2. 只能根據 FAQ 的內容回答，不可以自己編造價格、時間或政策。\n3. 依照以下格式輸出：\n   - 問題分類：從「保固查詢、維修費用、送修流程、故障排除、進度查詢、其他」選一個最符合的。\n   - 緊急程度：手機進水、電池膨脹、冒煙等需要立即處理的狀況填「緊急」，其他填「一般」。\n   - 問題摘要：用一句話（30 字內）摘要客人的問題。\n   - 知識庫有答案：FAQ 裡有找到可以回答的內容填 true；完全找不到填 false。\n   - 回覆內容：給客人的回覆信內容（純文字），開頭「您好，感謝您來信快修通 3C 維修中心。」，\n     條列回答每個問題，結尾附上門市地址與客服電話 02-2311-0000，署名「快修通客服團隊」。\n     如果 知識庫有答案 是 false，回覆「已收到您的問題，將由專人於 1 個工作天內回覆」。\n4. 一律使用繁體中文，語氣專業有禮。"
         }
       },
       "id": "e0a9787b-53b5-5420-9a2c-be67867fd6d5",
@@ -306,7 +306,7 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n  \"category\": \"維修費用\",\n  \"urgency\": \"一般\",\n  \"summary\": \"詢問 iPhone 14 換螢幕價格與時間\",\n  \"found_in_faq\": true,\n  \"reply\": \"您好，感謝您來信快修通 3C 維修中心。\\n...\"\n}"
+        "jsonSchemaExample": "{\n  \"問題分類\": \"維修費用\",\n  \"緊急程度\": \"一般\",\n  \"問題摘要\": \"詢問 iPhone 14 換螢幕價格與時間\",\n  \"知識庫有答案\": true,\n  \"回覆內容\": \"您好，感謝您來信快修通 3C 維修中心。\\n...\"\n}"
       },
       "id": "e1f5d3c3-9cba-5106-bc77-3f8bf407b038",
       "name": "輸出格式",
@@ -320,12 +320,12 @@
     {
       "parameters": {
         "resource": "draft",
-        "subject": "=Re: {{ $('整理信件').item.json.subject }}",
+        "subject": "=Re: {{ $('整理信件').item.json.主旨 }}",
         "emailType": "text",
-        "message": "={{ $json.output.reply }}",
+        "message": "={{ $json.output.回覆內容 }}",
         "options": {
-          "threadId": "={{ $('整理信件').item.json.thread_id }}",
-          "sendTo": "={{ $('整理信件').item.json.from_email }}"
+          "threadId": "={{ $('整理信件').item.json.對話串編號 }}",
+          "sendTo": "={{ $('整理信件').item.json.寄件人信箱 }}"
         }
       },
       "id": "268a8aba-9a85-5c43-861b-d26596241500",
@@ -348,28 +348,28 @@
         "table": {
           "__rl": true,
           "mode": "list",
-          "value": "repair_tickets",
-          "cachedResultName": "repair_tickets"
+          "value": "維修工單",
+          "cachedResultName": "維修工單"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "gmail_id": "={{ $('整理信件').item.json.gmail_id }}",
-            "customer_email": "={{ $('整理信件').item.json.from_email }}",
-            "subject": "={{ $('整理信件').item.json.subject }}",
-            "category": "={{ $('AI 客服').item.json.output.category }}",
-            "urgency": "={{ $('AI 客服').item.json.output.urgency }}",
-            "summary": "={{ $('AI 客服').item.json.output.summary }}",
-            "found_in_faq": "={{ $('AI 客服').item.json.output.found_in_faq }}",
-            "status": "={{ $('AI 客服').item.json.output.found_in_faq ? '草稿待審' : '需人工處理' }}"
+            "郵件編號": "={{ $('整理信件').item.json.郵件編號 }}",
+            "顧客信箱": "={{ $('整理信件').item.json.寄件人信箱 }}",
+            "主旨": "={{ $('整理信件').item.json.主旨 }}",
+            "問題分類": "={{ $('AI 客服').item.json.output.問題分類 }}",
+            "緊急程度": "={{ $('AI 客服').item.json.output.緊急程度 }}",
+            "問題摘要": "={{ $('AI 客服').item.json.output.問題摘要 }}",
+            "知識庫有答案": "={{ $('AI 客服').item.json.output.知識庫有答案 }}",
+            "處理狀態": "={{ $('AI 客服').item.json.output.知識庫有答案 ? '草稿待審' : '需人工處理' }}"
           },
           "matchingColumns": [
-            "gmail_id"
+            "郵件編號"
           ],
           "schema": [
             {
-              "id": "gmail_id",
-              "displayName": "gmail_id",
+              "id": "郵件編號",
+              "displayName": "郵件編號",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -377,8 +377,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "customer_email",
-              "displayName": "customer_email",
+              "id": "顧客信箱",
+              "displayName": "顧客信箱",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -386,8 +386,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "subject",
-              "displayName": "subject",
+              "id": "主旨",
+              "displayName": "主旨",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -395,8 +395,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "category",
-              "displayName": "category",
+              "id": "問題分類",
+              "displayName": "問題分類",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -404,8 +404,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "urgency",
-              "displayName": "urgency",
+              "id": "緊急程度",
+              "displayName": "緊急程度",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -413,8 +413,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "summary",
-              "displayName": "summary",
+              "id": "問題摘要",
+              "displayName": "問題摘要",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -422,8 +422,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "found_in_faq",
-              "displayName": "found_in_faq",
+              "id": "知識庫有答案",
+              "displayName": "知識庫有答案",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -431,8 +431,8 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "status",
-              "displayName": "status",
+              "id": "處理狀態",
+              "displayName": "處理狀態",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -455,7 +455,7 @@
     {
       "parameters": {
         "operation": "markAsRead",
-        "messageId": "={{ $('整理信件').item.json.gmail_id }}"
+        "messageId": "={{ $('整理信件').item.json.郵件編號 }}"
       },
       "id": "df0bb51a-cc5f-59b6-8986-4649a46f87b0",
       "name": "標記為已讀",

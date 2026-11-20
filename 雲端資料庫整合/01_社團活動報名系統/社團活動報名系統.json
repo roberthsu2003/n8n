@@ -119,32 +119,32 @@
         "assignments": {
           "assignments": [
             {
-              "id": "31a6f07a-9c54-59ae-80db-6182705c7fd6",
-              "name": "student_name",
+              "id": "7e1bcf0c-aa64-5975-b8dd-8f0e055aacad",
+              "name": "姓名",
               "value": "={{ $json['姓名'].trim() }}",
               "type": "string"
             },
             {
-              "id": "9e233d4b-a7c3-58dd-b1fd-29035d04eb32",
-              "name": "student_id",
+              "id": "60678c08-ddcd-5f67-aebb-f7e087763923",
+              "name": "學號",
               "value": "={{ $json['學號'].trim().toUpperCase() }}",
               "type": "string"
             },
             {
-              "id": "4bb70494-79a7-5992-8bfb-a4cbe7ea9e3c",
-              "name": "email",
+              "id": "11b24571-cc29-5002-81a4-9bdda2cb8260",
+              "name": "電子郵件",
               "value": "={{ $json['Email'].trim().toLowerCase() }}",
               "type": "string"
             },
             {
-              "id": "f915325f-6570-5122-b382-6d0a4eda696e",
-              "name": "department",
+              "id": "42e0d9b1-370e-5c8e-a006-79ac18e97804",
+              "name": "科系",
               "value": "={{ $json['系級'] }}",
               "type": "string"
             },
             {
-              "id": "11ef554a-b273-5d9c-8811-026a0d0300b4",
-              "name": "activity_title",
+              "id": "bd0d7ce1-df06-546f-95fb-f67edcb562e1",
+              "name": "活動名稱",
               "value": "={{ $json['報名活動'] }}",
               "type": "string"
             }
@@ -164,16 +164,16 @@
     {
       "parameters": {
         "operation": "getAll",
-        "tableId": "club_activity_seats",
+        "tableId": "活動剩餘名額",
         "limit": 1,
         "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
           "conditions": [
             {
-              "keyName": "title",
+              "keyName": "活動名稱",
               "condition": "eq",
-              "keyValue": "={{ $json.activity_title }}"
+              "keyValue": "={{ $json.活動名稱 }}"
             }
           ]
         }
@@ -190,21 +190,21 @@
     {
       "parameters": {
         "operation": "getAll",
-        "tableId": "club_registrations",
+        "tableId": "社團報名",
         "limit": 1,
         "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
           "conditions": [
             {
-              "keyName": "activity_id",
+              "keyName": "活動編號",
               "condition": "eq",
-              "keyValue": "={{ $json.id }}"
+              "keyValue": "={{ $json.編號 }}"
             },
             {
-              "keyName": "email",
+              "keyName": "電子郵件",
               "condition": "eq",
-              "keyValue": "={{ $('整理報名資料').first().json.email }}"
+              "keyValue": "={{ $('整理報名資料').first().json.電子郵件 }}"
             }
           ]
         }
@@ -230,8 +230,8 @@
           },
           "conditions": [
             {
-              "id": "6c8ddf56-ac48-5687-8868-133161636cbe",
-              "leftValue": "={{ $json.id }}",
+              "id": "6733ef12-ebaa-5332-8acd-1d1fb765d989",
+              "leftValue": "={{ $json.編號 }}",
               "rightValue": "",
               "operator": {
                 "type": "number",
@@ -258,7 +258,7 @@
       "parameters": {
         "operation": "completion",
         "completionTitle": "您已經報名過囉！",
-        "completionMessage": "={{ $('整理報名資料').first().json.student_name }} 同學，您已經報名過「{{ $('查詢活動剩餘名額').first().json.title }}」，不需要重複報名。",
+        "completionMessage": "={{ $('整理報名資料').first().json.姓名 }} 同學，您已經報名過「{{ $('查詢活動剩餘名額').first().json.活動名稱 }}」，不需要重複報名。",
         "options": {}
       },
       "id": "9dc842b2-9cc6-5bc4-a49c-3992c3564e54",
@@ -281,8 +281,8 @@
           },
           "conditions": [
             {
-              "id": "34837445-3890-56cb-b759-d90c5eca5b51",
-              "leftValue": "={{ $('查詢活動剩餘名額').first().json.remaining }}",
+              "id": "7198f2d7-e109-5673-8fa0-fb298680d991",
+              "leftValue": "={{ $('查詢活動剩餘名額').first().json.剩餘名額 }}",
               "rightValue": 0,
               "operator": {
                 "type": "number",
@@ -306,28 +306,28 @@
     },
     {
       "parameters": {
-        "tableId": "club_registrations",
+        "tableId": "社團報名",
         "fieldsUi": {
           "fieldValues": [
             {
-              "fieldId": "activity_id",
-              "fieldValue": "={{ $('查詢活動剩餘名額').first().json.id }}"
+              "fieldId": "活動編號",
+              "fieldValue": "={{ $('查詢活動剩餘名額').first().json.編號 }}"
             },
             {
-              "fieldId": "student_name",
-              "fieldValue": "={{ $('整理報名資料').first().json.student_name }}"
+              "fieldId": "姓名",
+              "fieldValue": "={{ $('整理報名資料').first().json.姓名 }}"
             },
             {
-              "fieldId": "student_id",
-              "fieldValue": "={{ $('整理報名資料').first().json.student_id }}"
+              "fieldId": "學號",
+              "fieldValue": "={{ $('整理報名資料').first().json.學號 }}"
             },
             {
-              "fieldId": "email",
-              "fieldValue": "={{ $('整理報名資料').first().json.email }}"
+              "fieldId": "電子郵件",
+              "fieldValue": "={{ $('整理報名資料').first().json.電子郵件 }}"
             },
             {
-              "fieldId": "department",
-              "fieldValue": "={{ $('整理報名資料').first().json.department }}"
+              "fieldId": "科系",
+              "fieldValue": "={{ $('整理報名資料').first().json.科系 }}"
             }
           ]
         }
@@ -343,10 +343,10 @@
     },
     {
       "parameters": {
-        "sendTo": "={{ $('整理報名資料').first().json.email }}",
-        "subject": "=【報名成功】{{ $('查詢活動剩餘名額').first().json.title }}",
+        "sendTo": "={{ $('整理報名資料').first().json.電子郵件 }}",
+        "subject": "=【報名成功】{{ $('查詢活動剩餘名額').first().json.活動名稱 }}",
         "emailType": "html",
-        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden\">\n  <div style=\"background:#4f46e5;color:#fff;padding:20px 24px\"><h2 style=\"margin:0\">🎉 報名成功！</h2></div>\n  <div style=\"padding:20px 24px;color:#111827;line-height:1.7\">\n    <p>{{ $('整理報名資料').first().json.student_name }} 同學您好：</p>\n    <p>您已成功報名 <b>{{ $('查詢活動剩餘名額').first().json.club }}</b> 舉辦的活動，資訊如下：</p>\n    <table style=\"border-collapse:collapse;width:100%\">\n      <tr><td style=\"padding:6px 0;color:#6b7280;width:90px\">活動</td><td><b>{{ $('查詢活動剩餘名額').first().json.title }}</b></td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">日期</td><td>{{ $('查詢活動剩餘名額').first().json.event_date }}</td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">地點</td><td>{{ $('查詢活動剩餘名額').first().json.location }}</td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">報名費</td><td>{{ $('查詢活動剩餘名額').first().json.fee > 0 ? $('查詢活動剩餘名額').first().json.fee + ' 元（活動當天現場繳交）' : '免費' }}</td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">您是第</td><td>{{ $('查詢活動剩餘名額').first().json.registered + 1 }} 位報名者（名額 {{ $('查詢活動剩餘名額').first().json.capacity }} 人）</td></tr>\n    </table>\n    <p style=\"margin-top:16px\">如需取消，請填寫「取消報名」表單，把名額留給其他同學 🙏</p>\n  </div>\n</div>",
+        "message": "=<div style=\"font-family:Arial,sans-serif;max-width:560px;margin:auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden\">\n  <div style=\"background:#4f46e5;color:#fff;padding:20px 24px\"><h2 style=\"margin:0\">🎉 報名成功！</h2></div>\n  <div style=\"padding:20px 24px;color:#111827;line-height:1.7\">\n    <p>{{ $('整理報名資料').first().json.姓名 }} 同學您好：</p>\n    <p>您已成功報名 <b>{{ $('查詢活動剩餘名額').first().json.主辦社團 }}</b> 舉辦的活動，資訊如下：</p>\n    <table style=\"border-collapse:collapse;width:100%\">\n      <tr><td style=\"padding:6px 0;color:#6b7280;width:90px\">活動</td><td><b>{{ $('查詢活動剩餘名額').first().json.活動名稱 }}</b></td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">日期</td><td>{{ $('查詢活動剩餘名額').first().json.活動日期 }}</td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">地點</td><td>{{ $('查詢活動剩餘名額').first().json.地點 }}</td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">報名費</td><td>{{ $('查詢活動剩餘名額').first().json.報名費 > 0 ? $('查詢活動剩餘名額').first().json.報名費 + ' 元（活動當天現場繳交）' : '免費' }}</td></tr>\n      <tr><td style=\"padding:6px 0;color:#6b7280\">您是第</td><td>{{ $('查詢活動剩餘名額').first().json.已報名人數 + 1 }} 位報名者（名額 {{ $('查詢活動剩餘名額').first().json.名額上限 }} 人）</td></tr>\n    </table>\n    <p style=\"margin-top:16px\">如需取消，請填寫「取消報名」表單，把名額留給其他同學 🙏</p>\n  </div>\n</div>",
         "options": {
           "appendAttribution": false
         }
@@ -364,7 +364,7 @@
       "parameters": {
         "operation": "completion",
         "completionTitle": "報名成功 🎉",
-        "completionMessage": "={{ $('整理報名資料').first().json.student_name }} 同學，您已成功報名「{{ $('查詢活動剩餘名額').first().json.title }}」！確認信已寄到 {{ $('整理報名資料').first().json.email }}。",
+        "completionMessage": "={{ $('整理報名資料').first().json.姓名 }} 同學，您已成功報名「{{ $('查詢活動剩餘名額').first().json.活動名稱 }}」！確認信已寄到 {{ $('整理報名資料').first().json.電子郵件 }}。",
         "options": {}
       },
       "id": "f0df84e2-c09a-5755-9287-0705031418c3",
@@ -380,7 +380,7 @@
       "parameters": {
         "operation": "completion",
         "completionTitle": "很抱歉，名額已滿 😢",
-        "completionMessage": "=「{{ $('查詢活動剩餘名額').first().json.title }}」的 {{ $('查詢活動剩餘名額').first().json.capacity }} 個名額已經額滿，歡迎報名其他活動！",
+        "completionMessage": "=「{{ $('查詢活動剩餘名額').first().json.活動名稱 }}」的 {{ $('查詢活動剩餘名額').first().json.名額上限 }} 個名額已經額滿，歡迎報名其他活動！",
         "options": {}
       },
       "id": "407aecdf-6c47-59ec-a121-5bfdd12cd9dd",
@@ -447,14 +447,14 @@
     {
       "parameters": {
         "operation": "getAll",
-        "tableId": "club_activities",
+        "tableId": "社團活動",
         "limit": 1,
         "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
           "conditions": [
             {
-              "keyName": "title",
+              "keyName": "活動名稱",
               "condition": "eq",
               "keyValue": "={{ $json['要取消的活動'] }}"
             }
@@ -473,18 +473,18 @@
     {
       "parameters": {
         "operation": "delete",
-        "tableId": "club_registrations",
+        "tableId": "社團報名",
         "filterType": "manual",
         "matchType": "allFilters",
         "filters": {
           "conditions": [
             {
-              "keyName": "activity_id",
+              "keyName": "活動編號",
               "condition": "eq",
-              "keyValue": "={{ $json.id }}"
+              "keyValue": "={{ $json.編號 }}"
             },
             {
-              "keyName": "email",
+              "keyName": "電子郵件",
               "condition": "eq",
               "keyValue": "={{ $('取消報名表單').first().json.Email.trim().toLowerCase() }}"
             }
@@ -512,8 +512,8 @@
           },
           "conditions": [
             {
-              "id": "6c8ddf56-ac48-5687-8868-133161636cbe",
-              "leftValue": "={{ $json.id }}",
+              "id": "6733ef12-ebaa-5332-8acd-1d1fb765d989",
+              "leftValue": "={{ $json.編號 }}",
               "rightValue": "",
               "operator": {
                 "type": "number",
@@ -540,7 +540,7 @@
       "parameters": {
         "operation": "completion",
         "completionTitle": "已取消報名",
-        "completionMessage": "=您已取消「{{ $('查詢要取消的活動').first().json.title }}」的報名，名額已釋出給其他同學。",
+        "completionMessage": "=您已取消「{{ $('查詢要取消的活動').first().json.活動名稱 }}」的報名，名額已釋出給其他同學。",
         "options": {}
       },
       "id": "aae276f4-1a32-5807-b519-e18d77c68ecc",
@@ -556,7 +556,7 @@
       "parameters": {
         "operation": "completion",
         "completionTitle": "查無報名資料",
-        "completionMessage": "=找不到 {{ $('取消報名表單').first().json.Email }} 報名「{{ $('查詢要取消的活動').first().json.title }}」的紀錄，請確認 Email 是否正確。",
+        "completionMessage": "=找不到 {{ $('取消報名表單').first().json.Email }} 報名「{{ $('查詢要取消的活動').first().json.活動名稱 }}」的紀錄，請確認 Email 是否正確。",
         "options": {}
       },
       "id": "300c8e15-2afb-520c-b77b-8451a3d50598",

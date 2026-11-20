@@ -104,6 +104,18 @@ graph LR
 
 > 💡 每份 `setup.sql` 都可以**重複執行**：會先刪除該範例的舊資料表再重建，資料玩壞了隨時重跑一次就恢復原狀。不同範例的資料表名稱不會互相衝突。
 
+### 🀄 資料表與欄位都用中文命名
+
+本章所有範例的資料表和欄位都是**繁體中文**（例如 `社團活動`、`早餐訂單`、`活動名稱`、`訂單金額`），讓 SQL 和 n8n 節點輸出一看就懂：
+
+```sql
+SELECT 品名, 單價 FROM 早餐品項 WHERE 類別 = '飲料' ORDER BY 單價 DESC;
+```
+
+- PostgreSQL 可以直接用中文當名稱，**不需要加雙引號**。
+- n8n 的 Supabase 節點、Postgres 節點都能正常選到中文資料表與欄位；在表達式中寫成 `{{ $json.活動名稱 }}` 即可。
+- ⚠️ **自己建表時，名稱不要混用大寫英文字母**（例如 `FAQ有答案`）。PostgreSQL 會把沒加引號的英文自動轉成小寫，實際欄位會變成 `faq有答案`，之後在 n8n 中選欄位就會對不上。只用中文、或只用小寫英文就不會有問題。
+
 ---
 
 ## ⚠️ 常見連線問題
@@ -114,6 +126,6 @@ graph LR
 | **password authentication failed** | 密碼錯誤，或 User 少了 `.專案代碼` | 確認 User 是 `postgres.xxxx` 格式；忘記密碼到 Project Settings ➔ Database 重設 |
 | **Tenant or user not found** | User 的專案代碼打錯 | 重新到 **Connect** ➔ **View parameters** 複製 |
 | **SSL / self-signed certificate 錯誤** | SSL 設定問題 | SSL 選 **Require** 並開啟 **Ignore SSL Issues** |
-| **relation "xxx" does not exist** | 還沒執行該範例的 `setup.sql` | 到 SQL Editor 執行 `setup.sql` |
+| **relation "xxx" does not exist** | 還沒執行該範例的 `setup.sql`，或資料表名稱打錯字 | 到 SQL Editor 執行 `setup.sql`；中文表名請確認一字不差（例如 `早餐訂單` 不是 `早餐訂單表`） |
 | **專案連不上、控制台顯示 Paused** | 免費專案 7 天未使用被暫停 | 按 **Restore project** |
 | **Supabase API 連線失敗（404 / 測試不過）** | Host 結尾多了 `/rest/v1` 或 `/rest/v1/` | 刪除結尾的 `/rest/v1`（`/rest/v1/`），只保留 `https://專案代碼.supabase.co` |

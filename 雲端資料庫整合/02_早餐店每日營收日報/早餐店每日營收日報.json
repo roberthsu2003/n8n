@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "content": "## 🍳 範例 02：早餐店每日營收日報\n\n每天早上 8 點自動統計「昨天」的營業狀況，整理成 HTML 日報寄給老闆。\n\n1. **設定**：報表日期（預設昨天）、老闆 Email\n2. **三個 Postgres 節點**各跑一段 SQL：營收總覽、熱銷前五名、各時段營收\n3. **Code**：把三份結果組成一封漂亮的 HTML 信\n4. **Gmail** 寄出\n\n⚙️ 使用前：執行 `setup.sql`、修改「設定」節點的 `boss_email`",
+        "content": "## 🍳 範例 02：早餐店每日營收日報\n\n每天早上 8 點自動統計「昨天」的營業狀況，整理成 HTML 日報寄給老闆。\n\n1. **設定**：報表日期（預設昨天）、老闆 Email\n2. **三個 Postgres 節點**各跑一段 SQL：營收總覽、熱銷前五名、各時段營收\n3. **Code**：把三份結果組成一封漂亮的 HTML 信\n4. **Gmail** 寄出\n\n⚙️ 使用前：執行 `setup.sql`、修改「設定」節點的 `老闆信箱`",
         "height": 360,
         "width": 560
       },
@@ -40,20 +40,20 @@
         "assignments": {
           "assignments": [
             {
-              "id": "8dec3d1f-1509-5309-a579-57b43102eba1",
-              "name": "report_date",
+              "id": "e002f6dc-29e6-5bc7-8593-e5b282b96ec1",
+              "name": "報表日期",
               "value": "={{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
               "type": "string"
             },
             {
-              "id": "8fa13311-b53d-53c7-bf1c-1a8ea8a24ff2",
-              "name": "boss_email",
+              "id": "1301ef03-6b35-5ecf-8e63-3345eed3444f",
+              "name": "老闆信箱",
               "value": "YOUR_EMAIL@gmail.com",
               "type": "string"
             },
             {
-              "id": "15b452bb-c3cc-554f-a3fa-790b1bbb87ed",
-              "name": "shop_name",
+              "id": "9057107a-a60a-5000-afc8-8993eced5b61",
+              "name": "店名",
               "value": "阿嬤的早餐店",
               "type": "string"
             }
@@ -73,9 +73,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- $1 = 報表日期，例如 2026-11-19\nSELECT\n  COUNT(*)                                   AS order_count,     -- 訂單數\n  COALESCE(SUM(total_amount), 0)             AS revenue,         -- 營收\n  COALESCE(ROUND(AVG(total_amount)), 0)      AS avg_ticket,      -- 客單價\n  COUNT(*) FILTER (WHERE channel = '外送平台') AS delivery_count,  -- 外送單數\n  (SELECT COALESCE(SUM(total_amount), 0)\n     FROM bf_orders\n    WHERE ordered_at::date = $1::date - 7)     AS last_week_revenue -- 上週同一天營收\nFROM bf_orders\nWHERE ordered_at::date = $1::date;",
+        "query": "-- $1 = 報表日期，例如 2026-11-19\nSELECT\n  COUNT(*)                                     AS 訂單數,\n  COALESCE(SUM(訂單金額), 0)                   AS 營收,\n  COALESCE(ROUND(AVG(訂單金額)), 0)            AS 客單價,\n  COUNT(*) FILTER (WHERE 點餐方式 = '外送平台') AS 外送單數,\n  (SELECT COALESCE(SUM(訂單金額), 0)\n     FROM 早餐訂單\n    WHERE 下單時間::date = $1::date - 7)       AS 上週同日營收\nFROM 早餐訂單\nWHERE 下單時間::date = $1::date;",
         "options": {
-          "queryReplacement": "={{ $json.report_date }}"
+          "queryReplacement": "={{ $json.報表日期 }}"
         }
       },
       "id": "b2a7c873-b60e-5a37-ae4f-58aa4cf23989",
@@ -90,9 +90,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT m.name, m.category,\n       SUM(i.quantity)                AS qty,\n       SUM(i.quantity * i.unit_price) AS sales\nFROM bf_order_items i\nJOIN bf_orders     o ON o.id = i.order_id\nJOIN bf_menu_items m ON m.id = i.menu_item_id\nWHERE o.ordered_at::date = $1::date\nGROUP BY m.name, m.category\nORDER BY qty DESC\nLIMIT 5;",
+        "query": "SELECT m.品名, m.類別,\n       SUM(i.數量)          AS 份數,\n       SUM(i.數量 * i.單價) AS 銷售額\nFROM 早餐訂單明細 i\nJOIN 早餐訂單 o ON o.編號 = i.訂單編號\nJOIN 早餐品項 m ON m.編號 = i.品項編號\nWHERE o.下單時間::date = $1::date\nGROUP BY m.品名, m.類別\nORDER BY 份數 DESC\nLIMIT 5;",
         "options": {
-          "queryReplacement": "={{ $('設定').first().json.report_date }}"
+          "queryReplacement": "={{ $('設定').first().json.報表日期 }}"
         }
       },
       "id": "4bcccbeb-84d9-5786-8a7b-5e59a3ae019e",
@@ -108,9 +108,9 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT EXTRACT(HOUR FROM ordered_at)::int AS hour,\n       COUNT(*)          AS orders,\n       SUM(total_amount) AS revenue\nFROM bf_orders\nWHERE ordered_at::date = $1::date\nGROUP BY 1\nORDER BY 1;",
+        "query": "SELECT EXTRACT(HOUR FROM 下單時間)::int AS 時段,\n       COUNT(*)      AS 訂單數,\n       SUM(訂單金額) AS 營收\nFROM 早餐訂單\nWHERE 下單時間::date = $1::date\nGROUP BY 1\nORDER BY 1;",
         "options": {
-          "queryReplacement": "={{ $('設定').first().json.report_date }}"
+          "queryReplacement": "={{ $('設定').first().json.報表日期 }}"
         }
       },
       "id": "62396e38-31ff-54f7-aef7-573bc323d6b7",
@@ -125,7 +125,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 取得前面三個 Postgres 節點的結果\nconst cfg   = $('設定').first().json;\nconst s     = $('營收總覽').first().json;\nconst top   = $('熱銷前五名').all().map(i => i.json);\nconst hours = $('各時段營收').all().map(i => i.json).filter(h => h.hour !== undefined);\n\nconst n   = v => Number(v || 0);\nconst fmt = v => n(v).toLocaleString('zh-TW');\n\n// 和上週同一天比較\nlet compare = '上週同日無資料';\nif (n(s.last_week_revenue) > 0) {\n  const pct = ((n(s.revenue) - n(s.last_week_revenue)) / n(s.last_week_revenue) * 100).toFixed(1);\n  compare = pct >= 0\n    ? `<span style=\"color:#16a34a\">▲ ${pct}%</span> 比上週同日`\n    : `<span style=\"color:#dc2626\">▼ ${Math.abs(pct).toFixed(1)}%</span> 比上週同日`;\n}\n\nconst card = (label, value) => `\n  <td style=\"padding:12px;background:#fff7ed;border-radius:10px;text-align:center\">\n    <div style=\"font-size:13px;color:#9a3412\">${label}</div>\n    <div style=\"font-size:22px;font-weight:bold;color:#7c2d12\">${value}</div>\n  </td>`;\n\nconst medal = ['🥇', '🥈', '🥉', '4.', '5.'];\nconst topRows = top.map((t, i) => `\n  <tr>\n    <td style=\"padding:6px 8px\">${medal[i]}</td>\n    <td style=\"padding:6px 8px\">${t.name}</td>\n    <td style=\"padding:6px 8px;color:#6b7280\">${t.category}</td>\n    <td style=\"padding:6px 8px;text-align:right\">${fmt(t.qty)} 份</td>\n    <td style=\"padding:6px 8px;text-align:right\">$${fmt(t.sales)}</td>\n  </tr>`).join('');\n\n// 用 div 寬度畫簡單的長條圖（Email 不支援 JavaScript 圖表）\nconst maxRev = Math.max(1, ...hours.map(h => n(h.revenue)));\nconst hourRows = hours.map(h => `\n  <tr>\n    <td style=\"padding:4px 8px;white-space:nowrap\">${String(h.hour).padStart(2, '0')}:00</td>\n    <td style=\"padding:4px 8px;width:100%\">\n      <div style=\"background:#fb923c;height:16px;border-radius:4px;width:${Math.round(n(h.revenue) / maxRev * 100)}%\"></div>\n    </td>\n    <td style=\"padding:4px 8px;text-align:right;white-space:nowrap\">$${fmt(h.revenue)}（${h.orders} 單）</td>\n  </tr>`).join('');\n\nconst html = n(s.order_count) === 0\n  ? `<p>${cfg.report_date} 沒有任何訂單（公休日？），請確認資料是否正確。</p>`\n  : `\n<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:auto\">\n  <h2 style=\"color:#7c2d12\">🍳 ${cfg.shop_name}｜${cfg.report_date} 營收日報</h2>\n  <table style=\"width:100%;border-spacing:8px\"><tr>\n    ${card('營收', '$' + fmt(s.revenue))}\n    ${card('訂單數', fmt(s.order_count) + ' 單')}\n    ${card('客單價', '$' + fmt(s.avg_ticket))}\n  </tr></table>\n  <p style=\"margin:4px 8px\">${compare}（上週同日 $${fmt(s.last_week_revenue)}）・外送平台 ${fmt(s.delivery_count)} 單</p>\n\n  <h3 style=\"color:#7c2d12;margin-top:24px\">🔥 熱銷前五名</h3>\n  <table style=\"width:100%;border-collapse:collapse;font-size:14px\">${topRows}</table>\n\n  <h3 style=\"color:#7c2d12;margin-top:24px\">⏰ 各時段營收</h3>\n  <table style=\"width:100%;border-collapse:collapse;font-size:14px\">${hourRows}</table>\n\n  <p style=\"color:#9ca3af;font-size:12px;margin-top:24px\">此信由 n8n 自動產生</p>\n</div>`;\n\nreturn [{\n  json: {\n    to: cfg.boss_email,\n    subject: `🍳 ${cfg.report_date} 營收日報：$${fmt(s.revenue)}（${fmt(s.order_count)} 單）`,\n    html,\n  },\n}];"
+        "jsCode": "// 取得前面三個 Postgres 節點的結果\nconst cfg   = $('設定').first().json;\nconst s     = $('營收總覽').first().json;\nconst top   = $('熱銷前五名').all().map(i => i.json);\nconst hours = $('各時段營收').all().map(i => i.json).filter(h => h.時段 !== undefined);\n\nconst n   = v => Number(v || 0);\nconst fmt = v => n(v).toLocaleString('zh-TW');\n\n// 和上週同一天比較\nlet compare = '上週同日無資料';\nif (n(s.上週同日營收) > 0) {\n  const pct = ((n(s.營收) - n(s.上週同日營收)) / n(s.上週同日營收) * 100).toFixed(1);\n  compare = pct >= 0\n    ? `<span style=\"color:#16a34a\">▲ ${pct}%</span> 比上週同日`\n    : `<span style=\"color:#dc2626\">▼ ${Math.abs(pct).toFixed(1)}%</span> 比上週同日`;\n}\n\nconst card = (label, value) => `\n  <td style=\"padding:12px;background:#fff7ed;border-radius:10px;text-align:center\">\n    <div style=\"font-size:13px;color:#9a3412\">${label}</div>\n    <div style=\"font-size:22px;font-weight:bold;color:#7c2d12\">${value}</div>\n  </td>`;\n\nconst medal = ['🥇', '🥈', '🥉', '4.', '5.'];\nconst topRows = top.map((t, i) => `\n  <tr>\n    <td style=\"padding:6px 8px\">${medal[i]}</td>\n    <td style=\"padding:6px 8px\">${t.品名}</td>\n    <td style=\"padding:6px 8px;color:#6b7280\">${t.類別}</td>\n    <td style=\"padding:6px 8px;text-align:right\">${fmt(t.份數)} 份</td>\n    <td style=\"padding:6px 8px;text-align:right\">$${fmt(t.銷售額)}</td>\n  </tr>`).join('');\n\n// 用 div 寬度畫簡單的長條圖（Email 不支援 JavaScript 圖表）\nconst maxRev = Math.max(1, ...hours.map(h => n(h.營收)));\nconst hourRows = hours.map(h => `\n  <tr>\n    <td style=\"padding:4px 8px;white-space:nowrap\">${String(h.時段).padStart(2, '0')}:00</td>\n    <td style=\"padding:4px 8px;width:100%\">\n      <div style=\"background:#fb923c;height:16px;border-radius:4px;width:${Math.round(n(h.營收) / maxRev * 100)}%\"></div>\n    </td>\n    <td style=\"padding:4px 8px;text-align:right;white-space:nowrap\">$${fmt(h.營收)}（${h.訂單數} 單）</td>\n  </tr>`).join('');\n\nconst html = n(s.訂單數) === 0\n  ? `<p>${cfg.報表日期} 沒有任何訂單（公休日？），請確認資料是否正確。</p>`\n  : `\n<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:auto\">\n  <h2 style=\"color:#7c2d12\">🍳 ${cfg.店名}｜${cfg.報表日期} 營收日報</h2>\n  <table style=\"width:100%;border-spacing:8px\"><tr>\n    ${card('營收', '$' + fmt(s.營收))}\n    ${card('訂單數', fmt(s.訂單數) + ' 單')}\n    ${card('客單價', '$' + fmt(s.客單價))}\n  </tr></table>\n  <p style=\"margin:4px 8px\">${compare}（上週同日 $${fmt(s.上週同日營收)}）・外送平台 ${fmt(s.外送單數)} 單</p>\n\n  <h3 style=\"color:#7c2d12;margin-top:24px\">🔥 熱銷前五名</h3>\n  <table style=\"width:100%;border-collapse:collapse;font-size:14px\">${topRows}</table>\n\n  <h3 style=\"color:#7c2d12;margin-top:24px\">⏰ 各時段營收</h3>\n  <table style=\"width:100%;border-collapse:collapse;font-size:14px\">${hourRows}</table>\n\n  <p style=\"color:#9ca3af;font-size:12px;margin-top:24px\">此信由 n8n 自動產生</p>\n</div>`;\n\nreturn [{\n  json: {\n    to: cfg.老闆信箱,\n    subject: `🍳 ${cfg.報表日期} 營收日報：$${fmt(s.營收)}（${fmt(s.訂單數)} 單）`,\n    html,\n  },\n}];"
       },
       "id": "11e511df-7748-5ede-9ad5-651df90896ac",
       "name": "組合 HTML 日報",

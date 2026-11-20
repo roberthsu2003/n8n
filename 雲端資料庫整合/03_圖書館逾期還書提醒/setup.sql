@@ -2,43 +2,44 @@
 -- 範例 03：圖書館逾期還書提醒
 -- 在 Supabase ➔ SQL Editor 貼上全部內容並執行 (Run)
 -- 借閱日期以「今天」為基準自動產生，可重複執行
+-- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
 
-DROP TABLE IF EXISTS public.lib_loans;
-DROP TABLE IF EXISTS public.lib_books;
-DROP TABLE IF EXISTS public.lib_members;
+DROP TABLE IF EXISTS public.借閱紀錄;
+DROP TABLE IF EXISTS public.館藏書籍;
+DROP TABLE IF EXISTS public.圖書館讀者;
 
 -- 1. 讀者
-CREATE TABLE public.lib_members (
-    id         SERIAL PRIMARY KEY,
-    name       TEXT NOT NULL,
-    email      TEXT NOT NULL UNIQUE,
-    phone      TEXT,
-    member_type TEXT NOT NULL DEFAULT '一般讀者'  -- 一般讀者 / 學生 / 樂齡
+CREATE TABLE public.圖書館讀者 (
+    編號      SERIAL PRIMARY KEY,
+    姓名      TEXT NOT NULL,
+    電子郵件  TEXT NOT NULL UNIQUE,
+    電話      TEXT,
+    讀者類型  TEXT NOT NULL DEFAULT '一般讀者'  -- 一般讀者 / 學生 / 樂齡
 );
 
 -- 2. 館藏
-CREATE TABLE public.lib_books (
-    id       SERIAL PRIMARY KEY,
-    title    TEXT NOT NULL,
-    author   TEXT NOT NULL,
-    category TEXT NOT NULL,
-    barcode  TEXT NOT NULL UNIQUE
+CREATE TABLE public.館藏書籍 (
+    編號  SERIAL PRIMARY KEY,
+    書名  TEXT NOT NULL,
+    作者  TEXT NOT NULL,
+    分類  TEXT NOT NULL,
+    條碼  TEXT NOT NULL UNIQUE
 );
 
 -- 3. 借閱紀錄
-CREATE TABLE public.lib_loans (
-    id               SERIAL PRIMARY KEY,
-    member_id        INT  NOT NULL REFERENCES public.lib_members(id),
-    book_id          INT  NOT NULL REFERENCES public.lib_books(id),
-    borrowed_at      DATE NOT NULL,
-    due_date         DATE NOT NULL,           -- 借期 21 天
-    returned_at      DATE,                    -- NULL 代表還沒還
-    last_reminded_at DATE,                    -- 最後一次寄提醒信的日期（防止同一天重複寄）
-    reminder_count   INT  NOT NULL DEFAULT 0  -- 已經提醒過幾次
+CREATE TABLE public.借閱紀錄 (
+    編號          SERIAL PRIMARY KEY,
+    讀者編號      INT  NOT NULL REFERENCES public.圖書館讀者(編號),
+    書籍編號      INT  NOT NULL REFERENCES public.館藏書籍(編號),
+    借出日期      DATE NOT NULL,
+    應還日期      DATE NOT NULL,           -- 借期 21 天
+    歸還日期      DATE,                    -- NULL（空白）代表還沒還
+    最後提醒日期  DATE,                    -- 最後一次寄提醒信的日期（防止同一天重複寄）
+    提醒次數      INT  NOT NULL DEFAULT 0  -- 已經提醒過幾次
 );
 
-INSERT INTO public.lib_members (name, email, phone, member_type) VALUES
+INSERT INTO public.圖書館讀者 (姓名, 電子郵件, 電話, 讀者類型) VALUES
     ('陳怡君', 'yijun.chen@example.com',   '0912-100-201', '一般讀者'),
     ('林俊傑', 'junjie.lin@example.com',   '0912-100-202', '一般讀者'),
     ('黃淑芬', 'shufen.huang@example.com', '0912-100-203', '樂齡'),
@@ -70,7 +71,7 @@ INSERT INTO public.lib_members (name, email, phone, member_type) VALUES
     ('石佳蓉', 'chiajung.shih@example.com','0912-100-229', '一般讀者'),
     ('高偉倫', 'weilun.kao@example.com',   '0912-100-230', '學生');
 
-INSERT INTO public.lib_books (title, author, category, barcode) VALUES
+INSERT INTO public.館藏書籍 (書名, 作者, 分類, 條碼) VALUES
     ('原子習慣',                     '詹姆斯．克利爾',   '心理勵志', 'B0001'),
     ('被討厭的勇氣',                 '岸見一郎、古賀史健', '心理勵志', 'B0002'),
     ('蛤蟆先生去看心理師',           '羅伯．狄保德',     '心理勵志', 'B0003'),
@@ -103,14 +104,14 @@ INSERT INTO public.lib_books (title, author, category, barcode) VALUES
     ('猜猜我有多愛你',               '山姆．麥克布雷尼', '兒童繪本', 'B0030');
 
 -- 4. 借閱紀錄：刻意安排各種狀況，方便測試 SQL 條件
---    days_ago：幾天前借的；due = 借閱日 + 21 天
-INSERT INTO public.lib_loans (member_id, book_id, borrowed_at, due_date, returned_at, last_reminded_at, reminder_count)
-SELECT member_id, book_id,
-       CURRENT_DATE - days_ago,
-       CURRENT_DATE - days_ago + 21,
-       CASE WHEN returned_days_ago IS NULL THEN NULL ELSE CURRENT_DATE - returned_days_ago END,
-       CASE WHEN reminded_days_ago IS NULL THEN NULL ELSE CURRENT_DATE - reminded_days_ago END,
-       reminder_count
+--    幾天前借：今天往前推幾天借出；應還日期 = 借出日期 + 21 天
+INSERT INTO public.借閱紀錄 (讀者編號, 書籍編號, 借出日期, 應還日期, 歸還日期, 最後提醒日期, 提醒次數)
+SELECT 讀者編號, 書籍編號,
+       CURRENT_DATE - 幾天前借,
+       CURRENT_DATE - 幾天前借 + 21,
+       CASE WHEN 幾天前還 IS NULL THEN NULL ELSE CURRENT_DATE - 幾天前還 END,
+       CASE WHEN 幾天前提醒 IS NULL THEN NULL ELSE CURRENT_DATE - 幾天前提醒 END,
+       提醒次數
 FROM (VALUES
     -- 【已歸還】不應該被提醒
     ( 1,  1, 40, 25,   NULL, 0),
@@ -142,16 +143,16 @@ FROM (VALUES
     (21, 11, 26, NULL, NULL, 0),   -- 逾期 5 天
     (21, 12, 26, NULL, NULL, 0),   -- 逾期 5 天
     (21, 28, 26, NULL, NULL, 0)    -- 逾期 5 天
-) AS t(member_id, book_id, days_ago, returned_days_ago, reminded_days_ago, reminder_count);
+) AS t(讀者編號, 書籍編號, 幾天前借, 幾天前還, 幾天前提醒, 提醒次數);
 
 -- 5. 驗證：今天應該提醒的借閱（應有 11 本書、9 位讀者）
-SELECT l.id, m.name, b.title, l.due_date,
-       CURRENT_DATE - l.due_date AS overdue_days,
-       l.last_reminded_at
-FROM public.lib_loans l
-JOIN public.lib_members m ON m.id = l.member_id
-JOIN public.lib_books   b ON b.id = l.book_id
-WHERE l.returned_at IS NULL
-  AND l.due_date < CURRENT_DATE
-  AND (l.last_reminded_at IS NULL OR l.last_reminded_at < CURRENT_DATE)
-ORDER BY overdue_days DESC;
+SELECT l.編號, m.姓名, b.書名, l.應還日期,
+       CURRENT_DATE - l.應還日期 AS 逾期天數,
+       l.最後提醒日期
+FROM public.借閱紀錄 l
+JOIN public.圖書館讀者 m ON m.編號 = l.讀者編號
+JOIN public.館藏書籍   b ON b.編號 = l.書籍編號
+WHERE l.歸還日期 IS NULL
+  AND l.應還日期 < CURRENT_DATE
+  AND (l.最後提醒日期 IS NULL OR l.最後提醒日期 < CURRENT_DATE)
+ORDER BY 逾期天數 DESC;

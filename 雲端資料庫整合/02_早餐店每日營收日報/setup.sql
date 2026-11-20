@@ -3,39 +3,40 @@
 -- 在 Supabase ➔ SQL Editor 貼上全部內容並執行 (Run)
 -- 會自動產生「最近 30 天」約 1,700 筆訂單，可重複執行
 -- 💡 隔了幾週再上課，重新執行一次就會產生以「今天」為基準的新資料
+-- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
 
-DROP TABLE IF EXISTS public.bf_order_items;
-DROP TABLE IF EXISTS public.bf_orders;
-DROP TABLE IF EXISTS public.bf_menu_items;
+DROP TABLE IF EXISTS public.早餐訂單明細;
+DROP TABLE IF EXISTS public.早餐訂單;
+DROP TABLE IF EXISTS public.早餐品項;
 
 -- 1. 菜單
-CREATE TABLE public.bf_menu_items (
-    id       SERIAL PRIMARY KEY,
-    name     TEXT NOT NULL UNIQUE,
-    category TEXT NOT NULL,          -- 漢堡 / 蛋餅 / 吐司 / 點心 / 飲料
-    price    INT  NOT NULL,
-    weight   INT  NOT NULL DEFAULT 1 -- 熱門程度（產生假資料用，數字越大越常被點）
+CREATE TABLE public.早餐品項 (
+    編號      SERIAL PRIMARY KEY,
+    品名      TEXT NOT NULL UNIQUE,
+    類別      TEXT NOT NULL,          -- 漢堡 / 蛋餅 / 吐司 / 點心 / 飲料
+    單價      INT  NOT NULL,
+    熱門權重  INT  NOT NULL DEFAULT 1 -- 產生假資料用，數字越大越常被點
 );
 
 -- 2. 訂單（一張單）
-CREATE TABLE public.bf_orders (
-    id           BIGSERIAL PRIMARY KEY,
-    ordered_at   TIMESTAMP NOT NULL,          -- 點餐時間（台灣時間）
-    channel      TEXT      NOT NULL,          -- 內用 / 外帶 / 外送平台
-    total_amount INT       NOT NULL DEFAULT 0
+CREATE TABLE public.早餐訂單 (
+    編號      BIGSERIAL PRIMARY KEY,
+    下單時間  TIMESTAMP NOT NULL,          -- 台灣時間
+    點餐方式  TEXT      NOT NULL,          -- 內用 / 外帶 / 外送平台
+    訂單金額  INT       NOT NULL DEFAULT 0
 );
 
 -- 3. 訂單明細（一張單有好幾個品項）
-CREATE TABLE public.bf_order_items (
-    id           BIGSERIAL PRIMARY KEY,
-    order_id     BIGINT NOT NULL REFERENCES public.bf_orders(id) ON DELETE CASCADE,
-    menu_item_id INT    NOT NULL REFERENCES public.bf_menu_items(id),
-    quantity     INT    NOT NULL,
-    unit_price   INT    NOT NULL
+CREATE TABLE public.早餐訂單明細 (
+    編號      BIGSERIAL PRIMARY KEY,
+    訂單編號  BIGINT NOT NULL REFERENCES public.早餐訂單(編號) ON DELETE CASCADE,
+    品項編號  INT    NOT NULL REFERENCES public.早餐品項(編號),
+    數量      INT    NOT NULL,
+    單價      INT    NOT NULL
 );
 
-INSERT INTO public.bf_menu_items (name, category, price, weight) VALUES
+INSERT INTO public.早餐品項 (品名, 類別, 單價, 熱門權重) VALUES
     ('豬肉起司蛋堡',   '漢堡', 65, 9),
     ('卡啦雞腿堡',     '漢堡', 75, 8),
     ('牛肉起司堡',     '漢堡', 80, 4),
@@ -62,7 +63,7 @@ SELECT setseed(0.2026);
 
 -- 4. 產生訂單：最近 30 天（不含今天），每天 06:00～13:00 營業
 --    平日每天約 45～60 單、週末約 60～75 單；07:00～09:00 是尖峰
-INSERT INTO public.bf_orders (ordered_at, channel)
+INSERT INTO public.早餐訂單 (下單時間, 點餐方式)
 SELECT
     d::DATE
       + make_interval(hours => 6)
@@ -86,47 +87,47 @@ CROSS JOIN LATERAL generate_series(
 CROSS JOIN LATERAL (SELECT random() AS r WHERE n IS NOT NULL) AS rr  -- 加上 n 讓每一筆都重新抽亂數
 ORDER BY 1;
 
--- 5. 產生訂單明細：每單 1～3 個餐點，依照 weight 熱門程度加權抽選，大部分訂單會加一杯飲料
-WITH picks AS (
-    SELECT o.id AS order_id, m.id AS menu_item_id, m.price,
-           1 + floor(random() * random() * 3)::INT AS quantity
-    FROM public.bf_orders o
+-- 5. 產生訂單明細：每單 1～3 個餐點，依照「熱門權重」加權抽選，大部分訂單會加一杯飲料
+WITH 抽選 AS (
+    SELECT o.編號 AS 訂單編號, m.編號 AS 品項編號, m.單價,
+           1 + floor(random() * random() * 3)::INT AS 數量
+    FROM public.早餐訂單 o
     CROSS JOIN LATERAL generate_series(1, 1 + floor(random() * 3)::INT) AS k
     CROSS JOIN LATERAL (
-        SELECT mi.id, mi.price
-        FROM public.bf_menu_items mi
-        WHERE mi.category <> '飲料' AND k IS NOT NULL AND o.id IS NOT NULL  -- 參照外層欄位，每筆都重新抽
-        ORDER BY -ln(random()) / mi.weight   -- 加權隨機抽樣
+        SELECT mi.編號, mi.單價
+        FROM public.早餐品項 mi
+        WHERE mi.類別 <> '飲料' AND k IS NOT NULL AND o.編號 IS NOT NULL  -- 參照外層欄位，每筆都重新抽
+        ORDER BY -ln(random()) / mi.熱門權重   -- 加權隨機抽樣
         LIMIT 1
     ) AS m
     UNION ALL
-    SELECT o.id, m.id, m.price, 1
-    FROM public.bf_orders o
+    SELECT o.編號, m.編號, m.單價, 1
+    FROM public.早餐訂單 o
     CROSS JOIN LATERAL (
-        SELECT mi.id, mi.price
-        FROM public.bf_menu_items mi
-        WHERE mi.category = '飲料' AND o.id IS NOT NULL
-        ORDER BY -ln(random()) / mi.weight
+        SELECT mi.編號, mi.單價
+        FROM public.早餐品項 mi
+        WHERE mi.類別 = '飲料' AND o.編號 IS NOT NULL
+        ORDER BY -ln(random()) / mi.熱門權重
         LIMIT 1
     ) AS m
     WHERE random() < 0.8
 )
-INSERT INTO public.bf_order_items (order_id, menu_item_id, quantity, unit_price)
-SELECT order_id, menu_item_id, quantity, price FROM picks;
+INSERT INTO public.早餐訂單明細 (訂單編號, 品項編號, 數量, 單價)
+SELECT 訂單編號, 品項編號, 數量, 單價 FROM 抽選;
 
--- 6. 回填每張訂單的總金額
-UPDATE public.bf_orders o
-SET total_amount = s.amount
+-- 6. 回填每張訂單的訂單金額
+UPDATE public.早餐訂單 o
+SET 訂單金額 = s.金額
 FROM (
-    SELECT order_id, SUM(quantity * unit_price) AS amount
-    FROM public.bf_order_items
-    GROUP BY order_id
+    SELECT 訂單編號, SUM(數量 * 單價) AS 金額
+    FROM public.早餐訂單明細
+    GROUP BY 訂單編號
 ) AS s
-WHERE s.order_id = o.id;
+WHERE s.訂單編號 = o.編號;
 
 -- 7. 驗證：最近 7 天每日營收
-SELECT ordered_at::DATE AS 日期, COUNT(*) AS 訂單數, SUM(total_amount) AS 營收
-FROM public.bf_orders
-WHERE ordered_at >= CURRENT_DATE - 7
+SELECT 下單時間::DATE AS 日期, COUNT(*) AS 訂單數, SUM(訂單金額) AS 營收
+FROM public.早餐訂單
+WHERE 下單時間 >= CURRENT_DATE - 7
 GROUP BY 1
 ORDER BY 1;

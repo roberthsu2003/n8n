@@ -7,7 +7,7 @@
 ### 🎯 本範例功能
 
 - ✅ **網頁報名表單**：姓名、學號、Email、系級、活動下拉選單
-- ✅ **即時名額檢查**：讀取 View `club_activity_seats`，自動算出剩餘名額
+- ✅ **即時名額檢查**：讀取 View `活動剩餘名額`，自動算出剩餘名額
 - ✅ **防止重複報名**：同一個 Email 報名同一個活動會被擋下
 - ✅ **寄送確認信**：報名成功自動寄出 HTML 確認信
 - ✅ **取消報名**：第二個表單可以刪除報名資料，名額立刻釋出
@@ -21,9 +21,41 @@
 
 | 名稱 | 類型 | 說明 |
 | :--- | :--- | :--- |
-| `club_activities` | 資料表 | 5 個活動：名稱、主辦社團、日期、地點、名額、報名費 |
-| `club_registrations` | 資料表 | 報名紀錄，`(activity_id, email)` 設為 UNIQUE 防重複 |
-| `club_activity_seats` | 檢視表 (View) | 自動計算每個活動的「已報名人數」與「剩餘名額」 |
+| `社團活動` | 資料表 | 5 個活動 |
+| `社團報名` | 資料表 | 報名紀錄，`(活動編號, 電子郵件)` 設為 UNIQUE 防重複 |
+| `活動剩餘名額` | 檢視表 (View) | 自動計算每個活動的「已報名人數」與「剩餘名額」 |
+
+> 💡 **資料表和欄位都用中文命名**：PostgreSQL 可以直接用中文當名稱，SQL 寫成 `SELECT 活動名稱 FROM 社團活動` 就可以，不需要加引號。在 Supabase Table Editor、n8n 節點輸出看到的也都是中文欄位，比較好對照。
+
+**`社團活動`**
+
+| 欄位 | 型別 | 說明 |
+| :--- | :--- | :--- |
+| `編號` | BIGSERIAL | 主鍵，自動編號 |
+| `活動名稱` | TEXT | 不可重複，表單下拉選單的文字要一模一樣 |
+| `主辦社團` | TEXT | |
+| `活動日期` | DATE | 以執行 SQL 當天為基準往後排 |
+| `地點` | TEXT | |
+| `名額上限` | INT | |
+| `報名費` | INT | 0 代表免費 |
+
+**`社團報名`**
+
+| 欄位 | 型別 | 說明 |
+| :--- | :--- | :--- |
+| `編號` | BIGSERIAL | 主鍵，自動編號 |
+| `活動編號` | BIGINT | 對應 `社團活動.編號`（外鍵） |
+| `姓名`、`學號`、`電子郵件`、`科系` | TEXT | 報名者資料 |
+| `報名時間` | TIMESTAMPTZ | 預設為寫入當下的時間 |
+
+**`活動剩餘名額`**（View）：`社團活動` 的所有欄位，再加上 `已報名人數`、`剩餘名額`。
+
+```mermaid
+flowchart LR
+    A["社團活動<br/>編號、活動名稱、名額上限…"] -- "1 個活動有多筆報名" --> B["社團報名<br/>活動編號、姓名、電子郵件…"]
+    A -.-> C["活動剩餘名額（View）<br/>已報名人數、剩餘名額"]
+    B -.-> C
+```
 
 預先準備好的測試狀況：
 
@@ -63,33 +95,34 @@ graph LR
 
 #### 1. **報名表單**（n8n Form Trigger）
 - **欄位**：姓名、學號、Email（email 類型）、系級、報名活動（下拉選單）
-- 下拉選單的選項必須和 `club_activities.title` **一字不差**，因為下一步要用活動名稱查資料。
+- 下拉選單的選項必須和 `社團活動.活動名稱` **一字不差**，因為下一步要用活動名稱查資料。
 
 #### 2. **整理報名資料**（Edit Fields / Set）
-把表單的中文欄位整理成英文欄位，順便清理資料：
-- `email`：`={{ $json['Email'].trim().toLowerCase() }}`（去空白、轉小寫，避免 `Amy@x.com` 和 `amy@x.com` 被當成兩個人）
-- `student_id`：`={{ $json['學號'].trim().toUpperCase() }}`
+把表單欄位整理成和資料表一樣的欄位名稱，順便清理資料：
+- `電子郵件`：`={{ $json['Email'].trim().toLowerCase() }}`（去空白、轉小寫，避免 `Amy@x.com` 和 `amy@x.com` 被當成兩個人）
+- `學號`：`={{ $json['學號'].trim().toUpperCase() }}`
+- `活動名稱`：`={{ $json['報名活動'] }}`
 
 #### 3. **查詢活動剩餘名額**（Supabase：Get Many）
-- **Table**：`club_activity_seats`（View 也可以直接選）
-- **Filter**：`title` **Equals** `={{ $json.activity_title }}`
-- 輸出：`id`、`title`、`capacity`、`registered`、`remaining`…
+- **Table**：`活動剩餘名額`（View 也可以直接選）
+- **Filter**：`活動名稱` **Equals** `={{ $json.活動名稱 }}`
+- 輸出：`編號`、`活動名稱`、`名額上限`、`已報名人數`、`剩餘名額`…
 
 #### 4. **查詢是否重複報名**（Supabase：Get Many）
-- **Table**：`club_registrations`
-- **Filters**（All Select Conditions）：`activity_id` = 活動 id，且 `email` = 報名者 Email
+- **Table**：`社團報名`
+- **Filters**（All Select Conditions）：`活動編號` = 活動的 `編號`，且 `電子郵件` = 報名者 Email
 - ⚙️ **Settings ➔ Always Output Data：開啟**。查不到資料時 Supabase 節點預設不輸出任何東西，流程就會停住；開啟後會輸出一筆空資料，讓下一個 IF 能判斷「沒有重複」。
 
 #### 5. **已經報名過？**（IF）
-- 條件：`{{ $json.id }}` **exists**（有查到報名紀錄 = 重複報名）
+- 條件：`{{ $json.編號 }}` **exists**（有查到報名紀錄 = 重複報名）
 
 #### 6. **還有名額？**（IF）
-- 條件：`{{ $('查詢活動剩餘名額').first().json.remaining }}` **>** `0`
+- 條件：`{{ $('查詢活動剩餘名額').first().json.剩餘名額 }}` **>** `0`
 - `$('節點名稱')` 可以取得**前面任何一個節點**的資料，不限於上一個節點。
 
 #### 7. **新增報名資料**（Supabase：Create）
-- **Table**：`club_registrations`
-- **Fields**：`activity_id`、`student_name`、`student_id`、`email`、`department`
+- **Table**：`社團報名`
+- **Fields**：`活動編號`、`姓名`、`學號`、`電子郵件`、`科系`（`編號`、`報名時間` 由資料庫自動產生）
 
 #### 8. **寄送報名確認信**（Gmail：Send）
 - **To**：報名者 Email
@@ -99,9 +132,9 @@ graph LR
 - 表單送出後顯示的結果頁。工作流中有 Form 節點時，表單會等流程跑到 Form Ending 才顯示結果。
 
 #### 10. **取消報名流程**
-- **查詢要取消的活動**（Supabase Get Many）取得活動 id
-- **刪除報名資料**（Supabase Delete）：條件為 `activity_id` + `email`，同樣開啟 **Always Output Data**
-- **有刪除到資料？**（IF）：Supabase Delete 會回傳被刪掉的資料，有 `id` 代表刪除成功
+- **查詢要取消的活動**（Supabase Get Many）取得活動的 `編號`
+- **刪除報名資料**（Supabase Delete）：條件為 `活動編號` + `電子郵件`，同樣開啟 **Always Output Data**
+- **有刪除到資料？**（IF）：Supabase Delete 會回傳被刪掉的資料，有 `編號` 代表刪除成功
 
 ---
 
@@ -123,7 +156,7 @@ graph LR
    - 用**自己的 Email** 報名「陽明山夜衝看星星」➔ 應該看到成功頁並收到確認信。
    - 再用同一個 Email 報名同一個活動 ➔ 應該看到「您已經報名過囉」。
    - 報名「桌遊之夜：狼人殺大會」➔ 應該看到「名額已滿」。
-   - 到 Supabase **Table Editor** 查看 `club_registrations` 是否多了一筆。
+   - 到 Supabase **Table Editor** 查看 `社團報名` 是否多了一筆。
 7. **正式啟用**：工作流右上角切換為 **Active**，使用 **Production URL** 分享給同學。
 
 > 🔄 資料玩亂了？重新執行一次 `setup.sql` 就會恢復初始狀態。
