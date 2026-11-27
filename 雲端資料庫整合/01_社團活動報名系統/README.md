@@ -15,6 +15,25 @@
 
 ---
 
+## ⚙️ 使用前準備
+
+1. **建立 Supabase 專案與憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase API** 憑證（本範例只使用 **(2) Supabase 節點用：Data API + Secret Key**，**不需要**設定 **(1) Postgres 資料庫連線參數**；注意 API 的 Secret Key 與 DBeaver 連線用的資料庫密碼是不同的東西）。
+2. **建立資料表**：Supabase ➔ **SQL Editor**，貼上 [`setup.sql`](./setup.sql) 全部內容並執行。
+3. **建立 Gmail 憑證**：參考 [Gemini 與 Gmail 憑證設定](../Gemini與Gmail憑證/README.md)。
+4. **匯入工作流**：n8n 右上角 **⋯** ➔ **Import from File**，選擇 [`社團活動報名系統.json`](./社團活動報名系統.json)。
+5. **選擇憑證**：打開每個 Supabase 節點選 **Supabase API**、Gmail 節點選 **Gmail**。
+6. **測試**：
+   - 點兩下「報名表單」節點 ➔ **Test step**，會開啟表單網頁。
+   - 用**自己的 Email** 報名「陽明山夜衝看星星」➔ 應該看到成功頁並收到確認信。
+   - 再用同一個 Email 報名同一個活動 ➔ 應該看到「您已經報名過囉」。
+   - 報名「桌遊之夜：狼人殺大會」➔ 應該看到「名額已滿」。
+   - 到 Supabase **Table Editor** 查看 `社團報名` 是否多了一筆。
+7. **正式啟用**：工作流右上角切換為 **Active**，使用 **Production URL** 分享給同學。
+
+> 🔄 資料玩亂了？重新執行一次 `setup.sql` 就會恢復初始狀態。
+
+---
+
 ## 🗂️ 資料表設計
 
 執行 [`setup.sql`](./setup.sql) 後會建立：
@@ -141,25 +160,6 @@ graph LR
 ## 📸 工作流程圖
 
 <!-- 截圖請放在 ./images/社團活動報名系統.png -->
-
----
-
-## ⚙️ 使用前準備
-
-1. **建立 Supabase 專案與憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase API** 憑證（本範例只使用 **(2) Supabase 節點用：Data API + Secret Key**，**不需要**設定 **(1) Postgres 資料庫連線參數**；注意 API 的 Secret Key 與 DBeaver 連線用的資料庫密碼是不同的東西）。
-2. **建立資料表**：Supabase ➔ **SQL Editor**，貼上 [`setup.sql`](./setup.sql) 全部內容並執行。
-3. **建立 Gmail 憑證**：參考 [Gemini 與 Gmail 憑證設定](../Gemini與Gmail憑證/README.md)。
-4. **匯入工作流**：n8n 右上角 **⋯** ➔ **Import from File**，選擇 [`社團活動報名系統.json`](./社團活動報名系統.json)。
-5. **選擇憑證**：打開每個 Supabase 節點選 **Supabase API**、Gmail 節點選 **Gmail**。
-6. **測試**：
-   - 點兩下「報名表單」節點 ➔ **Test step**，會開啟表單網頁。
-   - 用**自己的 Email** 報名「陽明山夜衝看星星」➔ 應該看到成功頁並收到確認信。
-   - 再用同一個 Email 報名同一個活動 ➔ 應該看到「您已經報名過囉」。
-   - 報名「桌遊之夜：狼人殺大會」➔ 應該看到「名額已滿」。
-   - 到 Supabase **Table Editor** 查看 `社團報名` 是否多了一筆。
-7. **正式啟用**：工作流右上角切換為 **Active**，使用 **Production URL** 分享給同學。
-
-> 🔄 資料玩亂了？重新執行一次 `setup.sql` 就會恢復初始狀態。
 
 ---
 

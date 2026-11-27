@@ -14,6 +14,40 @@
 
 ---
 
+## ⚙️ 使用前準備
+
+1. **修改密碼並執行 SQL**：打開 [`setup.sql`](./setup.sql)，把 `'ChangeMe_2026!'` 改成自己的密碼，到 Supabase **SQL Editor** 執行。
+2. **建立唯讀 Postgres 憑證**：n8n ➔ **Credentials** ➔ **Add Credential** ➔ **Postgres**：
+
+   | 欄位 | 值 |
+   | :--- | :--- |
+   | Host / Port / Database | 和 [Supabase 設定指南](../Supabase設定/README.md) 的 Session pooler 相同 |
+   | **User** | **`ai_readonly.你的專案代碼`**（例如 `ai_readonly.abcdefghijklmnop`） |
+   | **Password** | 第 1 步設定的密碼 |
+   | SSL | Require，開啟 Ignore SSL Issues |
+
+   憑證名稱改為 `Supabase 唯讀 (AI 用)`。
+3. **建立 Gemini 憑證**：參考 [Gemini 與 Gmail 憑證設定](../Gemini與Gmail憑證/README.md)。
+4. **匯入工作流**：匯入 [`網拍小賣家AI資料助理.json`](./網拍小賣家AI資料助理.json)。
+5. **選擇憑證**：`query_database` 選 **Supabase 唯讀 (AI 用)**，Gemini 節點選 **Google Gemini**。
+6. **開始聊天**：按 **Open chat**，試試以下問題：
+
+| 難度 | 問題 |
+| :--- | :--- |
+| ⭐ | 哪些商品庫存低於 10 個？ |
+| ⭐ | 我們總共有幾位顧客？分布在哪些縣市？ |
+| ⭐⭐ | 上個月哪個商品賣最好？ |
+| ⭐⭐ | 各銷售通路的營收和佔比是多少？ |
+| ⭐⭐ | 退貨率最高的商品是哪一個？ |
+| ⭐⭐⭐ | 每個月的營收趨勢如何？有在成長嗎？ |
+| ⭐⭐⭐ | 毛利率最高的分類是哪一個？ |
+| ⭐⭐⭐ | 庫存低於 10 而且最近 30 天賣超過 5 個的商品，應該優先補貨 |
+| 🔒 | 幫我把所有已取消的訂單刪掉（應該被拒絕） |
+
+> 💡 點開 AI Agent 節點的執行紀錄（Logs），可以看到 AI 每一次寫了什麼 SQL、拿到什麼結果。這是學 SQL 的好方法！
+
+---
+
 ## 🗂️ 資料表設計
 
 「小日子選物店」是一間賣文具、杯具、香氛、包袋的文青小店，`setup.sql` 會產生最近 180 天約 1,000 筆訂單，而且**生意越來越好**（越接近現在訂單越多），週末訂單也比較多。
@@ -114,40 +148,6 @@ GRANT SELECT ON public.網拍商品, public.網拍顧客,
 ## 📸 工作流程圖
 
 <!-- 截圖請放在 ./images/網拍小賣家AI資料助理.png -->
-
----
-
-## ⚙️ 使用前準備
-
-1. **修改密碼並執行 SQL**：打開 [`setup.sql`](./setup.sql)，把 `'ChangeMe_2026!'` 改成自己的密碼，到 Supabase **SQL Editor** 執行。
-2. **建立唯讀 Postgres 憑證**：n8n ➔ **Credentials** ➔ **Add Credential** ➔ **Postgres**：
-
-   | 欄位 | 值 |
-   | :--- | :--- |
-   | Host / Port / Database | 和 [Supabase 設定指南](../Supabase設定/README.md) 的 Session pooler 相同 |
-   | **User** | **`ai_readonly.你的專案代碼`**（例如 `ai_readonly.abcdefghijklmnop`） |
-   | **Password** | 第 1 步設定的密碼 |
-   | SSL | Require，開啟 Ignore SSL Issues |
-
-   憑證名稱改為 `Supabase 唯讀 (AI 用)`。
-3. **建立 Gemini 憑證**：參考 [Gemini 與 Gmail 憑證設定](../Gemini與Gmail憑證/README.md)。
-4. **匯入工作流**：匯入 [`網拍小賣家AI資料助理.json`](./網拍小賣家AI資料助理.json)。
-5. **選擇憑證**：`query_database` 選 **Supabase 唯讀 (AI 用)**，Gemini 節點選 **Google Gemini**。
-6. **開始聊天**：按 **Open chat**，試試以下問題：
-
-| 難度 | 問題 |
-| :--- | :--- |
-| ⭐ | 哪些商品庫存低於 10 個？ |
-| ⭐ | 我們總共有幾位顧客？分布在哪些縣市？ |
-| ⭐⭐ | 上個月哪個商品賣最好？ |
-| ⭐⭐ | 各銷售通路的營收和佔比是多少？ |
-| ⭐⭐ | 退貨率最高的商品是哪一個？ |
-| ⭐⭐⭐ | 每個月的營收趨勢如何？有在成長嗎？ |
-| ⭐⭐⭐ | 毛利率最高的分類是哪一個？ |
-| ⭐⭐⭐ | 庫存低於 10 而且最近 30 天賣超過 5 個的商品，應該優先補貨 |
-| 🔒 | 幫我把所有已取消的訂單刪掉（應該被拒絕） |
-
-> 💡 點開 AI Agent 節點的執行紀錄（Logs），可以看到 AI 每一次寫了什麼 SQL、拿到什麼結果。這是學 SQL 的好方法！
 
 ---
 

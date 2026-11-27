@@ -14,6 +14,20 @@
 
 ---
 
+## ⚙️ 使用前準備
+
+1. **建立 Postgres 憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase Postgres** 憑證。
+2. **產生測試資料**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)。最後會顯示最近 7 天的營收。
+3. **匯入工作流**：匯入 [`早餐店每日營收日報.json`](./早餐店每日營收日報.json)。
+4. **選擇憑證**：三個 Postgres 節點選 **Supabase Postgres**，Gmail 節點選 **Gmail**。
+5. **修改設定**：「設定」節點的 `老闆信箱` 改成自己的 Email。
+6. **測試**：按 **Execute workflow**，到信箱查看日報。
+7. **正式啟用**：切換為 **Active**，之後每天早上 8 點自動寄出。
+
+> 🔄 **資料是以「執行 setup.sql 那天」往回產生 30 天**。過了幾週再上課，昨天可能已經沒有資料，重新執行一次 `setup.sql` 即可。
+
+---
+
 ## 🗂️ 資料表設計
 
 ```mermaid
@@ -128,20 +142,6 @@ ORDER BY 1;
 ## 📸 工作流程圖
 
 <!-- 截圖請放在 ./images/早餐店每日營收日報.png -->
-
----
-
-## ⚙️ 使用前準備
-
-1. **建立 Postgres 憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase Postgres** 憑證。
-2. **產生測試資料**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)。最後會顯示最近 7 天的營收。
-3. **匯入工作流**：匯入 [`早餐店每日營收日報.json`](./早餐店每日營收日報.json)。
-4. **選擇憑證**：三個 Postgres 節點選 **Supabase Postgres**，Gmail 節點選 **Gmail**。
-5. **修改設定**：「設定」節點的 `老闆信箱` 改成自己的 Email。
-6. **測試**：按 **Execute workflow**，到信箱查看日報。
-7. **正式啟用**：切換為 **Active**，之後每天早上 8 點自動寄出。
-
-> 🔄 **資料是以「執行 setup.sql 那天」往回產生 30 天**。過了幾週再上課，昨天可能已經沒有資料，重新執行一次 `setup.sql` 即可。
 
 ---
 

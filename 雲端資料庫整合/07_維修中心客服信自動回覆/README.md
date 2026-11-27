@@ -22,6 +22,24 @@
 
 ---
 
+## ⚙️ 使用前準備
+
+1. **建立工單資料表**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)。
+2. **憑證**：需要 **Supabase Postgres**、**Pinecone**、**Google Gemini**、**Gmail** 四種憑證（見 [Supabase 設定](../Supabase設定/README.md)、[Pinecone 設定](../Pinecone設定/README.md)、[Gemini 與 Gmail 憑證](../Gemini與Gmail憑證/README.md)）。
+3. **匯入工作流**：匯入 [`維修中心客服信自動回覆.json`](./維修中心客服信自動回覆.json)，逐一選擇憑證。
+4. **建立 FAQ 知識庫**：點兩下「上傳維修 FAQ」➔ **Test step**，上傳 [`快修通維修服務FAQ.md`](./快修通維修服務FAQ.md)。
+5. **寄測試信**：依照 [`測試信件範例.md`](./測試信件範例.md)，用另一個信箱寄信給 n8n 綁定的 Gmail。
+6. **測試**：
+   - 點兩下「收到客服信」➔ **Fetch Test Event** 抓取最新的信，再按 **Execute workflow**。
+   - 到 Gmail **草稿**查看 AI 寫的回覆。
+   - 到 Supabase **Table Editor** ➔ `維修工單` 查看新工單。
+   - 到 SQL Editor 執行 `SELECT * FROM 維修工單統計;` 看各分類統計。
+7. **正式啟用**：切換為 **Active**，之後每分鐘自動處理新信件。
+
+> ⚠️ **Gemini 免費額度**：每封信會呼叫 Gemini 數次（判斷、查詢、生成），一次寄很多封測試信可能遇到 `429 Too Many Requests`，請一封一封測試。
+
+---
+
 ## 📄 範例資料
 
 | 檔案 | 說明 |
@@ -126,24 +144,6 @@ graph LR
 ## 📸 工作流程圖
 
 <!-- 截圖請放在 ./images/維修中心客服信自動回覆.png -->
-
----
-
-## ⚙️ 使用前準備
-
-1. **建立工單資料表**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)。
-2. **憑證**：需要 **Supabase Postgres**、**Pinecone**、**Google Gemini**、**Gmail** 四種憑證（見 [Supabase 設定](../Supabase設定/README.md)、[Pinecone 設定](../Pinecone設定/README.md)、[Gemini 與 Gmail 憑證](../Gemini與Gmail憑證/README.md)）。
-3. **匯入工作流**：匯入 [`維修中心客服信自動回覆.json`](./維修中心客服信自動回覆.json)，逐一選擇憑證。
-4. **建立 FAQ 知識庫**：點兩下「上傳維修 FAQ」➔ **Test step**，上傳 [`快修通維修服務FAQ.md`](./快修通維修服務FAQ.md)。
-5. **寄測試信**：依照 [`測試信件範例.md`](./測試信件範例.md)，用另一個信箱寄信給 n8n 綁定的 Gmail。
-6. **測試**：
-   - 點兩下「收到客服信」➔ **Fetch Test Event** 抓取最新的信，再按 **Execute workflow**。
-   - 到 Gmail **草稿**查看 AI 寫的回覆。
-   - 到 Supabase **Table Editor** ➔ `維修工單` 查看新工單。
-   - 到 SQL Editor 執行 `SELECT * FROM 維修工單統計;` 看各分類統計。
-7. **正式啟用**：切換為 **Active**，之後每分鐘自動處理新信件。
-
-> ⚠️ **Gemini 免費額度**：每封信會呼叫 Gemini 數次（判斷、查詢、生成），一次寄很多封測試信可能遇到 `429 Too Many Requests`，請一封一封測試。
 
 ---
 

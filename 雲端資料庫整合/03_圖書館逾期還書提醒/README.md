@@ -15,6 +15,22 @@
 
 ---
 
+## ⚙️ 使用前準備
+
+1. **建立 Postgres 憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md)。
+2. **產生測試資料**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)，最後會列出 11 筆今天該提醒的借閱。
+3. **匯入工作流**：匯入 [`圖書館逾期還書提醒.json`](./圖書館逾期還書提醒.json)，選擇 Postgres 與 Gmail 憑證。
+4. **修改設定**：「設定」節點的 `測試信箱` 改成自己的 Email。
+5. **測試**：
+   - 按 **Execute workflow** ➔ 信箱應收到 **9 封**提醒信，徐靜宜那封列出 3 本書。
+   - 再按一次 **Execute workflow** ➔ 「查詢今天要提醒的讀者」應該沒有輸出，**不會再寄信**。
+   - 到 Supabase 執行 `SELECT * FROM 借閱紀錄 ORDER BY 編號;` 看 `最後提醒日期` 與 `提醒次數` 的變化。
+
+> 🔄 想重新測試？重新執行 `setup.sql` 即可。
+> 🕘 **時區小提醒**：Supabase 資料庫的 `CURRENT_DATE` 是 UTC 時間。台灣早上 9 點 = UTC 凌晨 1 點，日期相同，不影響結果；但如果排在台灣時間早上 8 點以前執行，UTC 還是前一天。
+
+---
+
 ## 🗂️ 資料表設計
 
 | 資料表 | 說明 | 筆數 |
@@ -129,22 +145,6 @@ RETURNING 編號, 讀者編號, 提醒次數;
 ## 📸 工作流程圖
 
 <!-- 截圖請放在 ./images/圖書館逾期還書提醒.png -->
-
----
-
-## ⚙️ 使用前準備
-
-1. **建立 Postgres 憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md)。
-2. **產生測試資料**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)，最後會列出 11 筆今天該提醒的借閱。
-3. **匯入工作流**：匯入 [`圖書館逾期還書提醒.json`](./圖書館逾期還書提醒.json)，選擇 Postgres 與 Gmail 憑證。
-4. **修改設定**：「設定」節點的 `測試信箱` 改成自己的 Email。
-5. **測試**：
-   - 按 **Execute workflow** ➔ 信箱應收到 **9 封**提醒信，徐靜宜那封列出 3 本書。
-   - 再按一次 **Execute workflow** ➔ 「查詢今天要提醒的讀者」應該沒有輸出，**不會再寄信**。
-   - 到 Supabase 執行 `SELECT * FROM 借閱紀錄 ORDER BY 編號;` 看 `最後提醒日期` 與 `提醒次數` 的變化。
-
-> 🔄 想重新測試？重新執行 `setup.sql` 即可。
-> 🕘 **時區小提醒**：Supabase 資料庫的 `CURRENT_DATE` 是 UTC 時間。台灣早上 9 點 = UTC 凌晨 1 點，日期相同，不影響結果；但如果排在台灣時間早上 8 點以前執行，UTC 還是前一天。
 
 ---
 
