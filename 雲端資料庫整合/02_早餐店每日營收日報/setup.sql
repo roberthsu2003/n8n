@@ -132,11 +132,11 @@ SELECT
     CASE 下單時間::DATE
         WHEN CURRENT_DATE     THEN '今天'
         WHEN CURRENT_DATE - 1 THEN '昨天'
-        ELSE to_char(下單時間, 'Dy')
+        ELSE to_char(下單時間::DATE, 'Dy')
     END AS 備註,
     COUNT(*)      AS 訂單數,
     SUM(訂單金額) AS 營收
 FROM public.早餐訂單
 WHERE 下單時間::DATE >= CURRENT_DATE - 7
-GROUP BY 1
-ORDER BY 1;
+GROUP BY 下單時間::DATE
+ORDER BY 下單時間::DATE;
