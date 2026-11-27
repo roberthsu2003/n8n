@@ -73,7 +73,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- 一位讀者一列，把他所有逾期的書合併成 JSON 陣列\nSELECT\n  m.編號 AS 讀者編號,\n  m.姓名,\n  m.電子郵件,\n  json_agg(json_build_object(\n    '書名',     b.書名,\n    '應還日期', to_char(l.應還日期, 'YYYY-MM-DD'),\n    '逾期天數', CURRENT_DATE - l.應還日期\n  ) ORDER BY l.應還日期)          AS 逾期書單,\n  MAX(CURRENT_DATE - l.應還日期)  AS 最多逾期天數,\n  SUM(CURRENT_DATE - l.應還日期)  AS 累計逾期天數\nFROM 借閱紀錄 l\nJOIN 圖書館讀者 m ON m.編號 = l.讀者編號\nJOIN 館藏書籍   b ON b.編號 = l.書籍編號\nWHERE l.歸還日期 IS NULL                     -- 還沒還\n  AND l.應還日期 < CURRENT_DATE              -- 已經過了應還日期\n  AND (l.最後提醒日期 IS NULL\n       OR l.最後提醒日期 < CURRENT_DATE)     -- 今天還沒寄過\nGROUP BY m.編號, m.姓名, m.電子郵件\nORDER BY 最多逾期天數 DESC;",
+        "query": "SET TIME ZONE 'Asia/Taipei';\n-- 一位讀者一列，把他所有逾期的書合併成 JSON 陣列\nSELECT\n  m.編號 AS 讀者編號,\n  m.姓名,\n  m.電子郵件,\n  json_agg(json_build_object(\n    '書名',     b.書名,\n    '應還日期', to_char(l.應還日期, 'YYYY-MM-DD'),\n    '逾期天數', CURRENT_DATE - l.應還日期\n  ) ORDER BY l.應還日期)          AS 逾期書單,\n  MAX(CURRENT_DATE - l.應還日期)  AS 最多逾期天數,\n  SUM(CURRENT_DATE - l.應還日期)  AS 累計逾期天數\nFROM 借閱紀錄 l\nJOIN 圖書館讀者 m ON m.編號 = l.讀者編號\nJOIN 館藏書籍   b ON b.編號 = l.書籍編號\nWHERE l.歸還日期 IS NULL                     -- 還沒還\n  AND l.應還日期 < CURRENT_DATE              -- 已經過了應還日期\n  AND (l.最後提醒日期 IS NULL\n       OR l.最後提醒日期 < CURRENT_DATE)     -- 今天還沒寄過\nGROUP BY m.編號, m.姓名, m.電子郵件\nORDER BY 最多逾期天數 DESC;",
         "options": {}
       },
       "id": "d2cee1dd-047b-5939-980f-39dced1db200",
@@ -121,7 +121,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "-- 把這位讀者今天提醒過的借閱紀錄，標記為「今天已提醒」\nUPDATE 借閱紀錄\nSET 最後提醒日期 = CURRENT_DATE,\n    提醒次數     = 提醒次數 + 1\nWHERE 讀者編號 = $1\n  AND 歸還日期 IS NULL\n  AND 應還日期 < CURRENT_DATE\n  AND (最後提醒日期 IS NULL OR 最後提醒日期 < CURRENT_DATE)\nRETURNING 編號, 讀者編號, 提醒次數;",
+        "query": "SET TIME ZONE 'Asia/Taipei';\n-- 把這位讀者今天提醒過的借閱紀錄，標記為「今天已提醒」\nUPDATE 借閱紀錄\nSET 最後提醒日期 = CURRENT_DATE,\n    提醒次數     = 提醒次數 + 1\nWHERE 讀者編號 = $1\n  AND 歸還日期 IS NULL\n  AND 應還日期 < CURRENT_DATE\n  AND (最後提醒日期 IS NULL OR 最後提醒日期 < CURRENT_DATE)\nRETURNING 編號, 讀者編號, 提醒次數;",
         "options": {
           "queryReplacement": "={{ $('產生提醒信內容').item.json.讀者編號 }}"
         }

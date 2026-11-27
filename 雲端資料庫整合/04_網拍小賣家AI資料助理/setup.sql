@@ -152,6 +152,7 @@ END $$;
 ALTER ROLE ai_readonly PASSWORD 'ChangeMe_2026!';                -- 每次執行都會把密碼設成這裡的值
 ALTER ROLE ai_readonly SET default_transaction_read_only = on;  -- 連線預設為唯讀交易
 ALTER ROLE ai_readonly SET statement_timeout = '10s';           -- 防止 AI 寫出跑太久的查詢
+ALTER ROLE ai_readonly SET timezone = 'Asia/Taipei';            -- 確保 AI 寫 CURRENT_DATE 時為台灣時間
 GRANT USAGE  ON SCHEMA public TO ai_readonly;
 GRANT SELECT ON public.網拍商品, public.網拍顧客, public.網拍訂單, public.網拍訂單明細 TO ai_readonly;
 

@@ -27,7 +27,7 @@
    - 到 Supabase 執行 `SELECT * FROM 借閱紀錄 ORDER BY 編號;` 看 `最後提醒日期` 與 `提醒次數` 的變化。
 
 > 🔄 想重新測試？重新執行 `setup.sql` 即可。
-> 🕘 **時區小提醒**：Supabase 資料庫的 `CURRENT_DATE` 是 UTC 時間。台灣早上 9 點 = UTC 凌晨 1 點，日期相同，不影響結果；但如果排在台灣時間早上 8 點以前執行，UTC 還是前一天。
+> 🕘 **時區小提醒**：Supabase 資料庫預設是 UTC 時間，本範例已在 `setup.sql` 與兩個 Postgres 節點的 SQL 開頭都加上 `SET TIME ZONE 'Asia/Taipei';`，確保無論幾點上課執行，兩邊的 `CURRENT_DATE` 永遠都是台灣時間的今天。
 
 ---
 
@@ -85,6 +85,8 @@ graph LR
 
 #### 3. **查詢今天要提醒的讀者**（Postgres：Execute Query）
 ```sql
+SET TIME ZONE 'Asia/Taipei';
+
 SELECT
   m.編號 AS 讀者編號,
   m.姓名,
@@ -127,6 +129,8 @@ ORDER BY 最多逾期天數 DESC;
 
 #### 6. **更新提醒紀錄**（Postgres：Execute Query）
 ```sql
+SET TIME ZONE 'Asia/Taipei';
+
 UPDATE 借閱紀錄
 SET 最後提醒日期 = CURRENT_DATE,
     提醒次數     = 提醒次數 + 1

@@ -199,6 +199,7 @@ CREATE ROLE ai_readonly LOGIN;
 ALTER ROLE ai_readonly PASSWORD 'ChangeMe_2026!';
 ALTER ROLE ai_readonly SET default_transaction_read_only = on;  -- 預設唯讀交易
 ALTER ROLE ai_readonly SET statement_timeout = '10s';           -- 查詢最多跑 10 秒
+ALTER ROLE ai_readonly SET timezone = 'Asia/Taipei';            -- 確保 CURRENT_DATE 為台灣時間
 GRANT USAGE  ON SCHEMA public TO ai_readonly;
 GRANT SELECT ON public.網拍商品, public.網拍顧客,
                 public.網拍訂單, public.網拍訂單明細 TO ai_readonly;
