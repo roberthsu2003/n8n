@@ -6,6 +6,8 @@
 -- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
 
+SET TIME ZONE 'Asia/Taipei';
+
 DROP VIEW  IF EXISTS public.網拍訂單明細;
 DROP TABLE IF EXISTS public.網拍訂單;
 DROP TABLE IF EXISTS public.網拍顧客;
@@ -74,8 +76,6 @@ INSERT INTO public.網拍商品 (商品名稱, 類別, 售價, 成本, 庫存, �
     ('鑰匙圈 木頭小鳥',        '居家', 220,  70, 30, 5),
     ('雨傘 自動開收',          '居家', 690, 280, 19, 4);
 
-SELECT setseed(0.88);
-
 -- 4. 顧客：60 位，分布在各縣市
 INSERT INTO public.網拍顧客 (姓名, 縣市, 加入日期)
 SELECT
@@ -85,7 +85,7 @@ SELECT
     CURRENT_DATE - (200 + floor(random() * 500))::INT
 FROM generate_series(1, 60);
 
--- 5. 訂單：最近 180 天，越接近現在訂單越多（生意越來越好），週末較多
+-- 5. 訂單：最近 180 天 ＋ 今天，越接近現在訂單越多（生意越來越好），週末較多
 INSERT INTO public.網拍訂單 (訂單日期, 顧客編號, 商品編號, 數量, 成交單價, 銷售通路, 訂單狀態)
 SELECT
     o.訂單日期,
@@ -106,7 +106,7 @@ SELECT
     END
 FROM (
     SELECT d::DATE AS 訂單日期, n
-    FROM generate_series(CURRENT_DATE - 180, CURRENT_DATE - 1, INTERVAL '1 day') AS d
+    FROM generate_series(CURRENT_DATE - 180, CURRENT_DATE, INTERVAL '1 day') AS d
     CROSS JOIN LATERAL generate_series(
         1,
         (2 + (180 - (CURRENT_DATE - d::DATE)) / 60.0          -- 隨時間成長

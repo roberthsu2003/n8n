@@ -6,7 +6,7 @@
 
 ### 🎯 本範例功能
 
-- ✅ **自動產生 1,700 筆訂單**：`setup.sql` 用 `generate_series` + `random()` 產生最近 30 天、有尖峰離峰的擬真資料
+- ✅ **自動產生約 1,750 筆訂單**：`setup.sql` 以台灣時間動態產生「最近 30 天 ＋ 今天」、有尖峰離峰的擬真資料，每次匯入都會隨機產生不同日期與時間
 - ✅ **排程觸發**：每天早上 8 點自動執行
 - ✅ **三段 SQL 統計**：營收總覽（含與上週同日比較）、熱銷前五名、各時段營收
 - ✅ **參數化查詢**：日期用 `$1` 傳入，避免 SQL Injection
@@ -17,14 +17,14 @@
 ## ⚙️ 使用前準備
 
 1. **建立 Postgres 憑證**：依照 [Supabase 設定指南](../Supabase設定/README.md) 建立 **Supabase Postgres** 憑證。
-2. **產生測試資料**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)。最後會顯示最近 7 天的營收。
+2. **產生測試資料**：Supabase ➔ **SQL Editor**，執行 [`setup.sql`](./setup.sql)。最後會顯示最近 8 天（含**昨天**與**今天**）的營收。
 3. **匯入工作流**：匯入 [`早餐店每日營收日報.json`](./早餐店每日營收日報.json)。
 4. **選擇憑證**：三個 Postgres 節點選 **Supabase Postgres**，Gmail 節點選 **Gmail**。
 5. **修改設定**：「設定」節點的 `老闆信箱` 改成自己的 Email。
 6. **測試**：按 **Execute workflow**，到信箱查看日報。
 7. **正式啟用**：切換為 **Active**，之後每天早上 8 點自動寄出。
 
-> 🔄 **資料是以「執行 setup.sql 那天」往回產生 30 天**。過了幾週再上課，昨天可能已經沒有資料，重新執行一次 `setup.sql` 即可。
+> 🔄 **每次上課重新執行 `setup.sql`，都會以執行當下的台灣日期（`Asia/Taipei`）動態產生「過去 30 天 ＋ 今天」的全新隨機訂單**（每次匯入的訂單筆數、下單時間到秒數、金額都會不一樣）。學生在課堂上除了預設查「昨天」，也可以在「設定」節點把 `報表日期` 改成今天（`={{ $now.toFormat('yyyy-MM-dd') }}`）或在 Supabase 直接查詢今天／昨天的資料。
 
 ---
 
@@ -73,7 +73,7 @@ graph LR
 #### 2. **設定**（Edit Fields / Set）
 | 欄位 | 值 | 說明 |
 | :--- | :--- | :--- |
-| `報表日期` | `={{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}` | 昨天的日期。想看其他天，直接改成例如 `2026-11-15` |
+| `報表日期` | `={{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}` | 昨天的日期。想看**今天**改成 `={{ $now.toFormat('yyyy-MM-dd') }}`，或直接填指定日期（如 `2026-11-15`） |
 | `老闆信箱` | `YOUR_EMAIL@gmail.com` | ⚠️ 改成你的 Email |
 | `店名` | `阿嬤的早餐店` | 顯示在信件標題 |
 
@@ -95,6 +95,49 @@ WHERE 下單時間::date = $1::date;
 - `COUNT(*) FILTER (WHERE ...)`：只計算符合條件的列，一次算出多種統計
 
 > ⚠️ **為什麼不直接把日期寫進 SQL？** 如果寫成 `WHERE 下單時間::date = '{{ $json.報表日期 }}'`，日期內容會直接拼進 SQL 字串，萬一來源是使用者輸入，就可能被塞入惡意指令（SQL Injection）。使用 `$1` 參數，資料庫會把它當成「值」而不是「指令」。
+
+<details>
+<summary>🖥️ <strong>上課示範 SQL：在 Supabase SQL Editor 直接查詢今天或昨天</strong>（不用 `$1` 參數的版本）</summary>
+
+因為 `$1` 是 n8n 傳參數用的語法，直接在 Supabase **SQL Editor** 執行會找不到 `$1`。上課示範時可以用 `SET TIME ZONE 'Asia/Taipei';` 搭配 `CURRENT_DATE`（今天）或 `CURRENT_DATE - 1`（昨天）直接貼上執行：
+
+```sql
+SET TIME ZONE 'Asia/Taipei';
+
+-- 1. 營收總覽（把 CURRENT_DATE - 1 改成 CURRENT_DATE 就是查「今天」）
+SELECT
+  COUNT(*)                                     AS 訂單數,
+  COALESCE(SUM(訂單金額), 0)                   AS 營收,
+  COALESCE(ROUND(AVG(訂單金額)), 0)            AS 客單價,
+  COUNT(*) FILTER (WHERE 點餐方式 = '外送平台') AS 外送單數,
+  (SELECT COALESCE(SUM(訂單金額), 0)
+     FROM 早餐訂單
+    WHERE 下單時間::date = CURRENT_DATE - 8)   AS 上週同日營收
+FROM 早餐訂單
+WHERE 下單時間::date = CURRENT_DATE - 1;
+
+-- 2. 熱銷前五名（昨天）
+SELECT m.品名, m.類別,
+       SUM(i.數量)          AS 份數,
+       SUM(i.數量 * i.單價) AS 銷售額
+FROM 早餐訂單明細 i
+JOIN 早餐訂單 o ON o.編號 = i.訂單編號
+JOIN 早餐品項 m ON m.編號 = i.品項編號
+WHERE o.下單時間::date = CURRENT_DATE - 1
+GROUP BY m.品名, m.類別
+ORDER BY 份數 DESC
+LIMIT 5;
+
+-- 3. 各時段營收（昨天）
+SELECT EXTRACT(HOUR FROM 下單時間)::int AS 時段,
+       COUNT(*)      AS 訂單數,
+       SUM(訂單金額) AS 營收
+FROM 早餐訂單
+WHERE 下單時間::date = CURRENT_DATE - 1
+GROUP BY 1
+ORDER BY 1;
+```
+</details>
 
 #### 4. **熱銷前五名**（Postgres：Execute Query）
 ```sql

@@ -1,10 +1,12 @@
 -- =============================================================
 -- 範例 02：早餐店每日營收日報
 -- 在 Supabase ➔ SQL Editor 貼上全部內容並執行 (Run)
--- 會自動產生「最近 30 天」約 1,700 筆訂單，可重複執行
--- 💡 隔了幾週再上課，重新執行一次就會產生以「今天」為基準的新資料
+-- 以台灣時間 (Asia/Taipei) 產生「最近 30 天 ＋ 今天」約 1,750 筆訂單，可重複執行
+-- 💡 每次上課重新執行，都會以當下的日期動態產生全新隨機訂單與時間
 -- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
+
+SET TIME ZONE 'Asia/Taipei';
 
 DROP TABLE IF EXISTS public.早餐訂單明細;
 DROP TABLE IF EXISTS public.早餐訂單;
@@ -58,11 +60,9 @@ INSERT INTO public.早餐品項 (品名, 類別, 單價, 熱門權重) VALUES
     ('美式咖啡',       '飲料', 40, 6),
     ('鮮奶茶',         '飲料', 45, 5);
 
--- 固定亂數種子：每次執行產生的資料分布都一樣，方便老師對答案
-SELECT setseed(0.2026);
-
--- 4. 產生訂單：最近 30 天（不含今天），每天 06:00～13:00 營業
+-- 4. 產生訂單：最近 30 天 ＋ 今天（共 31 天），每天 06:00～13:00 營業
 --    平日每天約 45～60 單、週末約 60～75 單；07:00～09:00 是尖峰
+--    每次執行不固定亂數種子，訂單日期、下單時間（到秒）與金額都會重新隨機產生
 INSERT INTO public.早餐訂單 (下單時間, 點餐方式)
 SELECT
     d::DATE
@@ -73,13 +73,14 @@ SELECT
                 WHEN r < 0.70 THEN 60  + floor(random() * 120) -- 07:00～09:00 尖峰
                 WHEN r < 0.90 THEN 180 + floor(random() * 120) -- 09:00～11:00
                 ELSE               300 + floor(random() * 120) -- 11:00～13:00
-            END)::INT),
+            END)::INT)
+      + make_interval(secs => floor(random() * 60)::INT),
     CASE
         WHEN random() < 0.35 THEN '內用'
         WHEN random() < 0.75 THEN '外帶'
         ELSE '外送平台'
     END
-FROM generate_series(CURRENT_DATE - 30, CURRENT_DATE - 1, INTERVAL '1 day') AS d
+FROM generate_series(CURRENT_DATE - 30, CURRENT_DATE, INTERVAL '1 day') AS d
 CROSS JOIN LATERAL generate_series(
     1,
     CASE WHEN EXTRACT(ISODOW FROM d) >= 6 THEN 60 ELSE 45 END + floor(random() * 16)::INT
@@ -125,9 +126,17 @@ FROM (
 ) AS s
 WHERE s.訂單編號 = o.編號;
 
--- 7. 驗證：最近 7 天每日營收
-SELECT 下單時間::DATE AS 日期, COUNT(*) AS 訂單數, SUM(訂單金額) AS 營收
+-- 7. 驗證：最近 8 天每日營收（含昨天與今天，對照台灣時間）
+SELECT
+    下單時間::DATE AS 日期,
+    CASE 下單時間::DATE
+        WHEN CURRENT_DATE     THEN '今天'
+        WHEN CURRENT_DATE - 1 THEN '昨天'
+        ELSE to_char(下單時間, 'Dy')
+    END AS 備註,
+    COUNT(*)      AS 訂單數,
+    SUM(訂單金額) AS 營收
 FROM public.早餐訂單
-WHERE 下單時間 >= CURRENT_DATE - 7
+WHERE 下單時間::DATE >= CURRENT_DATE - 7
 GROUP BY 1
 ORDER BY 1;

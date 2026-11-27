@@ -5,6 +5,8 @@
 -- 資料表與欄位都用中文命名，PostgreSQL 可以直接使用，不需要加雙引號
 -- =============================================================
 
+SET TIME ZONE 'Asia/Taipei';
+
 DROP TABLE IF EXISTS public.借閱紀錄;
 DROP TABLE IF EXISTS public.館藏書籍;
 DROP TABLE IF EXISTS public.圖書館讀者;
