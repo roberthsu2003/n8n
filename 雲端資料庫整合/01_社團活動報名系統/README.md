@@ -88,6 +88,26 @@ flowchart LR
 
 > 💡 **為什麼要用 View？** 剩餘名額 = 名額 − 報名人數，每次有人報名或取消都會變動。用 View 讓資料庫即時計算，n8n 只要「讀取」就好，不用自己數。
 
+<details>
+<summary>🖥️ <strong>上課示範 SQL：View 是怎麼算出剩餘名額的？</strong>（可在 Supabase SQL Editor 執行）</summary>
+
+`活動剩餘名額` 並不是真的存了一張表，而是每次查詢時即時執行這段 `LEFT JOIN` + `GROUP BY`：
+
+```sql
+SELECT
+  a.編號,
+  a.活動名稱,
+  a.名額上限,
+  COUNT(r.編號)::INT                AS 已報名人數,
+  (a.名額上限 - COUNT(r.編號))::INT AS 剩餘名額
+FROM 社團活動 a
+LEFT JOIN 社團報名 r ON r.活動編號 = a.編號
+GROUP BY a.編號
+ORDER BY a.編號;
+```
+- 為什麼用 `LEFT JOIN` 而不是 `JOIN`？因為「淨灘志工」目前 **0 人報名**，如果用一般 `JOIN` 會整筆消失；`LEFT JOIN` 才會保留活動並算出 `COUNT = 0`。
+</details>
+
 ---
 
 ## 🚀 工作流程架構
@@ -126,11 +146,22 @@ graph LR
 - **Table**：`活動剩餘名額`（View 也可以直接選）
 - **Filter**：`活動名稱` **Equals** `={{ $json.活動名稱 }}`
 - 輸出：`編號`、`活動名稱`、`名額上限`、`已報名人數`、`剩餘名額`…
+- 🔍 **底層對應的 SQL**（可在 Supabase SQL Editor 貼上執行看看）：
+  ```sql
+  SELECT * FROM 活動剩餘名額
+  WHERE 活動名稱 = '陽明山夜衝看星星';
+  ```
 
 #### 4. **查詢是否重複報名**（Supabase：Get Many）
 - **Table**：`社團報名`
 - **Filters**（All Select Conditions）：`活動編號` = 活動的 `編號`，且 `電子郵件` = 報名者 Email
 - ⚙️ **Settings ➔ Always Output Data：開啟**。查不到資料時 Supabase 節點預設不輸出任何東西，流程就會停住；開啟後會輸出一筆空資料，讓下一個 IF 能判斷「沒有重複」。
+- 🔍 **底層對應的 SQL**：
+  ```sql
+  SELECT * FROM 社團報名
+  WHERE 活動編號 = 1
+    AND 電子郵件 = 'yachu.yang@example.com';
+  ```
 
 #### 5. **已經報名過？**（IF）
 - 條件：`{{ $json.編號 }}` **exists**（有查到報名紀錄 = 重複報名）
@@ -142,6 +173,12 @@ graph LR
 #### 7. **新增報名資料**（Supabase：Create）
 - **Table**：`社團報名`
 - **Fields**：`活動編號`、`姓名`、`學號`、`電子郵件`、`科系`（`編號`、`報名時間` 由資料庫自動產生）
+- 🔍 **底層對應的 SQL**：
+  ```sql
+  INSERT INTO 社團報名 (活動編號, 姓名, 學號, 電子郵件, 科系)
+  VALUES (1, '王小明', 'B11209999', 'ming@example.com', '資訊工程系')
+  RETURNING *;
+  ```
 
 #### 8. **寄送報名確認信**（Gmail：Send）
 - **To**：報名者 Email
@@ -154,6 +191,13 @@ graph LR
 - **查詢要取消的活動**（Supabase Get Many）取得活動的 `編號`
 - **刪除報名資料**（Supabase Delete）：條件為 `活動編號` + `電子郵件`，同樣開啟 **Always Output Data**
 - **有刪除到資料？**（IF）：Supabase Delete 會回傳被刪掉的資料，有 `編號` 代表刪除成功
+- 🔍 **底層對應的 SQL**：
+  ```sql
+  DELETE FROM 社團報名
+  WHERE 活動編號 = 1
+    AND 電子郵件 = 'ming@example.com'
+  RETURNING *;
+  ```
 
 ---
 

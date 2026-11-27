@@ -134,6 +134,31 @@ graph LR
 | `問題分類`、`緊急程度`、`問題摘要`、`知識庫有答案` | 來自 `$('AI 客服').item.json.output` |
 | `處理狀態` | `={{ ...知識庫有答案 ? '草稿待審' : '需人工處理' }}` |
 
+- 🔍 **底層對應的 SQL（Upsert）與統計查詢**（可在 Supabase SQL Editor 測試）：
+  n8n 的 **Insert or Update** 節點在 PostgreSQL 底層其實是執行 `ON CONFLICT (...) DO UPDATE`：
+  ```sql
+  -- 1. 新增工單；若「郵件編號」已存在，就更新原有那一列（不會產生重複工單）
+  INSERT INTO 維修工單 (郵件編號, 顧客信箱, 主旨, 問題分類, 緊急程度, 問題摘要, 知識庫有答案, 處理狀態)
+  VALUES ('demo-999', 'test@example.com', '請問維修 iPhone 換電池多少錢', '維修費用', '一般', '詢問 iPhone 換電池價格', TRUE, '草稿待審')
+  ON CONFLICT (郵件編號) DO UPDATE SET
+    問題分類     = EXCLUDED.問題分類,
+    緊急程度     = EXCLUDED.緊急程度,
+    問題摘要     = EXCLUDED.問題摘要,
+    知識庫有答案 = EXCLUDED.知識庫有答案,
+    處理狀態     = EXCLUDED.處理狀態
+  RETURNING *;
+
+  -- 2. 主管隨時查看各分類工單數量、緊急件與需人工處理件數（查詢 View）
+  SELECT
+    問題分類,
+    COUNT(*)                                  AS 工單數,
+    COUNT(*) FILTER (WHERE 緊急程度 = '緊急') AS 緊急件,
+    COUNT(*) FILTER (WHERE NOT 知識庫有答案)  AS 需人工處理
+  FROM 維修工單
+  GROUP BY 問題分類
+  ORDER BY 工單數 DESC;
+  ```
+
 > ⚠️ **中文欄位名稱裡不要混用大寫英文字母**：PostgreSQL 會把沒加引號的英文自動轉成小寫，例如建表時寫 `FAQ有答案`，實際欄位會變成 `faq有答案`，n8n 用原本的名稱就對不上。純中文（例如 `知識庫有答案`）沒有這個問題。
 
 **8. 標記為已讀**（Gmail：Message ➔ Mark as Read）

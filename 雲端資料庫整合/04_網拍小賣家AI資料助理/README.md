@@ -46,6 +46,47 @@
 
 > 💡 點開 AI Agent 節點的執行紀錄（Logs），可以看到 AI 每一次寫了什麼 SQL、拿到什麼結果。這是學 SQL 的好方法！
 
+<details>
+<summary>🖥️ <strong>上課對照用 SQL：AI 背後其實寫了這些查詢</strong>（可在 Supabase SQL Editor 執行驗證）</summary>
+
+上課時可以先在 Supabase SQL Editor 執行以下 SQL 算出標準答案，再看 AI Agent 寫出來的 SQL 是否一致：
+
+**1. 哪些商品庫存低於 10 個？（⭐ 單表篩選 `WHERE`）**
+```sql
+SELECT 商品名稱, 類別, 售價, 庫存
+FROM 網拍商品
+WHERE 庫存 < 10
+ORDER BY 庫存 ASC;
+```
+
+**2. 各銷售通路的營收和佔比是多少？（⭐⭐ 分組統計 `GROUP BY`）**
+```sql
+SELECT
+  銷售通路,
+  COUNT(*)        AS 訂單數,
+  SUM(金額)       AS 總營收,
+  SUM(毛利)       AS 總毛利,
+  ROUND(SUM(金額) * 100.0 / SUM(SUM(金額)) OVER (), 1) AS 營收佔比百分比
+FROM 網拍訂單明細
+WHERE 訂單狀態 = '已完成'
+GROUP BY 銷售通路
+ORDER BY 總營收 DESC;
+```
+
+**3. 每個月的營收趨勢如何？（⭐⭐⭐ 日期截斷 `DATE_TRUNC`）**
+```sql
+SELECT
+  TO_CHAR(DATE_TRUNC('month', 訂單日期), 'YYYY-MM') AS 月份,
+  COUNT(*)  AS 訂單數,
+  SUM(金額) AS 月營收,
+  SUM(毛利) AS 月毛利
+FROM 網拍訂單明細
+WHERE 訂單狀態 = '已完成'
+GROUP BY 1
+ORDER BY 1;
+```
+</details>
+
 ---
 
 ## 🗂️ 資料表設計
@@ -61,6 +102,32 @@
 | `ai_readonly` | 資料庫角色 | 只能 SELECT 上面四個物件的唯讀帳號 |
 
 > 💡 **為什麼要特別做一個 View 給 AI？** AI 寫的 JOIN 越多越容易出錯。先用 View 把常用欄位組好，AI 大部分問題只要查一張表，正確率會高很多。
+
+<details>
+<summary>🖥️ <strong>上課示範 SQL：看看 View 幫 AI 省了多少事</strong>（可在 Supabase SQL Editor 執行）</summary>
+
+如果沒有 View，AI 每次查營收都要自己 JOIN 三張表、自己算金額與毛利；我們在 `setup.sql` 先做好 `網拍訂單明細`：
+
+```sql
+SELECT
+  o.編號                          AS 訂單編號,
+  o.訂單日期,
+  o.訂單狀態,
+  o.銷售通路,
+  p.商品名稱,
+  p.類別,
+  o.數量,
+  o.成交單價,
+  o.數量 * o.成交單價             AS 金額,
+  o.數量 * (o.成交單價 - p.成本)  AS 毛利,
+  c.姓名                          AS 顧客姓名,
+  c.縣市
+FROM 網拍訂單 o
+JOIN 網拍商品 p ON p.編號 = o.商品編號
+JOIN 網拍顧客 c ON c.編號 = o.顧客編號;
+```
+有了這張 View，AI 只要寫 `SELECT 商品名稱, SUM(金額) FROM 網拍訂單明細 ...` 就能查出答案！
+</details>
 
 ---
 
